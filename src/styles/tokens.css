@@ -1,0 +1,27 @@
+:root {
+  color-scheme: dark;
+  --ink-950: #080a10;
+  --ink-900: #0e111b;
+  --ink-850: #151927;
+  --ink-800: #1d2130;
+  --ink-700: #2c3142;
+  --paper: #f7eedc;
+  --paper-soft: #d9cdb8;
+  --paper-dim: #a99e8a;
+  --crimson: #b52537;
+  --crimson-bright: #ef5365;
+  --crimson-dark: #651421;
+  --azure: #2f7fc5;
+  --azure-bright: #69c8ee;
+  --gold: #d8b66a;
+  --gold-bright: #ffe2a0;
+  --green: #61a985;
+  --shadow: rgba(0, 0, 0, 0.58);
+  --line: rgba(232, 207, 158, 0.28);
+  --glass: rgba(14, 17, 27, 0.82);
+  --serif: "Yu Mincho", "Noto Serif TC", "PMingLiU", serif;
+  --sans: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  --display: "Yu Mincho", "Noto Serif TC", serif;
+  --header-height: 72px;
+  --radius: 4px;
+}

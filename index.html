@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#10131f">
+    <meta name="description" content="與狐娘小樂進行猜拳、QTE 反制、升級與泳裝事件的日式 AVG 網頁小遊戲。">
+    <title>狐樂・絆之勝負</title>
+    <link rel="stylesheet" href="./src/styles/tokens.css">
+    <link rel="stylesheet" href="./src/styles/base.css">
+    <link rel="stylesheet" href="./src/styles/components.css">
+    <link rel="stylesheet" href="./src/styles/screens.css">
+    <link rel="stylesheet" href="./src/styles/animations.css">
+    <link rel="stylesheet" href="./src/styles/responsive.css">
+  </head>
+  <body>
+    <div id="app" class="app-shell" data-screen="home">
+      <div class="paper-grain" aria-hidden="true"></div>
+      <div class="petals" aria-hidden="true">
+        <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+      </div>
+
+      <header class="global-header">
+        <button class="brand-button" type="button" data-nav="home" aria-label="回到首頁">
+          <span class="brand-mon">狐</span>
+          <span class="brand-copy">
+            <strong>狐樂・絆之勝負</strong>
+            <small>KORAKU NO SHŌBU</small>
+          </span>
+        </button>
+        <div class="profile-strip" aria-label="玩家資料">
+          <span class="profile-chip"><small>等級</small><b id="header-level">01</b></span>
+          <span class="profile-chip profile-xp">
+            <small>經驗</small>
+            <span class="micro-meter"><i id="header-xp-fill"></i></span>
+            <b id="header-xp">0 / 100</b>
+          </span>
+          <span class="profile-chip coin-chip"><small>星砂</small><b id="header-coins">0</b></span>
+          <button id="sound-toggle" class="icon-button" type="button" aria-label="切換音效" title="切換音效">♪</button>
+        </div>
+      </header>
+
+      <main class="screen-stack">
+        <section id="screen-home" class="screen home-screen is-active" aria-labelledby="home-title">
+          <div class="home-scenery" aria-hidden="true">
+            <div class="sun-disc"></div>
+            <div class="torii">
+              <i class="torii-top"></i><i class="torii-cross"></i><i class="torii-left"></i><i class="torii-right"></i>
+            </div>
+            <div class="mist mist-one"></div>
+            <div class="mist mist-two"></div>
+          </div>
+
+          <div class="home-copy">
+            <p class="eyebrow">じゃんけん・狐火異聞</p>
+            <h1 id="home-title"><span>狐樂</span><em>絆之勝負</em></h1>
+            <p class="home-lead">五秒定一手。看穿她的指尖，在敗勢裡抓住唯一的反擊。</p>
+
+            <nav class="main-menu" aria-label="主選單">
+              <button class="menu-command primary" type="button" data-nav="stages">
+                <span class="command-index">01</span>
+                <span><b>開始對局</b><small>STORY BATTLE</small></span>
+                <i>›</i>
+              </button>
+              <button class="menu-command" type="button" data-nav="growth">
+                <span class="command-index">02</span>
+                <span><b>能力成長</b><small>PLAYER GROWTH</small></span>
+                <i>›</i>
+              </button>
+              <button class="menu-command" type="button" data-nav="shop">
+                <span class="command-index">03</span>
+                <span><b>緣側商店</b><small>ITEM SHOP</small></span>
+                <i>›</i>
+              </button>
+              <button class="menu-command" type="button" data-nav="guide">
+                <span class="command-index">04</span>
+                <span><b>遊戲指南</b><small>HOW TO PLAY</small></span>
+                <i>›</i>
+              </button>
+            </nav>
+
+            <div class="home-record" aria-label="戰績">
+              <span><small>勝</small><b id="record-wins">0</b></span>
+              <i></i>
+              <span><small>敗</small><b id="record-losses">0</b></span>
+              <i></i>
+              <span><small>最深章節</small><b id="record-stage">—</b></span>
+            </div>
+          </div>
+
+          <div class="home-character character-speaker" data-character-speaker>
+            <div class="character-halo" aria-hidden="true"></div>
+            <img src="./koraku/小樂-預設.png" alt="狐娘小樂的預設造型">
+            <span class="character-seal">対戦<br>受付中</span>
+          </div>
+
+          <div class="home-dialogue">
+            <span>小樂</span>
+            <p>準備好了嗎？這次可別把視線移開喔。</p>
+          </div>
+          <button id="reset-save" class="text-button reset-button" type="button">重置存檔</button>
+        </section>
+
+        <section id="screen-stages" class="screen page-screen" aria-labelledby="stages-title">
+          <div class="page-backdrop page-backdrop-stage" aria-hidden="true"></div>
+          <header class="page-heading">
+            <button class="back-button" type="button" data-nav="home"><span>‹</span> 返回</button>
+            <div>
+              <p class="eyebrow">STORY BATTLE</p>
+              <h2 id="stages-title">選擇章節</h2>
+              <p>小樂會隨章節變得更有耐力。提升等級後，新的鏡界便會開啟。</p>
+            </div>
+          </header>
+          <div id="stage-grid" class="stage-grid"></div>
+          <aside class="stage-tip">
+            <b>戰鬥規則</b>
+            <span>每回合 5 秒</span><span>基礎傷害 10</span><span>敗勢觸發 QTE</span>
+          </aside>
+        </section>
+
+        <section id="screen-shop" class="screen page-screen" aria-labelledby="shop-title">
+          <div class="page-backdrop page-backdrop-shop" aria-hidden="true"></div>
+          <header class="page-heading">
+            <button class="back-button" type="button" data-nav="home"><span>‹</span> 返回</button>
+            <div>
+              <p class="eyebrow">ENGAWA ITEM SHOP</p>
+              <h2 id="shop-title">緣側商店</h2>
+              <p>一小瓶剛好恢復 25 點。帶進對局後，可從左下快捷欄立即使用。</p>
+            </div>
+            <div class="large-wallet"><small>持有星砂</small><b id="shop-coins">0</b></div>
+          </header>
+          <div id="shop-grid" class="shop-grid"></div>
+          <div class="shopkeeper-note">
+            <span class="note-seal">小樂<br>特選</span>
+            <p>「勝利可以得到 100 星砂；就算暫時落敗，也有 50 星砂的練習獎勵喔。」</p>
+          </div>
+        </section>
+
+        <section id="screen-growth" class="screen page-screen" aria-labelledby="growth-title">
+          <div class="page-backdrop page-backdrop-growth" aria-hidden="true"></div>
+          <header class="page-heading">
+            <button class="back-button" type="button" data-nav="home"><span>‹</span> 返回</button>
+            <div>
+              <p class="eyebrow">PLAYER GROWTH</p>
+              <h2 id="growth-title">能力成長</h2>
+              <p>每次升等得到 5 點。分配後會立即保存，並套用到下一場對局。</p>
+            </div>
+            <div class="skill-points"><small>可用點數</small><b id="skill-points">0</b><em>SP</em></div>
+          </header>
+          <div id="growth-grid" class="growth-grid"></div>
+          <section class="level-progress-card">
+            <div>
+              <span>下一等級</span>
+              <b id="growth-level">Lv. 1</b>
+            </div>
+            <div class="ornate-meter xp-meter"><i id="growth-xp-fill"></i></div>
+            <span id="growth-xp-text">0 / 100 EXP</span>
+          </section>
+        </section>
+
+        <section id="screen-guide" class="screen page-screen" aria-labelledby="guide-title">
+          <div class="page-backdrop page-backdrop-guide" aria-hidden="true"></div>
+          <header class="page-heading">
+            <button class="back-button" type="button" data-nav="home"><span>‹</span> 返回</button>
+            <div>
+              <p class="eyebrow">HOW TO PLAY</p>
+              <h2 id="guide-title">遊戲指南</h2>
+              <p>先看懂節奏，再把敗勢變成牽住她手的機會。</p>
+            </div>
+          </header>
+          <div class="guide-grid">
+            <article class="guide-card">
+              <span class="guide-number">一</span>
+              <h3>五秒出拳</h3>
+              <p>在倒數結束前選擇石頭、布或剪刀。未更換時會沿用目前選擇。</p>
+              <div class="guide-hands"><i>✊</i><i>✋</i><i>✌</i></div>
+            </article>
+            <article class="guide-card">
+              <span class="guide-number">二</span>
+              <h3>一秒變拳</h3>
+              <p>雙方亮拳後會有 1 秒看破窗口。消耗 25 MP，立即改成能獲勝的手勢。</p>
+              <div class="guide-skill">✦ <b>変</b> <small>25 MP</small></div>
+            </article>
+            <article class="guide-card">
+              <span class="guide-number">三</span>
+              <h3>八向反制</h3>
+              <p>猜輸時，在 5 秒內依序完成 5 個方向。斜向需同時按兩個方向，例如 W＋D 或 ↑＋→。</p>
+              <div class="guide-arrows">↖ ↑ ↗<br>←　→<br>↙ ↓ ↘</div>
+            </article>
+            <article class="guide-card">
+              <span class="guide-number">四</span>
+              <h3>整備與成長</h3>
+              <p>藥水恢復 25 點 HP／MP。勝利得 100 星砂、敗北得 50，升等另得技能點。</p>
+              <div class="guide-reward">勝 +100　敗 +50</div>
+            </article>
+          </div>
+        </section>
+
+        <section id="screen-battle" class="screen battle-screen" aria-label="猜拳戰鬥">
+          <div id="battle-arena" class="battle-arena">
+            <div class="battle-backdrop" aria-hidden="true">
+              <div class="battle-moon"></div>
+              <div class="distant-shrine"></div>
+              <div class="battle-mist"></div>
+            </div>
+            <div class="chapter-tag">
+              <small id="battle-chapter">壹ノ章</small>
+              <b id="battle-stage-name">初逢・朱鳥居</b>
+            </div>
+            <button id="abandon-battle" class="battle-exit" type="button">撤退</button>
+
+            <section class="combatant-hud enemy-hud" aria-label="小樂生命值">
+              <div class="hud-name">
+                <span class="fox-mark">狐</span>
+                <div><small>BOSS</small><b id="enemy-name">小樂</b></div>
+                <em id="enemy-hp-text">1000 / 1000</em>
+              </div>
+              <div class="ornate-meter hp-meter enemy-meter"><i id="enemy-hp-fill"></i></div>
+            </section>
+
+            <div id="battle-character-wrap" class="battle-character-wrap character-speaker" data-character-speaker>
+              <div class="battle-character-aura" aria-hidden="true"></div>
+              <img id="battle-character" src="./koraku/小樂-預設.png" alt="對戰中的小樂">
+              <output id="damage-number" class="damage-number" aria-live="polite"></output>
+            </div>
+
+            <section class="round-oracle" aria-label="本回合狀態">
+              <span class="round-label">ROUND <b id="round-number">1</b></span>
+              <div class="hand-versus">
+                <div>
+                  <small>YOU</small>
+                  <strong id="player-hand-display">✊</strong>
+                  <b id="player-hand-label">石頭</b>
+                </div>
+                <span>対</span>
+                <div>
+                  <small>KORAKU</small>
+                  <strong id="enemy-hand-display">？</strong>
+                  <b id="enemy-hand-label">未揭曉</b>
+                </div>
+              </div>
+              <div id="round-countdown" class="round-countdown">
+                <i id="countdown-ring"></i>
+                <b id="countdown-value">5</b>
+                <small id="countdown-caption">出拳倒數</small>
+              </div>
+            </section>
+
+            <section class="hand-selector" aria-label="選擇出拳">
+              <span class="panel-kicker">選擇手勢</span>
+              <button type="button" data-hand="rock" class="hand-button is-selected"><i>✊</i><span>石頭</span><kbd>1</kbd></button>
+              <button type="button" data-hand="paper" class="hand-button"><i>✋</i><span>布</span><kbd>2</kbd></button>
+              <button type="button" data-hand="scissors" class="hand-button"><i>✌</i><span>剪刀</span><kbd>3</kbd></button>
+            </section>
+
+            <section class="quick-slots" aria-label="道具與技能快捷欄">
+              <span class="quick-label">QUICK SLOT</span>
+              <div class="slot-grid">
+                <button class="soul-slot hp-slot" type="button" data-item="hpPotion" title="使用 HP 藥水">
+                  <span class="slot-content"><i>◆</i><small>緋露藥</small><b id="battle-hp-potions">1</b></span>
+                </button>
+                <button id="morph-skill" class="soul-slot morph-slot" type="button" data-skill="morph" title="一秒內變拳">
+                  <span class="slot-content"><i>変</i><small>變拳</small><b>25 MP</b></span>
+                </button>
+                <button class="soul-slot mp-slot" type="button" data-item="mpPotion" title="使用 MP 藥水">
+                  <span class="slot-content"><i>◇</i><small>蒼月露</small><b id="battle-mp-potions">0</b></span>
+                </button>
+                <span class="slot-core">十</span>
+              </div>
+            </section>
+
+            <section class="combatant-hud player-hud" aria-label="玩家生命與魔力">
+              <div class="hud-name player-name">
+                <span class="player-mark">主</span>
+                <div><small id="battle-player-level">LEVEL 01</small><b>旅人</b></div>
+                <em id="player-hp-text">100 / 100</em>
+              </div>
+              <div class="ornate-meter hp-meter player-meter"><i id="player-hp-fill"></i></div>
+              <div class="resource-row">
+                <span>MP</span>
+                <div class="ornate-meter mp-meter"><i id="player-mp-fill"></i></div>
+                <em id="player-mp-text">50 / 50</em>
+              </div>
+            </section>
+
+            <section id="battle-dialogue" class="avg-dialogue" aria-live="polite">
+              <span id="dialogue-speaker">小樂</span>
+              <p id="dialogue-text">五秒一決。讓我看看你的決心吧。</p>
+              <i class="dialogue-next">◆</i>
+            </section>
+
+            <section id="qte-overlay" class="qte-overlay" aria-label="反制 QTE" aria-hidden="true">
+              <div class="qte-vignette"></div>
+              <div class="qte-panel">
+                <p class="eyebrow">COUNTER CHANCE</p>
+                <h2>反制她的出拳</h2>
+                <p>依序輸入五個方向</p>
+                <div id="qte-sequence" class="qte-sequence"></div>
+                <div id="qte-input-hint" class="qte-input-hint">單方向輸入</div>
+                <div class="qte-timer"><i id="qte-timer-fill"></i></div>
+                <b id="qte-time">5.00</b>
+                <div id="qte-pad" class="qte-pad" aria-label="方向輸入">
+                  <button type="button" data-direction="upLeft">↖</button>
+                  <button type="button" data-direction="up">↑</button>
+                  <button type="button" data-direction="upRight">↗</button>
+                  <button type="button" data-direction="left">←</button>
+                  <span></span>
+                  <button type="button" data-direction="right">→</button>
+                  <button type="button" data-direction="downLeft">↙</button>
+                  <button type="button" data-direction="down">↓</button>
+                  <button type="button" data-direction="downRight">↘</button>
+                </div>
+                <small>斜向：同時按住兩個正方向鍵；也可使用 Q／E／Z／C 快捷鍵</small>
+              </div>
+            </section>
+
+            <section id="result-overlay" class="result-overlay" aria-hidden="true">
+              <div class="result-card">
+                <p id="result-kicker" class="eyebrow">BATTLE COMPLETE</p>
+                <h2 id="result-title">勝負已分</h2>
+                <p id="result-message">這一戰留下了新的羈絆。</p>
+                <div class="reward-row">
+                  <span><small>星砂</small><b id="reward-coins">+100</b></span>
+                  <span><small>經驗</small><b id="reward-xp">+150</b></span>
+                  <span id="reward-level-wrap"><small>升等</small><b id="reward-level">+1</b></span>
+                </div>
+                <div id="postbattle-actions" class="result-actions"></div>
+                <div id="watermelon-game" class="watermelon-game" hidden>
+                  <div class="watermelon-score">
+                    <span id="watermelon-attempt">第 1 刀 / 3</span>
+                    <span id="watermelon-successes">切中 0 次</span>
+                  </div>
+                  <p>讓白色指針進入綠色區域</p>
+                  <div class="timing-track">
+                    <i id="watermelon-target"></i>
+                    <b id="watermelon-marker"></b>
+                  </div>
+                  <button id="watermelon-strike" class="button-primary" type="button">就是現在！<kbd>SPACE</kbd></button>
+                </div>
+                <p id="watermelon-status" class="watermelon-status" hidden></p>
+              </div>
+            </section>
+          </div>
+        </section>
+      </main>
+
+      <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    </div>
+    <script type="module" src="./src/js/main.js"></script>
+  </body>
+</html>

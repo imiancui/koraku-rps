@@ -1,0 +1,576 @@
+@media (max-width: 1100px) {
+  .home-copy {
+    width: 52vw;
+    margin-left: 5vw;
+  }
+
+  .home-character {
+    right: -8vw;
+    width: 64vw;
+  }
+
+  .home-dialogue {
+    display: none;
+  }
+
+  .stage-grid,
+  .guide-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .stage-card {
+    min-height: 330px;
+  }
+
+  .enemy-hud {
+    width: 48vw;
+  }
+
+  .round-oracle {
+    width: 41vw;
+  }
+
+  .hand-selector {
+    width: 35vw;
+  }
+
+  .battle-character-wrap {
+    right: 0;
+    width: 59vw;
+  }
+
+  .quick-slots {
+    left: 20px;
+  }
+
+  .player-hud {
+    right: 25px;
+  }
+}
+
+@media (max-height: 780px) and (min-width: 721px) {
+  .home-copy {
+    margin-top: 22px;
+  }
+
+  .home-copy h1 span {
+    font-size: clamp(50px, 6vw, 82px);
+  }
+
+  .home-copy h1 em {
+    font-size: clamp(21px, 2.5vw, 36px);
+  }
+
+  .home-lead {
+    display: none;
+  }
+
+  .main-menu {
+    margin-top: 18px;
+  }
+
+  .menu-command {
+    min-height: 50px;
+  }
+
+  .round-oracle {
+    top: 14%;
+  }
+
+  .hand-selector {
+    top: 41%;
+  }
+
+  .hand-button {
+    min-height: 42px;
+  }
+
+  .avg-dialogue {
+    min-height: 94px;
+    padding-top: 27px;
+    padding-bottom: 16px;
+  }
+
+  .quick-slots,
+  .player-hud {
+    bottom: 119px;
+  }
+
+  .slot-grid {
+    grid-template: repeat(3, 48px) / repeat(3, 48px);
+  }
+
+  .soul-slot {
+    width: 44px;
+    height: 44px;
+  }
+
+  .slot-content small {
+    display: none;
+  }
+}
+
+@media (max-width: 780px) {
+  :root {
+    --header-height: 58px;
+  }
+
+  body {
+    overflow: auto;
+  }
+
+  .app-shell {
+    min-height: 100svh;
+    overflow: hidden;
+  }
+
+  .global-header {
+    padding: 0 12px;
+  }
+
+  .brand-mon {
+    width: 36px;
+    height: 36px;
+    font-size: 20px;
+  }
+
+  .brand-copy strong {
+    font-size: 14px;
+  }
+
+  .brand-copy small,
+  .profile-xp,
+  .coin-chip small {
+    display: none;
+  }
+
+  .profile-chip {
+    min-width: auto;
+    padding: 6px 9px;
+  }
+
+  .profile-chip b {
+    font-size: 14px;
+  }
+
+  .screen-stack {
+    height: calc(100svh - var(--header-height));
+  }
+
+  .home-screen {
+    overflow-y: auto;
+  }
+
+  .home-copy {
+    z-index: 20;
+    width: auto;
+    margin: 25px 18px 120px;
+  }
+
+  .home-copy h1 span {
+    font-size: clamp(49px, 16vw, 76px);
+  }
+
+  .home-copy h1 em {
+    margin-left: 1.1em;
+    font-size: clamp(21px, 7vw, 32px);
+  }
+
+  .home-lead {
+    width: 82%;
+    font-size: 11px;
+  }
+
+  .main-menu {
+    width: 100%;
+    margin-top: 24px;
+  }
+
+  .menu-command {
+    min-height: 54px;
+    background: linear-gradient(90deg, rgba(16, 19, 29, 0.96), rgba(16, 19, 29, 0.77));
+  }
+
+  .home-record {
+    flex-wrap: wrap;
+    padding-bottom: 100px;
+  }
+
+  .home-character {
+    right: -33%;
+    bottom: -5%;
+    width: 108%;
+    height: 79%;
+    opacity: 0.68;
+  }
+
+  .home-character::after {
+    content: "";
+    position: absolute;
+    z-index: 4;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(8, 10, 16, 0.62), transparent 60%);
+  }
+
+  .character-seal {
+    display: none;
+  }
+
+  .reset-button {
+    left: 18px;
+    bottom: 14px;
+  }
+
+  .page-screen {
+    padding: 24px 15px 46px;
+  }
+
+  .page-heading {
+    grid-template-columns: 1fr auto;
+    align-items: start;
+    gap: 16px;
+    margin-bottom: 30px;
+  }
+
+  .page-heading .back-button {
+    grid-column: 1 / -1;
+    width: max-content;
+  }
+
+  .page-heading h2 {
+    font-size: 30px;
+  }
+
+  .page-heading p:not(.eyebrow) {
+    font-size: 11px;
+  }
+
+  .large-wallet,
+  .skill-points {
+    min-width: 112px;
+    padding: 10px 12px;
+  }
+
+  .stage-grid,
+  .shop-grid,
+  .growth-grid,
+  .guide-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stage-card {
+    min-height: 260px;
+  }
+
+  .stage-tip {
+    flex-wrap: wrap;
+  }
+
+  .shop-card {
+    grid-template-columns: 90px 1fr;
+    padding: 20px;
+  }
+
+  .item-orb {
+    width: 78px;
+    height: 78px;
+  }
+
+  .item-orb i {
+    width: 51px;
+    height: 51px;
+    font-size: 26px;
+  }
+
+  .guide-card {
+    min-height: 270px;
+  }
+
+  .guide-card p {
+    min-height: auto;
+  }
+
+  .level-progress-card {
+    grid-template-columns: 92px 1fr;
+  }
+
+  .level-progress-card > span {
+    grid-column: 1 / -1;
+    text-align: right;
+  }
+
+  /* Mobile battle */
+  .battle-character-wrap {
+    right: -17%;
+    bottom: 95px;
+    width: 96%;
+    height: 75%;
+    opacity: 0.76;
+  }
+
+  .battle-character-wrap::after {
+    content: "";
+    position: absolute;
+    z-index: 3;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(10, 12, 19, 0.38), transparent 54%);
+  }
+
+  .chapter-tag {
+    left: 12px;
+    top: 11px;
+  }
+
+  .battle-exit {
+    right: 10px;
+    top: 9px;
+  }
+
+  .enemy-hud {
+    top: 58px;
+    left: 18px;
+    width: calc(100% - 36px);
+    transform: none;
+  }
+
+  .round-oracle {
+    left: 12px;
+    top: 135px;
+    width: calc(100% - 24px);
+    padding: 9px 12px 11px;
+  }
+
+  .hand-versus strong {
+    font-size: 26px;
+  }
+
+  .round-countdown {
+    right: 4px;
+    top: calc(100% + 32px);
+    width: 54px;
+    height: 54px;
+  }
+
+  .round-countdown small {
+    display: none;
+  }
+
+  .hand-selector {
+    left: 12px;
+    top: 260px;
+    width: 45%;
+  }
+
+  .hand-button {
+    grid-template-columns: 34px 1fr 22px;
+    min-height: 40px;
+    padding: 3px 8px;
+    background: rgba(12, 15, 23, 0.82);
+  }
+
+  .hand-button i {
+    font-size: 20px;
+  }
+
+  .hand-button span {
+    font-size: 11px;
+  }
+
+  .quick-slots {
+    left: 11px;
+    bottom: 122px;
+  }
+
+  .quick-label {
+    display: none;
+  }
+
+  .slot-grid {
+    grid-template: repeat(3, 45px) / repeat(3, 45px);
+  }
+
+  .soul-slot {
+    width: 40px;
+    height: 40px;
+  }
+
+  .slot-content {
+    inset: -12px;
+  }
+
+  .slot-content i {
+    font-size: 16px;
+  }
+
+  .slot-content small {
+    display: none;
+  }
+
+  .slot-content b {
+    font-size: 7px;
+  }
+
+  .player-hud {
+    right: 14px;
+    bottom: 125px;
+    width: 52%;
+  }
+
+  .hud-name {
+    gap: 7px;
+  }
+
+  .hud-name > span {
+    width: 28px;
+    height: 28px;
+    font-size: 13px;
+  }
+
+  .hud-name b {
+    font-size: 13px;
+  }
+
+  .hud-name em {
+    font-size: 9px;
+  }
+
+  .avg-dialogue {
+    bottom: 8px;
+    width: calc(100% - 16px);
+    min-height: 100px;
+    padding: 27px 26px 16px;
+  }
+
+  .avg-dialogue > span {
+    left: 22px;
+    min-width: 94px;
+    padding: 7px 15px;
+    font-size: 11px;
+  }
+
+  .avg-dialogue p {
+    font-size: 12px;
+  }
+
+  .qte-panel {
+    padding: 23px 14px 16px;
+  }
+
+  .qte-sequence {
+    gap: 5px;
+  }
+
+  .qte-pad {
+    display: grid;
+  }
+
+  .qte-panel > small {
+    display: none;
+  }
+
+  .result-overlay {
+    align-items: end;
+    padding: 0 10px 112px;
+    background: linear-gradient(180deg, rgba(5, 6, 10, 0.22), rgba(5, 6, 10, 0.92) 55%);
+  }
+
+  .result-card {
+    width: 100%;
+    padding: 22px;
+  }
+
+  .result-card h2 {
+    font-size: 36px;
+  }
+
+  .reward-row {
+    margin: 16px 0;
+  }
+}
+
+@media (max-width: 430px) {
+  .brand-copy small {
+    display: none;
+  }
+
+  .profile-chip:first-child {
+    display: none;
+  }
+
+  .home-copy h1 span {
+    font-size: 49px;
+  }
+
+  .home-copy h1 em {
+    font-size: 21px;
+  }
+
+  .home-lead {
+    width: 94%;
+  }
+
+  .home-record {
+    font-size: 9px;
+  }
+
+  .page-heading {
+    grid-template-columns: 1fr;
+  }
+
+  .large-wallet,
+  .skill-points {
+    width: max-content;
+  }
+
+  .shop-card {
+    grid-template-columns: 1fr;
+  }
+
+  .item-orb {
+    margin: 0 auto 4px;
+  }
+
+  .round-oracle {
+    top: 126px;
+  }
+
+  .hand-selector {
+    top: 248px;
+    width: 48%;
+  }
+
+  .battle-character-wrap {
+    right: -29%;
+    width: 118%;
+  }
+
+  .player-hud {
+    width: 55%;
+  }
+
+  .player-hud .hud-name > span,
+  .player-name small {
+    display: none;
+  }
+
+  .result-overlay {
+    padding-bottom: 106px;
+  }
+
+  .result-card {
+    padding: 18px;
+  }
+
+  .reward-row span {
+    padding: 9px;
+  }
+
+  .result-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .result-actions button:first-child {
+    grid-column: 1 / -1;
+  }
+}

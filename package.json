@@ -1,0 +1,12 @@
+{
+  "name": "koraku-rps",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/serve.mjs",
+    "start": "node scripts/serve.mjs",
+    "start:tailscale": "node scripts/serve.mjs --tailscale",
+    "test": "node --test"
+  }
+}
