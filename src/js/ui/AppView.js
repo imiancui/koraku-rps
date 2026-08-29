@@ -689,9 +689,8 @@ export class AppView {
         if (!confirmed) return;
         this.battle.stopAutoBattle();
         this.battle.abandon();
-      } else {
+      } else if (this.battle.autoBattle.active) {
         this.battle.stopAutoBattle();
-        this.battle.abandon();
       }
     }
     this.navigate(screenName);

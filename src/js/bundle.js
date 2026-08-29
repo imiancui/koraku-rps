@@ -4868,13 +4868,16 @@ class BattleSystem {
   }
 
   stopAutoBattle() {
+    const wasActive = this.autoBattle.active;
     this.autoBattle.active = false;
     this.autoBattle.remainingRounds = 0;
     if (this.autoRestartTimerId !== null) {
       this.timers.clearTimeout(this.autoRestartTimerId);
       this.autoRestartTimerId = null;
     }
-    this.bus.emit("auto-battle:stopped");
+    if (wasActive) {
+      this.bus.emit("auto-battle:stopped");
+    }
     if (this.state) {
       this.state.autoBattle = { ...this.autoBattle };
       this.emitState();
@@ -5933,9 +5936,8 @@ class AppView {
         if (!confirmed) return;
         this.battle.stopAutoBattle();
         this.battle.abandon();
-      } else {
+      } else if (this.battle.autoBattle.active) {
         this.battle.stopAutoBattle();
-        this.battle.abandon();
       }
     }
     this.navigate(screenName);

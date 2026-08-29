@@ -1079,13 +1079,16 @@ export class BattleSystem {
   }
 
   stopAutoBattle() {
+    const wasActive = this.autoBattle.active;
     this.autoBattle.active = false;
     this.autoBattle.remainingRounds = 0;
     if (this.autoRestartTimerId !== null) {
       this.timers.clearTimeout(this.autoRestartTimerId);
       this.autoRestartTimerId = null;
     }
-    this.bus.emit("auto-battle:stopped");
+    if (wasActive) {
+      this.bus.emit("auto-battle:stopped");
+    }
     if (this.state) {
       this.state.autoBattle = { ...this.autoBattle };
       this.emitState();
