@@ -53,7 +53,7 @@ src/
     ├── components.css          # 按鈕、卡片、模態框、HUD
     ├── screens.css             # 各大主畫面（首頁/關卡/商店/裝備/圖鑑/戰鬥/歷程）
     ├── animations.css          # 受擊震動、說話跳動、QTE 特效、雷擊/燃燒動畫
-    └── responsive.css          # 780px/390px 行動版適配
+    └── responsive.css          # 780px/390px 行度適配
 ```
 
 ---

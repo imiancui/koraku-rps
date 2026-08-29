@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>狐樂・絆之勝負 — 官方全遊戲百科 (Wiki)</title>
+  <style>
+    :root {
+      --bg-dark: #0a0e14;
+      --bg-panel: #121820;
+      --bg-card: #18222e;
+      --bg-hover: #223040;
+      --border-color: #2b394a;
+      --accent-crimson: #e05656;
+      --accent-crimson-dark: #8c2424;
+      --accent-gold: #e5b54f;
+      --accent-gold-light: #fef08a;
+      --accent-azure: #38bdf8;
+      --accent-emerald: #34d399;
+      --accent-purple: #c084fc;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --radius: 10px;
+      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "Hiragino Sans", "PingFang TC", "Microsoft JhengHei", sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      line-height: 1.6;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 280px;
+      background: var(--bg-panel);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      z-index: 100;
+    }
+
+    .brand {
+      padding: 24px 20px;
+      background: linear-gradient(180deg, rgba(224, 86, 86, 0.15) 0%, transparent 100%);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .brand h1 {
+      font-size: 1.3rem;
+      color: var(--accent-gold);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .nav-list {
+      list-style: none;
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+    }
+
+    .nav-link:hover, .nav-link.active {
+      background: var(--bg-card);
+      color: var(--accent-gold);
+      border-left: 3px solid var(--accent-crimson);
+      padding-left: 11px;
+    }
+
+    /* Main Content */
+    .main-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Header */
+    header {
+      background: var(--bg-panel);
+      border-bottom: 1px solid var(--border-color);
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 90;
+      backdrop-filter: blur(10px);
+    }
+
+    .search-box {
+      position: relative;
+      width: 360px;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 10px 16px 10px 38px;
+      background: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      color: var(--text-main);
+      font-size: 0.9rem;
+      outline: none;
+      transition: border 0.2s;
+    }
+
+    .search-box input:focus {
+      border-color: var(--accent-gold);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+
+    .header-links a {
+      color: var(--accent-azure);
+      text-decoration: none;
+      font-size: 0.85rem;
+      margin-left: 16px;
+      padding: 6px 12px;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      border-radius: 6px;
+    }
+
+    .content-area {
+      padding: 32px;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* Section Cards */
+    .section-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 28px;
+      margin-bottom: 32px;
+      box-shadow: var(--shadow);
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      color: var(--accent-gold);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 12px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+      margin-top: 16px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 18px;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent-gold);
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      color: var(--accent-gold);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-weight: bold;
+    }
+
+    .badge-crimson { background: rgba(224, 86, 86, 0.2); color: var(--accent-crimson); border: 1px solid var(--accent-crimson); }
+    .badge-gold { background: rgba(229, 181, 79, 0.2); color: var(--accent-gold); border: 1px solid var(--accent-gold); }
+    .badge-azure { background: rgba(56, 189, 248, 0.2); color: var(--accent-azure); border: 1px solid var(--accent-azure); }
+    .badge-purple { background: rgba(192, 132, 252, 0.2); color: var(--accent-purple); border: 1px solid var(--accent-purple); }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+      font-size: 0.9rem;
+    }
+
+    th, td {
+      padding: 12px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    th {
+      background: rgba(0, 0, 0, 0.3);
+      color: var(--accent-gold);
+      font-weight: 600;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Calculator Widgets */
+    .calculator-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 16px;
+    }
+
+    .calc-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+
+    .calc-row label {
+      min-width: 140px;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .calc-input {
+      background: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      width: 120px;
+    }
+
+    .calc-result-box {
+      background: rgba(229, 181, 79, 0.1);
+      border: 1px solid var(--accent-gold);
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 16px;
+      display: flex;
+      gap: 24px;
+      font-weight: bold;
+    }
+
+    /* Interactive QTE Tester */
+    .qte-key-box {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .qte-key-btn {
+      background: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 10px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.1s;
+    }
+
+    .qte-key-btn:active, .qte-key-btn.active {
+      background: var(--accent-crimson);
+      color: white;
+      transform: scale(0.95);
+    }
+
+    @media (max-width: 900px) {
+      body { flex-direction: column; }
+      .sidebar { width: 100%; height: auto; position: relative; }
+      .search-box { width: 100%; margin-bottom: 12px; }
+      header { flex-direction: column; align-items: stretch; gap: 10px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <h1>⛩️ 狐樂・絆之勝負</h1>
+      <p>官方全遊戲百科 (Wiki v2.0)</p>
+    </div>
+    <ul class="nav-list">
+      <li><a href="#section-overview" class="nav-link active">📜 遊戲概述與世界觀</a></li>
+      <li><a href="#section-characters" class="nav-link">🦊 角色與視覺立繪</a></li>
+      <li><a href="#section-stages" class="nav-link">⛩️ 四大章節與 Boss 梯度</a></li>
+      <li><a href="#section-combat" class="nav-link">✊ 猜拳、節奏與變拳</a></li>
+      <li><a href="#section-qte" class="nav-link">⚡ 八方向 QTE 與雙軌反制</a></li>
+      <li><a href="#section-skills" class="nav-link">✨ 技能樹 (摸摸與雙手)</a></li>
+      <li><a href="#section-progression" class="nav-link">📈 等級成長與配點公式</a></li>
+      <li><a href="#section-equipment" class="nav-link">🥋 12 格位裝備武具總覽</a></li>
+      <li><a href="#section-economy" class="nav-link">🪙 藥水道具與星砂經濟</a></li>
+      <li><a href="#section-watermelon" class="nav-link">🍉 蒙眼切西瓜小遊戲</a></li>
+      <li><a href="#section-dps" class="nav-link">📊 歷程紀錄與 DPS 戰力</a></li>
+      <li><a href="#section-calculator" class="nav-link">🧮 互動式公式計算器</a></li>
+      <li><a href="#section-cheats" class="nav-link">🛠️ 除錯作弊與秘密指令</a></li>
+      <li><a href="#section-i18n" class="nav-link">🌐 四國語系在地化</a></li>
+    </ul>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main-wrapper">
+    <header>
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="wiki-search" placeholder="搜尋關卡、裝備、技能、公式或關鍵字...">
+      </div>
+      <div class="header-links">
+        <a href="index.html" target="_blank">🎮 開始遊戲</a>
+        <a href="https://github.com/imiancui/koraku-rps" target="_blank">📦 GitHub 專案庫</a>
+      </div>
+    </header>
+
+    <main class="content-area">
+
+      <!-- Section 1: Overview -->
+      <section id="section-overview" class="section-card">
+        <h2 class="section-title">📜 遊戲概述與世界觀</h2>
+        <p>《狐樂・絆之勝負》是一款結合日式動漫視覺小說（AVG）風格與深層 RPG 裝備養成機制的網頁猜拳博弈對決遊戲。玩家在五秒節奏出拳倒數中與狐娘「小樂」博弈，於敗勢透過八方向疾速 QTE 絕地反制，解鎖摸摸偷襲與雙手解放雙拳對決，藉由 12 格位武具紙娃娃裝備不斷成長，挑戰四階 Boss 與雙生白金小樂！</p>
+      </section>
+
+      <!-- Section 2: Characters -->
+      <section id="section-characters" class="section-card">
+        <h2 class="section-title">🦊 角色設定與視覺立繪</h2>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">
+              <span>小樂 (Kohaku)・預設</span>
+              <span class="badge badge-gold">巫女本體</span>
+            </div>
+            <p>守護朱紅鳥居神社的狐娘，個性靈動活潑，喜歡在祭典與旅人猜拳博弈。使用於首頁看板、第 1~3 關戰鬥與常規獲勝。</p>
+          </div>
+          <div class="card">
+            <div class="card-title">
+              <span>白金小樂 (Platinum Kohaku)</span>
+              <span class="badge badge-purple">2P 鏡界雙生</span>
+            </div>
+            <p>鏡界幻化出的白金雙生小樂，銀白羽衣與狂暴靈氣，出現在終ノ章雙生 Boss 關卡中。</p>
+          </div>
+          <div class="card">
+            <div class="card-title">
+              <span>夏日祭・清涼泳裝</span>
+              <span class="badge badge-azure">戰後事件</span>
+            </div>
+            <p>小樂換上的夏日清涼泳裝，在戰勝後點擊「請小樂穿泳裝」解鎖。</p>
+          </div>
+          <div class="card">
+            <div class="card-title">
+              <span>海風・切西瓜</span>
+              <span class="badge badge-crimson">切西瓜得意</span>
+            </div>
+            <p>蒙眼切西瓜大獲全勝後，小樂得意洋洋展示成果的特殊差分立繪。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3: Stages -->
+      <section id="section-stages" class="section-card">
+        <h2 class="section-title">⛩️ 四大章節關卡與 Boss 梯度</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>章節</th>
+              <th>名稱</th>
+              <th>Boss HP</th>
+              <th>門檻等級</th>
+              <th>倒數秒數</th>
+              <th>變拳窗口</th>
+              <th>QTE 規格</th>
+              <th>摸摸閃避</th>
+              <th>勝利獎勵</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge badge-gold">壹ノ章</span></td>
+              <td><strong>初逢・朱鳥居</strong></td>
+              <td>1,000</td>
+              <td>Lv. 1</td>
+              <td>5 秒</td>
+              <td>1.00 秒</td>
+              <td>4 正方向 (5 鍵，不懲罰)</td>
+              <td>0%</td>
+              <td>150 EXP / 100 🪙</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-gold">貳ノ章</span></td>
+              <td><strong>夕映・狐火</strong></td>
+              <td>2,000</td>
+              <td>Lv. 3</td>
+              <td>3 秒</td>
+              <td>0.75 秒</td>
+              <td>8 方向 (5 鍵，限錯 2 次)</td>
+              <td>11%</td>
+              <td>188 EXP / 125 🪙</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-gold">參ノ章</span></td>
+              <td><strong>月下・九尾試</strong></td>
+              <td>5,000</td>
+              <td>Lv. 6</td>
+              <td>3 秒</td>
+              <td>0.50 秒</td>
+              <td>8 方向 (7 鍵，限錯 1 次)</td>
+              <td>33%</td>
+              <td>300 EXP / 200 🪙</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-purple">終ノ章</span></td>
+              <td><strong>鏡界・白金小樂</strong></td>
+              <td>10,000 (雙生雙血條)</td>
+              <td>Lv. 10</td>
+              <td>3 秒</td>
+              <td>0.25 秒</td>
+              <td>雙軌混向 (7 鍵，限錯 1 次)</td>
+              <td>66%</td>
+              <td>1,200 EXP / 800 🪙</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Section 4: Combat & Morph -->
+      <section id="section-combat" class="section-card">
+        <h2 class="section-title">✊ 猜拳核心、節奏倒數與時機變拳</h2>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">
+              <span>3-2-1 節奏倒數</span>
+              <span class="badge badge-crimson">音畫同步</span>
+            </div>
+            <p>每回合最後 3 秒依序喊出「剪刀（じゃん）」、「石頭（けん）」、「布！（ぽん！）」，並發送倒數事件。</p>
+          </div>
+          <div class="card">
+            <div class="card-title">
+              <span>時機變拳 (Morph Skill)</span>
+              <span class="badge badge-azure">快捷鍵 F</span>
+            </div>
+            <p>在看清反應時間內消耗 MP（基礎 25 MP，受耳環折抵至最低 5 MP）進入 2.0 秒手動選擇窗口！手動選贏造成傷害、選錯輸拳進 QTE、選平手計算摸摸發動率，超時自動結算。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 5: QTE System -->
+      <section id="section-qte" class="section-card">
+        <h2 class="section-title">⚡ 八方向 QTE 與雙軌反制系統</h2>
+        <p>猜輸進入 QTE 反制階段，支援單鍵與雙正方向斜向合成：</p>
+        <table>
+          <thead>
+            <tr>
+              <th>方向</th>
+              <th>代碼</th>
+              <th>單鍵鍵盤</th>
+              <th>方向鍵</th>
+              <th>數字鍵盤</th>
+              <th>雙鍵合成 (Chords)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>上</td><td><code>up</code></td><td>W</td><td>↑</td><td>8</td><td>—</td></tr>
+            <tr><td>下</td><td><code>down</code></td><td>S</td><td>↓</td><td>2</td><td>—</td></tr>
+            <tr><td>左</td><td><code>left</code></td><td>A</td><td>←</td><td>4</td><td>—</td></tr>
+            <tr><td>右</td><td><code>right</code></td><td>D</td><td>→</td><td>6</td><td>—</td></tr>
+            <tr><td>左上</td><td><code>upLeft</code></td><td>Q</td><td>—</td><td>7</td><td>W + A 或 ↑ + ←</td></tr>
+            <tr><td>右上</td><td><code>upRight</code></td><td>E</td><td>—</td><td>9</td><td>W + D 或 ↑ + →</td></tr>
+            <tr><td>左下</td><td><code>downLeft</code></td><td>Z</td><td>—</td><td>1</td><td>S + A 或 ↓ + ←</td></tr>
+            <tr><td>右下</td><td><code>downRight</code></td><td>C</td><td>—</td><td>3</td><td>S + D 或 ↓ + →</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Section 6: Skills -->
+      <section id="section-skills" class="section-card">
+        <h2 class="section-title">✨ 技能樹體系 (摸摸與雙手解放)</h2>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">
+              <span>撫・摸摸 (Petting)</span>
+              <span class="badge badge-gold">Lv.2 解鎖 (最高 10 級)</span>
+            </div>
+            <p>平手時以 <code>等級 × 10%</code> 機率自動偷摸小樂，造成 25 點基礎傷害（每把短匕 +15 點）。每級消耗 1 SP。</p>
+          </div>
+          <div class="card">
+            <div class="card-title">
+              <span>掌・雙手解放 (Dual Hands)</span>
+              <span class="badge badge-purple">Lv.4 解鎖 (消耗 100 SP)</span>
+            </div>
+            <p>解放雙手獨立出拳。對單體 Boss 時雙勝造成雙倍傷害，一負一平為安全脫離；對第 4 關雙生 Boss 時左手對抗左怪、右手對抗右怪。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 7: Progression & Formulas -->
+      <section id="section-progression" class="section-card">
+        <h2 class="section-title">📈 等級成長與屬性配點公式</h2>
+        <p><strong>升級經驗公式</strong>：<code>xpNeededForLevel(level) = 100 + Math.max(0, level - 1) * 75</code></p>
+        <p><strong>屬性加成</strong>：每升一級得 5 SP。HP 配點每點 +10 Max HP；MP 配點每點 +10 Max MP；Damage 配點每點 +5 攻擊力。</p>
+      </section>
+
+      <!-- Section 8: Equipment Catalog -->
+      <section id="section-equipment" class="section-card">
+        <h2 class="section-title">🥋 12 格位裝備武具總覽 (18 件武具)</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>武具名稱</th>
+              <th>格位</th>
+              <th>雙手</th>
+              <th>稀有度</th>
+              <th>價格</th>
+              <th>屬性加成</th>
+              <th>專屬戰鬥被動效果</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>玄武・金剛胸甲</strong></td><td>chest</td><td>否</td><td><span class="badge badge-purple">Epic</span></td><td>320 🪙</td><td>HP +150</td><td>受擊傷害減免 25 點（可與盾牌減傷疊加）</td></tr>
+            <tr><td><strong>靈狐・幻影羽織</strong></td><td>chest</td><td>否</td><td><span class="badge badge-purple">Epic</span></td><td>350 🪙</td><td>ATK +15, HP +80, MP +40</td><td>受擊時 25% 機率殘影閃避，完全免疫傷害</td></tr>
+            <tr><td><strong>淨世・白狐千早</strong></td><td>chest</td><td>否</td><td><span class="badge badge-azure">Rare</span></td><td>260 🪙</td><td>ATK +10, HP +100, MP +60</td><td>每回合結束回復 15 點 MP</td></tr>
+            <tr><td><strong>八咫・鏡光護胸</strong></td><td>chest</td><td>否</td><td><span class="badge badge-gold">Legendary</span></td><td>550 🪙</td><td>ATK +20, HP +120, MP +50</td><td>受擊時鏡光反彈 40 點傷害給小樂</td></tr>
+            <tr><td><strong>業火・炎之太刀</strong></td><td>weapon</td><td>否</td><td><span class="badge badge-purple">Epic</span></td><td>350 🪙</td><td>ATK +25, HP +50</td><td>回合結束造成 30 點燃燒傷害（雙持疊加至 60）</td></tr>
+            <tr><td><strong>霜月・冰結靈刃</strong></td><td>weapon</td><td>否</td><td><span class="badge badge-azure">Rare</span></td><td>300 🪙</td><td>ATK +20, MP +30</td><td>命中時 30% 機率凍結小樂，下回合隨機封印其一手勢</td></tr>
+            <tr><td><strong>雷霆・神鳴迅劍</strong></td><td>weapon</td><td>否</td><td><span class="badge badge-azure">Rare</span></td><td>250 🪙</td><td>ATK +30</td><td>QTE 反制成功額外追加 50 點雷擊傷害</td></tr>
+            <tr><td><strong>破滅・九尾雙手巨劍</strong></td><td>weapon</td><td><strong>是</strong></td><td><span class="badge badge-gold">Legendary</span></td><td>800 🪙</td><td>ATK +70, HP +100, MP -20</td><td>佔用雙手格位；常規出拳獲勝傷害提高為 1.5 倍</td></tr>
+            <tr><td><strong>結界・朱雀盾</strong></td><td>offHand</td><td>否</td><td><span class="badge badge-purple">Epic</span></td><td>320 🪙</td><td>HP +150, MP +50</td><td>受擊傷害固定減免 30 點（雙盾疊加至 60 點）</td></tr>
+            <tr><td><strong>影月・短匕</strong></td><td>weapon</td><td>否</td><td><span class="badge badge-azure">Rare</span></td><td>220 🪙</td><td>ATK +25</td><td>平手摸摸傷害額外 +15 點（雙持疊加至 +30 點）</td></tr>
+            <tr><td><strong>妖狐面具</strong></td><td>head</td><td>否</td><td><span class="badge badge-azure">Rare</span></td><td>200 🪙</td><td>ATK +10, HP +80, MP +30</td><td>均衡提升生命、魔力與攻擊</td></tr>
+            <tr><td><strong>緋紅之肩鎧</strong></td><td>shoulders</td><td>否</td><td><span class="badge badge-azure">Rare</span></td><td>200 🪙</td><td>ATK +15, HP +100</td><td>大幅提升生命上限與攻擊力</td></tr>
+            <tr><td><strong>注連繩神靈腰帶</strong></td><td>belt</td><td>否</td><td><span class="badge badge-purple">Epic</span></td><td>280 🪙</td><td>HP +60, MP +40</td><td>藥水回復量由 25 提升至 35 點</td></tr>
+            <tr><td><strong>疾風之草履</strong></td><td>boots</td><td>否</td><td><span class="badge badge-purple">Epic</span></td><td>300 🪙</td><td>HP +50</td><td>QTE 反制時間延長 1.0 秒</td></tr>
+            <tr><td><strong>八尺瓊・勾玉耳環</strong></td><td>earring</td><td>否</td><td><span class="badge badge-azure">Rare</span></td><td>180 🪙</td><td>ATK +8, MP +25</td><td>變拳 MP 消耗降低 5 點（雙耳環降低 10 點）</td></tr>
+            <tr><td><strong>狐火紅玉戒指</strong></td><td>ring</td><td>否</td><td><span class="badge badge-azure">Rare</span></td><td>160 🪙</td><td>ATK +12, HP +50</td><td>提升生命與攻擊力</td></tr>
+            <tr><td><strong>月華藍玉戒指</strong></td><td>ring</td><td>否</td><td><span class="badge badge-azure">Rare</span></td><td>160 🪙</td><td>ATK +12, MP +50</td><td>提升魔力與攻擊力</td></tr>
+            <tr><td><strong>絆之守護胸章</strong></td><td>badge</td><td>否</td><td><span class="badge badge-gold">Legendary</span></td><td>500 🪙</td><td>ATK +20, HP +100, MP +50</td><td>戰勝時獲得星砂額外提升 +20%</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Section 9: Economy -->
+      <section id="section-economy" class="section-card">
+        <h2 class="section-title">🪙 藥水道具與星砂經濟</h2>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">
+              <span>緋露藥 (HP 藥水)</span>
+              <span class="badge badge-crimson">100 星砂</span>
+            </div>
+            <p>戰鬥中點擊回復 25 HP（裝備腰帶加成後回復 35 HP）。</p>
+          </div>
+          <div class="card">
+            <div class="card-title">
+              <span>蒼月露 (MP 藥水)</span>
+              <span class="badge badge-azure">100 星砂</span>
+            </div>
+            <p>戰鬥中點擊回復 25 MP（裝備腰帶加成後回復 35 MP）。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 10: Watermelon -->
+      <section id="section-watermelon" class="section-card">
+        <h2 class="section-title">🍉 蒙眼切西瓜小遊戲</h2>
+        <p>戰勝小樂並要求換泳裝後可進行固定 3 刀之切西瓜挑戰：</p>
+        <table>
+          <thead>
+            <tr>
+              <th>刀數</th>
+              <th>安全判定區寬度</th>
+              <th>擺動週期速度</th>
+              <th>成功獎勵</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>第 1 刀</td><td>26.0% (容錯 0.1300)</td><td>1,800 ms</td><td>結算 +100 EXP</td></tr>
+            <tr><td>第 2 刀</td><td>13.0% (容錯 0.0650，縮小 50%)</td><td>1,440 ms (加速 25%)</td><td>結算 +100 EXP</td></tr>
+            <tr><td>第 3 刀</td><td>6.5% (容錯 0.0325，再縮小 50%)</td><td>1,152 ms (再加速 25%)</td><td>結算 +100 EXP</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Section 11: DPS -->
+      <section id="section-dps" class="section-card">
+        <h2 class="section-title">📊 歷程紀錄與 DPS 戰力分析</h2>
+        <p><strong>理論 DPS</strong> 綜合計算玩家面板攻擊力、九尾巨劍 1.5x 倍率、雙手解放 1.5x 倍率、裝備燃燒與反彈被動、摸摸平手期望值與 3.5 秒回合週期。</p>
+        <p><strong>實測 DPS</strong> 記錄每場戰鬥實際造成之傷害 ÷ 戰鬥秒數，並完整記錄最近 100 場戰鬥歷程。</p>
+      </section>
+
+      <!-- Section 12: Interactive Calculator -->
+      <section id="section-calculator" class="section-card">
+        <h2 class="section-title">🧮 互動式公式計算器</h2>
+        <div class="calculator-panel">
+          <div class="calc-row">
+            <label for="calc-sp-hp">HP 配點數：</label>
+            <input type="number" id="calc-sp-hp" class="calc-input" value="0" min="0">
+            <label for="calc-sp-mp">MP 配點數：</label>
+            <input type="number" id="calc-sp-mp" class="calc-input" value="0" min="0">
+            <label for="calc-sp-dmg">Damage 配點數：</label>
+            <input type="number" id="calc-sp-dmg" class="calc-input" value="0" min="0">
+          </div>
+          <div class="calc-row">
+            <label for="calc-momo-lvl">摸摸技能等級 (0~10)：</label>
+            <input type="number" id="calc-momo-lvl" class="calc-input" value="0" min="0" max="10">
+            <label><input type="checkbox" id="calc-dual-hand"> 已解鎖雙手解放</label>
+            <label><input type="checkbox" id="calc-greatsword"> 裝備九尾雙手巨劍</label>
+          </div>
+          <div class="calc-result-box" id="calc-result">
+            <div>最大 HP：<span id="res-hp" style="color:var(--accent-crimson);">100</span></div>
+            <div>最大 MP：<span id="res-mp" style="color:var(--accent-azure);">50</span></div>
+            <div>攻擊力：<span id="res-dmg" style="color:var(--accent-gold);">100</span></div>
+            <div>理論 DPS：<span id="res-dps" style="color:var(--accent-emerald);">28.6</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 13: Cheats -->
+      <section id="section-cheats" class="section-card">
+        <h2 class="section-title">🛠️ 除錯作弊與秘密指令</h2>
+        <div class="card">
+          <div class="card-title">
+            <span>秘密觸發快速鍵</span>
+            <span class="badge badge-crimson">1000ms 內連按 4 次數字鍵 8</span>
+          </div>
+          <p>在任意畫面於 1000ms 內連續按下 4 次數字鍵 <code>8</code>（或小鍵盤 Numpad 8），即可喚出作弊面板，自由設定等級、SP、星砂、藥水、解鎖全關卡與全圖鑑。</p>
+        </div>
+      </section>
+
+      <!-- Section 14: I18n -->
+      <section id="section-i18n" class="section-card">
+        <h2 class="section-title">🌐 四國語系在地化</h2>
+        <p>全面支援繁體中文 (<code>zh-Hant</code>)、簡體中文 (<code>zh-Hans</code>)、英文 (<code>en</code>)、日文 (<code>ja</code>)。點擊遊戲主畫面語系按鈕可即時循環切換，並自動保存至本地儲存空間。</p>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+    // Live Search Filter
+    const searchInput = document.getElementById("wiki-search");
+    searchInput.addEventListener("input", (e) => {
+      const query = e.target.value.toLowerCase().trim();
+      const cards = document.querySelectorAll(".card, tr, .section-card");
+      cards.forEach(card => {
+        if (card.tagName === "SECTION" && !query) {
+          card.style.display = "";
+          return;
+        }
+        const text = card.textContent.toLowerCase();
+        if (text.includes(query)) {
+          card.style.display = "";
+        } else if (card.tagName === "TR" || card.classList.contains("card")) {
+          card.style.display = "none";
+        }
+      });
+    });
+
+    // Dynamic Calculator
+    function updateCalc() {
+      const hpAlloc = Number(document.getElementById("calc-sp-hp").value) || 0;
+      const mpAlloc = Number(document.getElementById("calc-sp-mp").value) || 0;
+      const dmgAlloc = Number(document.getElementById("calc-sp-dmg").value) || 0;
+      const momoLvl = Number(document.getElementById("calc-momo-lvl").value) || 0;
+      const hasDualHand = document.getElementById("calc-dual-hand").checked;
+      const hasGreatsword = document.getElementById("calc-greatsword").checked;
+
+      const maxHp = 100 + (hpAlloc * 10) + (hasGreatsword ? 100 : 0);
+      const maxMp = Math.max(0, 50 + (mpAlloc * 10) - (hasGreatsword ? 20 : 0));
+      const damage = 100 + (dmgAlloc * 5) + (hasGreatsword ? 70 : 0);
+
+      const greatswordMult = hasGreatsword ? 1.5 : 1.0;
+      const dualHandMult = hasDualHand ? 1.5 : 1.0;
+      const momoExpected = (momoLvl * 0.1) * 25 * 0.33;
+      const theoreticalDps = ((damage * greatswordMult * dualHandMult) + momoExpected) / 3.5;
+
+      document.getElementById("res-hp").textContent = maxHp;
+      document.getElementById("res-mp").textContent = maxMp;
+      document.getElementById("res-dmg").textContent = damage;
+      document.getElementById("res-dps").textContent = theoreticalDps.toFixed(1);
+    }
+
+    document.querySelectorAll(".calc-input, #calc-dual-hand, #calc-greatsword").forEach(el => {
+      el.addEventListener("input", updateCalc);
+      el.addEventListener("change", updateCalc);
+    });
+  </script>
+</body>
+</html>
