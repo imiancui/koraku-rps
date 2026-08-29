@@ -3,6 +3,7 @@ import { spawn } from "node:child_process";
 import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { buildBundle } from "./build.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const port = Number(process.env.PORT || 4173);
@@ -118,6 +119,9 @@ async function allowTailscaleFirewall() {
 }
 
 async function start() {
+  await buildBundle().catch((err) => {
+    console.warn("自動打包警告（若使用模組化開發可忽略）：", err.message);
+  });
   await listenOn(host);
   console.log("狐樂・絆之勝負：http://" + host + ":" + port);
 

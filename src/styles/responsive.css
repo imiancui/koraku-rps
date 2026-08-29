@@ -23,28 +23,24 @@
   }
 
   .enemy-hud {
-    width: 48vw;
+    width: 58vw;
   }
 
   .round-oracle {
-    width: 41vw;
+    left: 50%;
+    width: min(88vw, 460px);
+    transform: translateX(-50%);
   }
 
-  .hand-selector {
-    width: 35vw;
+  .battle-left-cluster {
+    left: 16px;
+    bottom: 128px;
+    width: 36vw;
   }
 
   .battle-character-wrap {
-    right: 0;
-    width: 59vw;
-  }
-
-  .quick-slots {
-    left: 20px;
-  }
-
-  .player-hud {
-    right: 25px;
+    left: 58%;
+    width: 58vw;
   }
 }
 
@@ -74,11 +70,13 @@
   }
 
   .round-oracle {
-    top: 14%;
+    top: 75px;
+    left: 50%;
+    transform: translateX(-50%);
   }
 
   .hand-selector {
-    top: 41%;
+    top: 220px;
   }
 
   .hand-button {
@@ -299,13 +297,28 @@
     text-align: right;
   }
 
+  .gallery-stage {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 20px;
+  }
+
+  .gallery-art-frame {
+    height: 340px;
+  }
+
   /* Mobile battle */
   .battle-character-wrap {
-    right: -17%;
+    left: 56%;
     bottom: 95px;
-    width: 96%;
+    width: 90%;
     height: 75%;
     opacity: 0.76;
+  }
+
+  .battle-character-wrap.is-dual-stage {
+    left: 50%;
+    width: 98%;
   }
 
   .battle-character-wrap::after {
@@ -327,17 +340,27 @@
   }
 
   .enemy-hud {
-    top: 58px;
-    left: 18px;
-    width: calc(100% - 36px);
+    top: 54px;
+    left: 14px;
+    width: calc(100% - 28px);
     transform: none;
   }
 
+  .dual-enemy-row {
+    gap: 8px;
+  }
+
+  .dual-enemy-card {
+    padding: 6px 10px;
+  }
+
   .round-oracle {
-    left: 12px;
-    top: 135px;
+    left: 50%;
+    top: 128px;
     width: calc(100% - 24px);
-    padding: 9px 12px 11px;
+    max-width: 440px;
+    padding: 10px 14px 12px;
+    transform: translateX(-50%);
   }
 
   .hand-versus strong {
@@ -345,27 +368,29 @@
   }
 
   .round-countdown {
-    right: 4px;
-    top: calc(100% + 32px);
-    width: 54px;
-    height: 54px;
+    right: 6px;
+    top: 50%;
+    width: 56px;
+    height: 56px;
+    transform: translateY(-50%);
   }
 
   .round-countdown small {
     display: none;
   }
 
-  .hand-selector {
-    left: 12px;
-    top: 260px;
-    width: 45%;
+  .battle-left-cluster {
+    left: 10px;
+    bottom: 118px;
+    width: min(54vw, 240px);
+    gap: 8px;
   }
 
   .hand-button {
     grid-template-columns: 34px 1fr 22px;
-    min-height: 40px;
+    min-height: 38px;
     padding: 3px 8px;
-    background: rgba(12, 15, 23, 0.82);
+    background: rgba(12, 15, 23, 0.88);
   }
 
   .hand-button i {
@@ -376,22 +401,13 @@
     font-size: 11px;
   }
 
-  .quick-slots {
-    left: 11px;
-    bottom: 122px;
-  }
-
-  .quick-label {
-    display: none;
-  }
-
   .slot-grid {
-    grid-template: repeat(3, 45px) / repeat(3, 45px);
+    grid-template: repeat(3, 44px) / repeat(3, 44px);
   }
 
   .soul-slot {
-    width: 40px;
-    height: 40px;
+    width: 38px;
+    height: 38px;
   }
 
   .slot-content {
@@ -399,7 +415,7 @@
   }
 
   .slot-content i {
-    font-size: 16px;
+    font-size: 15px;
   }
 
   .slot-content small {
@@ -408,12 +424,6 @@
 
   .slot-content b {
     font-size: 7px;
-  }
-
-  .player-hud {
-    right: 14px;
-    bottom: 125px;
-    width: 52%;
   }
 
   .hud-name {
@@ -462,6 +472,32 @@
 
   .qte-pad {
     display: grid;
+  }
+
+  .dual-qte-split-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin: 8px 0;
+  }
+
+  .dual-qte-slot {
+    padding: 8px 6px;
+  }
+
+  .dual-qte-slot .qte-sequence {
+    gap: 4px;
+    margin: 6px 0;
+  }
+
+  .dual-qte-slot .qte-arrow {
+    width: 34px;
+    font-size: 19px;
+  }
+
+  .dual-qte-touch-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
   }
 
   .qte-panel > small {

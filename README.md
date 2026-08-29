@@ -4,11 +4,15 @@
 
 ## 啟動
 
-需求：Node.js 18 或更新版本。
+本遊戲支援多種啟動方式：
 
-    npm run dev
-
-瀏覽器開啟 http://127.0.0.1:4173/ 。專案沒有第三方執行期套件，不需要先安裝依賴。
+1. **直接開啟**：直接以瀏覽器開啟 [index.html](file:///d:/game-dev/New-game-project-4/index.html) 即可暢玩（免開伺服器，支援本機 `file://` 協議）。
+2. **一鍵啟動（Windows）**：雙擊執行 [啟動遊戲.bat](file:///d:/game-dev/New-game-project-4/啟動遊戲.bat)。
+3. **開發伺服器**（需求 Node.js 18+）：
+   ```bash
+   npm run dev
+   ```
+   瀏覽器開啟 http://127.0.0.1:4173/ 。專案零第三方套件依賴，不需要先安裝 npm packages。
 
 在 Tailscale 網路上給其他裝置玩（iPhone／iPad／另一台電腦）：
 

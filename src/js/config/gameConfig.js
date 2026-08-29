@@ -33,8 +33,21 @@ export const STAGES = Object.freeze([
     subtitle: "先從看穿她的小動作開始",
     enemyHp: 1000,
     requiredLevel: 1,
+    rewardMultiplier: 1,
     xpWin: 150,
     xpLoss: 50,
+    winCoins: 100,
+    lossCoins: 50,
+    roundSeconds: 5,
+    reactionWindowMs: 1000,
+    momoDodgeRate: 0,
+    qteDirections: "cardinal",
+    qteLength: 5,
+    maxErrors: Infinity,
+    enemyDamageMultiplier: 1,
+    enemies: [{ id: "main", name: "小樂", hp: 1000, maxHp: 1000 }],
+    bossRuleSummary: "5 秒／4 向容錯",
+    bossRuleDetail: "亮拳倒數 5 秒、QTE 僅出現正 4 方向（按錯不計失敗），變拳時機 1.0 秒，小樂不閃避摸摸。",
     final: false
   },
   {
@@ -44,8 +57,21 @@ export const STAGES = Object.freeze([
     subtitle: "黃昏會把猶豫照得一清二楚",
     enemyHp: 2000,
     requiredLevel: 3,
-    xpWin: 320,
-    xpLoss: 110,
+    rewardMultiplier: 1.25,
+    xpWin: 188,
+    xpLoss: 63,
+    winCoins: 125,
+    lossCoins: 63,
+    roundSeconds: 3,
+    reactionWindowMs: 750,
+    momoDodgeRate: 0.11,
+    qteDirections: "all",
+    qteLength: 5,
+    maxErrors: 2,
+    enemyDamageMultiplier: 1,
+    enemies: [{ id: "main", name: "小樂", hp: 2000, maxHp: 2000 }],
+    bossRuleSummary: "3 秒",
+    bossRuleDetail: "亮拳倒數 3 秒、QTE 包含 8 方向（按錯 2 次失敗），變拳時機 0.75 秒，小樂有 11% 機率閃避摸摸。",
     final: false
   },
   {
@@ -55,20 +81,83 @@ export const STAGES = Object.freeze([
     subtitle: "別被九道殘影騙走視線",
     enemyHp: 5000,
     requiredLevel: 6,
-    xpWin: 760,
-    xpLoss: 240,
+    rewardMultiplier: 2,
+    xpWin: 300,
+    xpLoss: 100,
+    winCoins: 200,
+    lossCoins: 100,
+    roundSeconds: 3,
+    reactionWindowMs: 500,
+    momoDodgeRate: 0.33,
+    qteDirections: "all",
+    qteLength: 7,
+    maxErrors: 1,
+    enemyDamageMultiplier: 1,
+    enemies: [{ id: "main", name: "小樂", hp: 5000, maxHp: 5000 }],
+    bossRuleSummary: "3 秒",
+    bossRuleDetail: "亮拳倒數 3 秒、QTE 7 鍵長度（按錯 1 次失敗），變拳時機 0.5 秒，小樂有 33% 機率閃避摸摸。",
     final: false
   },
   {
     id: 4,
     chapter: "終ノ章",
     name: "鏡界・白金小樂",
-    subtitle: "跨越鏡面，迎戰最終的 2P 色",
+    subtitle: "跨越鏡面，迎戰雙生的 2P 色",
     enemyHp: 10000,
     requiredLevel: 10,
-    xpWin: 1800,
-    xpLoss: 520,
+    rewardMultiplier: 8,
+    xpWin: 1200,
+    xpLoss: 400,
+    winCoins: 800,
+    lossCoins: 400,
+    roundSeconds: 3,
+    reactionWindowMs: 250,
+    momoDodgeRate: 0.66,
+    qteDirections: "random",
+    qteLength: 7,
+    maxErrors: 1,
+    enemyDamageMultiplier: 2,
+    dualEnemy: true,
+    enemies: [
+      { id: "left", name: "白金小樂・左", hp: 5000, maxHp: 5000 },
+      { id: "right", name: "白金小樂・右", hp: 5000, maxHp: 5000 }
+    ],
+    bossRuleSummary: "3 秒／雙小樂雙血條",
+    bossRuleDetail: "亮拳倒數 3 秒、雙小樂雙血條（受擊 2 倍傷害）、7 鍵 QTE，極限變拳時機 0.25 秒，小樂有 66% 機率閃避摸摸。",
     final: true
+  }
+]);
+
+export const SKILLS = Object.freeze({
+  momo: {
+    id: "momo",
+    name: "摸摸",
+    code: "PETTING",
+    unlockLevel: 2,
+    maxLevel: 10,
+    baseChance: 0.10,
+    chancePerLevel: 0.10,
+    damage: 25,
+    costPerLevel: 1,
+    glyph: "撫",
+    description: "平手時以機率自動發動，偷摸摸場上隨機一個小樂對其造成 25 點傷害。"
+  }
+});
+
+export const GALLERY_ITEMS = Object.freeze([
+  {
+    id: "swimsuit_default",
+    name: "夏日祭・清涼泳裝",
+    variantName: "預設泳裝",
+    src: ASSETS.swimsuit,
+    description: "小樂難得換上的清涼泳裝。在對局勝出後方能一窺風采。"
+  },
+  {
+    id: "swimsuit_watermelon",
+    name: "海風・切西瓜",
+    variantName: "切西瓜",
+    src: ASSETS.watermelon,
+    description: "蒙眼切西瓜大獲全勝後，小樂得意洋洋展示成果的模樣。"
   }
 ]);
 
@@ -98,7 +187,7 @@ export const ITEMS = Object.freeze({
 export const BASE_PLAYER = Object.freeze({
   maxHp: 100,
   maxMp: 50,
-  damage: 10
+  damage: 100
 });
 
 export const STAT_GAINS = Object.freeze({
@@ -113,11 +202,192 @@ export const BATTLE_RULES = Object.freeze({
   reactionWindowMs: 1000,
   qteSeconds: 5,
   qteLength: 5,
-  enemyDamage: 10,
+  enemyDamage: 100,
   hpPotionRestore: 25,
   mpPotionRestore: 25,
   winCoins: 100,
   lossCoins: 50
+});
+
+export const EQUIPMENT_SLOTS = Object.freeze({
+  head: { id: "head", label: "頭盔", icon: "👑" },
+  shoulders: { id: "shoulders", label: "肩甲", icon: "🛡️" },
+  belt: { id: "belt", label: "腰帶", icon: "🎗️" },
+  boots: { id: "boots", label: "鞋子", icon: "🥾" },
+  mainHand: { id: "mainHand", label: "主手武器", icon: "⚔️" },
+  offHand: { id: "offHand", label: "副手武防", icon: "🛡️" },
+  ring1: { id: "ring1", label: "戒指 1", icon: "💍" },
+  ring2: { id: "ring2", label: "戒指 2", icon: "💍" },
+  earring1: { id: "earring1", label: "耳環 1", icon: "💎" },
+  earring2: { id: "earring2", label: "耳環 2", icon: "💎" },
+  badge: { id: "badge", label: "胸章", icon: "🏅" }
+});
+
+export const EQUIPMENT_ITEMS = Object.freeze({
+  sword_flame: {
+    id: "sword_flame",
+    name: "業火・炎之太刀",
+    slotType: "weapon",
+    twoHanded: false,
+    rarity: "epic",
+    icon: "🔥⚔️",
+    price: 350,
+    stats: { damage: 25, hp: 50, mp: 0 },
+    effect: { type: "burn", burnDamage: 30 },
+    description: "刀身繚繞著永不熄滅的狐火。回合結束時對小樂造成 30 點燃燒傷害。"
+  },
+  sword_frost: {
+    id: "sword_frost",
+    name: "霜月・冰結靈刃",
+    slotType: "weapon",
+    twoHanded: false,
+    rarity: "rare",
+    icon: "❄️⚔️",
+    price: 300,
+    stats: { damage: 20, hp: 0, mp: 30 },
+    effect: { type: "freeze", freezeChance: 0.3, reactionDelay: 0.5 },
+    description: "極北寒潭萃取的靈刃。猜拳獲勝時 30% 機率冰凍小樂，使下一回合反應時間延長 +0.5 秒。"
+  },
+  sword_thunder: {
+    id: "sword_thunder",
+    name: "雷霆・神鳴迅劍",
+    slotType: "weapon",
+    twoHanded: false,
+    rarity: "rare",
+    icon: "⚡⚔️",
+    price: 250,
+    stats: { damage: 30, hp: 0, mp: 0 },
+    effect: { type: "thunder", qteBonusDamage: 50 },
+    description: "雷鳴纏繞的刺劍。QTE 反制成功時追加 50 點雷擊傷害。"
+  },
+  sword_great_nine: {
+    id: "sword_great_nine",
+    name: "破滅・九尾雙手巨劍",
+    slotType: "weapon",
+    twoHanded: true,
+    rarity: "legendary",
+    icon: "🗡️💥",
+    price: 800,
+    stats: { damage: 70, hp: 100, mp: -20 },
+    effect: { type: "burst", winMultiplier: 1.5 },
+    description: "蘊含九尾狂氣的雙手大劍（佔用雙手）。常規出拳獲勝傷害提高為 1.5 倍。"
+  },
+  shield_suzaku: {
+    id: "shield_suzaku",
+    name: "結界・朱雀盾",
+    slotType: "offHand",
+    twoHanded: false,
+    rarity: "epic",
+    icon: "🛡️✨",
+    price: 320,
+    stats: { damage: 0, hp: 150, mp: 50 },
+    effect: { type: "shield", damageReduction: 30 },
+    description: "刻有朱雀神紋的靈盾。受到的猜輸與 QTE 失敗傷害降低 30 點。"
+  },
+  dagger_shadow: {
+    id: "dagger_shadow",
+    name: "影月・短匕",
+    slotType: "weapon",
+    twoHanded: false,
+    rarity: "rare",
+    icon: "🗡️🌑",
+    price: 220,
+    stats: { damage: 25, hp: 0, mp: 0 },
+    effect: { type: "shadow", momoDamageBonus: 15 },
+    description: "隱於夜幕的短匕。可裝備於主手或副手，平手摸摸傷害額外 +15 點。"
+  },
+  helm_fox: {
+    id: "helm_fox",
+    name: "妖狐面具",
+    slotType: "head",
+    twoHanded: false,
+    rarity: "rare",
+    icon: "🦊🎭",
+    price: 200,
+    stats: { damage: 10, hp: 80, mp: 30 },
+    description: "依小樂容貌雕琢的靈狐面具。提供均衡的生命、魔力與攻擊加成。"
+  },
+  shoulders_crimson: {
+    id: "shoulders_crimson",
+    name: "緋紅之肩鎧",
+    slotType: "shoulders",
+    twoHanded: false,
+    rarity: "rare",
+    icon: "🏮🛡️",
+    price: 200,
+    stats: { damage: 15, hp: 100, mp: 0 },
+    description: "鳥居朱漆淬鍊的堅固肩鎧。大幅提升生命上限與攻擊力。"
+  },
+  belt_shimenawa: {
+    id: "belt_shimenawa",
+    name: "注連繩神靈腰帶",
+    slotType: "belt",
+    twoHanded: false,
+    rarity: "epic",
+    icon: "🎗️⛩️",
+    price: 280,
+    stats: { damage: 0, hp: 60, mp: 40 },
+    effect: { type: "potion_boost", potionBoost: 10 },
+    description: "神社結界編織的神繩腰帶。藥水回復效果額外提升 10 點。"
+  },
+  boots_gale: {
+    id: "boots_gale",
+    name: "疾風之草履",
+    slotType: "boots",
+    twoHanded: false,
+    rarity: "epic",
+    icon: "🥾💨",
+    price: 300,
+    stats: { damage: 0, hp: 50, mp: 0 },
+    effect: { type: "qte_time", extraQteSeconds: 1 },
+    description: "踏風而行的神行草履。QTE 反制時間延長 1.0 秒。"
+  },
+  earring_magatama: {
+    id: "earring_magatama",
+    name: "八尺瓊・勾玉耳環",
+    slotType: "earring",
+    twoHanded: false,
+    rarity: "rare",
+    icon: "💎✨",
+    price: 180,
+    stats: { damage: 8, hp: 0, mp: 25 },
+    effect: { type: "morph_discount", morphDiscount: 5 },
+    description: "翠綠溫潤的古老勾玉。變拳技能 MP 消耗降低 5 點。"
+  },
+  ring_ruby: {
+    id: "ring_ruby",
+    name: "狐火紅玉戒指",
+    slotType: "ring",
+    twoHanded: false,
+    rarity: "rare",
+    icon: "💍🔴",
+    price: 160,
+    stats: { damage: 12, hp: 50, mp: 0 },
+    description: "封印狐火靈氣的紅寶石戒指。提升生命與攻擊。"
+  },
+  ring_sapphire: {
+    id: "ring_sapphire",
+    name: "月華藍玉戒指",
+    slotType: "ring",
+    twoHanded: false,
+    rarity: "rare",
+    icon: "💍🔵",
+    price: 160,
+    stats: { damage: 12, hp: 0, mp: 50 },
+    description: "映照幽藍月光的寶石戒指。提升魔力與攻擊。"
+  },
+  badge_bond: {
+    id: "badge_bond",
+    name: "絆之守護胸章",
+    slotType: "badge",
+    twoHanded: false,
+    rarity: "legendary",
+    icon: "🏅💖",
+    price: 500,
+    stats: { damage: 20, hp: 100, mp: 50 },
+    effect: { type: "coin_boost", coinMultiplier: 1.2 },
+    description: "與小樂深厚羈絆的信物。全面提升能力，且戰勝時額外獲得 20% 星砂。"
+  }
 });
 
 export const STORAGE_KEY = "koraku-rps-save-v1";

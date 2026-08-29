@@ -3,7 +3,7 @@ export class TimerRegistry {
   #intervals = new Set();
 
   timeout(callback, delay) {
-    const id = window.setTimeout(() => {
+    const id = globalThis.setTimeout(() => {
       this.#timeouts.delete(id);
       callback();
     }, delay);
@@ -12,24 +12,24 @@ export class TimerRegistry {
   }
 
   interval(callback, delay) {
-    const id = window.setInterval(callback, delay);
+    const id = globalThis.setInterval(callback, delay);
     this.#intervals.add(id);
     return id;
   }
 
   clearTimeout(id) {
-    window.clearTimeout(id);
+    globalThis.clearTimeout(id);
     this.#timeouts.delete(id);
   }
 
   clearInterval(id) {
-    window.clearInterval(id);
+    globalThis.clearInterval(id);
     this.#intervals.delete(id);
   }
 
   clearAll() {
-    this.#timeouts.forEach((id) => window.clearTimeout(id));
-    this.#intervals.forEach((id) => window.clearInterval(id));
+    this.#timeouts.forEach((id) => globalThis.clearTimeout(id));
+    this.#intervals.forEach((id) => globalThis.clearInterval(id));
     this.#timeouts.clear();
     this.#intervals.clear();
   }

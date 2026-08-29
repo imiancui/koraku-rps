@@ -14,6 +14,42 @@ const OPPOSITES = Object.freeze({
   right: "left"
 });
 
+export const WASD_KEY_MAP = Object.freeze({
+  w: "up",
+  a: "left",
+  s: "down",
+  d: "right",
+  q: "upLeft",
+  e: "upRight",
+  z: "downLeft",
+  c: "downRight"
+});
+
+export const ARROW_KEY_MAP = Object.freeze({
+  arrowup: "up",
+  arrowdown: "down",
+  arrowleft: "left",
+  arrowright: "right",
+  "8": "up",
+  "2": "down",
+  "4": "left",
+  "6": "right",
+  "7": "upLeft",
+  "9": "upRight",
+  "1": "downLeft",
+  "3": "downRight"
+});
+
+export function wasdDirectionFromKey(key) {
+  const normalized = String(key).toLowerCase();
+  return WASD_KEY_MAP[normalized] || null;
+}
+
+export function arrowDirectionFromKey(key) {
+  const normalized = String(key).toLowerCase();
+  return ARROW_KEY_MAP[normalized] || null;
+}
+
 export function directionFromKey(key) {
   const normalized = String(key).toLowerCase();
   return DIRECTIONS.find((direction) => direction.keys.includes(normalized))?.id || null;
@@ -35,12 +71,13 @@ export function combineCardinalDirections(directions) {
 }
 
 export class QTEKeyboardInput {
-  constructor() {
+  constructor(mapper = directionFromKey) {
+    this.mapper = mapper;
     this.held = new Set();
   }
 
   keyDown(key, expectedDirection, repeat = false) {
-    const direction = directionFromKey(key);
+    const direction = this.mapper(key);
     if (!direction) return { handled: false, direction: null };
     if (repeat) return { handled: true, direction: null };
 
@@ -66,11 +103,12 @@ export class QTEKeyboardInput {
   }
 
   keyUp(key) {
-    const direction = directionFromKey(key);
-    if (!CARDINAL_DIRECTIONS.has(direction)) return false;
+    const direction = this.mapper(key);
+    if (!direction || !CARDINAL_DIRECTIONS.has(direction)) return false;
     this.held.delete(direction);
     return true;
   }
+
 
   snapshot() {
     return [...this.held];

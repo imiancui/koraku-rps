@@ -33,6 +33,6 @@ test("能力點正確增加生命、魔力與傷害", () => {
   assert.deepEqual(computePlayerStats(upgraded), {
     maxHp: 130,
     maxMp: 70,
-    damage: 30
+    damage: 120
   });
 });

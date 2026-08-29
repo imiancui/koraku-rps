@@ -29,20 +29,26 @@
 .petals i:nth-child(7) { left: 89%; animation-duration: 11s; animation-delay: -3s; }
 .petals i:nth-child(8) { left: 96%; animation-duration: 18s; animation-delay: -9s; transform: scale(0.55); }
 
-.character-speaker.is-speaking img {
+.character-speaker.is-speaking:not(.is-enemy-hit) img {
   animation: character-speaking 430ms ease-in-out infinite alternate;
 }
 
+.battle-character-wrap.is-enemy-hit,
+.battle-character-wrap.is-enemy-hit img,
 .battle-character-wrap img.is-enemy-hit {
-  animation: enemy-hit 620ms cubic-bezier(0.34, 0.04, 0.22, 1);
+  animation: enemy-hit 680ms cubic-bezier(0.34, 0.04, 0.22, 1) !important;
 }
 
 .battle-character-wrap.is-enemy-hit .damage-number {
   animation: damage-pop 760ms ease-out;
 }
 
-.app-shell.is-player-hit {
-  animation: screen-shake 600ms cubic-bezier(0.36, 0.07, 0.19, 0.97);
+.app-shell.is-player-hit,
+.battle-arena.is-player-hit,
+.screen-stack.is-player-hit,
+.qte-overlay.is-player-hit,
+.player-hud.is-player-hit {
+  animation: screen-shake 620ms cubic-bezier(0.36, 0.07, 0.19, 0.97) !important;
 }
 
 .battle-arena.is-player-hit::after {
@@ -51,7 +57,7 @@
   z-index: 62;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(circle at center, rgba(239, 83, 101, 0.26), rgba(123, 9, 25, 0.08) 45%, transparent 72%);
+  background: radial-gradient(circle at center, rgba(239, 83, 101, 0.35), rgba(123, 9, 25, 0.12) 45%, transparent 72%);
   animation: player-hit-flash 470ms ease-out both;
 }
 
@@ -79,6 +85,29 @@
   animation: reveal-card 320ms ease;
 }
 
+.hand-versus strong.is-fist-shaking {
+  animation: fist-shake 420ms cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+.round-countdown.is-beat {
+  animation: countdown-beat 400ms ease-out;
+}
+
+@keyframes fist-shake {
+  0% { transform: scale(1) translateY(0) rotate(0deg); }
+  20% { transform: scale(1.35) translateY(-14px) rotate(-14deg); filter: drop-shadow(0 0 14px rgba(239, 83, 101, 0.8)); }
+  45% { transform: scale(1.22) translateY(8px) rotate(10deg); }
+  65% { transform: scale(1.18) translateY(-5px) rotate(-5deg); }
+  85% { transform: scale(1.06) translateY(2px) rotate(2deg); }
+  100% { transform: scale(1) translateY(0) rotate(0deg); }
+}
+
+@keyframes countdown-beat {
+  0% { transform: translateY(-50%) scale(1); }
+  30% { transform: translateY(-50%) scale(1.22); box-shadow: 0 0 0 2px var(--gold), 0 0 26px rgba(239, 83, 101, 0.6); }
+  100% { transform: translateY(-50%) scale(1); }
+}
+
 @keyframes screen-enter {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
@@ -97,12 +126,13 @@
 }
 
 @keyframes enemy-hit {
-  0%, 100% { transform: translate3d(0, 0, 0) scale(1); filter: drop-shadow(-10px 19px 27px rgba(0, 0, 0, 0.58)); }
-  12% { transform: translate3d(-18px, -14px, 0) scale(1.025) rotate(-1.2deg); filter: brightness(1.75) drop-shadow(0 0 20px rgba(239, 83, 101, 0.78)); }
-  28% { transform: translate3d(20px, 10px, 0) rotate(1.1deg); }
-  46% { transform: translate3d(-14px, -9px, 0) rotate(-0.8deg); }
-  64% { transform: translate3d(10px, 7px, 0) rotate(0.6deg); }
-  82% { transform: translate3d(-4px, -3px, 0) rotate(-0.2deg); }
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); filter: drop-shadow(-10px 19px 27px rgba(0, 0, 0, 0.58)); }
+  10% { transform: translate3d(-38px, -18px, 0) scale(1.06) rotate(-3.5deg); filter: brightness(2.2) drop-shadow(0 0 35px rgba(239, 83, 101, 0.95)); }
+  24% { transform: translate3d(36px, 15px, 0) scale(0.96) rotate(3deg); filter: brightness(1.7) drop-shadow(0 0 24px rgba(239, 83, 101, 0.8)); }
+  40% { transform: translate3d(-28px, -10px, 0) scale(1.03) rotate(-2deg); }
+  56% { transform: translate3d(22px, 8px, 0) rotate(1.5deg); }
+  72% { transform: translate3d(-14px, -5px, 0) rotate(-0.8deg); }
+  86% { transform: translate3d(8px, 3px, 0) rotate(0.4deg); }
 }
 
 @keyframes damage-pop {
@@ -113,13 +143,14 @@
 }
 
 @keyframes screen-shake {
-  0%, 100% { transform: translate(0, 0) rotate(0); }
-  10% { transform: translate(-16px, 8px) rotate(-0.55deg); }
-  22% { transform: translate(15px, -11px) rotate(0.48deg); }
-  34% { transform: translate(-13px, -8px) rotate(-0.38deg); }
-  47% { transform: translate(11px, 9px) rotate(0.32deg); }
-  61% { transform: translate(-8px, 5px) rotate(-0.18deg); }
-  76% { transform: translate(5px, -3px); }
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  10% { transform: translate3d(-32px, 16px, 0) rotate(-1.8deg); }
+  22% { transform: translate3d(30px, -18px, 0) rotate(1.6deg); }
+  34% { transform: translate3d(-24px, -12px, 0) rotate(-1.2deg); }
+  47% { transform: translate3d(20px, 14px, 0) rotate(0.9deg); }
+  61% { transform: translate3d(-15px, 8px, 0) rotate(-0.6deg); }
+  76% { transform: translate3d(10px, -5px, 0) rotate(0.3deg); }
+  88% { transform: translate3d(-5px, 2px, 0) rotate(-0.1deg); }
 }
 
 @keyframes player-hit-flash {
@@ -157,6 +188,11 @@
   75% { transform: translateX(-5px); }
 }
 
+@keyframes warning-emoji-pulse {
+  0% { transform: translate(-50%, -50%) scale(1); filter: drop-shadow(0 0 35px rgba(239, 83, 101, 0.85)) drop-shadow(0 10px 20px rgba(0, 0, 0, 0.8)); }
+  100% { transform: translate(-50%, -50%) scale(1.15); filter: drop-shadow(0 0 55px rgba(239, 83, 101, 1)) drop-shadow(0 14px 28px rgba(0, 0, 0, 0.9)); }
+}
+
 @keyframes strike-marker {
   0% { left: 0; }
   50% { left: calc(100% - 3px); }
@@ -164,12 +200,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    scroll-behavior: auto !important;
-    animation-duration: 0.001ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.001ms !important;
+  .petals i {
+    animation: none !important;
   }
 }

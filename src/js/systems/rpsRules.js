@@ -39,3 +39,33 @@ export function getQteCounterNarration(originalPlayerHand) {
   };
   return narratives[originalPlayerHand];
 }
+
+export function evaluateDualRps(playerHand, leftHand, rightHand) {
+  const leftResult = leftHand ? compareHands(playerHand, leftHand) : null;
+  const rightResult = rightHand ? compareHands(playerHand, rightHand) : null;
+
+  const losses = [];
+  const wins = [];
+  const draws = [];
+
+  if (leftResult === "loss") losses.push("left");
+  else if (leftResult === "win") wins.push("left");
+  else if (leftResult === "draw") draws.push("left");
+
+  if (rightResult === "loss") losses.push("right");
+  else if (rightResult === "win") wins.push("right");
+  else if (rightResult === "draw") draws.push("right");
+
+  return {
+    left: leftResult,
+    right: rightResult,
+    losses,
+    wins,
+    draws,
+    isDualLoss: losses.length === 2,
+    isSingleLoss: losses.length === 1,
+    hasLoss: losses.length > 0,
+    isAllWin: wins.length > 0 && losses.length === 0 && draws.length === 0
+  };
+}
+

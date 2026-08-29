@@ -16,6 +16,7 @@ export class PostBattleSystem {
         ? (result.stage.final ? ASSETS.final : ASSETS.default)
         : ASSETS.defeat,
       target: 0,
+      tolerance: 0.13,
       strikeStartedAt: 0,
       strikeDuration: 1800,
       watermelon: {
@@ -37,6 +38,7 @@ export class PostBattleSystem {
 
   requestSwimsuit() {
     if (!this.state?.won) return;
+    this.store?.unlockSwimsuit?.();
     this.state.scene = "swimsuit";
     this.state.appearance = ASSETS.swimsuit;
     this.emit();
@@ -49,9 +51,14 @@ export class PostBattleSystem {
       !["swimsuit", "watermelonResult"].includes(this.state.scene) ||
       this.state.watermelon.attempts >= this.state.watermelon.maxAttempts
     ) return;
+    const successes = this.state.watermelon.successes;
+    this.state.tolerance = 0.13 * (0.5 ** successes);
+    this.state.strikeDuration = 1800 / (1.25 ** successes);
     this.state.scene = "watermelonAim";
     this.state.appearance = ASSETS.swimsuit;
-    this.state.target = 0.28 + this.random() * 0.44;
+    const minTarget = this.state.tolerance + 0.05;
+    const maxTarget = 1 - this.state.tolerance - 0.05;
+    this.state.target = minTarget + this.random() * Math.max(0.1, maxTarget - minTarget);
     this.state.strikeStartedAt = performance.now();
     this.emit();
     const nextAttempt = this.state.watermelon.attempts + 1;
@@ -62,7 +69,8 @@ export class PostBattleSystem {
     if (this.state?.scene !== "watermelonAim") return;
     const marker = this.getMarkerPosition();
     const distance = Math.abs(marker - this.state.target);
-    const success = distance <= 0.13;
+    const tolerance = this.state.tolerance ?? (0.13 * (0.5 ** this.state.watermelon.successes));
+    const success = distance <= tolerance;
     this.state.watermelon.attempts += 1;
     this.state.watermelon.lastCutSuccess = success;
     if (success) this.state.watermelon.successes += 1;
