@@ -379,6 +379,21 @@
     display: none;
   }
 
+  .battle-character-wrap {
+    width: min(88vw, 420px);
+    height: 74%;
+    bottom: 30px;
+  }
+
+  .battle-character-wrap.is-dual-stage {
+    width: 96vw;
+    left: 50%;
+  }
+
+  .character-dual-slot {
+    width: 49%;
+  }
+
   .battle-left-cluster {
     left: 10px;
     bottom: 118px;

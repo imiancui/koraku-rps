@@ -74,3 +74,14 @@ test("切西瓜每成功一次，下一刀綠色安全範圍縮小 50%、速度�
   assert.equal(system.state.strikeDuration, 1152, "第 3 刀速度再次增加 25% (週期 1152ms)");
 });
 
+test("戰勝結算畫面初始為 victory 階段，請小樂穿泳裝後切換至 swimsuit 階段", () => {
+  const store = { grantExperience() { return { xp: 0, levelsGained: 0 }; } };
+  const system = new PostBattleSystem(new EventBus(), store, () => 0.5);
+  system.open(battleResult());
+  assert.equal(system.state.scene, "victory");
+
+  system.requestSwimsuit();
+  assert.equal(system.state.scene, "swimsuit");
+});
+
+

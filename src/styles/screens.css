@@ -1217,12 +1217,23 @@
 
 .battle-character-wrap.is-dual-stage {
   left: 50%;
-  width: min(74vw, 980px);
+  width: min(85vw, 1100px);
 }
 
 .character-single-slot {
   position: absolute;
   inset: 0;
+}
+
+.character-single-slot img {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+  filter: drop-shadow(-10px 19px 27px rgba(0, 0, 0, 0.58));
 }
 
 .characters-dual-wrap {
@@ -1231,23 +1242,27 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
+  pointer-events: none;
 }
 
 .character-dual-slot {
   position: relative;
-  width: 50%;
+  width: 48%;
   height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
 }
 
 .character-dual-slot img {
-  position: absolute;
-  inset: 0;
+  position: relative;
+  z-index: 2;
   width: 100%;
   height: 100%;
   object-fit: contain;
   object-position: center bottom;
   filter: drop-shadow(-10px 19px 27px rgba(0, 0, 0, 0.58));
-  transition: opacity 200ms ease, filter 200ms ease, transform 200ms ease;
+  transition: opacity 200ms ease, filter 200ms ease;
 }
 
 .character-dual-slot.is-left img {
@@ -1261,21 +1276,6 @@
 .character-dual-slot.is-dead img {
   opacity: 0.35;
   filter: grayscale(0.9) brightness(0.6);
-}
-
-.character-dual-slot.is-enemy-hit img {
-  animation: enemy-hurt 200ms ease 3;
-}
-
-.battle-character-wrap img {
-  position: absolute;
-  z-index: 2;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  object-position: center bottom;
-  filter: drop-shadow(-10px 19px 27px rgba(0, 0, 0, 0.58));
 }
 
 .battle-character-aura {

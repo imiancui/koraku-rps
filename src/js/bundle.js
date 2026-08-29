@@ -2813,6 +2813,10 @@ class AppView {
     if (isPostActive) {
       if (event.code === "Space" || key === " ") {
         event.preventDefault();
+        if (this.postState.scene === "victory") {
+          this.postBattle.requestSwimsuit();
+          return;
+        }
         if (this.postState.scene === "watermelonAim") {
           this.postBattle.strike();
           return;
@@ -2832,6 +2836,12 @@ class AppView {
       if (key === "e") {
         event.preventDefault();
         this.handlePostAction("rematch");
+        return;
+      }
+
+      if (key === "c") {
+        event.preventDefault();
+        this.handlePostAction("stages");
         return;
       }
     }
@@ -3743,8 +3753,10 @@ class AppView {
         enemyElements.push(this.battleCharacterLeftSlot);
       } else if (effect.targetId === "right" && this.battleCharacterRightSlot) {
         enemyElements.push(this.battleCharacterRightSlot);
+      } else if (this.battleCharactersDual && !this.battleCharactersDual.hidden) {
+        enemyElements.push(this.battleCharacterLeftSlot, this.battleCharacterRightSlot);
       } else {
-        enemyElements.push(this.battleCharacterWrap, this.battleCharacter, this.battleCharacterLeftSlot, this.battleCharacterRightSlot);
+        enemyElements.push(this.battleCharacterSingle || this.battleCharacter);
       }
       enemyElements.forEach((el) => {
         if (!el) return;
@@ -3820,7 +3832,7 @@ class AppView {
       $("#result-title").textContent = "勝利・結緣";
       $("#result-message").textContent = "你拆解了小樂的架勢。現在，可以向她提出勝者的願望。";
       actions =
-        '<button type="button" class="button-primary" data-post-action="swimsuit">請小樂穿泳裝</button>' +
+        '<button type="button" class="button-primary" data-post-action="swimsuit">請小樂穿泳裝 <kbd>SPACE</kbd></button>' +
         this.postButtons(false);
     } else if (state.scene === "swimsuit") {
       $("#result-title").textContent = "勝者的願望";
@@ -3867,7 +3879,7 @@ class AppView {
   postButtons(rematchPrimary) {
     const rematchClass = rematchPrimary ? "button-primary" : "button-secondary";
     return '<button type="button" class="' + rematchClass + '" data-post-action="rematch">再次挑戰 <kbd>E</kbd></button>' +
-      '<button type="button" class="button-secondary" data-post-action="stages">選擇章節</button>' +
+      '<button type="button" class="button-secondary" data-post-action="stages">選擇章節 <kbd>C</kbd></button>' +
       '<button type="button" class="button-secondary" data-post-action="home">回大廳 <kbd>Q</kbd></button>';
   }
 
