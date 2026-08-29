@@ -2262,40 +2262,61 @@
   position: absolute;
   z-index: 30;
   left: 24px;
-  bottom: 16px;
+  bottom: 18px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 5px;
+  width: fit-content;
+  max-width: fit-content;
+  gap: 4px;
+}
+
+.reset-button {
+  display: inline-block;
+  width: fit-content;
+  font-size: 11px;
+  opacity: 0.6;
+  padding: 0;
+  cursor: pointer;
+  border-bottom: 1px solid currentColor;
+  transition: opacity 160ms ease, color 160ms ease;
+}
+
+.reset-button:hover {
+  opacity: 1;
+  color: var(--paper-soft);
 }
 
 .home-footer {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 1px;
+  gap: 6px;
+  margin-top: 2px;
+  width: fit-content;
 }
 
 .footer-plain-link {
+  display: inline-block;
+  width: fit-content;
   color: var(--paper-dim);
-  font-size: 11px;
+  font-size: 10px;
   letter-spacing: 0.06em;
   text-decoration: none;
   border-bottom: 1px solid transparent;
-  opacity: 0.6;
+  opacity: 0.55;
   transition: all 160ms ease;
 }
 
 .footer-plain-link:hover {
   color: var(--paper-soft);
   border-bottom-color: currentColor;
-  opacity: 1;
+  opacity: 0.95;
 }
 
 .footer-plain-sep {
   color: var(--paper-dim);
-  font-size: 10px;
-  opacity: 0.35;
+  font-size: 9px;
+  opacity: 0.3;
   user-select: none;
 }
 
