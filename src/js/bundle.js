@@ -892,10 +892,36 @@ class QTESystem {
     return true;
   }
 
+  pause() {
+    if (!this.active || this.isPaused) return;
+    this.isPaused = true;
+    this.remainingOnPause = Math.max(0, this.deadline - performance.now());
+    if (this.tickId !== null) {
+      this.timers.clearInterval(this.tickId);
+      this.tickId = null;
+    }
+    this.emit();
+  }
+
+  resume() {
+    if (!this.active || !this.isPaused) return;
+    this.isPaused = false;
+    this.deadline = performance.now() + (this.remainingOnPause || 0);
+    this.tickId = this.timers.interval(() => {
+      if (performance.now() >= this.deadline) {
+        this.finish(false);
+      } else {
+        this.emit();
+      }
+    }, 50);
+    this.emit();
+  }
+
   snapshot() {
-    const remainingMs = Math.max(0, this.deadline - performance.now());
+    const remainingMs = this.isPaused ? (this.remainingOnPause || 0) : Math.max(0, this.deadline - performance.now());
     return {
       active: this.active,
+      isPaused: Boolean(this.isPaused),
       sequence: [...this.sequence],
       index: this.index,
       errors: this.errors,
@@ -913,6 +939,7 @@ class QTESystem {
     if (!this.active) return;
     const result = { success, sequence: [...this.sequence], index: this.index, errors: this.errors };
     this.active = false;
+    this.isPaused = false;
     if (this.tickId !== null) {
       this.timers.clearInterval(this.tickId);
       this.tickId = null;
@@ -1065,11 +1092,37 @@ class DualQTESystem {
     return this.inputSlot("right", directionId);
   }
 
+  pause() {
+    if (!this.active || this.isPaused) return;
+    this.isPaused = true;
+    this.remainingOnPause = Math.max(0, this.deadline - performance.now());
+    if (this.tickId !== null) {
+      this.timers.clearInterval(this.tickId);
+      this.tickId = null;
+    }
+    this.emit();
+  }
+
+  resume() {
+    if (!this.active || !this.isPaused) return;
+    this.isPaused = false;
+    this.deadline = performance.now() + (this.remainingOnPause || 0);
+    this.tickId = this.timers.interval(() => {
+      if (performance.now() >= this.deadline) {
+        this.finish();
+      } else {
+        this.emit();
+      }
+    }, 50);
+    this.emit();
+  }
+
   snapshot() {
-    const remainingMs = Math.max(0, this.deadline - performance.now());
+    const remainingMs = this.isPaused ? (this.remainingOnPause || 0) : Math.max(0, this.deadline - performance.now());
     return {
       mode: "dual",
       active: this.active,
+      isPaused: Boolean(this.isPaused),
       left: { ...this.left, sequence: [...this.left.sequence] },
       right: { ...this.right, sequence: [...this.right.sequence] },
       remainingMs,
@@ -1084,6 +1137,7 @@ class DualQTESystem {
   finish() {
     if (!this.active) return;
     this.active = false;
+    this.isPaused = false;
     if (this.tickId !== null) {
       this.timers.clearInterval(this.tickId);
       this.tickId = null;
@@ -1522,12 +1576,90 @@ class BattleSystem {
       reactionRemaining: 0,
       morphUsed: false,
       isEnemyFrozen: false,
+      isPaused: false,
       appearance: stage.final ? ASSETS.final : ASSETS.default
     };
     this.emitState();
     this.say(stage.final ? "鏡中的我，可不會手下留情。" : "出拳一決。讓我看看你的決心吧。");
     this.scheduleRound();
     return true;
+  }
+
+  togglePause() {
+    if (!this.state?.active || this.state.phase === "ended") return;
+    if (this.state.isPaused) {
+      this.resume();
+    } else {
+      this.pause();
+    }
+  }
+
+  pause() {
+    if (!this.state?.active || this.state.phase === "ended" || this.state.isPaused) return;
+    this.state.isPaused = true;
+    if (this.state.phase === "countdown") {
+      this.countdownRemainingMs = Math.max(0, (this.countdownDeadline || 0) - performance.now());
+      if (this.countdownId !== null) {
+        this.timers.clearInterval(this.countdownId);
+        this.countdownId = null;
+      }
+    } else if (this.state.phase === "reaction") {
+      this.reactionRemainingMs = Math.max(0, (this.reactionDeadline || 0) - performance.now());
+      this.clearReactionClocks();
+    } else if (this.state.phase === "qte") {
+      if (this.state.isDualQte) {
+        this.dualQte.pause();
+      } else {
+        this.qte.pause();
+      }
+    }
+    this.emitState();
+  }
+
+  resume() {
+    if (!this.state?.active || this.state.phase === "ended" || !this.state.isPaused) return;
+    this.state.isPaused = false;
+    if (this.state.phase === "countdown") {
+      const remainingMs = this.countdownRemainingMs ?? 1000;
+      this.countdownDeadline = performance.now() + remainingMs;
+      this.countdownId = this.timers.interval(() => {
+        const remaining = Math.max(0, this.countdownDeadline - performance.now());
+        const currentCount = Math.ceil(remaining / 1000);
+        this.state.countdown = currentCount;
+
+        if (currentCount === 3 && this.state.lastChant !== 3) {
+          this.state.lastChant = 3;
+          this.say("剪刀", "小樂");
+          this.bus.emit("battle:countdown-beat", { count: 3, word: "剪刀" });
+        } else if (currentCount === 2 && this.state.lastChant !== 2) {
+          this.state.lastChant = 2;
+          this.say("石頭", "小樂");
+          this.bus.emit("battle:countdown-beat", { count: 2, word: "石頭" });
+        } else if (currentCount === 1 && this.state.lastChant !== 1) {
+          this.state.lastChant = 1;
+          this.say("布！", "小樂");
+          this.bus.emit("battle:countdown-beat", { count: 1, word: "布！" });
+        }
+
+        this.emitState();
+        if (remaining <= 0) this.revealHands();
+      }, 80);
+    } else if (this.state.phase === "reaction") {
+      const remainingMs = this.reactionRemainingMs ?? 500;
+      this.reactionDeadline = performance.now() + remainingMs;
+      this.reactionTickId = this.timers.interval(() => {
+        this.state.reactionRemaining = Math.max(0, (this.reactionDeadline - performance.now()) / 1000);
+        this.emitState();
+      }, 40);
+      this.reactionTimeoutId = this.timers.timeout(() => this.resolveRound(), remainingMs);
+    } else if (this.state.phase === "qte") {
+      if (this.state.isDualQte) {
+        this.dualQte.resume();
+      } else {
+        this.qte.resume();
+      }
+    }
+    this.emitState();
   }
 
   selectTarget(enemyId) {
@@ -1563,11 +1695,12 @@ class BattleSystem {
     this.state.reactionRemaining = 0;
     this.state.morphUsed = false;
     this.state.lastChant = null;
-    const deadline = performance.now() + roundSeconds * 1000;
+    this.state.isPaused = false;
+    this.countdownDeadline = performance.now() + roundSeconds * 1000;
     this.emitState();
 
     this.countdownId = this.timers.interval(() => {
-      const remaining = Math.max(0, deadline - performance.now());
+      const remaining = Math.max(0, this.countdownDeadline - performance.now());
       const currentCount = Math.ceil(remaining / 1000);
       this.state.countdown = currentCount;
 
@@ -1646,8 +1779,19 @@ class BattleSystem {
       const hand = getRandomHand(this.random);
       this.state.opponentHand = hand;
       this.state.opponentHands = { main: hand };
-      const rpsResult = compareHands(this.state.selectedHand, hand);
-      this.state.enemyWinningEmoji = rpsResult === "loss" ? HANDS[hand].glyph : null;
+      if (this.state.hasDualHandSkill) {
+        const leftResult = compareHands(this.state.selectedHands.left, hand);
+        const rightResult = compareHands(this.state.selectedHands.right, hand);
+        // Only if BOTH hands lose does Kohaku win and show winning emoji
+        if (leftResult === "loss" && rightResult === "loss") {
+          this.state.enemyWinningEmoji = HANDS[hand].glyph;
+        } else {
+          this.state.enemyWinningEmoji = null;
+        }
+      } else {
+        const rpsResult = compareHands(this.state.selectedHand, hand);
+        this.state.enemyWinningEmoji = rpsResult === "loss" ? HANDS[hand].glyph : null;
+      }
     }
 
     let reactionWindowMs = this.state.stage?.reactionWindowMs ?? BATTLE_RULES.reactionWindowMs;
@@ -1657,12 +1801,12 @@ class BattleSystem {
     }
     this.state.reactionRemaining = reactionWindowMs / 1000;
 
-    const deadline = performance.now() + reactionWindowMs;
+    this.reactionDeadline = performance.now() + reactionWindowMs;
     this.emitState();
     this.bus.emit("sound", { name: "reveal" });
 
     this.reactionTickId = this.timers.interval(() => {
-      this.state.reactionRemaining = Math.max(0, (deadline - performance.now()) / 1000);
+      this.state.reactionRemaining = Math.max(0, (this.reactionDeadline - performance.now()) / 1000);
       this.emitState();
     }, 40);
     this.reactionTimeoutId = this.timers.timeout(() => this.resolveRound(), reactionWindowMs);
@@ -1694,9 +1838,10 @@ class BattleSystem {
         this.state.selectedHands.right = this.state.selectedHand;
       }
     } else {
-      this.state.selectedHand = getCounterHand(this.state.opponentHand);
-      this.state.selectedHands.left = this.state.selectedHand;
-      this.state.selectedHands.right = this.state.selectedHand;
+      const counter = getCounterHand(this.state.opponentHand);
+      this.state.selectedHand = counter;
+      this.state.selectedHands.left = counter;
+      this.state.selectedHands.right = counter;
     }
 
     this.state.enemyWinningEmoji = null;
@@ -1830,6 +1975,37 @@ class BattleSystem {
 
       if (anyWin) {
         this.finishRound("win", this.state.morphUsed ? "變拳奏效，成功壓制！" : "漂亮地壓過了小樂的手勢！");
+        return;
+      }
+
+      this.resolveMomoDraw();
+      return;
+    }
+
+    if (this.state.hasDualHandSkill) {
+      const leftResult = compareHands(this.state.selectedHands.left, this.state.opponentHand);
+      const rightResult = compareHands(this.state.selectedHands.right, this.state.opponentHand);
+
+      if (leftResult === "loss" && rightResult === "loss") {
+        this.bus.emit("battle:effect", { type: "player-rps-loss" });
+        this.bus.emit("sound", { name: "punch" });
+        this.startQte();
+        return;
+      }
+
+      const bothWin = leftResult === "win" && rightResult === "win";
+      const singleWin = leftResult === "win" || rightResult === "win";
+
+      if (bothWin) {
+        const doubleDamage = this.state.playerDamage * 2;
+        const suffix = this.state.morphUsed ? "雙手變拳齊出，造成雙倍壓制傷害！" : "雙手同時獲勝，造成雙倍壓制傷害！";
+        this.damageEnemy(suffix, false, doubleDamage);
+        return;
+      }
+
+      if (singleWin) {
+        const suffix = this.state.morphUsed ? "變拳奏效，成功壓制！" : "漂亮地壓過了小樂的手勢！";
+        this.damageEnemy(suffix, false);
         return;
       }
 
@@ -2759,6 +2935,22 @@ class AppView {
       return;
     }
 
+    if (event.target.closest("#btn-resume-battle")) {
+      this.battle.resume();
+      return;
+    }
+
+    if (event.target.closest("#btn-pause-abandon")) {
+      this.battle.abandon();
+      const pauseModal = $("#battle-pause-modal");
+      if (pauseModal) {
+        pauseModal.hidden = true;
+        pauseModal.setAttribute("aria-hidden", "true");
+      }
+      this.requestNavigation("stages");
+      return;
+    }
+
     const slotBtn = event.target.closest("[data-slot]");
     if (slotBtn) {
       const slotKey = slotBtn.dataset.slot;
@@ -2988,7 +3180,15 @@ class AppView {
       }
     }
 
-    if (!this.battleState?.active) return;
+    if (event.key === "Escape") {
+      if (this.battleState?.active && this.battleState.phase !== "ended") {
+        event.preventDefault();
+        this.battle.togglePause();
+        return;
+      }
+    }
+
+    if (!this.battleState?.active || this.battleState.isPaused) return;
     if (this.battleState.phase === "qte") {
       if (this.qteState?.mode === "dual") {
         const leftExpected = this.qteState.left?.sequence[this.qteState.left?.index];
@@ -3033,7 +3233,7 @@ class AppView {
     }
 
     if (this.battleState.phase === "countdown") {
-      const isDualHands = Boolean(this.battleState.hasDualHandSkill && this.battleState.stage?.dualEnemy);
+      const isDualHands = Boolean(this.battleState.hasDualHandSkill);
       if (isDualHands) {
         const leftHandByKey = { "1": "rock", "2": "paper", "3": "scissors", "q": "rock", "w": "paper", "e": "scissors" };
         const rightHandByKey = {
@@ -3044,11 +3244,11 @@ class AppView {
           this.battle.selectHand(leftHandByKey[key], "left");
         } else if (rightHandByKey[key]) {
           this.battle.selectHand(rightHandByKey[key], "right");
-        } else if (event.code === "Numpad1") {
+        } else if (["numpad7", "numpad1"].includes(event.code.toLowerCase())) {
           this.battle.selectHand("rock", "right");
-        } else if (event.code === "Numpad2") {
+        } else if (["numpad8", "numpad2"].includes(event.code.toLowerCase())) {
           this.battle.selectHand("paper", "right");
-        } else if (event.code === "Numpad3") {
+        } else if (["numpad9", "numpad3"].includes(event.code.toLowerCase())) {
           this.battle.selectHand("scissors", "right");
         }
       } else {
@@ -3472,46 +3672,50 @@ class AppView {
     if ($("#equipment-coins")) $("#equipment-coins").textContent = state.coins.toLocaleString("zh-TW");
     if ($("#bag-count")) $("#bag-count").textContent = `${bag.length} 件裝備`;
 
-    // Render paperdoll slots
+    if ($("#equip-hp-potion-count")) $("#equip-hp-potion-count").textContent = `${state.inventory?.hpPotion || 0} 瓶`;
+    if ($("#equip-mp-potion-count")) $("#equip-mp-potion-count").textContent = `${state.inventory?.mpPotion || 0} 瓶`;
+
+    // Render paperdoll slots (both growth screen and shop screen)
     const isMainTwoHanded = Boolean(equip.mainHand && EQUIPMENT_ITEMS[equip.mainHand]?.twoHanded);
 
     Object.keys(EQUIPMENT_SLOTS).forEach((slotKey) => {
-      const box = $("#slot-" + slotKey);
-      const slotBtn = $(`[data-slot="${slotKey}"]`);
-      if (!box || !slotBtn) return;
-
-      if (slotKey === "offHand" && isMainTwoHanded) {
-        slotBtn.classList.add("is-two-handed-locked");
-        box.innerHTML = '<span class="slot-placeholder" style="font-size:14px;color:var(--gold);">⚔️ (雙手佔用)</span>';
-        slotBtn.removeAttribute("data-equip-tooltip-id");
-        return;
-      } else {
-        slotBtn.classList.remove("is-two-handed-locked");
-      }
-
       const itemId = equip[slotKey];
-      if (itemId && EQUIPMENT_ITEMS[itemId]) {
-        const item = EQUIPMENT_ITEMS[itemId];
-        slotBtn.setAttribute("data-equip-tooltip-id", item.id);
-        box.innerHTML = `
-          <span class="slot-item-icon">${item.icon}</span>
-          <span class="slot-item-name rarity-${item.rarity}">${item.name}</span>
-        `;
-      } else {
-        slotBtn.removeAttribute("data-equip-tooltip-id");
-        box.innerHTML = `<span class="slot-placeholder">${EQUIPMENT_SLOTS[slotKey].icon}</span>`;
-      }
+      const item = itemId ? EQUIPMENT_ITEMS[itemId] : null;
+
+      document.querySelectorAll(`[data-slot="${slotKey}"]`).forEach((slotBtn) => {
+        const box = slotBtn.querySelector(".slot-box");
+        if (!box) return;
+
+        if (slotKey === "offHand" && isMainTwoHanded) {
+          slotBtn.classList.add("is-two-handed-locked");
+          box.innerHTML = '<span class="slot-placeholder" style="font-size:12px;color:var(--gold);">⚔️ (雙手佔用)</span>';
+          slotBtn.removeAttribute("data-equip-tooltip-id");
+          return;
+        } else {
+          slotBtn.classList.remove("is-two-handed-locked");
+        }
+
+        if (item) {
+          slotBtn.setAttribute("data-equip-tooltip-id", item.id);
+          box.innerHTML = `
+            <span class="slot-item-icon">${item.icon}</span>
+            <span class="slot-item-name rarity-${item.rarity}">${item.name}</span>
+          `;
+        } else {
+          slotBtn.removeAttribute("data-equip-tooltip-id");
+          box.innerHTML = `<span class="slot-placeholder">${EQUIPMENT_SLOTS[slotKey].icon}</span>`;
+        }
+      });
     });
 
-    // Render stats summary
-    const statsSummary = $("#paperdoll-stats-summary");
-    if (statsSummary) {
-      statsSummary.innerHTML = `
-        <span>HP<b>${state.playerStats.maxHp}</b></span>
-        <span>MP<b>${state.playerStats.maxMp}</b></span>
-        <span>ATK<b>${state.playerStats.damage}</b></span>
-      `;
-    }
+    // Render stats summary for both panels
+    const statsHtml = `
+      <span>HP<b>${state.playerStats.maxHp}</b></span>
+      <span>MP<b>${state.playerStats.maxMp}</b></span>
+      <span>ATK<b>${state.playerStats.damage}</b></span>
+    `;
+    if ($("#paperdoll-stats-summary")) $("#paperdoll-stats-summary").innerHTML = statsHtml;
+    if ($("#shop-paperdoll-stats-summary")) $("#shop-paperdoll-stats-summary").innerHTML = statsHtml;
 
     // Render Bag
     const bagGrid = $("#equipment-bag-grid");
@@ -3721,8 +3925,8 @@ class AppView {
       }
     }
 
-    const isDualHands = Boolean(state.stage?.dualEnemy && state.hasDualHandSkill);
-    if (isDualHands) {
+    const isPlayerDual = Boolean(state.hasDualHandSkill);
+    if (isPlayerDual) {
       if (this.playerHandWrapSingle) this.playerHandWrapSingle.hidden = true;
       if (this.playerHandWrapDual) this.playerHandWrapDual.hidden = false;
       const leftPlayerHand = HANDS[state.selectedHands?.left || "rock"];
@@ -3740,8 +3944,9 @@ class AppView {
 
     const singleHandWrap = $("#enemy-hand-wrap-single");
     const dualHandWrap = $("#enemy-hand-wrap-dual");
+    const isEnemyDual = Boolean(state.stage?.dualEnemy && state.enemies?.length > 1);
 
-    if (isDualHands && state.opponentHands?.left && state.opponentHands?.right) {
+    if (isEnemyDual && state.opponentHands?.left && state.opponentHands?.right) {
       if (singleHandWrap) singleHandWrap.hidden = true;
       if (dualHandWrap) dualHandWrap.hidden = false;
 
@@ -3773,7 +3978,7 @@ class AppView {
       }
     }
 
-    if (isDualHands) {
+    if (isPlayerDual) {
       if (this.handSelectorSingle) this.handSelectorSingle.hidden = true;
       if (this.handSelectorDual) this.handSelectorDual.hidden = false;
       document.querySelectorAll("[data-hand-slot='left'][data-hand]").forEach((button) => {
@@ -3791,6 +3996,12 @@ class AppView {
         button.classList.toggle("is-selected", button.dataset.hand === state.selectedHand);
         button.disabled = state.phase !== "countdown";
       });
+    }
+
+    const pauseModal = $("#battle-pause-modal");
+    if (pauseModal) {
+      pauseModal.hidden = !state.isPaused;
+      pauseModal.setAttribute("aria-hidden", String(!state.isPaused));
     }
 
     const morph = $("#morph-skill");

@@ -84,12 +84,90 @@ export class BattleSystem {
       reactionRemaining: 0,
       morphUsed: false,
       isEnemyFrozen: false,
+      isPaused: false,
       appearance: stage.final ? ASSETS.final : ASSETS.default
     };
     this.emitState();
     this.say(stage.final ? "鏡中的我，可不會手下留情。" : "出拳一決。讓我看看你的決心吧。");
     this.scheduleRound();
     return true;
+  }
+
+  togglePause() {
+    if (!this.state?.active || this.state.phase === "ended") return;
+    if (this.state.isPaused) {
+      this.resume();
+    } else {
+      this.pause();
+    }
+  }
+
+  pause() {
+    if (!this.state?.active || this.state.phase === "ended" || this.state.isPaused) return;
+    this.state.isPaused = true;
+    if (this.state.phase === "countdown") {
+      this.countdownRemainingMs = Math.max(0, (this.countdownDeadline || 0) - performance.now());
+      if (this.countdownId !== null) {
+        this.timers.clearInterval(this.countdownId);
+        this.countdownId = null;
+      }
+    } else if (this.state.phase === "reaction") {
+      this.reactionRemainingMs = Math.max(0, (this.reactionDeadline || 0) - performance.now());
+      this.clearReactionClocks();
+    } else if (this.state.phase === "qte") {
+      if (this.state.isDualQte) {
+        this.dualQte.pause();
+      } else {
+        this.qte.pause();
+      }
+    }
+    this.emitState();
+  }
+
+  resume() {
+    if (!this.state?.active || this.state.phase === "ended" || !this.state.isPaused) return;
+    this.state.isPaused = false;
+    if (this.state.phase === "countdown") {
+      const remainingMs = this.countdownRemainingMs ?? 1000;
+      this.countdownDeadline = performance.now() + remainingMs;
+      this.countdownId = this.timers.interval(() => {
+        const remaining = Math.max(0, this.countdownDeadline - performance.now());
+        const currentCount = Math.ceil(remaining / 1000);
+        this.state.countdown = currentCount;
+
+        if (currentCount === 3 && this.state.lastChant !== 3) {
+          this.state.lastChant = 3;
+          this.say("剪刀", "小樂");
+          this.bus.emit("battle:countdown-beat", { count: 3, word: "剪刀" });
+        } else if (currentCount === 2 && this.state.lastChant !== 2) {
+          this.state.lastChant = 2;
+          this.say("石頭", "小樂");
+          this.bus.emit("battle:countdown-beat", { count: 2, word: "石頭" });
+        } else if (currentCount === 1 && this.state.lastChant !== 1) {
+          this.state.lastChant = 1;
+          this.say("布！", "小樂");
+          this.bus.emit("battle:countdown-beat", { count: 1, word: "布！" });
+        }
+
+        this.emitState();
+        if (remaining <= 0) this.revealHands();
+      }, 80);
+    } else if (this.state.phase === "reaction") {
+      const remainingMs = this.reactionRemainingMs ?? 500;
+      this.reactionDeadline = performance.now() + remainingMs;
+      this.reactionTickId = this.timers.interval(() => {
+        this.state.reactionRemaining = Math.max(0, (this.reactionDeadline - performance.now()) / 1000);
+        this.emitState();
+      }, 40);
+      this.reactionTimeoutId = this.timers.timeout(() => this.resolveRound(), remainingMs);
+    } else if (this.state.phase === "qte") {
+      if (this.state.isDualQte) {
+        this.dualQte.resume();
+      } else {
+        this.qte.resume();
+      }
+    }
+    this.emitState();
   }
 
   selectTarget(enemyId) {
@@ -125,11 +203,12 @@ export class BattleSystem {
     this.state.reactionRemaining = 0;
     this.state.morphUsed = false;
     this.state.lastChant = null;
-    const deadline = performance.now() + roundSeconds * 1000;
+    this.state.isPaused = false;
+    this.countdownDeadline = performance.now() + roundSeconds * 1000;
     this.emitState();
 
     this.countdownId = this.timers.interval(() => {
-      const remaining = Math.max(0, deadline - performance.now());
+      const remaining = Math.max(0, this.countdownDeadline - performance.now());
       const currentCount = Math.ceil(remaining / 1000);
       this.state.countdown = currentCount;
 
@@ -208,8 +287,19 @@ export class BattleSystem {
       const hand = getRandomHand(this.random);
       this.state.opponentHand = hand;
       this.state.opponentHands = { main: hand };
-      const rpsResult = compareHands(this.state.selectedHand, hand);
-      this.state.enemyWinningEmoji = rpsResult === "loss" ? HANDS[hand].glyph : null;
+      if (this.state.hasDualHandSkill) {
+        const leftResult = compareHands(this.state.selectedHands.left, hand);
+        const rightResult = compareHands(this.state.selectedHands.right, hand);
+        // Only if BOTH hands lose does Kohaku win and show winning emoji
+        if (leftResult === "loss" && rightResult === "loss") {
+          this.state.enemyWinningEmoji = HANDS[hand].glyph;
+        } else {
+          this.state.enemyWinningEmoji = null;
+        }
+      } else {
+        const rpsResult = compareHands(this.state.selectedHand, hand);
+        this.state.enemyWinningEmoji = rpsResult === "loss" ? HANDS[hand].glyph : null;
+      }
     }
 
     let reactionWindowMs = this.state.stage?.reactionWindowMs ?? BATTLE_RULES.reactionWindowMs;
@@ -219,12 +309,12 @@ export class BattleSystem {
     }
     this.state.reactionRemaining = reactionWindowMs / 1000;
 
-    const deadline = performance.now() + reactionWindowMs;
+    this.reactionDeadline = performance.now() + reactionWindowMs;
     this.emitState();
     this.bus.emit("sound", { name: "reveal" });
 
     this.reactionTickId = this.timers.interval(() => {
-      this.state.reactionRemaining = Math.max(0, (deadline - performance.now()) / 1000);
+      this.state.reactionRemaining = Math.max(0, (this.reactionDeadline - performance.now()) / 1000);
       this.emitState();
     }, 40);
     this.reactionTimeoutId = this.timers.timeout(() => this.resolveRound(), reactionWindowMs);
@@ -256,9 +346,10 @@ export class BattleSystem {
         this.state.selectedHands.right = this.state.selectedHand;
       }
     } else {
-      this.state.selectedHand = getCounterHand(this.state.opponentHand);
-      this.state.selectedHands.left = this.state.selectedHand;
-      this.state.selectedHands.right = this.state.selectedHand;
+      const counter = getCounterHand(this.state.opponentHand);
+      this.state.selectedHand = counter;
+      this.state.selectedHands.left = counter;
+      this.state.selectedHands.right = counter;
     }
 
     this.state.enemyWinningEmoji = null;
@@ -392,6 +483,37 @@ export class BattleSystem {
 
       if (anyWin) {
         this.finishRound("win", this.state.morphUsed ? "變拳奏效，成功壓制！" : "漂亮地壓過了小樂的手勢！");
+        return;
+      }
+
+      this.resolveMomoDraw();
+      return;
+    }
+
+    if (this.state.hasDualHandSkill) {
+      const leftResult = compareHands(this.state.selectedHands.left, this.state.opponentHand);
+      const rightResult = compareHands(this.state.selectedHands.right, this.state.opponentHand);
+
+      if (leftResult === "loss" && rightResult === "loss") {
+        this.bus.emit("battle:effect", { type: "player-rps-loss" });
+        this.bus.emit("sound", { name: "punch" });
+        this.startQte();
+        return;
+      }
+
+      const bothWin = leftResult === "win" && rightResult === "win";
+      const singleWin = leftResult === "win" || rightResult === "win";
+
+      if (bothWin) {
+        const doubleDamage = this.state.playerDamage * 2;
+        const suffix = this.state.morphUsed ? "雙手變拳齊出，造成雙倍壓制傷害！" : "雙手同時獲勝，造成雙倍壓制傷害！";
+        this.damageEnemy(suffix, false, doubleDamage);
+        return;
+      }
+
+      if (singleWin) {
+        const suffix = this.state.morphUsed ? "變拳奏效，成功壓制！" : "漂亮地壓過了小樂的手勢！";
+        this.damageEnemy(suffix, false);
         return;
       }
 

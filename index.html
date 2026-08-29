@@ -138,6 +138,70 @@
             </div>
             <div class="large-wallet"><small>持有星砂</small><b id="shop-coins">0</b></div>
           </header>
+          <!-- Shop Paperdoll Equipment Layout -->
+          <details id="shop-paperdoll-details" class="shop-paperdoll-details" open>
+            <summary class="shop-paperdoll-summary">
+              <span>✦ 角色穿戴紙娃娃與屬性總覽（點擊格位可直接卸下裝備）</span>
+              <span class="summary-arrow">▼</span>
+            </summary>
+            <div class="paperdoll-card shop-paperdoll-card">
+              <div class="paperdoll-header">
+                <span class="paperdoll-title">當前穿戴裝備</span>
+                <div class="paperdoll-stats-summary" id="shop-paperdoll-stats-summary"></div>
+              </div>
+              <div class="paperdoll-slots-grid shop-paperdoll-slots-grid">
+                <button type="button" class="equip-slot-btn" data-slot="earring1" title="耳環 1">
+                  <span class="slot-tag">耳環 1</span>
+                  <div class="slot-box" id="shop-slot-earring1"><span class="slot-placeholder">💎</span></div>
+                </button>
+                <button type="button" class="equip-slot-btn" data-slot="head" title="頭盔">
+                  <span class="slot-tag">頭盔</span>
+                  <div class="slot-box" id="shop-slot-head"><span class="slot-placeholder">👑</span></div>
+                </button>
+                <button type="button" class="equip-slot-btn" data-slot="earring2" title="耳環 2">
+                  <span class="slot-tag">耳環 2</span>
+                  <div class="slot-box" id="shop-slot-earring2"><span class="slot-placeholder">💎</span></div>
+                </button>
+                <button type="button" class="equip-slot-btn" data-slot="shoulders" title="肩甲">
+                  <span class="slot-tag">肩甲</span>
+                  <div class="slot-box" id="shop-slot-shoulders"><span class="slot-placeholder">🛡️</span></div>
+                </button>
+                <button type="button" class="equip-slot-btn" data-slot="chest" title="胸甲">
+                  <span class="slot-tag">胸甲</span>
+                  <div class="slot-box" id="shop-slot-chest"><span class="slot-placeholder">🥋</span></div>
+                </button>
+                <button type="button" class="equip-slot-btn" data-slot="badge" title="胸章">
+                  <span class="slot-tag">胸章</span>
+                  <div class="slot-box" id="shop-slot-badge"><span class="slot-placeholder">🏅</span></div>
+                </button>
+                <button type="button" class="equip-slot-btn" data-slot="mainHand" title="主手武器">
+                  <span class="slot-tag">主手</span>
+                  <div class="slot-box" id="shop-slot-mainHand"><span class="slot-placeholder">⚔️</span></div>
+                </button>
+                <button type="button" class="equip-slot-btn" data-slot="belt" title="腰帶">
+                  <span class="slot-tag">腰帶</span>
+                  <div class="slot-box" id="shop-slot-belt"><span class="slot-placeholder">🎗️</span></div>
+                </button>
+                <button type="button" class="equip-slot-btn" data-slot="offHand" title="副手武防">
+                  <span class="slot-tag">副手</span>
+                  <div class="slot-box" id="shop-slot-offHand"><span class="slot-placeholder">🛡️</span></div>
+                </button>
+                <button type="button" class="equip-slot-btn" data-slot="ring1" title="戒指 1">
+                  <span class="slot-tag">戒指 1</span>
+                  <div class="slot-box" id="shop-slot-ring1"><span class="slot-placeholder">💍</span></div>
+                </button>
+                <button type="button" class="equip-slot-btn" data-slot="boots" title="鞋子">
+                  <span class="slot-tag">鞋子</span>
+                  <div class="slot-box" id="shop-slot-boots"><span class="slot-placeholder">🥾</span></div>
+                </button>
+                <button type="button" class="equip-slot-btn" data-slot="ring2" title="戒指 2">
+                  <span class="slot-tag">戒指 2</span>
+                  <div class="slot-box" id="shop-slot-ring2"><span class="slot-placeholder">💍</span></div>
+                </button>
+              </div>
+            </div>
+          </details>
+
           <div class="sub-tab-bar shop-filter-bar" role="tablist">
             <button class="sub-tab-btn is-active" type="button" data-shop-filter="all" role="tab">全部</button>
             <button class="sub-tab-btn" type="button" data-shop-filter="potions" role="tab">消耗靈露</button>
@@ -353,6 +417,32 @@
               </div>
               <p class="bag-hint">點擊背包內裝備即可穿戴（雙手武器會同時佔用主副手，單手劍可雙持）。</p>
               <div id="equipment-bag-grid" class="equipment-bag-grid"></div>
+
+              <!-- Consumables Bar in Equipment Page -->
+              <div class="equipment-consumables-card">
+                <div class="consumables-header">
+                  <h4>✦ 攜帶靈露</h4>
+                  <small>可在對局中直接使用快捷鍵 4 / 5 飲用</small>
+                </div>
+                <div class="consumables-grid">
+                  <div class="consumable-item-badge">
+                    <div class="item-orb orb-red"><i>🔴</i></div>
+                    <div class="consumable-item-info">
+                      <strong>緋靈露 (HP)</strong>
+                      <p>恢復 25 點生命值</p>
+                    </div>
+                    <span class="consumable-item-count" id="equip-hp-potion-count">0 瓶</span>
+                  </div>
+                  <div class="consumable-item-badge">
+                    <div class="item-orb orb-blue"><i>🔵</i></div>
+                    <div class="consumable-item-info">
+                      <strong>蒼月露 (MP)</strong>
+                      <p>恢復 25 點魔力值</p>
+                    </div>
+                    <span class="consumable-item-count" id="equip-mp-potion-count">0 瓶</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -672,6 +762,22 @@
           </div>
         </section>
       </main>
+
+      <!-- Battle Pause Modal -->
+      <div id="battle-pause-modal" class="modal-overlay pause-modal-overlay" hidden aria-hidden="true">
+        <div class="modal-card pause-modal-card">
+          <header class="modal-header">
+            <h3>⏸️ 對局暫停中</h3>
+          </header>
+          <div class="pause-content">
+            <p class="pause-message">戰鬥與 QTE 計時已完全暫停。您可以隨時繼續對局，或放棄本場戰鬥返回大廳。</p>
+            <div class="pause-actions">
+              <button type="button" class="button-primary pause-action-btn" id="btn-resume-battle">▶ 繼續戰鬥 <kbd>ESC</kbd></button>
+              <button type="button" class="button-secondary pause-action-btn" id="btn-pause-abandon">🏳️ 放棄對局 (返回大廳)</button>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div id="cheat-modal" class="modal-overlay" hidden aria-hidden="true">
         <div class="modal-card cheat-card">

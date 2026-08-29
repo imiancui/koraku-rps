@@ -114,10 +114,36 @@ export class QTESystem {
     return true;
   }
 
+  pause() {
+    if (!this.active || this.isPaused) return;
+    this.isPaused = true;
+    this.remainingOnPause = Math.max(0, this.deadline - performance.now());
+    if (this.tickId !== null) {
+      this.timers.clearInterval(this.tickId);
+      this.tickId = null;
+    }
+    this.emit();
+  }
+
+  resume() {
+    if (!this.active || !this.isPaused) return;
+    this.isPaused = false;
+    this.deadline = performance.now() + (this.remainingOnPause || 0);
+    this.tickId = this.timers.interval(() => {
+      if (performance.now() >= this.deadline) {
+        this.finish(false);
+      } else {
+        this.emit();
+      }
+    }, 50);
+    this.emit();
+  }
+
   snapshot() {
-    const remainingMs = Math.max(0, this.deadline - performance.now());
+    const remainingMs = this.isPaused ? (this.remainingOnPause || 0) : Math.max(0, this.deadline - performance.now());
     return {
       active: this.active,
+      isPaused: Boolean(this.isPaused),
       sequence: [...this.sequence],
       index: this.index,
       errors: this.errors,
@@ -135,6 +161,7 @@ export class QTESystem {
     if (!this.active) return;
     const result = { success, sequence: [...this.sequence], index: this.index, errors: this.errors };
     this.active = false;
+    this.isPaused = false;
     if (this.tickId !== null) {
       this.timers.clearInterval(this.tickId);
       this.tickId = null;
@@ -287,11 +314,37 @@ export class DualQTESystem {
     return this.inputSlot("right", directionId);
   }
 
+  pause() {
+    if (!this.active || this.isPaused) return;
+    this.isPaused = true;
+    this.remainingOnPause = Math.max(0, this.deadline - performance.now());
+    if (this.tickId !== null) {
+      this.timers.clearInterval(this.tickId);
+      this.tickId = null;
+    }
+    this.emit();
+  }
+
+  resume() {
+    if (!this.active || !this.isPaused) return;
+    this.isPaused = false;
+    this.deadline = performance.now() + (this.remainingOnPause || 0);
+    this.tickId = this.timers.interval(() => {
+      if (performance.now() >= this.deadline) {
+        this.finish();
+      } else {
+        this.emit();
+      }
+    }, 50);
+    this.emit();
+  }
+
   snapshot() {
-    const remainingMs = Math.max(0, this.deadline - performance.now());
+    const remainingMs = this.isPaused ? (this.remainingOnPause || 0) : Math.max(0, this.deadline - performance.now());
     return {
       mode: "dual",
       active: this.active,
+      isPaused: Boolean(this.isPaused),
       left: { ...this.left, sequence: [...this.left.sequence] },
       right: { ...this.right, sequence: [...this.right.sequence] },
       remainingMs,
@@ -306,6 +359,7 @@ export class DualQTESystem {
   finish() {
     if (!this.active) return;
     this.active = false;
+    this.isPaused = false;
     if (this.tickId !== null) {
       this.timers.clearInterval(this.tickId);
       this.tickId = null;

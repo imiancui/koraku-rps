@@ -203,6 +203,22 @@ export class AppView {
       return;
     }
 
+    if (event.target.closest("#btn-resume-battle")) {
+      this.battle.resume();
+      return;
+    }
+
+    if (event.target.closest("#btn-pause-abandon")) {
+      this.battle.abandon();
+      const pauseModal = $("#battle-pause-modal");
+      if (pauseModal) {
+        pauseModal.hidden = true;
+        pauseModal.setAttribute("aria-hidden", "true");
+      }
+      this.requestNavigation("stages");
+      return;
+    }
+
     const slotBtn = event.target.closest("[data-slot]");
     if (slotBtn) {
       const slotKey = slotBtn.dataset.slot;
@@ -432,7 +448,15 @@ export class AppView {
       }
     }
 
-    if (!this.battleState?.active) return;
+    if (event.key === "Escape") {
+      if (this.battleState?.active && this.battleState.phase !== "ended") {
+        event.preventDefault();
+        this.battle.togglePause();
+        return;
+      }
+    }
+
+    if (!this.battleState?.active || this.battleState.isPaused) return;
     if (this.battleState.phase === "qte") {
       if (this.qteState?.mode === "dual") {
         const leftExpected = this.qteState.left?.sequence[this.qteState.left?.index];
@@ -477,7 +501,7 @@ export class AppView {
     }
 
     if (this.battleState.phase === "countdown") {
-      const isDualHands = Boolean(this.battleState.hasDualHandSkill && this.battleState.stage?.dualEnemy);
+      const isDualHands = Boolean(this.battleState.hasDualHandSkill);
       if (isDualHands) {
         const leftHandByKey = { "1": "rock", "2": "paper", "3": "scissors", "q": "rock", "w": "paper", "e": "scissors" };
         const rightHandByKey = {
@@ -488,11 +512,11 @@ export class AppView {
           this.battle.selectHand(leftHandByKey[key], "left");
         } else if (rightHandByKey[key]) {
           this.battle.selectHand(rightHandByKey[key], "right");
-        } else if (event.code === "Numpad1") {
+        } else if (["numpad7", "numpad1"].includes(event.code.toLowerCase())) {
           this.battle.selectHand("rock", "right");
-        } else if (event.code === "Numpad2") {
+        } else if (["numpad8", "numpad2"].includes(event.code.toLowerCase())) {
           this.battle.selectHand("paper", "right");
-        } else if (event.code === "Numpad3") {
+        } else if (["numpad9", "numpad3"].includes(event.code.toLowerCase())) {
           this.battle.selectHand("scissors", "right");
         }
       } else {
@@ -916,46 +940,50 @@ export class AppView {
     if ($("#equipment-coins")) $("#equipment-coins").textContent = state.coins.toLocaleString("zh-TW");
     if ($("#bag-count")) $("#bag-count").textContent = `${bag.length} 件裝備`;
 
-    // Render paperdoll slots
+    if ($("#equip-hp-potion-count")) $("#equip-hp-potion-count").textContent = `${state.inventory?.hpPotion || 0} 瓶`;
+    if ($("#equip-mp-potion-count")) $("#equip-mp-potion-count").textContent = `${state.inventory?.mpPotion || 0} 瓶`;
+
+    // Render paperdoll slots (both growth screen and shop screen)
     const isMainTwoHanded = Boolean(equip.mainHand && EQUIPMENT_ITEMS[equip.mainHand]?.twoHanded);
 
     Object.keys(EQUIPMENT_SLOTS).forEach((slotKey) => {
-      const box = $("#slot-" + slotKey);
-      const slotBtn = $(`[data-slot="${slotKey}"]`);
-      if (!box || !slotBtn) return;
-
-      if (slotKey === "offHand" && isMainTwoHanded) {
-        slotBtn.classList.add("is-two-handed-locked");
-        box.innerHTML = '<span class="slot-placeholder" style="font-size:14px;color:var(--gold);">⚔️ (雙手佔用)</span>';
-        slotBtn.removeAttribute("data-equip-tooltip-id");
-        return;
-      } else {
-        slotBtn.classList.remove("is-two-handed-locked");
-      }
-
       const itemId = equip[slotKey];
-      if (itemId && EQUIPMENT_ITEMS[itemId]) {
-        const item = EQUIPMENT_ITEMS[itemId];
-        slotBtn.setAttribute("data-equip-tooltip-id", item.id);
-        box.innerHTML = `
-          <span class="slot-item-icon">${item.icon}</span>
-          <span class="slot-item-name rarity-${item.rarity}">${item.name}</span>
-        `;
-      } else {
-        slotBtn.removeAttribute("data-equip-tooltip-id");
-        box.innerHTML = `<span class="slot-placeholder">${EQUIPMENT_SLOTS[slotKey].icon}</span>`;
-      }
+      const item = itemId ? EQUIPMENT_ITEMS[itemId] : null;
+
+      document.querySelectorAll(`[data-slot="${slotKey}"]`).forEach((slotBtn) => {
+        const box = slotBtn.querySelector(".slot-box");
+        if (!box) return;
+
+        if (slotKey === "offHand" && isMainTwoHanded) {
+          slotBtn.classList.add("is-two-handed-locked");
+          box.innerHTML = '<span class="slot-placeholder" style="font-size:12px;color:var(--gold);">⚔️ (雙手佔用)</span>';
+          slotBtn.removeAttribute("data-equip-tooltip-id");
+          return;
+        } else {
+          slotBtn.classList.remove("is-two-handed-locked");
+        }
+
+        if (item) {
+          slotBtn.setAttribute("data-equip-tooltip-id", item.id);
+          box.innerHTML = `
+            <span class="slot-item-icon">${item.icon}</span>
+            <span class="slot-item-name rarity-${item.rarity}">${item.name}</span>
+          `;
+        } else {
+          slotBtn.removeAttribute("data-equip-tooltip-id");
+          box.innerHTML = `<span class="slot-placeholder">${EQUIPMENT_SLOTS[slotKey].icon}</span>`;
+        }
+      });
     });
 
-    // Render stats summary
-    const statsSummary = $("#paperdoll-stats-summary");
-    if (statsSummary) {
-      statsSummary.innerHTML = `
-        <span>HP<b>${state.playerStats.maxHp}</b></span>
-        <span>MP<b>${state.playerStats.maxMp}</b></span>
-        <span>ATK<b>${state.playerStats.damage}</b></span>
-      `;
-    }
+    // Render stats summary for both panels
+    const statsHtml = `
+      <span>HP<b>${state.playerStats.maxHp}</b></span>
+      <span>MP<b>${state.playerStats.maxMp}</b></span>
+      <span>ATK<b>${state.playerStats.damage}</b></span>
+    `;
+    if ($("#paperdoll-stats-summary")) $("#paperdoll-stats-summary").innerHTML = statsHtml;
+    if ($("#shop-paperdoll-stats-summary")) $("#shop-paperdoll-stats-summary").innerHTML = statsHtml;
 
     // Render Bag
     const bagGrid = $("#equipment-bag-grid");
@@ -1165,8 +1193,8 @@ export class AppView {
       }
     }
 
-    const isDualHands = Boolean(state.stage?.dualEnemy && state.hasDualHandSkill);
-    if (isDualHands) {
+    const isPlayerDual = Boolean(state.hasDualHandSkill);
+    if (isPlayerDual) {
       if (this.playerHandWrapSingle) this.playerHandWrapSingle.hidden = true;
       if (this.playerHandWrapDual) this.playerHandWrapDual.hidden = false;
       const leftPlayerHand = HANDS[state.selectedHands?.left || "rock"];
@@ -1184,8 +1212,9 @@ export class AppView {
 
     const singleHandWrap = $("#enemy-hand-wrap-single");
     const dualHandWrap = $("#enemy-hand-wrap-dual");
+    const isEnemyDual = Boolean(state.stage?.dualEnemy && state.enemies?.length > 1);
 
-    if (isDualHands && state.opponentHands?.left && state.opponentHands?.right) {
+    if (isEnemyDual && state.opponentHands?.left && state.opponentHands?.right) {
       if (singleHandWrap) singleHandWrap.hidden = true;
       if (dualHandWrap) dualHandWrap.hidden = false;
 
@@ -1217,7 +1246,7 @@ export class AppView {
       }
     }
 
-    if (isDualHands) {
+    if (isPlayerDual) {
       if (this.handSelectorSingle) this.handSelectorSingle.hidden = true;
       if (this.handSelectorDual) this.handSelectorDual.hidden = false;
       document.querySelectorAll("[data-hand-slot='left'][data-hand]").forEach((button) => {
@@ -1235,6 +1264,12 @@ export class AppView {
         button.classList.toggle("is-selected", button.dataset.hand === state.selectedHand);
         button.disabled = state.phase !== "countdown";
       });
+    }
+
+    const pauseModal = $("#battle-pause-modal");
+    if (pauseModal) {
+      pauseModal.hidden = !state.isPaused;
+      pauseModal.setAttribute("aria-hidden", String(!state.isPaused));
     }
 
     const morph = $("#morph-skill");
