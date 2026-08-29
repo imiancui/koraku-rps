@@ -956,7 +956,10 @@ export class AppView {
         return `
           <tr>
             <td><b>${locStage.chapter}・${locStage.name}</b></td>
-            <td>${sAttempts} 次 (${sWins}勝 / ${sLosses}敗, ${sWinRate}%)</td>
+            <td>
+              <div>${sAttempts} 次 (${sWins}勝 / ${sLosses}敗, ${sWinRate}%)</div>
+              <div style="font-size:11px;color:var(--paper-dim);margin-top:2px;">手動: ${sStat.manualWins || 0}勝 / ${sStat.manualLosses || 0}敗 · 自動: ${sStat.autoWins || 0}勝 / ${sStat.autoLosses || 0}敗</div>
+            </td>
             <td style="color:#73d13d;font-weight:600;">${sDealt.toLocaleString("zh-TW")}</td>
             <td style="color:#ff7875;font-weight:600;">${sTaken.toLocaleString("zh-TW")}</td>
             <td><span class="rate-badge ${qteRateClass}">${sQte.successes}/${sQte.attempts} (${sQteRate}%)</span></td>
@@ -972,7 +975,10 @@ export class AppView {
       stageBreakdownTbody.innerHTML = stageRows + `
         <tr class="total-row">
           <td><b>加總總計</b></td>
-          <td>${totalAtt} 次 (${totalW}勝 / ${totalL}敗, ${totalWinRate}%)</td>
+          <td>
+            <div>${totalAtt} 次 (${totalW}勝 / ${totalL}敗, ${totalWinRate}%)</div>
+            <div style="font-size:11px;color:var(--paper-dim);margin-top:2px;">手動: ${manualWins}勝 / ${manualLosses}敗 · 自動: ${autoWins}勝 / ${autoLosses}敗</div>
+          </td>
           <td style="color:#73d13d;font-weight:bold;">${totalDealt.toLocaleString("zh-TW")}</td>
           <td style="color:#ff7875;font-weight:bold;">${totalTaken.toLocaleString("zh-TW")}</td>
           <td><span class="rate-badge ${totalQteClass}">${totalQteSucc}/${totalQteAtt} (${totalQteRate}%)</span></td>
@@ -984,24 +990,41 @@ export class AppView {
     // 7. Recent 100 Battles Log List
     const recentBattlesList = $("#records-recent-battles-list");
     if (recentBattlesList) {
-      const recent = records.recentBattles || [];
-      if (recent.length === 0) {
-        recentBattlesList.innerHTML = '<div style="text-align:center;padding:30px;color:var(--paper-dim);">目前尚無對戰紀錄，快去挑戰小樂吧！</div>';
+      const battles = records.recentBattles || [];
+      if (battles.length === 0) {
+        recentBattlesList.innerHTML = '<div class="records-recent-battles-empty">尚無對戰紀錄。快去開始一場對局吧！</div>';
       } else {
-        recentBattlesList.innerHTML = recent.map((b, idx) => {
-          const resultClass = b.won ? "win" : "loss";
-          const resultText = b.won ? I18n.t("ui.resultWin") : I18n.t("ui.resultLoss");
-          const modeText = b.isAuto ? I18n.t("ui.modeAuto") : I18n.t("ui.modeManual");
-          const timeStr = b.timestamp ? new Date(b.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : "";
-
+        recentBattlesList.innerHTML = battles.map((b, idx) => {
+          const locStage = b.stageName ? { name: b.stageName } : I18n.getLocalizedStage(STAGES.find(s => s.id === b.stageId) || { name: `第 ${b.stageId} 章` });
+          const outcomeClass = b.won ? "outcome-win" : "outcome-loss";
+          const outcomeText = b.won ? I18n.t("ui.battleWon") : I18n.t("ui.battleLost");
+          const modeBadge = b.isAuto ? '<span class="battle-log-mode is-auto">⚡ 自動</span>' : '<span class="battle-log-mode is-manual">🎮 手動</span>';
           return `
-            <div class="recent-battle-card">
-              <span class="recent-battle-result ${resultClass}">${resultText}</span>
-              <span class="recent-battle-stage">${b.chapter ? b.chapter + '・' : ''}${b.stageName || "關卡"}</span>
-              <span class="recent-battle-mode">${modeText} (${b.durationSec || 1}s)</span>
-              <span class="recent-battle-dps">DPS <b>${b.dps ?? 0}</b></span>
-              <span class="recent-battle-damage">造成 <b>${b.damageDealt || 0}</b> / 承受 <b>${b.damageTaken || 0}</b></span>
-              <small style="color:var(--paper-dim);">${timeStr}</small>
+            <div class="battle-log-card ${outcomeClass}">
+              <div class="battle-log-header">
+                <span class="battle-log-index">#${battles.length - idx}</span>
+                <span class="battle-log-stage">${locStage.name}</span>
+                ${modeBadge}
+                <span class="battle-log-outcome ${outcomeClass}">${outcomeText}</span>
+              </div>
+              <div class="battle-log-body">
+                <div class="battle-log-stat">
+                  <small>實戰 DPS</small>
+                  <strong style="color:var(--gold-bright);">${b.dps ?? 0}</strong>
+                </div>
+                <div class="battle-log-stat">
+                  <small>造成傷害</small>
+                  <strong style="color:#73d13d;">${(b.damageDealt || 0).toLocaleString("zh-TW")}</strong>
+                </div>
+                <div class="battle-log-stat">
+                  <small>承受傷害</small>
+                  <strong style="color:#ff7875;">${(b.damageTaken || 0).toLocaleString("zh-TW")}</strong>
+                </div>
+                <div class="battle-log-stat">
+                  <small>戰鬥耗時</small>
+                  <span>${b.durationSec || 1} 秒</span>
+                </div>
+              </div>
             </div>
           `;
         }).join("");
@@ -1015,9 +1038,8 @@ export class AppView {
       const locStage = I18n.getLocalizedStage(stage);
       const locked = state.profile.level < stage.requiredLevel;
       const cleared = (state.records.clearedStages || []).includes(stage.id) || (state.records.bestStage >= stage.id);
-      const stageStat = state.records?.stageStats?.[stage.id] || { totalAttempts: 0, autoWins: 0, manualLosses: 0 };
+      const stageStat = state.records?.stageStats?.[stage.id] || { totalAttempts: 0, manualWins: 0, manualLosses: 0, autoWins: 0, autoLosses: 0 };
       const attemptsText = I18n.t("ui.stageAttempts", { total: stageStat.totalAttempts || 0 });
-      const recordBadgeText = I18n.t("ui.stageRecordBadge", { autoWins: stageStat.autoWins || 0, manualLosses: stageStat.manualLosses || 0 });
 
       const classes = [
         "stage-card",
@@ -1038,7 +1060,6 @@ export class AppView {
         '</div>' +
         '<div class="stage-metrics-row">' +
         '<div class="stage-metric-attempts"><span>' + attemptsText + '</span></div>' +
-        '<div class="stage-metric-breakdown"><span>' + recordBadgeText + '</span></div>' +
         '</div>' +
         '<div class="stage-actions-row">' +
         '<button type="button" class="button-primary" data-stage="' + stage.id + '"' + (locked ? " disabled" : "") + '>' + status + "</button>" +
