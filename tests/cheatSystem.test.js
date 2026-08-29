@@ -1,4 +1,4 @@
-﻿import test from "node:test";
+import test from "node:test";
 import assert from "node:assert/strict";
 import { EventBus } from "../src/js/core/EventBus.js";
 import { GameStore } from "../src/js/core/GameStore.js";
@@ -23,7 +23,7 @@ test("作弊調試設定：自訂修改等級、經驗、SP、星砂、配點、
     hpPotion: 15,
     mpPotion: 20,
     allocations: { hp: 10, mp: 10, damage: 10 },
-    skills: { momo: 8 }
+    skills: { momo: 8, dualHand: 1 }
   });
 
   assert.equal(res.ok, true);
@@ -36,6 +36,7 @@ test("作弊調試設定：自訂修改等級、經驗、SP、星砂、配點、
   assert.equal(snap.inventory.mpPotion, 20);
   assert.equal(snap.profile.allocations.hp, 10);
   assert.equal(snap.profile.skills.momo, 8);
+  assert.equal(snap.profile.skills.dualHand, 1);
 });
 
 test("一鍵解鎖全關卡與一鍵解鎖全圖鑑", () => {

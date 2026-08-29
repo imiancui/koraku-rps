@@ -393,6 +393,25 @@
     background: rgba(12, 15, 23, 0.88);
   }
 
+  .hand-selector-dual {
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+  }
+
+  .dual-hand-sub-column .hand-button {
+    grid-template-columns: 24px 1fr 18px;
+    min-height: 32px;
+    padding: 2px 4px;
+  }
+
+  .dual-hand-sub-column .hand-button span {
+    font-size: 10px;
+  }
+
+  .dual-hand-sub-column .hand-button i {
+    font-size: 15px;
+  }
+
   .hand-button i {
     font-size: 20px;
   }

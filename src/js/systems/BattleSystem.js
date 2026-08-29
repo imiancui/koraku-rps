@@ -52,6 +52,7 @@ export class BattleSystem {
 
     this.stopClocks();
     const stats = profile.playerStats;
+    const hasDualHandSkill = Boolean(profile.profile?.skills?.dualHand > 0);
 
     const enemies = stage.enemies
       ? stage.enemies.map((e) => ({ id: e.id, name: e.name, hp: e.hp, maxHp: e.maxHp, alive: true }))
@@ -70,11 +71,13 @@ export class BattleSystem {
       playerMp: stats.maxMp,
       playerMaxMp: stats.maxMp,
       playerDamage: stats.damage,
+      hasDualHandSkill,
       enemies,
       targetEnemyId: enemies[0].id,
       enemyHp: totalEnemyHp,
       enemyMaxHp: totalEnemyMaxHp,
       selectedHand: "rock",
+      selectedHands: { left: "rock", right: "rock" },
       opponentHand: null,
       enemyWinningEmoji: null,
       countdown: stage.roundSeconds || BATTLE_RULES.roundSeconds,
@@ -149,9 +152,20 @@ export class BattleSystem {
     }, 80);
   }
 
-  selectHand(handId) {
+  selectHand(handId, slot = null) {
     if (!this.state?.active || this.state.phase !== "countdown" || !HANDS[handId]) return;
-    this.state.selectedHand = handId;
+    if (slot === "left") {
+      this.state.selectedHands.left = handId;
+      this.state.selectedHand = handId;
+    } else if (slot === "right") {
+      this.state.selectedHands.right = handId;
+    } else {
+      this.state.selectedHand = handId;
+      this.state.selectedHands.left = handId;
+      if (!this.state.hasDualHandSkill) {
+        this.state.selectedHands.right = handId;
+      }
+    }
     this.emitState();
     this.bus.emit("sound", { name: "select" });
   }
@@ -173,12 +187,22 @@ export class BattleSystem {
       this.state.opponentHands = { left: leftHand, right: rightHand };
       this.state.opponentHand = leftHand;
 
-      const leftResult = compareHands(this.state.selectedHand, leftHand);
-      const rightResult = compareHands(this.state.selectedHand, rightHand);
-      if (leftResult === "loss" || rightResult === "loss") {
-        this.state.enemyWinningEmoji = leftResult === "loss" ? HANDS[leftHand].glyph : HANDS[rightHand].glyph;
+      if (this.state.hasDualHandSkill) {
+        const leftResult = compareHands(this.state.selectedHands.left, leftHand);
+        const rightResult = compareHands(this.state.selectedHands.right, rightHand);
+        if (leftResult === "loss" || rightResult === "loss") {
+          this.state.enemyWinningEmoji = leftResult === "loss" ? HANDS[leftHand].glyph : HANDS[rightHand].glyph;
+        } else {
+          this.state.enemyWinningEmoji = null;
+        }
       } else {
-        this.state.enemyWinningEmoji = null;
+        const leftResult = compareHands(this.state.selectedHand, leftHand);
+        const rightResult = compareHands(this.state.selectedHand, rightHand);
+        if (leftResult === "loss" || rightResult === "loss") {
+          this.state.enemyWinningEmoji = leftResult === "loss" ? HANDS[leftHand].glyph : HANDS[rightHand].glyph;
+        } else {
+          this.state.enemyWinningEmoji = null;
+        }
       }
     } else {
       const hand = getRandomHand(this.random);
@@ -220,11 +244,21 @@ export class BattleSystem {
     this.state.playerMp -= morphCost;
 
     if (this.state.opponentHands?.left && this.state.opponentHands?.right) {
-      const targetEnemy = this.state.enemies.find((e) => e.id === this.state.targetEnemyId && e.alive);
-      const targetOpponentHand = targetEnemy?.id === "right" ? this.state.opponentHands.right : this.state.opponentHands.left;
-      this.state.selectedHand = getCounterHand(targetOpponentHand);
+      if (this.state.hasDualHandSkill) {
+        this.state.selectedHands.left = getCounterHand(this.state.opponentHands.left);
+        this.state.selectedHands.right = getCounterHand(this.state.opponentHands.right);
+        this.state.selectedHand = this.state.selectedHands.left;
+      } else {
+        const targetEnemy = this.state.enemies.find((e) => e.id === this.state.targetEnemyId && e.alive);
+        const targetOpponentHand = targetEnemy?.id === "right" ? this.state.opponentHands.right : this.state.opponentHands.left;
+        this.state.selectedHand = getCounterHand(targetOpponentHand);
+        this.state.selectedHands.left = this.state.selectedHand;
+        this.state.selectedHands.right = this.state.selectedHand;
+      }
     } else {
       this.state.selectedHand = getCounterHand(this.state.opponentHand);
+      this.state.selectedHands.left = this.state.selectedHand;
+      this.state.selectedHands.right = this.state.selectedHand;
     }
 
     this.state.enemyWinningEmoji = null;
@@ -242,6 +276,7 @@ export class BattleSystem {
     if (!this.state?.active) return;
     this.state.phase = "reaction";
     this.state.selectedHand = "rock";
+    this.state.selectedHands = { left: "rock", right: "rock" };
     this.state.opponentHand = "rock";
     this.resolveRound();
   }
@@ -254,6 +289,68 @@ export class BattleSystem {
     const aliveEnemies = this.state.enemies.filter((e) => e.alive);
 
     if (isDualStage && aliveEnemies.length >= 2) {
+      if (this.state.hasDualHandSkill) {
+        const leftResult = compareHands(this.state.selectedHands.left, this.state.opponentHands.left);
+        const rightResult = compareHands(this.state.selectedHands.right, this.state.opponentHands.right);
+
+        if (leftResult === "loss" && rightResult === "loss") {
+          this.bus.emit("battle:effect", { type: "player-rps-loss" });
+          this.bus.emit("sound", { name: "punch" });
+          this.startDualQte();
+          return;
+        }
+
+        if (leftResult === "loss") {
+          if (rightResult === "win") {
+            const rightEnemy = this.state.enemies.find((e) => e.id === "right" && e.alive);
+            if (rightEnemy) this.applyDamageToEnemy(rightEnemy, null, false);
+          }
+          this.state.targetEnemyId = "left";
+          this.bus.emit("battle:effect", { type: "player-rps-loss" });
+          this.bus.emit("sound", { name: "punch" });
+          this.startQte("left");
+          return;
+        }
+
+        if (rightResult === "loss") {
+          if (leftResult === "win") {
+            const leftEnemy = this.state.enemies.find((e) => e.id === "left" && e.alive);
+            if (leftEnemy) this.applyDamageToEnemy(leftEnemy, null, false);
+          }
+          this.state.targetEnemyId = "right";
+          this.bus.emit("battle:effect", { type: "player-rps-loss" });
+          this.bus.emit("sound", { name: "punch" });
+          this.startQte("right");
+          return;
+        }
+
+        // No losses on either side
+        let anyWin = false;
+        if (leftResult === "win") {
+          const leftEnemy = this.state.enemies.find((e) => e.id === "left" && e.alive);
+          if (leftEnemy) {
+            anyWin = true;
+            this.applyDamageToEnemy(leftEnemy, null, false);
+          }
+        }
+        if (rightResult === "win") {
+          const rightEnemy = this.state.enemies.find((e) => e.id === "right" && e.alive);
+          if (rightEnemy) {
+            anyWin = true;
+            this.applyDamageToEnemy(rightEnemy, null, false);
+          }
+        }
+
+        if (anyWin) {
+          this.finishRound("win", this.state.morphUsed ? "變拳奏效，成功壓制！" : "漂亮地壓過了小樂的手勢！");
+          return;
+        }
+
+        this.resolveMomoDraw();
+        return;
+      }
+
+      // Single hand vs dual enemy
       const evalResult = evaluateDualRps(
         this.state.selectedHand,
         this.state.opponentHands.left,

@@ -394,17 +394,43 @@
 
             <div id="battle-character-wrap" class="battle-character-wrap character-speaker" data-character-speaker>
               <div class="battle-character-aura" aria-hidden="true"></div>
-              <img id="battle-character" src="./koraku/小樂-預設.png" alt="對戰中的小樂">
+              <!-- Single Enemy Sprite (Stage 1-3) -->
+              <div id="battle-character-single" class="character-single-slot">
+                <img id="battle-character" src="./koraku/小樂-預設.png" alt="對戰中的小樂">
+              </div>
+
+              <!-- Dual Enemy Sprites (Stage 4) -->
+              <div id="battle-characters-dual" class="characters-dual-wrap" hidden>
+                <div id="battle-character-left-slot" class="character-dual-slot is-left">
+                  <img id="battle-character-left" src="./koraku/小樂-2P色.png" alt="白金小樂・左">
+                </div>
+                <div id="battle-character-right-slot" class="character-dual-slot is-right">
+                  <img id="battle-character-right" src="./koraku/小樂-2P色.png" alt="白金小樂・右">
+                </div>
+              </div>
+
               <output id="damage-number" class="damage-number" aria-live="polite"></output>
             </div>
 
             <section class="round-oracle" aria-label="本回合狀態">
               <span class="round-label">ROUND <b id="round-number">1</b></span>
               <div class="hand-versus">
-                <div>
+                <div id="player-hand-wrap-single">
                   <small>YOU</small>
                   <strong id="player-hand-display">✊</strong>
                   <b id="player-hand-label">石頭</b>
+                </div>
+                <div id="player-hand-wrap-dual" class="dual-hand-wrap" hidden>
+                  <div class="dual-hand-side">
+                    <small>左手</small>
+                    <strong id="player-left-hand-display">✊</strong>
+                    <b id="player-left-hand-label">石頭</b>
+                  </div>
+                  <div class="dual-hand-side">
+                    <small>右手</small>
+                    <strong id="player-right-hand-display">✊</strong>
+                    <b id="player-right-hand-label">石頭</b>
+                  </div>
                 </div>
                 <span>対</span>
                 <div id="enemy-hand-wrap-single">
@@ -449,10 +475,29 @@
               </section>
 
               <section class="hand-selector" aria-label="選擇出拳">
-                <span class="panel-kicker">選擇手勢 <small>[1/2/3]</small></span>
-                <button type="button" data-hand="rock" class="hand-button is-selected" title="選擇石頭 (熱鍵: 1)"><i>✊</i><span>石頭</span><kbd>1</kbd></button>
-                <button type="button" data-hand="paper" class="hand-button" title="選擇布 (熱鍵: 2)"><i>✋</i><span>布</span><kbd>2</kbd></button>
-                <button type="button" data-hand="scissors" class="hand-button" title="選擇剪刀 (熱鍵: 3)"><i>✌</i><span>剪刀</span><kbd>3</kbd></button>
+                <!-- Single Hand Mode -->
+                <div id="hand-selector-single" class="hand-selector-group">
+                  <span class="panel-kicker">選擇手勢 <small>[1/2/3]</small></span>
+                  <button type="button" data-hand="rock" class="hand-button is-selected" title="選擇石頭 (熱鍵: 1)"><i>✊</i><span>石頭</span><kbd>1</kbd></button>
+                  <button type="button" data-hand="paper" class="hand-button" title="選擇布 (熱鍵: 2)"><i>✋</i><span>布</span><kbd>2</kbd></button>
+                  <button type="button" data-hand="scissors" class="hand-button" title="選擇剪刀 (熱鍵: 3)"><i>✌</i><span>剪刀</span><kbd>3</kbd></button>
+                </div>
+
+                <!-- Two-handed Liberation Mode (Skill dualHand) -->
+                <div id="hand-selector-dual" class="hand-selector-dual" hidden>
+                  <div class="dual-hand-sub-column">
+                    <span class="panel-kicker">左手・對左 <small>[1/2/3]</small></span>
+                    <button type="button" data-hand-slot="left" data-hand="rock" class="hand-button is-selected" title="左手石頭 (熱鍵: 1 或 Q)"><i>✊</i><span>石頭</span><kbd>1</kbd></button>
+                    <button type="button" data-hand-slot="left" data-hand="paper" class="hand-button" title="左手布 (熱鍵: 2 或 W)"><i>✋</i><span>布</span><kbd>2</kbd></button>
+                    <button type="button" data-hand-slot="left" data-hand="scissors" class="hand-button" title="左手剪刀 (熱鍵: 3 或 E)"><i>✌</i><span>剪刀</span><kbd>3</kbd></button>
+                  </div>
+                  <div class="dual-hand-sub-column">
+                    <span class="panel-kicker">右手・對右 <small>[7/8/9 或 J/K/L]</small></span>
+                    <button type="button" data-hand-slot="right" data-hand="rock" class="hand-button is-selected" title="右手石頭 (熱鍵: 7 或 J 或 Num1)"><i>✊</i><span>石頭</span><kbd>7</kbd></button>
+                    <button type="button" data-hand-slot="right" data-hand="paper" class="hand-button" title="右手布 (熱鍵: 8 或 K 或 Num2)"><i>✋</i><span>布</span><kbd>8</kbd></button>
+                    <button type="button" data-hand-slot="right" data-hand="scissors" class="hand-button" title="右手剪刀 (熱鍵: 9 或 L 或 Num3)"><i>✌</i><span>剪刀</span><kbd>9</kbd></button>
+                  </div>
+                </div>
               </section>
 
               <section class="quick-slots" aria-label="道具與技能快捷欄">
@@ -660,6 +705,10 @@
               <label class="cheat-field">
                 <span>摸摸技能 (Momo Skill Lv)</span>
                 <input type="number" id="cheat-skill-momo" min="0" max="10" value="0">
+              </label>
+              <label class="cheat-field">
+                <span>雙手解放 (Dual Hands Skill)</span>
+                <input type="number" id="cheat-skill-dualHand" min="0" max="1" value="0">
               </label>
               <label class="cheat-field">
                 <span>HP 藥水數量</span>

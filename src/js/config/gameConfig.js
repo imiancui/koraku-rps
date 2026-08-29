@@ -141,6 +141,16 @@ export const SKILLS = Object.freeze({
     costPerLevel: 1,
     glyph: "撫",
     description: "平手時以機率自動發動，偷摸摸場上隨機一個小樂對其造成 25 點傷害。"
+  },
+  dualHand: {
+    id: "dualHand",
+    name: "雙手解放",
+    code: "DUAL_HANDS",
+    unlockLevel: 4,
+    maxLevel: 1,
+    costPerLevel: 100,
+    glyph: "掌",
+    description: "解放另一隻手！在第四關對決中可同時使用左手（對左小樂）與右手（對右小樂）獨立出拳。"
   }
 });
 

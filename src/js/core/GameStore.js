@@ -8,7 +8,7 @@ const DEFAULT_SAVE = Object.freeze({
     xp: 0,
     skillPoints: 0,
     allocations: { hp: 0, mp: 0, damage: 0 },
-    skills: { momo: 0 }
+    skills: { momo: 0, dualHand: 0 }
   },
   coins: 0,
   inventory: { hpPotion: 1, mpPotion: 0 },
@@ -289,6 +289,7 @@ export class GameStore {
     }
     if (updates.skills) {
       if (typeof updates.skills.momo === "number") this.state.profile.skills.momo = Math.max(0, Math.min(10, updates.skills.momo));
+      if (typeof updates.skills.dualHand === "number") this.state.profile.skills.dualHand = Math.max(0, Math.min(1, updates.skills.dualHand));
     }
     this.commit("cheat-update");
     return { ok: true, message: "數值已更新！" };

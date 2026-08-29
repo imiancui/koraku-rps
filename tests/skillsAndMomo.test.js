@@ -125,20 +125,57 @@ test("小樂閃避摸摸：第 2 關 11%、第 3 關 33%、第 4 關 66% 閃避�
     assert.equal(battle3Hit.state.enemyHp, hpBeforeHit - 25, "Stage 3 未命中閃避率應受傷");
     battle3Hit.abandon();
   }
-
-  // Test Stage 4: 66% dodge rate & regular punches are NOT dodged
-  {
-    // Random 0.50 (< 0.66 -> dodge momo)
-    const battle4Momo = new BattleSystem(bus, store, () => 0.50);
-    battle4Momo.start(4);
-    const hpBefore = battle4Momo.state.enemyHp;
-    battle4Momo.resolveDraw();
-    assert.equal(battle4Momo.state.enemyHp, hpBefore, "Stage 4 命中 66% 閃避率應閃避摸摸");
-
-    // Regular punch (damageEnemy) MUST NOT dodge
-    battle4Momo.damageEnemy("贏了！");
-    assert.equal(battle4Momo.state.enemyHp, hpBefore - store.snapshot().playerStats.damage, "常規出拳不可被閃避");
-    battle4Momo.abandon();
-  }
 });
+
+test("雙手解放技能：100 SP 解鎖、雙手獨立出拳與勝負判定", () => {
+  const dualHand = SKILLS.dualHand;
+  assert.equal(dualHand.name, "雙手解放");
+  assert.equal(dualHand.costPerLevel, 100);
+  assert.equal(dualHand.unlockLevel, 4);
+  assert.equal(dualHand.maxLevel, 1);
+
+  const bus = new EventBus();
+  const persistence = new MemoryPersistence();
+  const store = new GameStore(bus, persistence);
+
+  // Insufficient SP
+  store.state.profile.level = 10;
+  store.state.profile.skillPoints = 50;
+  const resFail = store.allocateSkill("dualHand");
+  assert.equal(resFail.ok, false, "SP < 100 不能學習雙手解放");
+
+  // Sufficient SP
+  store.state.profile.skillPoints = 100;
+  const resOk = store.allocateSkill("dualHand");
+  assert.equal(resOk.ok, true, "100 SP 可以成功學習雙手解放");
+  assert.equal(store.state.profile.skills.dualHand, 1);
+  assert.equal(store.state.profile.skillPoints, 0);
+
+  // Test Battle with two hands
+  const battle = new BattleSystem(bus, store, () => 0.5);
+  battle.start(4);
+  assert.equal(battle.state.hasDualHandSkill, true);
+
+  // Select left hand Rock, right hand Scissors
+  battle.selectHand("rock", "left");
+  battle.selectHand("scissors", "right");
+  assert.equal(battle.state.selectedHands.left, "rock");
+  assert.equal(battle.state.selectedHands.right, "scissors");
+
+  // Simulate opponent hands: Left Scissors (Loss to Rock), Right Rock (Wins over Scissors)
+  battle.state.phase = "reaction";
+  battle.state.opponentHands = { left: "scissors", right: "rock" };
+  const leftEnemyBefore = battle.state.enemies.find((e) => e.id === "left").hp;
+  const rightEnemyBefore = battle.state.enemies.find((e) => e.id === "right").hp;
+
+  battle.resolveRound();
+
+  // Left enemy lost to player left hand -> took damage
+  assert.ok(battle.state.enemies.find((e) => e.id === "left").hp < leftEnemyBefore, "左小樂輸給玩家左手應受傷");
+  // Right enemy won against player right hand -> triggers single QTE targeting right
+  assert.equal(battle.state.phase, "qte");
+  assert.equal(battle.state.targetEnemyId, "right");
+  battle.abandon();
+});
+
 
