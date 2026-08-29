@@ -5749,6 +5749,22 @@ class AppView {
 
   handleKeydown(event) {
     const key = event.key.toLowerCase();
+
+    // Secret Cheat Trigger: Numpad 8 (or 8 key) pressed 4 times within 1000ms
+    const isNumpad8 = event.code === "Numpad8" || event.key === "8" || (event.code === "Digit8" && event.key === "8");
+    if (isNumpad8) {
+      const now = performance.now();
+      if (!this.cheatKeypressTimestamps) this.cheatKeypressTimestamps = [];
+      this.cheatKeypressTimestamps = this.cheatKeypressTimestamps.filter((t) => now - t <= 1000);
+      this.cheatKeypressTimestamps.push(now);
+      if (this.cheatKeypressTimestamps.length >= 4) {
+        this.cheatKeypressTimestamps = [];
+        this.openCheatModal();
+        this.showToast("⚙️ 作弊選單已喚起！", "success");
+        return;
+      }
+    }
+
     const isPostActive = Boolean(this.postState) && this.resultOverlay?.classList.contains("is-active");
 
     if (isPostActive) {
