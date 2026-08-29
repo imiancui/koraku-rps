@@ -6885,7 +6885,8 @@ class AppView {
       toggleIcon.textContent = isPaused ? "▶" : "⏸";
     }
     if (toggleText) {
-      toggleText.textContent = isPaused ? I18n.t("ui.btnResumeAutoBattle") : I18n.t("ui.btnPauseAutoBattle");
+      const rawText = isPaused ? I18n.t("ui.btnResumeAutoBattle") : I18n.t("ui.btnPauseAutoBattle");
+      toggleText.textContent = rawText.replace(/^[▶⏸⏹\s]+/, "");
     }
 
     const info = autoBattleInfo || this.battle?.autoBattle;
