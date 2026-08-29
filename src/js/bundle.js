@@ -777,6 +777,11 @@ const DICTIONARY = {
       btnStartAutoBattle: "⚡ 開始自動刷關",
       btnCancel: "取消",
       btnStopAutoBattle: "⏹ 停止刷關",
+      btnPauseAutoBattle: "⏸ 暫停刷關",
+      btnResumeAutoBattle: "▶ 繼續刷關",
+      autoBattleHudPaused: "自動刷關已暫停：第 {current} / {total} 次（勝: {wins}, 敗: {losses}）",
+      autoBattleToastPaused: "已暫停自動刷關，可手動操作或再次點擊繼續。",
+      autoBattleToastResumed: "已繼續自動刷關。",
       autoBattleHudRunning: "自動刷關中：第 {current} / {total} 次（勝: {wins}, 敗: {losses}）",
       autoBattleToastUpdateWin: "自動刷關：獲勝！剩餘 {remaining} 場...",
       autoBattleToastUpdateLoss: "自動刷關：戰敗！剩餘 {remaining} 場...",
@@ -1217,6 +1222,11 @@ const DICTIONARY = {
       btnStartAutoBattle: "⚡ 开始自动刷关",
       btnCancel: "取消",
       btnStopAutoBattle: "⏹ 停止刷关",
+      btnPauseAutoBattle: "⏸ 暂停刷关",
+      btnResumeAutoBattle: "▶ 继续刷关",
+      autoBattleHudPaused: "自动刷关已暂停：第 {current} / {total} 次（胜: {wins}, 败: {losses}）",
+      autoBattleToastPaused: "已暂停自动刷关，可手动操作或再次点击继续。",
+      autoBattleToastResumed: "已继续自动刷关。",
       autoBattleHudRunning: "自动刷关中：第 {current} / {total} 次（胜: {wins}, 败: {losses}）",
       autoBattleToastUpdateWin: "自动刷关：获胜！剩余 {remaining} 场...",
       autoBattleToastUpdateLoss: "自动刷关：战败！剩余 {remaining} 场...",
@@ -1604,6 +1614,11 @@ const DICTIONARY = {
       btnStartAutoBattle: "⚡ Start Auto-Battle",
       btnCancel: "Cancel",
       btnStopAutoBattle: "⏹ Stop Auto",
+      btnPauseAutoBattle: "⏸ Pause Auto",
+      btnResumeAutoBattle: "▶ Resume Auto",
+      autoBattleHudPaused: "Auto-Battle Paused: Run {current} / {total} (Wins: {wins}, Losses: {losses})",
+      autoBattleToastPaused: "Auto-battle paused. You can play manually or click to resume.",
+      autoBattleToastResumed: "Auto-battle resumed.",
       autoBattleHudRunning: "Auto-Battling: Run {current} / {total} (Wins: {wins}, Losses: {losses})",
       autoBattleToastUpdateWin: "Auto-battle: Victory! {remaining} rounds remaining...",
       autoBattleToastUpdateLoss: "Auto-battle: Defeat! {remaining} rounds remaining...",
@@ -1982,7 +1997,34 @@ const DICTIONARY = {
       settleCaption: "ターン結果",
       battleWon: "勝",
       battleLost: "負",
-      battleDraw: "分"
+      battleDraw: "分",
+      // Auto-Battle & Frost & Pause
+      btnAutoBattle: "⚡ 自動周回",
+      autoBattleModalTitle: "⚡ 自動連続周回設定",
+      autoBattleModalDesc: "出拳・変拳・QTE反撃を自動で行います。勝利時はスイカ割りをスキップして報酬を獲得し次へ進み、敗北時は回数を消費して自動で再試行します。",
+      autoBattleCountLabel: "連続周回回数を選択：",
+      autoBattleTimes: "{count} 回",
+      btnStartAutoBattle: "⚡ 自動周回を開始",
+      btnCancel: "キャンセル",
+      btnStopAutoBattle: "⏹ 周回停止",
+      btnPauseAutoBattle: "⏸ 周回一時停止",
+      btnResumeAutoBattle: "▶ 周回再開",
+      autoBattleHudRunning: "自動周回中：第 {current} / {total} 回（勝: {wins}, 敗: {losses}）",
+      autoBattleHudPaused: "自動周回一時停止中：第 {current} / {total} 回（勝: {wins}, 敗: {losses}）",
+      autoBattleToastUpdateWin: "自動周回：勝利！残り {remaining} 回...",
+      autoBattleToastUpdateLoss: "自動周回：敗北！残り {remaining} 回...",
+      autoBattleToastFinished: "🎉 自動周回完了！全 {total} 回（勝: {wins}, 敗: {losses}）。",
+      autoBattleToastStopped: "自動周回を停止しました。",
+      autoBattleToastPaused: "自動周回を一時停止しました。手動で続行するか再開を押してください。",
+      autoBattleToastResumed: "自動周回を再開しました。",
+      frozenBadge: "❄️ 霜月氷結：コハクの【{hand}】は封印中！",
+      ownedCount: "所持数 {total}",
+      equippedCountBadge: "(装備中 {count})",
+      pauseModalTitle: "⏸️ 対局一時停止中",
+      pauseModalDesc: "バトルとQTEタイマーが停止中です。いつでも対局を再開、または対局を破棄して戻ることができます。",
+      btnResumeBattle: "対戦再開",
+      btnAbandonBattle: "対局破棄 (ロビーへ戻る)",
+      selectLanguage: "言語切替"
     },
     hands: {
       rock: { label: "グー", glyph: "✊" },
@@ -3814,6 +3856,7 @@ class BattleSystem {
     this.autoRestartTimerId = null;
     this.autoBattle = {
       active: false,
+      isPaused: false,
       stageId: null,
       totalRounds: 0,
       remainingRounds: 0,
@@ -3859,15 +3902,19 @@ class BattleSystem {
       if (!this.autoBattle.active) {
         this.autoBattle = {
           active: true,
+          isPaused: false,
           stageId: Number(stageId),
           totalRounds: options.autoBattleRounds || 10,
           remainingRounds: options.autoBattleRounds || 10,
           wins: 0,
           losses: 0
         };
+      } else {
+        this.autoBattle.isPaused = false;
       }
     } else {
       this.autoBattle.active = false;
+      this.autoBattle.isPaused = false;
       this.autoBattle.remainingRounds = 0;
     }
 
@@ -3925,10 +3972,47 @@ class BattleSystem {
     return this.start(stageId, { autoBattle: true, autoBattleRounds: rounds });
   }
 
-  stopAutoBattle() {
-    this.autoBattle.active = false;
-    this.bus.emit("auto-battle:stopped", { ...this.autoBattle });
-    this.emitState();
+  pauseAutoBattle() {
+    if (!this.autoBattle.active || this.autoBattle.isPaused) return;
+    this.autoBattle.isPaused = true;
+    if (this.autoRestartTimerId !== null) {
+      this.timers.clearTimeout(this.autoRestartTimerId);
+      this.autoRestartTimerId = null;
+    }
+    if (this.state) {
+      this.state.autoBattle = { ...this.autoBattle };
+      this.emitState();
+    }
+    this.bus.emit("auto-battle:paused", { ...this.autoBattle });
+  }
+
+  resumeAutoBattle() {
+    if (!this.autoBattle.active || !this.autoBattle.isPaused) return;
+    this.autoBattle.isPaused = false;
+    if (this.state) {
+      this.state.autoBattle = { ...this.autoBattle };
+      this.emitState();
+    }
+    this.bus.emit("auto-battle:resumed", { ...this.autoBattle });
+
+    if (this.state?.active) {
+      if (this.state.phase === "countdown") {
+        this.runAutoBattleCountdown();
+      } else if (this.state.phase === "qte") {
+        this.runAutoQte();
+      }
+    } else if (this.autoBattle.remainingRounds > 0) {
+      this.start(this.autoBattle.stageId, { autoBattle: true });
+    }
+  }
+
+  toggleAutoBattle() {
+    if (!this.autoBattle.active) return;
+    if (this.autoBattle.isPaused) {
+      this.resumeAutoBattle();
+    } else {
+      this.pauseAutoBattle();
+    }
   }
 
   togglePause() {
@@ -4085,9 +4169,9 @@ class BattleSystem {
   }
 
   runAutoBattleCountdown() {
-    if (!this.state?.active || !this.autoBattle.active || this.state.phase !== "countdown") return;
+    if (!this.state?.active || !this.autoBattle.active || this.autoBattle.isPaused || this.state.phase !== "countdown") return;
     this.timers.timeout(() => {
-      if (!this.state?.active || !this.autoBattle.active || this.state.phase !== "countdown") return;
+      if (!this.state?.active || !this.autoBattle.active || this.autoBattle.isPaused || this.state.phase !== "countdown") return;
 
       const frozen = this.state.frozenEnemyHand;
       const hands = ["rock", "paper", "scissors"];
@@ -4517,9 +4601,9 @@ class BattleSystem {
   }
 
   runAutoQte() {
-    if (!this.state?.active || !this.autoBattle.active || this.state.phase !== "qte") return;
+    if (!this.state?.active || !this.autoBattle.active || this.autoBattle.isPaused || this.state.phase !== "qte") return;
     this.timers.timeout(() => {
-      if (!this.state?.active || !this.autoBattle.active || this.state.phase !== "qte") return;
+      if (!this.state?.active || !this.autoBattle.active || this.autoBattle.isPaused || this.state.phase !== "qte") return;
       if (this.state.isDualQte) {
         this.dualQte.finish();
       } else {
@@ -4850,17 +4934,20 @@ class BattleSystem {
       this.bus.emit("auto-battle:update", { ...this.autoBattle, won });
 
       if (this.autoBattle.active && this.autoBattle.remainingRounds > 0) {
-        if (this.autoRestartTimerId !== null) {
-          this.timers.clearTimeout(this.autoRestartTimerId);
-        }
-        this.autoRestartTimerId = this.timers.timeout(() => {
-          this.autoRestartTimerId = null;
-          if (this.autoBattle.active && this.autoBattle.remainingRounds > 0) {
-            this.start(this.autoBattle.stageId, { autoBattle: true });
+        if (!this.autoBattle.isPaused) {
+          if (this.autoRestartTimerId !== null) {
+            this.timers.clearTimeout(this.autoRestartTimerId);
           }
-        }, 800);
+          this.autoRestartTimerId = this.timers.timeout(() => {
+            this.autoRestartTimerId = null;
+            if (this.autoBattle.active && !this.autoBattle.isPaused && this.autoBattle.remainingRounds > 0) {
+              this.start(this.autoBattle.stageId, { autoBattle: true });
+            }
+          }, 800);
+        }
       } else {
         this.autoBattle.active = false;
+        this.autoBattle.isPaused = false;
         this.autoBattle.remainingRounds = 0;
         this.bus.emit("auto-battle:finished", { ...this.autoBattle });
       }
@@ -4868,15 +4955,12 @@ class BattleSystem {
   }
 
   stopAutoBattle() {
-    const wasActive = this.autoBattle.active;
     this.autoBattle.active = false;
+    this.autoBattle.isPaused = false;
     this.autoBattle.remainingRounds = 0;
     if (this.autoRestartTimerId !== null) {
       this.timers.clearTimeout(this.autoRestartTimerId);
       this.autoRestartTimerId = null;
-    }
-    if (wasActive) {
-      this.bus.emit("auto-battle:stopped");
     }
     if (this.state) {
       this.state.autoBattle = { ...this.autoBattle };
@@ -5417,7 +5501,7 @@ class AppView {
       this.requestNavigation("stages");
     });
     this.bus.on("auto-battle:stopped", () => {
-      this.showToast(I18n.t("ui.autoBattleToastStopped"), "warning");
+      // Toast shown by button handler, no duplicate needed
     });
   }
 
@@ -5492,11 +5576,17 @@ class AppView {
       return;
     }
 
-    if (event.target.closest("#btn-stop-autobattle")) {
-      this.battle.stopAutoBattle();
-      const banner = $("#auto-battle-hud-banner");
-      if (banner) banner.hidden = true;
-      this.showToast(I18n.t("ui.autoBattleToastStopped"), "warning");
+    const toggleAutoBtn = event.target.closest("#btn-toggle-autobattle, #btn-stop-autobattle");
+    if (toggleAutoBtn) {
+      if (this.battle.autoBattle.active) {
+        if (this.battle.autoBattle.isPaused) {
+          this.battle.resumeAutoBattle();
+          this.showToast(I18n.t("ui.autoBattleToastResumed"), "success");
+        } else {
+          this.battle.pauseAutoBattle();
+          this.showToast(I18n.t("ui.autoBattleToastPaused"), "warning");
+        }
+      }
       return;
     }
 
@@ -6920,12 +7010,27 @@ class AppView {
     // Auto-Battle HUD Banner
     const autoBattleBanner = $("#auto-battle-hud-banner");
     const autoBattleText = $("#auto-battle-hud-text");
+    const toggleIcon = $("#btn-toggle-autobattle-icon");
+    const toggleText = $("#btn-toggle-autobattle-text");
+    const toggleBtn = $("#btn-toggle-autobattle") || $("#btn-stop-autobattle");
+
     if (autoBattleBanner) {
       if (state.autoBattle?.active) {
         autoBattleBanner.hidden = false;
+        const isPaused = Boolean(state.autoBattle.isPaused);
+        if (toggleBtn) {
+          toggleBtn.classList.toggle("is-paused", isPaused);
+        }
+        if (toggleIcon) {
+          toggleIcon.textContent = isPaused ? "▶" : "⏸";
+        }
+        if (toggleText) {
+          toggleText.textContent = isPaused ? I18n.t("ui.btnResumeAutoBattle") : I18n.t("ui.btnPauseAutoBattle");
+        }
         if (autoBattleText) {
           const currentRun = state.autoBattle.totalRounds - state.autoBattle.remainingRounds + 1;
-          autoBattleText.textContent = I18n.t("ui.autoBattleHudRunning", {
+          const templateKey = isPaused ? "ui.autoBattleHudPaused" : "ui.autoBattleHudRunning";
+          autoBattleText.textContent = I18n.t(templateKey, {
             current: Math.min(currentRun, state.autoBattle.totalRounds),
             total: state.autoBattle.totalRounds,
             wins: state.autoBattle.wins,

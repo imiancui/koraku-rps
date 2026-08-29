@@ -25,6 +25,7 @@ export class BattleSystem {
     this.autoRestartTimerId = null;
     this.autoBattle = {
       active: false,
+      isPaused: false,
       stageId: null,
       totalRounds: 0,
       remainingRounds: 0,
@@ -70,15 +71,19 @@ export class BattleSystem {
       if (!this.autoBattle.active) {
         this.autoBattle = {
           active: true,
+          isPaused: false,
           stageId: Number(stageId),
           totalRounds: options.autoBattleRounds || 10,
           remainingRounds: options.autoBattleRounds || 10,
           wins: 0,
           losses: 0
         };
+      } else {
+        this.autoBattle.isPaused = false;
       }
     } else {
       this.autoBattle.active = false;
+      this.autoBattle.isPaused = false;
       this.autoBattle.remainingRounds = 0;
     }
 
@@ -136,10 +141,47 @@ export class BattleSystem {
     return this.start(stageId, { autoBattle: true, autoBattleRounds: rounds });
   }
 
-  stopAutoBattle() {
-    this.autoBattle.active = false;
-    this.bus.emit("auto-battle:stopped", { ...this.autoBattle });
-    this.emitState();
+  pauseAutoBattle() {
+    if (!this.autoBattle.active || this.autoBattle.isPaused) return;
+    this.autoBattle.isPaused = true;
+    if (this.autoRestartTimerId !== null) {
+      this.timers.clearTimeout(this.autoRestartTimerId);
+      this.autoRestartTimerId = null;
+    }
+    if (this.state) {
+      this.state.autoBattle = { ...this.autoBattle };
+      this.emitState();
+    }
+    this.bus.emit("auto-battle:paused", { ...this.autoBattle });
+  }
+
+  resumeAutoBattle() {
+    if (!this.autoBattle.active || !this.autoBattle.isPaused) return;
+    this.autoBattle.isPaused = false;
+    if (this.state) {
+      this.state.autoBattle = { ...this.autoBattle };
+      this.emitState();
+    }
+    this.bus.emit("auto-battle:resumed", { ...this.autoBattle });
+
+    if (this.state?.active) {
+      if (this.state.phase === "countdown") {
+        this.runAutoBattleCountdown();
+      } else if (this.state.phase === "qte") {
+        this.runAutoQte();
+      }
+    } else if (this.autoBattle.remainingRounds > 0) {
+      this.start(this.autoBattle.stageId, { autoBattle: true });
+    }
+  }
+
+  toggleAutoBattle() {
+    if (!this.autoBattle.active) return;
+    if (this.autoBattle.isPaused) {
+      this.resumeAutoBattle();
+    } else {
+      this.pauseAutoBattle();
+    }
   }
 
   togglePause() {
@@ -296,9 +338,9 @@ export class BattleSystem {
   }
 
   runAutoBattleCountdown() {
-    if (!this.state?.active || !this.autoBattle.active || this.state.phase !== "countdown") return;
+    if (!this.state?.active || !this.autoBattle.active || this.autoBattle.isPaused || this.state.phase !== "countdown") return;
     this.timers.timeout(() => {
-      if (!this.state?.active || !this.autoBattle.active || this.state.phase !== "countdown") return;
+      if (!this.state?.active || !this.autoBattle.active || this.autoBattle.isPaused || this.state.phase !== "countdown") return;
 
       const frozen = this.state.frozenEnemyHand;
       const hands = ["rock", "paper", "scissors"];
@@ -728,9 +770,9 @@ export class BattleSystem {
   }
 
   runAutoQte() {
-    if (!this.state?.active || !this.autoBattle.active || this.state.phase !== "qte") return;
+    if (!this.state?.active || !this.autoBattle.active || this.autoBattle.isPaused || this.state.phase !== "qte") return;
     this.timers.timeout(() => {
-      if (!this.state?.active || !this.autoBattle.active || this.state.phase !== "qte") return;
+      if (!this.state?.active || !this.autoBattle.active || this.autoBattle.isPaused || this.state.phase !== "qte") return;
       if (this.state.isDualQte) {
         this.dualQte.finish();
       } else {
@@ -1061,17 +1103,20 @@ export class BattleSystem {
       this.bus.emit("auto-battle:update", { ...this.autoBattle, won });
 
       if (this.autoBattle.active && this.autoBattle.remainingRounds > 0) {
-        if (this.autoRestartTimerId !== null) {
-          this.timers.clearTimeout(this.autoRestartTimerId);
-        }
-        this.autoRestartTimerId = this.timers.timeout(() => {
-          this.autoRestartTimerId = null;
-          if (this.autoBattle.active && this.autoBattle.remainingRounds > 0) {
-            this.start(this.autoBattle.stageId, { autoBattle: true });
+        if (!this.autoBattle.isPaused) {
+          if (this.autoRestartTimerId !== null) {
+            this.timers.clearTimeout(this.autoRestartTimerId);
           }
-        }, 800);
+          this.autoRestartTimerId = this.timers.timeout(() => {
+            this.autoRestartTimerId = null;
+            if (this.autoBattle.active && !this.autoBattle.isPaused && this.autoBattle.remainingRounds > 0) {
+              this.start(this.autoBattle.stageId, { autoBattle: true });
+            }
+          }, 800);
+        }
       } else {
         this.autoBattle.active = false;
+        this.autoBattle.isPaused = false;
         this.autoBattle.remainingRounds = 0;
         this.bus.emit("auto-battle:finished", { ...this.autoBattle });
       }
@@ -1079,15 +1124,12 @@ export class BattleSystem {
   }
 
   stopAutoBattle() {
-    const wasActive = this.autoBattle.active;
     this.autoBattle.active = false;
+    this.autoBattle.isPaused = false;
     this.autoBattle.remainingRounds = 0;
     if (this.autoRestartTimerId !== null) {
       this.timers.clearTimeout(this.autoRestartTimerId);
       this.autoRestartTimerId = null;
-    }
-    if (wasActive) {
-      this.bus.emit("auto-battle:stopped");
     }
     if (this.state) {
       this.state.autoBattle = { ...this.autoBattle };
