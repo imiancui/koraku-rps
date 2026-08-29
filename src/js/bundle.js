@@ -3496,7 +3496,7 @@ class AppView {
     const singleHandWrap = $("#enemy-hand-wrap-single");
     const dualHandWrap = $("#enemy-hand-wrap-dual");
 
-    if (state.stage?.dualEnemy && state.opponentHands?.left && state.opponentHands?.right) {
+    if (isDualHands && state.opponentHands?.left && state.opponentHands?.right) {
       if (singleHandWrap) singleHandWrap.hidden = true;
       if (dualHandWrap) dualHandWrap.hidden = false;
 
