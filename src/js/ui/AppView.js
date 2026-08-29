@@ -183,6 +183,26 @@ export class AppView {
       return;
     }
 
+    const shopEquipBtn = event.target.closest("[data-shop-equip]");
+    if (shopEquipBtn) {
+      const itemId = shopEquipBtn.dataset.shopEquip;
+      const result = this.store.equipItem(itemId);
+      this.showToast(result.message, result.ok ? "success" : "danger");
+      if (result.ok) this.bus.emit("sound", { name: "skill" });
+      this.hideTooltip();
+      return;
+    }
+
+    const shopUnequipBtn = event.target.closest("[data-shop-unequip]");
+    if (shopUnequipBtn) {
+      const slotKey = shopUnequipBtn.dataset.shopUnequip;
+      const result = this.store.unequipItem(slotKey);
+      this.showToast(result.message, result.ok ? "success" : "danger");
+      if (result.ok) this.bus.emit("sound", { name: "select" });
+      this.hideTooltip();
+      return;
+    }
+
     const slotBtn = event.target.closest("[data-slot]");
     if (slotBtn) {
       const slotKey = slotBtn.dataset.slot;
@@ -602,9 +622,9 @@ export class AppView {
       if (item.twoHanded) return "主手 (雙手)";
       if (item.slotType === "weapon") return "主手武器";
       if (item.slotType === "offHand") return "副手武防";
-      if (item.slotType === "chest") return "胸甲";
       if (item.slotType === "head") return "頭盔";
       if (item.slotType === "shoulders") return "肩甲";
+      if (item.slotType === "chest") return "胸甲";
       if (item.slotType === "belt") return "腰帶";
       if (item.slotType === "boots") return "鞋子";
       if (item.slotType === "ring") return "戒指";
@@ -630,19 +650,44 @@ export class AppView {
         items: Object.values(EQUIPMENT_ITEMS).filter((item) => item.slotType === "offHand" || item.id === "dagger_shadow")
       },
       {
+        id: "head",
+        title: "頭盔防具",
+        items: Object.values(EQUIPMENT_ITEMS).filter((item) => item.slotType === "head")
+      },
+      {
+        id: "shoulders",
+        title: "肩甲防具",
+        items: Object.values(EQUIPMENT_ITEMS).filter((item) => item.slotType === "shoulders")
+      },
+      {
         id: "chest",
         title: "胸甲防具",
         items: Object.values(EQUIPMENT_ITEMS).filter((item) => item.slotType === "chest")
       },
       {
-        id: "armor",
-        title: "其他防具（頭/肩/腰/鞋）",
-        items: Object.values(EQUIPMENT_ITEMS).filter((item) => ["head", "shoulders", "belt", "boots"].includes(item.slotType))
+        id: "belt",
+        title: "腰帶防具",
+        items: Object.values(EQUIPMENT_ITEMS).filter((item) => item.slotType === "belt")
       },
       {
-        id: "accessory",
-        title: "飾品配件（戒指/耳環/胸章）",
-        items: Object.values(EQUIPMENT_ITEMS).filter((item) => ["ring", "earring", "badge"].includes(item.slotType))
+        id: "boots",
+        title: "鞋子防具",
+        items: Object.values(EQUIPMENT_ITEMS).filter((item) => item.slotType === "boots")
+      },
+      {
+        id: "ring",
+        title: "戒指飾品",
+        items: Object.values(EQUIPMENT_ITEMS).filter((item) => item.slotType === "ring")
+      },
+      {
+        id: "earring",
+        title: "耳環飾品",
+        items: Object.values(EQUIPMENT_ITEMS).filter((item) => item.slotType === "earring")
+      },
+      {
+        id: "badge",
+        title: "胸章飾品",
+        items: Object.values(EQUIPMENT_ITEMS).filter((item) => item.slotType === "badge")
       }
     ];
 
@@ -680,6 +725,23 @@ export class AppView {
           const statsText = statParts.join(" / ");
           const slotLabel = getSlotLabel(item);
 
+          const equippedSlot = Object.keys(state.equipment || {}).find((s) => state.equipment[s] === item.id);
+          const isEquipped = Boolean(equippedSlot);
+          const isOwnedInBag = (state.inventoryEquipment || []).includes(item.id);
+
+          let actionHtml = "";
+          if (isEquipped) {
+            actionHtml = '<span class="shop-status-badge is-equipped">已裝備 ✓</span>' +
+              '<button type="button" class="button-secondary shop-btn-unequip" data-shop-unequip="' + equippedSlot + '">卸下</button>';
+          } else if (isOwnedInBag) {
+            actionHtml = '<span class="shop-status-badge is-owned">背包持有</span>' +
+              '<button type="button" class="button-primary shop-btn-equip" data-shop-equip="' + item.id + '">即刻穿戴</button>';
+          } else {
+            actionHtml = '<span style="font-size:12px;color:var(--gold);">✦ ' + item.price + ' 星砂</span>' +
+              '<button type="button" class="button-primary" data-buy-equip="' + item.id + '"' +
+              (state.coins < item.price ? " disabled" : "") + '>購入</button>';
+          }
+
           html += '<article class="shop-equip-card rarity-' + item.rarity + '" data-equip-tooltip-id="' + item.id + '">' +
             '<div class="shop-equip-icon">' + item.icon + '</div>' +
             '<div class="shop-equip-info">' +
@@ -689,11 +751,7 @@ export class AppView {
             '</div>' +
             '<div class="shop-equip-stats">' + statsText + '</div>' +
             '<div class="shop-equip-desc">' + item.description + '</div>' +
-            '<div class="shop-equip-action">' +
-            '<span style="font-size:12px;color:var(--gold);">✦ ' + item.price + ' 星砂</span>' +
-            '<button type="button" class="button-primary" data-buy-equip="' + item.id + '"' +
-            (state.coins < item.price ? " disabled" : "") + '>購入</button>' +
-            '</div>' +
+            '<div class="shop-equip-action">' + actionHtml + '</div>' +
             '</div></article>';
         }
       });
