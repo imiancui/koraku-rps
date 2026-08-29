@@ -138,12 +138,16 @@
             </div>
             <div class="large-wallet"><small>持有星砂</small><b id="shop-coins">0</b></div>
           </header>
-          <div class="sub-tab-bar" role="tablist">
-            <button class="sub-tab-btn is-active" type="button" data-shop-tab="potions" role="tab">消耗藥水</button>
-            <button class="sub-tab-btn" type="button" data-shop-tab="equipment" role="tab">裝備武具</button>
+          <div class="sub-tab-bar shop-filter-bar" role="tablist">
+            <button class="sub-tab-btn is-active" type="button" data-shop-filter="all" role="tab">全部商品</button>
+            <button class="sub-tab-btn" type="button" data-shop-filter="potions" role="tab">消耗靈露</button>
+            <button class="sub-tab-btn" type="button" data-shop-filter="weapon" role="tab">主手武器</button>
+            <button class="sub-tab-btn" type="button" data-shop-filter="offHand" role="tab">副手武防</button>
+            <button class="sub-tab-btn" type="button" data-shop-filter="chest" role="tab">胸甲防具</button>
+            <button class="sub-tab-btn" type="button" data-shop-filter="armor" role="tab">其他防具</button>
+            <button class="sub-tab-btn" type="button" data-shop-filter="accessory" role="tab">飾品配件</button>
           </div>
-          <div id="shop-potions-grid" class="shop-grid"></div>
-          <div id="shop-equipment-grid" class="shop-grid equipment-shop-grid" hidden></div>
+          <div id="shop-grid" class="shop-grid equipment-shop-grid"></div>
           <div class="shopkeeper-note">
             <span class="note-seal">小樂<br>特選</span>
             <p>「勝利可以得到星砂；強力的裝備具有燃燒、冰凍與減傷等特殊神威喔！」</p>
@@ -291,16 +295,19 @@
                     <div class="slot-box" id="slot-earring2"><span class="slot-placeholder">💎</span></div>
                   </button>
 
-                  <!-- Row 2: Shoulders, Badge, Shoulders spacer -->
+                  <!-- Row 2: Shoulders, Chest, Badge -->
                   <button type="button" class="equip-slot-btn" data-slot="shoulders" title="肩甲">
                     <span class="slot-tag">肩甲</span>
                     <div class="slot-box" id="slot-shoulders"><span class="slot-placeholder">🛡️</span></div>
+                  </button>
+                  <button type="button" class="equip-slot-btn" data-slot="chest" title="胸甲">
+                    <span class="slot-tag">胸甲</span>
+                    <div class="slot-box" id="slot-chest"><span class="slot-placeholder">🥋</span></div>
                   </button>
                   <button type="button" class="equip-slot-btn" data-slot="badge" title="胸章">
                     <span class="slot-tag">胸章</span>
                     <div class="slot-box" id="slot-badge"><span class="slot-placeholder">🏅</span></div>
                   </button>
-                  <div class="equip-slot-spacer"></div>
 
                   <!-- Row 3: Main Hand, Belt, Off Hand -->
                   <button type="button" class="equip-slot-btn" data-slot="mainHand" title="主手武器">

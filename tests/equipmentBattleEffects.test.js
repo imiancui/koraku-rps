@@ -1,4 +1,4 @@
-﻿import test from "node:test";
+import test from "node:test";
 import assert from "node:assert/strict";
 import { EventBus } from "../src/js/core/EventBus.js";
 import { GameStore } from "../src/js/core/GameStore.js";
@@ -79,3 +79,73 @@ test("絆之守護胸章特效：戰勝獲得 +20% 星砂加成", () => {
   const reward = store.recordBattle(true, STAGES[0]);
   assert.equal(reward.coins, Math.round(100 * 1.2), "戰勝獎勵應獲得 +20% 星砂 (120)");
 });
+
+test("玄武金剛胸甲戰鬥特效：受擊減免 25 點傷害，且與盾牌 30 點減傷疊加（總減免 55 點）", () => {
+  const bus = new EventBus();
+  const persistence = new MemoryPersistence();
+  const store = new GameStore(bus, persistence);
+  store.state.equipment.chest = "chest_samurai";
+  store.state.equipment.offHand = "shield_suzaku";
+
+  const battle = new BattleSystem(bus, store);
+  battle.start(1);
+  const hpBefore = battle.state.playerHp;
+
+  // Player takes 100 base damage -> reduced by 25 (armor) + 30 (shield) = 55 -> takes 45 dmg
+  battle.damagePlayer("胸甲與盾牌減傷測試");
+  assert.equal(battle.state.playerHp, hpBefore - 45, "受擊傷害應由 100 減免 55 為 45");
+  battle.abandon();
+});
+
+test("靈狐幻影羽織戰鬥特效：25% 殘影閃避判定成功時完全免疫受擊傷害", () => {
+  const bus = new EventBus();
+  const persistence = new MemoryPersistence();
+  const store = new GameStore(bus, persistence);
+  store.state.equipment.chest = "chest_ninja";
+
+  // Force random to return 0.1 (which is < 0.25 dodge chance)
+  const battle = new BattleSystem(bus, store, () => 0.1);
+  battle.start(1);
+  const hpBefore = battle.state.playerHp;
+
+  const dodgeEvents = [];
+  bus.on("battle:effect", (e) => {
+    if (e.type === "player-dodge") dodgeEvents.push(e);
+  });
+
+  battle.damagePlayer("殘影閃避測試");
+  assert.equal(battle.state.playerHp, hpBefore, "觸發殘影閃避時玩家生命不應減少");
+  assert.equal(dodgeEvents.length, 1, "應觸發 player-dodge 特效事件");
+  battle.abandon();
+});
+
+test("淨世白狐千早戰鬥特效：回合結算回復 15 點 MP", () => {
+  const bus = new EventBus();
+  const persistence = new MemoryPersistence();
+  const store = new GameStore(bus, persistence);
+  store.state.equipment.chest = "chest_miko";
+
+  const battle = new BattleSystem(bus, store);
+  battle.start(1);
+  battle.state.playerMp = 20;
+
+  battle.finishRound("draw", "回合結束測試");
+  assert.equal(battle.state.playerMp, 35, "回合結算應自動回復 15 點 MP");
+  battle.abandon();
+});
+
+test("八咫鏡光護胸戰鬥特效：受擊時反彈 40 點傷害給對手", () => {
+  const bus = new EventBus();
+  const persistence = new MemoryPersistence();
+  const store = new GameStore(bus, persistence);
+  store.state.equipment.chest = "chest_mirror";
+
+  const battle = new BattleSystem(bus, store);
+  battle.start(1);
+  const enemyHpBefore = battle.state.enemyHp;
+
+  battle.damagePlayer("受擊反傷測試");
+  assert.equal(battle.state.enemyHp, enemyHpBefore - 40, "受擊時應反彈 40 點傷害給小樂");
+  battle.abandon();
+});
+

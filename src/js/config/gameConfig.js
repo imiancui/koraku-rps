@@ -222,6 +222,7 @@ export const BATTLE_RULES = Object.freeze({
 export const EQUIPMENT_SLOTS = Object.freeze({
   head: { id: "head", label: "頭盔", icon: "👑" },
   shoulders: { id: "shoulders", label: "肩甲", icon: "🛡️" },
+  chest: { id: "chest", label: "胸甲", icon: "🥋" },
   belt: { id: "belt", label: "腰帶", icon: "🎗️" },
   boots: { id: "boots", label: "鞋子", icon: "🥾" },
   mainHand: { id: "mainHand", label: "主手武器", icon: "⚔️" },
@@ -234,6 +235,54 @@ export const EQUIPMENT_SLOTS = Object.freeze({
 });
 
 export const EQUIPMENT_ITEMS = Object.freeze({
+  chest_samurai: {
+    id: "chest_samurai",
+    name: "玄武・金剛胸甲",
+    slotType: "chest",
+    twoHanded: false,
+    rarity: "epic",
+    icon: "🥋🛡️",
+    price: 320,
+    stats: { damage: 0, hp: 150, mp: 0 },
+    effect: { type: "armor_reduction", damageReduction: 25 },
+    description: "玄武神靈加護的重型鎧甲。受到的傷害直接減免 25 點（可與盾牌減傷疊加）。"
+  },
+  chest_ninja: {
+    id: "chest_ninja",
+    name: "靈狐・幻影羽織",
+    slotType: "chest",
+    twoHanded: false,
+    rarity: "epic",
+    icon: "🥋🦊",
+    price: 350,
+    stats: { damage: 15, hp: 80, mp: 40 },
+    effect: { type: "dodge", dodgeChance: 0.25 },
+    description: "由九尾狐毛編織的靈幻羽織。猜輸受擊時有 25% 機率觸發殘影閃避，完全免疫本次傷害！"
+  },
+  chest_miko: {
+    id: "chest_miko",
+    name: "淨世・白狐千早",
+    slotType: "chest",
+    twoHanded: false,
+    rarity: "rare",
+    icon: "🥋⛩️",
+    price: 260,
+    stats: { damage: 10, hp: 100, mp: 60 },
+    effect: { type: "mp_regen", mpRegen: 15 },
+    description: "神社巫女穿著的純白千早服。每回合結束時回復 15 點 MP。"
+  },
+  chest_mirror: {
+    id: "chest_mirror",
+    name: "八咫・鏡光護胸",
+    slotType: "chest",
+    twoHanded: false,
+    rarity: "legendary",
+    icon: "🥋🪞",
+    price: 550,
+    stats: { damage: 20, hp: 120, mp: 50 },
+    effect: { type: "reflect", reflectDamage: 40 },
+    description: "鑲嵌神鏡碎片的護胸裝甲。受到小樂攻擊時，以鏡光反彈 40 點傷害給小樂。"
+  },
   sword_flame: {
     id: "sword_flame",
     name: "業火・炎之太刀",

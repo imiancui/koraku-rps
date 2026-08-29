@@ -228,6 +228,7 @@ const BATTLE_RULES = Object.freeze({
 const EQUIPMENT_SLOTS = Object.freeze({
   head: { id: "head", label: "頭盔", icon: "👑" },
   shoulders: { id: "shoulders", label: "肩甲", icon: "🛡️" },
+  chest: { id: "chest", label: "胸甲", icon: "🥋" },
   belt: { id: "belt", label: "腰帶", icon: "🎗️" },
   boots: { id: "boots", label: "鞋子", icon: "🥾" },
   mainHand: { id: "mainHand", label: "主手武器", icon: "⚔️" },
@@ -240,6 +241,54 @@ const EQUIPMENT_SLOTS = Object.freeze({
 });
 
 const EQUIPMENT_ITEMS = Object.freeze({
+  chest_samurai: {
+    id: "chest_samurai",
+    name: "玄武・金剛胸甲",
+    slotType: "chest",
+    twoHanded: false,
+    rarity: "epic",
+    icon: "🥋🛡️",
+    price: 320,
+    stats: { damage: 0, hp: 150, mp: 0 },
+    effect: { type: "armor_reduction", damageReduction: 25 },
+    description: "玄武神靈加護的重型鎧甲。受到的傷害直接減免 25 點（可與盾牌減傷疊加）。"
+  },
+  chest_ninja: {
+    id: "chest_ninja",
+    name: "靈狐・幻影羽織",
+    slotType: "chest",
+    twoHanded: false,
+    rarity: "epic",
+    icon: "🥋🦊",
+    price: 350,
+    stats: { damage: 15, hp: 80, mp: 40 },
+    effect: { type: "dodge", dodgeChance: 0.25 },
+    description: "由九尾狐毛編織的靈幻羽織。猜輸受擊時有 25% 機率觸發殘影閃避，完全免疫本次傷害！"
+  },
+  chest_miko: {
+    id: "chest_miko",
+    name: "淨世・白狐千早",
+    slotType: "chest",
+    twoHanded: false,
+    rarity: "rare",
+    icon: "🥋⛩️",
+    price: 260,
+    stats: { damage: 10, hp: 100, mp: 60 },
+    effect: { type: "mp_regen", mpRegen: 15 },
+    description: "神社巫女穿著的純白千早服。每回合結束時回復 15 點 MP。"
+  },
+  chest_mirror: {
+    id: "chest_mirror",
+    name: "八咫・鏡光護胸",
+    slotType: "chest",
+    twoHanded: false,
+    rarity: "legendary",
+    icon: "🥋🪞",
+    price: 550,
+    stats: { damage: 20, hp: 120, mp: 50 },
+    effect: { type: "reflect", reflectDamage: 40 },
+    description: "鑲嵌神鏡碎片的護胸裝甲。受到小樂攻擊時，以鏡光反彈 40 點傷害給小樂。"
+  },
   sword_flame: {
     id: "sword_flame",
     name: "業火・炎之太刀",
@@ -1091,6 +1140,7 @@ const DEFAULT_SAVE = Object.freeze({
   equipment: {
     head: null,
     shoulders: null,
+    chest: null,
     belt: null,
     boots: null,
     mainHand: null,
@@ -1983,9 +2033,18 @@ class BattleSystem {
   }
 
   damagePlayer(message) {
+    const dodge = this.hasEquipEffect("dodge");
+    if (dodge && this.random() < (dodge.dodgeChance || 0.25)) {
+      this.bus.emit("battle:effect", { type: "player-dodge" });
+      this.bus.emit("sound", { name: "danger" });
+      this.finishRound("draw", "殘影閃避！你藉由幻影羽織化解了攻勢！");
+      return;
+    }
+
     const multiplier = this.state.stage.enemyDamageMultiplier || 1;
     const shield = this.hasEquipEffect("shield");
-    const reduction = shield ? (shield.damageReduction || 0) : 0;
+    const armor = this.hasEquipEffect("armor_reduction");
+    const reduction = (shield ? (shield.damageReduction || 0) : 0) + (armor ? (armor.damageReduction || 0) : 0);
     const totalDamage = Math.max(1, (BATTLE_RULES.enemyDamage * multiplier) - reduction);
 
     this.state.playerHp = Math.max(0, this.state.playerHp - totalDamage);
@@ -1994,13 +2053,40 @@ class BattleSystem {
       amount: totalDamage
     });
     this.bus.emit("sound", { name: "hurt" });
+
+    // Reflect check
+    const reflect = this.hasEquipEffect("reflect");
+    if (reflect && reflect.reflectDamage > 0) {
+      const target = this.state.enemies.find((e) => e.id === this.state.targetEnemyId && e.alive)
+        || this.state.enemies.find((e) => e.alive);
+      if (target) {
+        target.hp = Math.max(0, target.hp - reflect.reflectDamage);
+        if (target.hp === 0) target.alive = false;
+        this.state.enemyHp = this.state.enemies.reduce((acc, e) => acc + e.hp, 0);
+        this.bus.emit("battle:effect", {
+          type: "enemy-hit",
+          amount: reflect.reflectDamage,
+          targetId: target.id
+        });
+      }
+    }
+
     this.finishRound("loss", message);
   }
 
   damagePlayerForDual(count, message) {
+    const dodge = this.hasEquipEffect("dodge");
+    if (dodge && this.random() < (dodge.dodgeChance || 0.25)) {
+      this.bus.emit("battle:effect", { type: "player-dodge" });
+      this.bus.emit("sound", { name: "danger" });
+      this.finishRound("draw", "殘影閃避！你藉由幻影羽織化解了雙生攻勢！");
+      return;
+    }
+
     const multiplier = this.state.stage.enemyDamageMultiplier || 1;
     const shield = this.hasEquipEffect("shield");
-    const reduction = shield ? (shield.damageReduction || 0) : 0;
+    const armor = this.hasEquipEffect("armor_reduction");
+    const reduction = (shield ? (shield.damageReduction || 0) : 0) + (armor ? (armor.damageReduction || 0) : 0);
     const singleDamage = Math.max(1, (BATTLE_RULES.enemyDamage * multiplier) - reduction);
     const totalDamage = singleDamage * count;
 
@@ -2010,12 +2096,36 @@ class BattleSystem {
       amount: totalDamage
     });
     this.bus.emit("sound", { name: "hurt" });
+
+    // Reflect check
+    const reflect = this.hasEquipEffect("reflect");
+    if (reflect && reflect.reflectDamage > 0) {
+      const target = this.state.enemies.find((e) => e.id === this.state.targetEnemyId && e.alive)
+        || this.state.enemies.find((e) => e.alive);
+      if (target) {
+        target.hp = Math.max(0, target.hp - reflect.reflectDamage);
+        if (target.hp === 0) target.alive = false;
+        this.state.enemyHp = this.state.enemies.reduce((acc, e) => acc + e.hp, 0);
+        this.bus.emit("battle:effect", {
+          type: "enemy-hit",
+          amount: reflect.reflectDamage,
+          targetId: target.id
+        });
+      }
+    }
+
     this.finishRound("loss", message);
   }
 
   finishRound(result, message) {
     this.state.phase = "result";
     this.state.lastResult = result;
+
+    // MP Regen effect check
+    const mpRegen = this.hasEquipEffect("mp_regen")?.mpRegen || 0;
+    if (mpRegen > 0) {
+      this.state.playerMp = Math.min(this.state.playerMaxMp, this.state.playerMp + mpRegen);
+    }
 
     // Burn effect check
     const burn = this.hasEquipEffect("burn");
@@ -2512,6 +2622,7 @@ class AppView {
     this.galleryVariantButtons = $("#gallery-variant-buttons");
     this.cheatModal = $("#cheat-modal");
     this.equipTooltip = $("#equip-tooltip");
+    this.activeShopFilter = "all";
   }
 
   init() {
@@ -2688,6 +2799,17 @@ class AppView {
       });
       if (this.growthGrid) this.growthGrid.hidden = this.activeGrowthTab !== "stats";
       if (this.skillsGrid) this.skillsGrid.hidden = this.activeGrowthTab !== "skills";
+      return;
+    }
+
+    const shopFilterBtn = event.target.closest("[data-shop-filter], [data-shop-tab]");
+    if (shopFilterBtn) {
+      this.activeShopFilter = shopFilterBtn.dataset.shopFilter || shopFilterBtn.dataset.shopTab;
+      document.querySelectorAll("[data-shop-filter], [data-shop-tab]").forEach((btn) => {
+        const btnFilter = btn.dataset.shopFilter || btn.dataset.shopTab;
+        btn.classList.toggle("is-active", btnFilter === this.activeShopFilter);
+      });
+      this.renderShop(this.store.snapshot());
       return;
     }
 
@@ -3028,47 +3150,112 @@ class AppView {
 
   renderShop(state) {
     $("#shop-coins").textContent = state.coins.toLocaleString("zh-TW");
+    const shopGrid = $("#shop-grid") || $("#shop-equipment-grid") || $("#shop-potions-grid");
+    if (!shopGrid) return;
 
-    // 1. Potions grid
-    const potionsGrid = $("#shop-potions-grid") || $("#shop-grid");
-    if (potionsGrid) {
-      potionsGrid.innerHTML = Object.values(ITEMS).map((item) => {
-        const description = item.resource === "hp"
-          ? "溫熱的紅色靈露，在對局中恢復 25 點生命。"
-          : "映著月色的藍色靈露，在對局中恢復 25 點魔力。";
-        return '<article class="shop-card">' +
-          '<div class="item-orb ' + item.color + '"><i>' + item.glyph + "</i></div>" +
-          '<div class="shop-info"><small>' + item.resource.toUpperCase() + " RECOVERY</small>" +
-          "<h3>" + item.name + "</h3><p>" + description + "</p>" +
-          '<div class="shop-buy-row"><span class="shop-owned">持有數<b>' + state.inventory[item.id] +
-          '</b></span><button type="button" class="button-primary shop-buy" data-buy="' + item.id +
-          '">✦ ' + item.price + " 購入</button></div></div></article>";
-      }).join("");
-    }
+    const filter = this.activeShopFilter || "all";
+    const getSlotLabel = (item) => {
+      if (item.twoHanded) return "主手 (雙手)";
+      if (item.slotType === "weapon") return "主手武器";
+      if (item.slotType === "offHand") return "副手武防";
+      if (item.slotType === "chest") return "胸甲";
+      if (item.slotType === "head") return "頭盔";
+      if (item.slotType === "shoulders") return "肩甲";
+      if (item.slotType === "belt") return "腰帶";
+      if (item.slotType === "boots") return "鞋子";
+      if (item.slotType === "ring") return "戒指";
+      if (item.slotType === "earring") return "耳環";
+      if (item.slotType === "badge") return "胸章";
+      return EQUIPMENT_SLOTS[item.slotType]?.label || "裝備";
+    };
 
-    // 2. Equipment grid
-    const equipGrid = $("#shop-equipment-grid");
-    if (equipGrid) {
-      equipGrid.innerHTML = Object.values(EQUIPMENT_ITEMS).map((item) => {
-        const statParts = [];
-        if (item.stats.damage) statParts.push("攻擊 +" + item.stats.damage);
-        if (item.stats.hp) statParts.push("生命 +" + item.stats.hp);
-        if (item.stats.mp) statParts.push("魔力 +" + item.stats.mp);
-        const statsText = statParts.join(" / ");
+    const categories = [
+      {
+        id: "potions",
+        title: "消耗靈露",
+        items: Object.values(ITEMS).map((item) => ({ ...item, isPotion: true }))
+      },
+      {
+        id: "weapon",
+        title: "主手武器",
+        items: Object.values(EQUIPMENT_ITEMS).filter((item) => item.slotType === "weapon")
+      },
+      {
+        id: "offHand",
+        title: "副手武防",
+        items: Object.values(EQUIPMENT_ITEMS).filter((item) => item.slotType === "offHand" || item.id === "dagger_shadow")
+      },
+      {
+        id: "chest",
+        title: "胸甲防具",
+        items: Object.values(EQUIPMENT_ITEMS).filter((item) => item.slotType === "chest")
+      },
+      {
+        id: "armor",
+        title: "其他防具（頭/肩/腰/鞋）",
+        items: Object.values(EQUIPMENT_ITEMS).filter((item) => ["head", "shoulders", "belt", "boots"].includes(item.slotType))
+      },
+      {
+        id: "accessory",
+        title: "飾品配件（戒指/耳環/胸章）",
+        items: Object.values(EQUIPMENT_ITEMS).filter((item) => ["ring", "earring", "badge"].includes(item.slotType))
+      }
+    ];
 
-        return '<article class="shop-equip-card rarity-' + item.rarity + '" data-equip-tooltip-id="' + item.id + '">' +
-          '<div class="shop-equip-icon">' + item.icon + '</div>' +
-          '<div class="shop-equip-info">' +
-          '<div class="shop-equip-name">' + item.name + '</div>' +
-          '<div class="shop-equip-stats">' + statsText + '</div>' +
-          '<div class="shop-equip-desc">' + item.description + '</div>' +
-          '<div class="shop-equip-action">' +
-          '<span style="font-size:12px;color:var(--gold);">✦ ' + item.price + ' 星砂</span>' +
-          '<button type="button" class="button-primary" data-buy-equip="' + item.id + '"' + (state.coins < item.price ? " disabled" : "") + '>購入</button>' +
-          '</div>' +
-          '</div></article>';
-      }).join("");
-    }
+    let html = "";
+    categories.forEach((cat) => {
+      if (filter !== "all" && filter !== cat.id && filter !== (cat.id === "potions" ? "potion" : cat.id)) return;
+      if (filter === "all") {
+        html += '<div class="shop-section-heading"><span>✦ ' + cat.title + '</span></div>';
+      }
+
+      cat.items.forEach((item) => {
+        if (item.isPotion) {
+          const description = item.resource === "hp"
+            ? "溫熱的紅色靈露，在對局中恢復 25 點生命。"
+            : "映著月色的藍色靈露，在對局中恢復 25 點魔力。";
+          html += '<article class="shop-equip-card shop-card-potion">' +
+            '<div class="item-orb ' + item.color + '"><i>' + item.glyph + "</i></div>" +
+            '<div class="shop-equip-info">' +
+            '<div class="shop-equip-header">' +
+            '<span class="shop-slot-badge is-potion">【消耗靈露】</span>' +
+            '<span class="shop-equip-name">' + item.name + '</span>' +
+            '</div>' +
+            '<div class="shop-equip-desc">' + description + '</div>' +
+            '<div class="shop-equip-action">' +
+            '<span class="shop-owned">持有數 <b>' + state.inventory[item.id] + '</b></span>' +
+            '<button type="button" class="button-primary" data-buy="' + item.id + '"' +
+            (state.coins < item.price ? " disabled" : "") + '>✦ ' + item.price + ' 購入</button>' +
+            '</div>' +
+            '</div></article>';
+        } else {
+          const statParts = [];
+          if (item.stats.damage) statParts.push("攻擊 +" + item.stats.damage);
+          if (item.stats.hp) statParts.push("生命 +" + item.stats.hp);
+          if (item.stats.mp) statParts.push("魔力 +" + item.stats.mp);
+          const statsText = statParts.join(" / ");
+          const slotLabel = getSlotLabel(item);
+
+          html += '<article class="shop-equip-card rarity-' + item.rarity + '" data-equip-tooltip-id="' + item.id + '">' +
+            '<div class="shop-equip-icon">' + item.icon + '</div>' +
+            '<div class="shop-equip-info">' +
+            '<div class="shop-equip-header">' +
+            '<span class="shop-slot-badge">【' + slotLabel + '】</span>' +
+            '<span class="shop-equip-name">' + item.name + '</span>' +
+            '</div>' +
+            '<div class="shop-equip-stats">' + statsText + '</div>' +
+            '<div class="shop-equip-desc">' + item.description + '</div>' +
+            '<div class="shop-equip-action">' +
+            '<span style="font-size:12px;color:var(--gold);">✦ ' + item.price + ' 星砂</span>' +
+            '<button type="button" class="button-primary" data-buy-equip="' + item.id + '"' +
+            (state.coins < item.price ? " disabled" : "") + '>購入</button>' +
+            '</div>' +
+            '</div></article>';
+        }
+      });
+    });
+
+    shopGrid.innerHTML = html;
   }
 
   renderGrowth(state) {
@@ -3282,7 +3469,7 @@ class AppView {
               <span class="bag-item-icon">${item.icon}</span>
               <div class="bag-item-info">
                 <span class="bag-item-name">${item.name}</span>
-                <span class="bag-item-type">${item.twoHanded ? "雙手武器" : (item.slotType.toUpperCase())}</span>
+                <span class="bag-item-type">${item.twoHanded ? "雙手武器" : (EQUIPMENT_SLOTS[item.slotType]?.label || item.slotType)}</span>
               </div>
             </button>
           `;

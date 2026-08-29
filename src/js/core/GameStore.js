@@ -15,6 +15,7 @@ const DEFAULT_SAVE = Object.freeze({
   equipment: {
     head: null,
     shoulders: null,
+    chest: null,
     belt: null,
     boots: null,
     mainHand: null,

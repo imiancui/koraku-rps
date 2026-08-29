@@ -2673,6 +2673,30 @@
 /* Equipment Shop Cards */
 .equipment-shop-grid {
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.shop-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.shop-section-heading {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 0 6px;
+  border-bottom: 1px solid var(--line);
+  margin-top: 10px;
+}
+
+.shop-section-heading span {
+  font: 600 14px var(--serif);
+  color: var(--gold-bright);
+  letter-spacing: 0.1em;
 }
 
 .shop-equip-card {
@@ -2682,17 +2706,36 @@
   border-radius: 4px;
   display: flex;
   gap: 14px;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.shop-equip-card:hover {
+  border-color: var(--gold);
+  transform: translateY(-2px);
+}
+
+.shop-card-potion .item-orb {
+  width: 54px;
+  height: 54px;
+  margin: 0;
+}
+
+.shop-card-potion .item-orb i {
+  width: 36px;
+  height: 36px;
+  font-size: 18px;
 }
 
 .shop-equip-icon {
   font-size: 32px;
   display: grid;
   place-content: center;
-  width: 50px;
-  height: 50px;
+  width: 54px;
+  height: 54px;
   background: rgba(0, 0, 0, 0.4);
   border-radius: 4px;
   border: 1px solid var(--line);
+  flex-shrink: 0;
 }
 
 .shop-equip-info {
@@ -2701,10 +2744,36 @@
   flex-direction: column;
 }
 
-.shop-equip-name {
-  font-size: 14px;
-  font-weight: 600;
+.shop-equip-header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
   margin-bottom: 4px;
+}
+
+.shop-slot-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--gold);
+  background: rgba(216, 182, 106, 0.12);
+  border: 1px solid rgba(216, 182, 106, 0.25);
+  border-radius: 2px;
+  padding: 1px 5px;
+  letter-spacing: 0.05em;
+}
+
+.shop-slot-badge.is-potion {
+  color: var(--azure-bright);
+  background: rgba(105, 200, 238, 0.12);
+  border-color: rgba(105, 200, 238, 0.25);
+}
+
+.shop-equip-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--paper);
 }
 
 .shop-equip-stats {

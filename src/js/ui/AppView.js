@@ -66,6 +66,7 @@ export class AppView {
     this.galleryVariantButtons = $("#gallery-variant-buttons");
     this.cheatModal = $("#cheat-modal");
     this.equipTooltip = $("#equip-tooltip");
+    this.activeShopFilter = "all";
   }
 
   init() {
@@ -242,6 +243,17 @@ export class AppView {
       });
       if (this.growthGrid) this.growthGrid.hidden = this.activeGrowthTab !== "stats";
       if (this.skillsGrid) this.skillsGrid.hidden = this.activeGrowthTab !== "skills";
+      return;
+    }
+
+    const shopFilterBtn = event.target.closest("[data-shop-filter], [data-shop-tab]");
+    if (shopFilterBtn) {
+      this.activeShopFilter = shopFilterBtn.dataset.shopFilter || shopFilterBtn.dataset.shopTab;
+      document.querySelectorAll("[data-shop-filter], [data-shop-tab]").forEach((btn) => {
+        const btnFilter = btn.dataset.shopFilter || btn.dataset.shopTab;
+        btn.classList.toggle("is-active", btnFilter === this.activeShopFilter);
+      });
+      this.renderShop(this.store.snapshot());
       return;
     }
 
@@ -582,47 +594,112 @@ export class AppView {
 
   renderShop(state) {
     $("#shop-coins").textContent = state.coins.toLocaleString("zh-TW");
+    const shopGrid = $("#shop-grid") || $("#shop-equipment-grid") || $("#shop-potions-grid");
+    if (!shopGrid) return;
 
-    // 1. Potions grid
-    const potionsGrid = $("#shop-potions-grid") || $("#shop-grid");
-    if (potionsGrid) {
-      potionsGrid.innerHTML = Object.values(ITEMS).map((item) => {
-        const description = item.resource === "hp"
-          ? "溫熱的紅色靈露，在對局中恢復 25 點生命。"
-          : "映著月色的藍色靈露，在對局中恢復 25 點魔力。";
-        return '<article class="shop-card">' +
-          '<div class="item-orb ' + item.color + '"><i>' + item.glyph + "</i></div>" +
-          '<div class="shop-info"><small>' + item.resource.toUpperCase() + " RECOVERY</small>" +
-          "<h3>" + item.name + "</h3><p>" + description + "</p>" +
-          '<div class="shop-buy-row"><span class="shop-owned">持有數<b>' + state.inventory[item.id] +
-          '</b></span><button type="button" class="button-primary shop-buy" data-buy="' + item.id +
-          '">✦ ' + item.price + " 購入</button></div></div></article>";
-      }).join("");
-    }
+    const filter = this.activeShopFilter || "all";
+    const getSlotLabel = (item) => {
+      if (item.twoHanded) return "主手 (雙手)";
+      if (item.slotType === "weapon") return "主手武器";
+      if (item.slotType === "offHand") return "副手武防";
+      if (item.slotType === "chest") return "胸甲";
+      if (item.slotType === "head") return "頭盔";
+      if (item.slotType === "shoulders") return "肩甲";
+      if (item.slotType === "belt") return "腰帶";
+      if (item.slotType === "boots") return "鞋子";
+      if (item.slotType === "ring") return "戒指";
+      if (item.slotType === "earring") return "耳環";
+      if (item.slotType === "badge") return "胸章";
+      return EQUIPMENT_SLOTS[item.slotType]?.label || "裝備";
+    };
 
-    // 2. Equipment grid
-    const equipGrid = $("#shop-equipment-grid");
-    if (equipGrid) {
-      equipGrid.innerHTML = Object.values(EQUIPMENT_ITEMS).map((item) => {
-        const statParts = [];
-        if (item.stats.damage) statParts.push("攻擊 +" + item.stats.damage);
-        if (item.stats.hp) statParts.push("生命 +" + item.stats.hp);
-        if (item.stats.mp) statParts.push("魔力 +" + item.stats.mp);
-        const statsText = statParts.join(" / ");
+    const categories = [
+      {
+        id: "potions",
+        title: "消耗靈露",
+        items: Object.values(ITEMS).map((item) => ({ ...item, isPotion: true }))
+      },
+      {
+        id: "weapon",
+        title: "主手武器",
+        items: Object.values(EQUIPMENT_ITEMS).filter((item) => item.slotType === "weapon")
+      },
+      {
+        id: "offHand",
+        title: "副手武防",
+        items: Object.values(EQUIPMENT_ITEMS).filter((item) => item.slotType === "offHand" || item.id === "dagger_shadow")
+      },
+      {
+        id: "chest",
+        title: "胸甲防具",
+        items: Object.values(EQUIPMENT_ITEMS).filter((item) => item.slotType === "chest")
+      },
+      {
+        id: "armor",
+        title: "其他防具（頭/肩/腰/鞋）",
+        items: Object.values(EQUIPMENT_ITEMS).filter((item) => ["head", "shoulders", "belt", "boots"].includes(item.slotType))
+      },
+      {
+        id: "accessory",
+        title: "飾品配件（戒指/耳環/胸章）",
+        items: Object.values(EQUIPMENT_ITEMS).filter((item) => ["ring", "earring", "badge"].includes(item.slotType))
+      }
+    ];
 
-        return '<article class="shop-equip-card rarity-' + item.rarity + '" data-equip-tooltip-id="' + item.id + '">' +
-          '<div class="shop-equip-icon">' + item.icon + '</div>' +
-          '<div class="shop-equip-info">' +
-          '<div class="shop-equip-name">' + item.name + '</div>' +
-          '<div class="shop-equip-stats">' + statsText + '</div>' +
-          '<div class="shop-equip-desc">' + item.description + '</div>' +
-          '<div class="shop-equip-action">' +
-          '<span style="font-size:12px;color:var(--gold);">✦ ' + item.price + ' 星砂</span>' +
-          '<button type="button" class="button-primary" data-buy-equip="' + item.id + '"' + (state.coins < item.price ? " disabled" : "") + '>購入</button>' +
-          '</div>' +
-          '</div></article>';
-      }).join("");
-    }
+    let html = "";
+    categories.forEach((cat) => {
+      if (filter !== "all" && filter !== cat.id && filter !== (cat.id === "potions" ? "potion" : cat.id)) return;
+      if (filter === "all") {
+        html += '<div class="shop-section-heading"><span>✦ ' + cat.title + '</span></div>';
+      }
+
+      cat.items.forEach((item) => {
+        if (item.isPotion) {
+          const description = item.resource === "hp"
+            ? "溫熱的紅色靈露，在對局中恢復 25 點生命。"
+            : "映著月色的藍色靈露，在對局中恢復 25 點魔力。";
+          html += '<article class="shop-equip-card shop-card-potion">' +
+            '<div class="item-orb ' + item.color + '"><i>' + item.glyph + "</i></div>" +
+            '<div class="shop-equip-info">' +
+            '<div class="shop-equip-header">' +
+            '<span class="shop-slot-badge is-potion">【消耗靈露】</span>' +
+            '<span class="shop-equip-name">' + item.name + '</span>' +
+            '</div>' +
+            '<div class="shop-equip-desc">' + description + '</div>' +
+            '<div class="shop-equip-action">' +
+            '<span class="shop-owned">持有數 <b>' + state.inventory[item.id] + '</b></span>' +
+            '<button type="button" class="button-primary" data-buy="' + item.id + '"' +
+            (state.coins < item.price ? " disabled" : "") + '>✦ ' + item.price + ' 購入</button>' +
+            '</div>' +
+            '</div></article>';
+        } else {
+          const statParts = [];
+          if (item.stats.damage) statParts.push("攻擊 +" + item.stats.damage);
+          if (item.stats.hp) statParts.push("生命 +" + item.stats.hp);
+          if (item.stats.mp) statParts.push("魔力 +" + item.stats.mp);
+          const statsText = statParts.join(" / ");
+          const slotLabel = getSlotLabel(item);
+
+          html += '<article class="shop-equip-card rarity-' + item.rarity + '" data-equip-tooltip-id="' + item.id + '">' +
+            '<div class="shop-equip-icon">' + item.icon + '</div>' +
+            '<div class="shop-equip-info">' +
+            '<div class="shop-equip-header">' +
+            '<span class="shop-slot-badge">【' + slotLabel + '】</span>' +
+            '<span class="shop-equip-name">' + item.name + '</span>' +
+            '</div>' +
+            '<div class="shop-equip-stats">' + statsText + '</div>' +
+            '<div class="shop-equip-desc">' + item.description + '</div>' +
+            '<div class="shop-equip-action">' +
+            '<span style="font-size:12px;color:var(--gold);">✦ ' + item.price + ' 星砂</span>' +
+            '<button type="button" class="button-primary" data-buy-equip="' + item.id + '"' +
+            (state.coins < item.price ? " disabled" : "") + '>購入</button>' +
+            '</div>' +
+            '</div></article>';
+        }
+      });
+    });
+
+    shopGrid.innerHTML = html;
   }
 
   renderGrowth(state) {
@@ -836,7 +913,7 @@ export class AppView {
               <span class="bag-item-icon">${item.icon}</span>
               <div class="bag-item-info">
                 <span class="bag-item-name">${item.name}</span>
-                <span class="bag-item-type">${item.twoHanded ? "雙手武器" : (item.slotType.toUpperCase())}</span>
+                <span class="bag-item-type">${item.twoHanded ? "雙手武器" : (EQUIPMENT_SLOTS[item.slotType]?.label || item.slotType)}</span>
               </div>
             </button>
           `;

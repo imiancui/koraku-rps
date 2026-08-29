@@ -1,4 +1,4 @@
-﻿import test from "node:test";
+import test from "node:test";
 import assert from "node:assert/strict";
 import { EQUIPMENT_ITEMS } from "../src/js/config/gameConfig.js";
 import { EventBus } from "../src/js/core/EventBus.js";
@@ -87,3 +87,23 @@ test("雙手巨劍互斥邏輯：穿戴雙手武器自動卸下副手，穿戴�
   assert.equal(store.state.equipment.mainHand, null, "副手穿戴盾牌後原雙手大劍自動卸下");
   assert.ok(store.state.inventoryEquipment.includes("sword_great_nine"));
 });
+
+test("胸甲裝備穿戴與卸下：正確裝備至 chest 格位並加成屬性", () => {
+  const bus = new EventBus();
+  const persistence = new MemoryPersistence();
+  const store = new GameStore(bus, persistence);
+
+  store.state.inventoryEquipment = ["chest_samurai"];
+  const res = store.equipItem("chest_samurai");
+  assert.equal(res.ok, true);
+  assert.equal(store.state.equipment.chest, "chest_samurai");
+  assert.equal(store.state.inventoryEquipment.length, 0);
+
+  const stats = store.snapshot().playerStats;
+  assert.equal(stats.maxHp, 100 + EQUIPMENT_ITEMS.chest_samurai.stats.hp);
+
+  store.unequipItem("chest");
+  assert.equal(store.state.equipment.chest, null);
+  assert.deepEqual(store.state.inventoryEquipment, ["chest_samurai"]);
+});
+

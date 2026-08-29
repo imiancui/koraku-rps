@@ -595,9 +595,18 @@ export class BattleSystem {
   }
 
   damagePlayer(message) {
+    const dodge = this.hasEquipEffect("dodge");
+    if (dodge && this.random() < (dodge.dodgeChance || 0.25)) {
+      this.bus.emit("battle:effect", { type: "player-dodge" });
+      this.bus.emit("sound", { name: "danger" });
+      this.finishRound("draw", "殘影閃避！你藉由幻影羽織化解了攻勢！");
+      return;
+    }
+
     const multiplier = this.state.stage.enemyDamageMultiplier || 1;
     const shield = this.hasEquipEffect("shield");
-    const reduction = shield ? (shield.damageReduction || 0) : 0;
+    const armor = this.hasEquipEffect("armor_reduction");
+    const reduction = (shield ? (shield.damageReduction || 0) : 0) + (armor ? (armor.damageReduction || 0) : 0);
     const totalDamage = Math.max(1, (BATTLE_RULES.enemyDamage * multiplier) - reduction);
 
     this.state.playerHp = Math.max(0, this.state.playerHp - totalDamage);
@@ -606,13 +615,40 @@ export class BattleSystem {
       amount: totalDamage
     });
     this.bus.emit("sound", { name: "hurt" });
+
+    // Reflect check
+    const reflect = this.hasEquipEffect("reflect");
+    if (reflect && reflect.reflectDamage > 0) {
+      const target = this.state.enemies.find((e) => e.id === this.state.targetEnemyId && e.alive)
+        || this.state.enemies.find((e) => e.alive);
+      if (target) {
+        target.hp = Math.max(0, target.hp - reflect.reflectDamage);
+        if (target.hp === 0) target.alive = false;
+        this.state.enemyHp = this.state.enemies.reduce((acc, e) => acc + e.hp, 0);
+        this.bus.emit("battle:effect", {
+          type: "enemy-hit",
+          amount: reflect.reflectDamage,
+          targetId: target.id
+        });
+      }
+    }
+
     this.finishRound("loss", message);
   }
 
   damagePlayerForDual(count, message) {
+    const dodge = this.hasEquipEffect("dodge");
+    if (dodge && this.random() < (dodge.dodgeChance || 0.25)) {
+      this.bus.emit("battle:effect", { type: "player-dodge" });
+      this.bus.emit("sound", { name: "danger" });
+      this.finishRound("draw", "殘影閃避！你藉由幻影羽織化解了雙生攻勢！");
+      return;
+    }
+
     const multiplier = this.state.stage.enemyDamageMultiplier || 1;
     const shield = this.hasEquipEffect("shield");
-    const reduction = shield ? (shield.damageReduction || 0) : 0;
+    const armor = this.hasEquipEffect("armor_reduction");
+    const reduction = (shield ? (shield.damageReduction || 0) : 0) + (armor ? (armor.damageReduction || 0) : 0);
     const singleDamage = Math.max(1, (BATTLE_RULES.enemyDamage * multiplier) - reduction);
     const totalDamage = singleDamage * count;
 
@@ -622,12 +658,36 @@ export class BattleSystem {
       amount: totalDamage
     });
     this.bus.emit("sound", { name: "hurt" });
+
+    // Reflect check
+    const reflect = this.hasEquipEffect("reflect");
+    if (reflect && reflect.reflectDamage > 0) {
+      const target = this.state.enemies.find((e) => e.id === this.state.targetEnemyId && e.alive)
+        || this.state.enemies.find((e) => e.alive);
+      if (target) {
+        target.hp = Math.max(0, target.hp - reflect.reflectDamage);
+        if (target.hp === 0) target.alive = false;
+        this.state.enemyHp = this.state.enemies.reduce((acc, e) => acc + e.hp, 0);
+        this.bus.emit("battle:effect", {
+          type: "enemy-hit",
+          amount: reflect.reflectDamage,
+          targetId: target.id
+        });
+      }
+    }
+
     this.finishRound("loss", message);
   }
 
   finishRound(result, message) {
     this.state.phase = "result";
     this.state.lastResult = result;
+
+    // MP Regen effect check
+    const mpRegen = this.hasEquipEffect("mp_regen")?.mpRegen || 0;
+    if (mpRegen > 0) {
+      this.state.playerMp = Math.min(this.state.playerMaxMp, this.state.playerMp + mpRegen);
+    }
 
     // Burn effect check
     const burn = this.hasEquipEffect("burn");
