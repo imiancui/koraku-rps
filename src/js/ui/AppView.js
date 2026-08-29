@@ -741,7 +741,9 @@ export class AppView {
     const stage = STAGES.find((s) => s.id === stageId);
     if (!stage) return;
     const locked = snapshot.profile.level < stage.requiredLevel;
-    const cleared = (snapshot.records?.clearedStages || []).includes(stageId);
+    const stageStat = snapshot.records?.stageStats?.[stageId] || { totalAttempts: 0, manualWins: 0, manualLosses: 0, autoWins: 0, autoLosses: 0 };
+    const hasWins = ((stageStat.manualWins || 0) + (stageStat.autoWins || 0)) > 0 || (stageId === 1 && ((snapshot.records?.wins || 0) > 0 || (snapshot.records?.manualWins || 0) > 0));
+    const cleared = (snapshot.records?.clearedStages || []).includes(stageId) && hasWins;
     if (locked || !cleared) {
       this.showToast(I18n.t("ui.mustClearOnceForAuto"), "danger");
       return;
@@ -777,7 +779,9 @@ export class AppView {
     const stage = STAGES.find((s) => s.id === stageId);
     if (!stage) return;
     const locked = snapshot.profile.level < stage.requiredLevel;
-    const cleared = (snapshot.records?.clearedStages || []).includes(stageId);
+    const stageStat = snapshot.records?.stageStats?.[stageId] || { totalAttempts: 0, manualWins: 0, manualLosses: 0, autoWins: 0, autoLosses: 0 };
+    const hasWins = ((stageStat.manualWins || 0) + (stageStat.autoWins || 0)) > 0 || (stageId === 1 && ((snapshot.records?.wins || 0) > 0 || (snapshot.records?.manualWins || 0) > 0));
+    const cleared = (snapshot.records?.clearedStages || []).includes(stageId) && hasWins;
     if (locked || !cleared) {
       this.showToast(I18n.t("ui.mustClearOnceForAuto"), "danger");
       return;
@@ -1065,8 +1069,9 @@ export class AppView {
     $("#stage-grid").innerHTML = STAGES.map((stage, index) => {
       const locStage = I18n.getLocalizedStage(stage);
       const locked = state.profile.level < stage.requiredLevel;
-      const cleared = (state.records.clearedStages || []).includes(stage.id);
       const stageStat = state.records?.stageStats?.[stage.id] || { totalAttempts: 0, manualWins: 0, manualLosses: 0, autoWins: 0, autoLosses: 0 };
+      const hasWins = ((stageStat.manualWins || 0) + (stageStat.autoWins || 0)) > 0 || (stage.id === 1 && ((state.records?.wins || 0) > 0 || (state.records?.manualWins || 0) > 0));
+      const cleared = (state.records.clearedStages || []).includes(stage.id) && hasWins;
       const attemptsText = I18n.t("ui.stageAttempts", { total: stageStat.totalAttempts || 0 });
 
       const classes = [
@@ -2087,7 +2092,7 @@ export class AppView {
     this.setWatermelonTicker(state.scene === "watermelonAim");
     $("#watermelon-attempt").textContent = "第 " + (watermelon.attempts + 1) + " 刀 / " + watermelon.maxAttempts;
     $("#watermelon-successes").textContent = I18n.t("ui.watermelonScore") + " " + watermelon.successes;
-    const tolerance = state.tolerance ?? (0.13 * (0.5 ** watermelon.successes));
+    const tolerance = state.tolerance ?? (0.13 * (0.5 ** watermelon.attempts));
     $("#watermelon-target").style.left = (state.target * 100) + "%";
     $("#watermelon-target").style.width = (tolerance * 2 * 100) + "%";
     const watermelonStatus = $("#watermelon-status");

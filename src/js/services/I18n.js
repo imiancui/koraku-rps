@@ -322,7 +322,7 @@ const DICTIONARY = {
       // Auto-Battle & Frost & Pause
       btnAutoBattle: "⚡ 自動刷關",
       autoBattleModalTitle: "⚡ 自動連續刷關設定",
-      autoBattleModalDesc: "自動為您進行出拳、變拳與 QTE 反制。獲勝時直接跳過切西瓜領取獎勵並接續下一場；失敗時自動扣除次數繼續重試。",
+      autoBattleModalDesc: "連續自動進行關卡對局，依據角色當前屬性與裝備配置挑戰。獲勝時直接跳過切西瓜領取獎勵並接續下一場；失敗時自動扣除次數繼續重試。",
       autoBattleCountLabel: "選擇連續刷關次數：",
       autoBattleTimes: "{count} 次",
       btnStartAutoBattle: "⚡ 開始自動刷關",
@@ -768,7 +768,7 @@ const DICTIONARY = {
       // Auto-Battle & Frost & Pause
       btnAutoBattle: "⚡ 自动刷关",
       autoBattleModalTitle: "⚡ 自动连续刷关设置",
-      autoBattleModalDesc: "自动为您进行出拳、变拳与 QTE 反制。获胜时直接跳过切西瓜领取奖励并接续下一场；失败时自动扣除次数继续重试。",
+      autoBattleModalDesc: "连续自动进行关卡对局，依据角色当前属性与装备配置挑战。获胜时直接跳过切西瓜领取奖励并接续下一场；失败时自动扣除次数继续重试。",
       autoBattleCountLabel: "选择连续刷关次数：",
       autoBattleTimes: "{count} 次",
       btnStartAutoBattle: "⚡ 开始自动刷关",
@@ -1161,7 +1161,7 @@ const DICTIONARY = {
       // Auto-Battle & Frost & Pause
       btnAutoBattle: "⚡ Auto-Battle",
       autoBattleModalTitle: "⚡ Auto-Battle Stage Config",
-      autoBattleModalDesc: "Automatically executes throws, Morphs, and QTE counters. Wins claim rewards and skip watermelon to continue; losses deduct attempts and auto-retry.",
+      autoBattleModalDesc: "Continuously battles the stage using your current character attributes and equipment. Wins claim rewards and skip watermelon to continue; losses deduct attempts and auto-retry.",
       autoBattleCountLabel: "Select continuous battle count:",
       autoBattleTimes: "{count} Times",
       btnStartAutoBattle: "⚡ Start Auto-Battle",
@@ -1555,7 +1555,7 @@ const DICTIONARY = {
       // Auto-Battle & Frost & Pause
       btnAutoBattle: "⚡ 自動周回",
       autoBattleModalTitle: "⚡ 自動連続周回設定",
-      autoBattleModalDesc: "出拳・変拳・QTE反撃を自動で行います。勝利時はスイカ割りをスキップして報酬を獲得し次へ進み、敗北時は回数を消費して自動で再試行します。",
+      autoBattleModalDesc: "現在のステータスと装備構成でステージを連続周回します。勝利時はスイカ割りをスキップして報酬を獲得し次へ進み、敗北時は回数を消費して自動で再試行します。",
       autoBattleCountLabel: "連続周回回数を選択：",
       autoBattleTimes: "{count} 回",
       btnStartAutoBattle: "⚡ 自動周回を開始",

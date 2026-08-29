@@ -106,4 +106,24 @@ test("自動刷關暫停與繼續：支援 pauseAutoBattle / resumeAutoBattle / 
   battle.abandon();
 });
 
+test("自動刷關僅為連續挑戰：不自動猜拳變拳，保留玩家選擇與數值挑戰", () => {
+  const bus = new EventBus();
+  const persistence = new MemoryPersistence();
+  const store = new GameStore(bus, persistence);
+  store.state.records.clearedStages = [1];
+  store.state.profile.level = 5;
+
+  const battle = new BattleSystem(bus, store);
+  assert.equal(battle.startAutoBattle(1, 5), true);
+  battle.selectHand("rock");
+  assert.equal(battle.state.selectedHand, "rock");
+
+  // Advance to reveal: player's hand remains rock
+  battle.revealHands();
+  assert.equal(battle.state.selectedHand, "rock");
+  assert.equal(battle.state.morphUsed, false);
+
+  battle.abandon();
+});
+
 

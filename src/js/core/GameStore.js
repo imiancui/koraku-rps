@@ -90,11 +90,6 @@ function freshSave() {
 function sanitizeSave(candidate) {
   if (!candidate || candidate.version !== 1) return freshSave();
   const base = freshSave();
-  const rawCleared = candidate.records?.clearedStages;
-  const clearedStages = Array.isArray(rawCleared)
-    ? [...rawCleared]
-    : [];
-
   const rawStats = candidate.records?.stageStats || {};
   const stageStats = {
     1: { totalAttempts: 0, manualWins: 0, manualLosses: 0, autoWins: 0, autoLosses: 0, ...(rawStats[1] || {}) },
@@ -102,6 +97,15 @@ function sanitizeSave(candidate) {
     3: { totalAttempts: 0, manualWins: 0, manualLosses: 0, autoWins: 0, autoLosses: 0, ...(rawStats[3] || {}) },
     4: { totalAttempts: 0, manualWins: 0, manualLosses: 0, autoWins: 0, autoLosses: 0, ...(rawStats[4] || {}) }
   };
+
+  const rawCleared = candidate.records?.clearedStages;
+  let clearedStages = Array.isArray(rawCleared) ? [...rawCleared] : [];
+  clearedStages = clearedStages.filter((stageId) => {
+    const s = stageStats[stageId];
+    if (s && ((s.manualWins || 0) + (s.autoWins || 0) > 0)) return true;
+    if (stageId === 1 && ((candidate.records?.wins || 0) > 0 || (candidate.records?.manualWins || 0) > 0)) return true;
+    return false;
+  });
 
   return {
     ...base,

@@ -169,13 +169,7 @@ export class BattleSystem {
     }
     this.bus.emit("auto-battle:resumed", { ...this.autoBattle });
 
-    if (this.state?.active) {
-      if (this.state.phase === "countdown") {
-        this.runAutoBattleCountdown();
-      } else if (this.state.phase === "qte") {
-        this.runAutoQte();
-      }
-    } else if (this.autoBattle.remainingRounds > 0) {
+    if (!this.state?.active && this.autoBattle.remainingRounds > 0) {
       this.start(this.autoBattle.stageId, { autoBattle: true });
     }
   }
@@ -311,10 +305,6 @@ export class BattleSystem {
     this.countdownDeadline = performance.now() + roundSeconds * 1000;
     this.emitState();
 
-    if (this.autoBattle.active) {
-      this.runAutoBattleCountdown();
-    }
-
     this.countdownId = this.timers.interval(() => {
       const remaining = Math.max(0, this.countdownDeadline - performance.now());
       const currentCount = Math.ceil(remaining / 1000);
@@ -340,39 +330,6 @@ export class BattleSystem {
       this.emitState();
       if (remaining <= 0) this.revealHands();
     }, 80);
-  }
-
-  runAutoBattleCountdown() {
-    if (!this.state?.active || !this.autoBattle.active || this.autoBattle.isPaused || this.state.phase !== "countdown") return;
-    this.timers.timeout(() => {
-      if (!this.state?.active || !this.autoBattle.active || this.autoBattle.isPaused || this.state.phase !== "countdown") return;
-
-      const frozen = this.state.frozenEnemyHand;
-      const hands = ["rock", "paper", "scissors"];
-      let leftHand = "rock";
-      let rightHand = "scissors";
-
-      if (frozen === "scissors") {
-        leftHand = "paper";
-        rightHand = "rock";
-      } else if (frozen === "rock") {
-        leftHand = "scissors";
-        rightHand = "paper";
-      } else if (frozen === "paper") {
-        leftHand = "rock";
-        rightHand = "scissors";
-      } else {
-        leftHand = hands[Math.floor(this.random() * hands.length)];
-        rightHand = hands[(hands.indexOf(leftHand) + 1) % 3];
-      }
-
-      if (this.state.hasDualHandSkill) {
-        this.selectHand(leftHand, "left");
-        this.selectHand(rightHand, "right");
-      } else {
-        this.selectHand(leftHand);
-      }
-    }, 200);
   }
 
   selectHand(handId, slot = null) {
@@ -461,12 +418,6 @@ export class BattleSystem {
     this.reactionDeadline = performance.now() + reactionWindowMs;
     this.emitState();
     this.bus.emit("sound", { name: "reveal" });
-
-    if (this.autoBattle.active && this.state.enemyWinningEmoji && this.state.playerMp >= 25) {
-      this.timers.timeout(() => {
-        if (this.state?.phase === "reaction") this.useMorph();
-      }, 100);
-    }
 
     this.reactionTickId = this.timers.interval(() => {
       this.state.reactionRemaining = Math.max(0, (this.reactionDeadline - performance.now()) / 1000);
@@ -748,10 +699,6 @@ export class BattleSystem {
       qteDirections: this.state.stage.qteDirections || "all",
       maxErrors: this.state.stage.maxErrors ?? Infinity
     });
-
-    if (this.autoBattle.active) {
-      this.runAutoQte();
-    }
   }
 
   startDualQte() {
@@ -768,22 +715,6 @@ export class BattleSystem {
       qteDirections: this.state.stage.qteDirections || "all",
       maxErrors: this.state.stage.maxErrors ?? 1
     });
-
-    if (this.autoBattle.active) {
-      this.runAutoQte();
-    }
-  }
-
-  runAutoQte() {
-    if (!this.state?.active || !this.autoBattle.active || this.autoBattle.isPaused || this.state.phase !== "qte") return;
-    this.timers.timeout(() => {
-      if (!this.state?.active || !this.autoBattle.active || this.autoBattle.isPaused || this.state.phase !== "qte") return;
-      if (this.state.isDualQte) {
-        this.dualQte.finish();
-      } else {
-        this.qte.finish(true);
-      }
-    }, 250);
   }
 
   inputQte(directionId, slot = null) {

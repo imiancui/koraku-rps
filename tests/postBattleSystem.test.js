@@ -36,7 +36,7 @@ test("切西瓜固定三刀，成功每刀結算 100 額外經驗", () => {
   assert.deepEqual(granted, [300]);
 });
 
-test("切西瓜每成功一次，下一刀綠色安全範圍縮小 50%、速度增加 25%", () => {
+test("切西瓜不管成功失敗，下一刀綠色安全範圍縮小 50%、速度增加 25%", () => {
   const store = {
     grantExperience(amount) {
       return { xp: amount, levelsGained: 0 };
@@ -51,24 +51,26 @@ test("切西瓜每成功一次，下一刀綠色安全範圍縮小 50%、速度�
   assert.equal(system.state.tolerance, 0.13, "第 1 刀初始公差半徑應為 0.13");
   assert.equal(system.state.strikeDuration, 1800, "第 1 刀初始週期應為 1800ms");
 
-  // Force hit on knife 1
-  system.state.target = 0.5;
+  // Miss on knife 1 (target at 0.9, marker at 0.5)
+  system.state.target = 0.9;
   system.state.strikeStartedAt = performance.now() - (system.state.strikeDuration / 4); // marker at 0.5
   system.strike();
-  assert.equal(system.state.watermelon.successes, 1);
+  assert.equal(system.state.watermelon.successes, 0, "第 1 刀未命中");
+  assert.equal(system.state.watermelon.attempts, 1);
 
-  // Knife 2: after 1 success
+  // Knife 2: after 1 attempt (even if missed)
   system.startWatermelon();
-  assert.equal(system.state.tolerance, 0.065, "第 2 刀安全範圍縮小 50% (0.065)");
-  assert.equal(system.state.strikeDuration, 1440, "第 2 刀速度增加 25% (週期 1440ms)");
+  assert.equal(system.state.tolerance, 0.065, "第 2 刀安全範圍仍應縮小 50% (0.065)");
+  assert.equal(system.state.strikeDuration, 1440, "第 2 刀速度仍應增加 25% (週期 1440ms)");
 
   // Force hit on knife 2
   system.state.target = 0.5;
   system.state.strikeStartedAt = performance.now() - (system.state.strikeDuration / 4); // marker at 0.5
   system.strike();
-  assert.equal(system.state.watermelon.successes, 2);
+  assert.equal(system.state.watermelon.successes, 1);
+  assert.equal(system.state.watermelon.attempts, 2);
 
-  // Knife 3: after 2 successes
+  // Knife 3: after 2 attempts
   system.startWatermelon();
   assert.equal(system.state.tolerance, 0.0325, "第 3 刀安全範圍再次縮小 50% (0.0325)");
   assert.equal(system.state.strikeDuration, 1152, "第 3 刀速度再次增加 25% (週期 1152ms)");

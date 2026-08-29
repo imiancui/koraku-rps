@@ -771,7 +771,7 @@ const DICTIONARY = {
       // Auto-Battle & Frost & Pause
       btnAutoBattle: "⚡ 自動刷關",
       autoBattleModalTitle: "⚡ 自動連續刷關設定",
-      autoBattleModalDesc: "自動為您進行出拳、變拳與 QTE 反制。獲勝時直接跳過切西瓜領取獎勵並接續下一場；失敗時自動扣除次數繼續重試。",
+      autoBattleModalDesc: "連續自動進行關卡對局，依據角色當前屬性與裝備配置挑戰。獲勝時直接跳過切西瓜領取獎勵並接續下一場；失敗時自動扣除次數繼續重試。",
       autoBattleCountLabel: "選擇連續刷關次數：",
       autoBattleTimes: "{count} 次",
       btnStartAutoBattle: "⚡ 開始自動刷關",
@@ -1217,7 +1217,7 @@ const DICTIONARY = {
       // Auto-Battle & Frost & Pause
       btnAutoBattle: "⚡ 自动刷关",
       autoBattleModalTitle: "⚡ 自动连续刷关设置",
-      autoBattleModalDesc: "自动为您进行出拳、变拳与 QTE 反制。获胜时直接跳过切西瓜领取奖励并接续下一场；失败时自动扣除次数继续重试。",
+      autoBattleModalDesc: "连续自动进行关卡对局，依据角色当前属性与装备配置挑战。获胜时直接跳过切西瓜领取奖励并接续下一场；失败时自动扣除次数继续重试。",
       autoBattleCountLabel: "选择连续刷关次数：",
       autoBattleTimes: "{count} 次",
       btnStartAutoBattle: "⚡ 开始自动刷关",
@@ -1610,7 +1610,7 @@ const DICTIONARY = {
       // Auto-Battle & Frost & Pause
       btnAutoBattle: "⚡ Auto-Battle",
       autoBattleModalTitle: "⚡ Auto-Battle Stage Config",
-      autoBattleModalDesc: "Automatically executes throws, Morphs, and QTE counters. Wins claim rewards and skip watermelon to continue; losses deduct attempts and auto-retry.",
+      autoBattleModalDesc: "Continuously battles the stage using your current character attributes and equipment. Wins claim rewards and skip watermelon to continue; losses deduct attempts and auto-retry.",
       autoBattleCountLabel: "Select continuous battle count:",
       autoBattleTimes: "{count} Times",
       btnStartAutoBattle: "⚡ Start Auto-Battle",
@@ -2004,7 +2004,7 @@ const DICTIONARY = {
       // Auto-Battle & Frost & Pause
       btnAutoBattle: "⚡ 自動周回",
       autoBattleModalTitle: "⚡ 自動連続周回設定",
-      autoBattleModalDesc: "出拳・変拳・QTE反撃を自動で行います。勝利時はスイカ割りをスキップして報酬を獲得し次へ進み、敗北時は回数を消費して自動で再試行します。",
+      autoBattleModalDesc: "現在のステータスと装備構成でステージを連続周回します。勝利時はスイカ割りをスキップして報酬を獲得し次へ進み、敗北時は回数を消費して自動で再試行します。",
       autoBattleCountLabel: "連続周回回数を選択：",
       autoBattleTimes: "{count} 回",
       btnStartAutoBattle: "⚡ 自動周回を開始",
@@ -3254,11 +3254,6 @@ function freshSave() {
 function sanitizeSave(candidate) {
   if (!candidate || candidate.version !== 1) return freshSave();
   const base = freshSave();
-  const rawCleared = candidate.records?.clearedStages;
-  const clearedStages = Array.isArray(rawCleared)
-    ? [...rawCleared]
-    : [];
-
   const rawStats = candidate.records?.stageStats || {};
   const stageStats = {
     1: { totalAttempts: 0, manualWins: 0, manualLosses: 0, autoWins: 0, autoLosses: 0, ...(rawStats[1] || {}) },
@@ -3266,6 +3261,15 @@ function sanitizeSave(candidate) {
     3: { totalAttempts: 0, manualWins: 0, manualLosses: 0, autoWins: 0, autoLosses: 0, ...(rawStats[3] || {}) },
     4: { totalAttempts: 0, manualWins: 0, manualLosses: 0, autoWins: 0, autoLosses: 0, ...(rawStats[4] || {}) }
   };
+
+  const rawCleared = candidate.records?.clearedStages;
+  let clearedStages = Array.isArray(rawCleared) ? [...rawCleared] : [];
+  clearedStages = clearedStages.filter((stageId) => {
+    const s = stageStats[stageId];
+    if (s && ((s.manualWins || 0) + (s.autoWins || 0) > 0)) return true;
+    if (stageId === 1 && ((candidate.records?.wins || 0) > 0 || (candidate.records?.manualWins || 0) > 0)) return true;
+    return false;
+  });
 
   return {
     ...base,
@@ -4004,13 +4008,7 @@ class BattleSystem {
     }
     this.bus.emit("auto-battle:resumed", { ...this.autoBattle });
 
-    if (this.state?.active) {
-      if (this.state.phase === "countdown") {
-        this.runAutoBattleCountdown();
-      } else if (this.state.phase === "qte") {
-        this.runAutoQte();
-      }
-    } else if (this.autoBattle.remainingRounds > 0) {
+    if (!this.state?.active && this.autoBattle.remainingRounds > 0) {
       this.start(this.autoBattle.stageId, { autoBattle: true });
     }
   }
@@ -4146,10 +4144,6 @@ class BattleSystem {
     this.countdownDeadline = performance.now() + roundSeconds * 1000;
     this.emitState();
 
-    if (this.autoBattle.active) {
-      this.runAutoBattleCountdown();
-    }
-
     this.countdownId = this.timers.interval(() => {
       const remaining = Math.max(0, this.countdownDeadline - performance.now());
       const currentCount = Math.ceil(remaining / 1000);
@@ -4175,39 +4169,6 @@ class BattleSystem {
       this.emitState();
       if (remaining <= 0) this.revealHands();
     }, 80);
-  }
-
-  runAutoBattleCountdown() {
-    if (!this.state?.active || !this.autoBattle.active || this.autoBattle.isPaused || this.state.phase !== "countdown") return;
-    this.timers.timeout(() => {
-      if (!this.state?.active || !this.autoBattle.active || this.autoBattle.isPaused || this.state.phase !== "countdown") return;
-
-      const frozen = this.state.frozenEnemyHand;
-      const hands = ["rock", "paper", "scissors"];
-      let leftHand = "rock";
-      let rightHand = "scissors";
-
-      if (frozen === "scissors") {
-        leftHand = "paper";
-        rightHand = "rock";
-      } else if (frozen === "rock") {
-        leftHand = "scissors";
-        rightHand = "paper";
-      } else if (frozen === "paper") {
-        leftHand = "rock";
-        rightHand = "scissors";
-      } else {
-        leftHand = hands[Math.floor(this.random() * hands.length)];
-        rightHand = hands[(hands.indexOf(leftHand) + 1) % 3];
-      }
-
-      if (this.state.hasDualHandSkill) {
-        this.selectHand(leftHand, "left");
-        this.selectHand(rightHand, "right");
-      } else {
-        this.selectHand(leftHand);
-      }
-    }, 200);
   }
 
   selectHand(handId, slot = null) {
@@ -4296,12 +4257,6 @@ class BattleSystem {
     this.reactionDeadline = performance.now() + reactionWindowMs;
     this.emitState();
     this.bus.emit("sound", { name: "reveal" });
-
-    if (this.autoBattle.active && this.state.enemyWinningEmoji && this.state.playerMp >= 25) {
-      this.timers.timeout(() => {
-        if (this.state?.phase === "reaction") this.useMorph();
-      }, 100);
-    }
 
     this.reactionTickId = this.timers.interval(() => {
       this.state.reactionRemaining = Math.max(0, (this.reactionDeadline - performance.now()) / 1000);
@@ -4583,10 +4538,6 @@ class BattleSystem {
       qteDirections: this.state.stage.qteDirections || "all",
       maxErrors: this.state.stage.maxErrors ?? Infinity
     });
-
-    if (this.autoBattle.active) {
-      this.runAutoQte();
-    }
   }
 
   startDualQte() {
@@ -4603,22 +4554,6 @@ class BattleSystem {
       qteDirections: this.state.stage.qteDirections || "all",
       maxErrors: this.state.stage.maxErrors ?? 1
     });
-
-    if (this.autoBattle.active) {
-      this.runAutoQte();
-    }
-  }
-
-  runAutoQte() {
-    if (!this.state?.active || !this.autoBattle.active || this.autoBattle.isPaused || this.state.phase !== "qte") return;
-    this.timers.timeout(() => {
-      if (!this.state?.active || !this.autoBattle.active || this.autoBattle.isPaused || this.state.phase !== "qte") return;
-      if (this.state.isDualQte) {
-        this.dualQte.finish();
-      } else {
-        this.qte.finish(true);
-      }
-    }, 250);
   }
 
   inputQte(directionId, slot = null) {
@@ -5065,9 +5000,9 @@ class PostBattleSystem {
       !["swimsuit", "watermelonResult"].includes(this.state.scene) ||
       this.state.watermelon.attempts >= this.state.watermelon.maxAttempts
     ) return;
-    const successes = this.state.watermelon.successes;
-    this.state.tolerance = 0.13 * (0.5 ** successes);
-    this.state.strikeDuration = 1800 / (1.25 ** successes);
+    const attempts = this.state.watermelon.attempts;
+    this.state.tolerance = 0.13 * (0.5 ** attempts);
+    this.state.strikeDuration = 1800 / (1.25 ** attempts);
     this.state.scene = "watermelonAim";
     this.state.appearance = ASSETS.swimsuit;
     const minTarget = this.state.tolerance + 0.05;
@@ -5083,7 +5018,7 @@ class PostBattleSystem {
     if (this.state?.scene !== "watermelonAim") return;
     const marker = this.getMarkerPosition();
     const distance = Math.abs(marker - this.state.target);
-    const tolerance = this.state.tolerance ?? (0.13 * (0.5 ** this.state.watermelon.successes));
+    const tolerance = this.state.tolerance ?? (0.13 * (0.5 ** this.state.watermelon.attempts));
     const success = distance <= tolerance;
     this.state.watermelon.attempts += 1;
     this.state.watermelon.lastCutSuccess = success;
@@ -6081,7 +6016,9 @@ class AppView {
     const stage = STAGES.find((s) => s.id === stageId);
     if (!stage) return;
     const locked = snapshot.profile.level < stage.requiredLevel;
-    const cleared = (snapshot.records?.clearedStages || []).includes(stageId);
+    const stageStat = snapshot.records?.stageStats?.[stageId] || { totalAttempts: 0, manualWins: 0, manualLosses: 0, autoWins: 0, autoLosses: 0 };
+    const hasWins = ((stageStat.manualWins || 0) + (stageStat.autoWins || 0)) > 0 || (stageId === 1 && ((snapshot.records?.wins || 0) > 0 || (snapshot.records?.manualWins || 0) > 0));
+    const cleared = (snapshot.records?.clearedStages || []).includes(stageId) && hasWins;
     if (locked || !cleared) {
       this.showToast(I18n.t("ui.mustClearOnceForAuto"), "danger");
       return;
@@ -6117,7 +6054,9 @@ class AppView {
     const stage = STAGES.find((s) => s.id === stageId);
     if (!stage) return;
     const locked = snapshot.profile.level < stage.requiredLevel;
-    const cleared = (snapshot.records?.clearedStages || []).includes(stageId);
+    const stageStat = snapshot.records?.stageStats?.[stageId] || { totalAttempts: 0, manualWins: 0, manualLosses: 0, autoWins: 0, autoLosses: 0 };
+    const hasWins = ((stageStat.manualWins || 0) + (stageStat.autoWins || 0)) > 0 || (stageId === 1 && ((snapshot.records?.wins || 0) > 0 || (snapshot.records?.manualWins || 0) > 0));
+    const cleared = (snapshot.records?.clearedStages || []).includes(stageId) && hasWins;
     if (locked || !cleared) {
       this.showToast(I18n.t("ui.mustClearOnceForAuto"), "danger");
       return;
@@ -6405,8 +6344,9 @@ class AppView {
     $("#stage-grid").innerHTML = STAGES.map((stage, index) => {
       const locStage = I18n.getLocalizedStage(stage);
       const locked = state.profile.level < stage.requiredLevel;
-      const cleared = (state.records.clearedStages || []).includes(stage.id);
       const stageStat = state.records?.stageStats?.[stage.id] || { totalAttempts: 0, manualWins: 0, manualLosses: 0, autoWins: 0, autoLosses: 0 };
+      const hasWins = ((stageStat.manualWins || 0) + (stageStat.autoWins || 0)) > 0 || (stage.id === 1 && ((state.records?.wins || 0) > 0 || (state.records?.manualWins || 0) > 0));
+      const cleared = (state.records.clearedStages || []).includes(stage.id) && hasWins;
       const attemptsText = I18n.t("ui.stageAttempts", { total: stageStat.totalAttempts || 0 });
 
       const classes = [
@@ -7427,7 +7367,7 @@ class AppView {
     this.setWatermelonTicker(state.scene === "watermelonAim");
     $("#watermelon-attempt").textContent = "第 " + (watermelon.attempts + 1) + " 刀 / " + watermelon.maxAttempts;
     $("#watermelon-successes").textContent = I18n.t("ui.watermelonScore") + " " + watermelon.successes;
-    const tolerance = state.tolerance ?? (0.13 * (0.5 ** watermelon.successes));
+    const tolerance = state.tolerance ?? (0.13 * (0.5 ** watermelon.attempts));
     $("#watermelon-target").style.left = (state.target * 100) + "%";
     $("#watermelon-target").style.width = (tolerance * 2 * 100) + "%";
     const watermelonStatus = $("#watermelon-status");
