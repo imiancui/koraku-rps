@@ -1674,12 +1674,12 @@ export class AppView {
     const dualHandWrap = $("#enemy-hand-wrap-dual");
     const isEnemyDual = Boolean(state.stage?.dualEnemy && state.enemies?.length > 1);
 
-    if (isEnemyDual && state.opponentHands?.left && state.opponentHands?.right) {
+    if (isEnemyDual) {
       if (singleHandWrap) singleHandWrap.hidden = true;
       if (dualHandWrap) dualHandWrap.hidden = false;
 
-      const leftHand = I18n.getLocalizedHand(state.opponentHands.left);
-      const rightHand = I18n.getLocalizedHand(state.opponentHands.right);
+      const leftHand = state.opponentHands?.left ? I18n.getLocalizedHand(state.opponentHands.left) : null;
+      const rightHand = state.opponentHands?.right ? I18n.getLocalizedHand(state.opponentHands.right) : null;
 
       if (state.phase === "countdown") {
         $("#enemy-left-hand-display").textContent = "✊";
@@ -1696,7 +1696,7 @@ export class AppView {
       if (singleHandWrap) singleHandWrap.hidden = false;
       if (dualHandWrap) dualHandWrap.hidden = true;
 
-      const opponent = I18n.getLocalizedHand(state.opponentHand);
+      const opponent = state.opponentHand ? I18n.getLocalizedHand(state.opponentHand) : null;
       if (state.phase === "countdown") {
         $("#enemy-hand-display").textContent = "✊";
         $("#enemy-hand-label").textContent = state.countdown <= 3 ? I18n.t("ui.preparing") : I18n.t("ui.unrevealed");

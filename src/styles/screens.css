@@ -1380,6 +1380,11 @@
   gap: 0 10px;
 }
 
+.hand-versus > div[hidden],
+.dual-hand-wrap[hidden] {
+  display: none !important;
+}
+
 .hand-versus small {
   grid-column: 1 / -1;
   color: var(--paper-dim);
