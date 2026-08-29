@@ -541,7 +541,7 @@
   .result-overlay {
     align-items: end;
     padding: 0 10px 112px;
-    background: linear-gradient(180deg, rgba(5, 6, 10, 0.22), rgba(5, 6, 10, 0.92) 55%);
+    background: transparent;
   }
 
   .result-card {

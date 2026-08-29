@@ -1722,7 +1722,7 @@
 
 .avg-dialogue {
   position: absolute;
-  z-index: 36;
+  z-index: 70;
   left: 50%;
   bottom: 16px;
   width: min(calc(100% - 48px), 1080px);
@@ -2113,9 +2113,10 @@
   align-items: center;
   visibility: hidden;
   padding-left: clamp(24px, 7vw, 110px);
-  background: linear-gradient(90deg, rgba(5, 6, 10, 0.92) 0%, rgba(7, 9, 14, 0.78) 43%, rgba(7, 9, 14, 0.12) 75%);
+  background: transparent;
+  pointer-events: none;
   opacity: 0;
-  transition: opacity 350ms ease;
+  transition: opacity 350ms ease, visibility 350ms ease;
 }
 
 .result-overlay.is-active {
@@ -2131,6 +2132,41 @@
   border-left: 3px solid var(--crimson);
   background: linear-gradient(90deg, rgba(13, 15, 24, 0.96), rgba(19, 22, 33, 0.82));
   box-shadow: 22px 25px 70px rgba(0, 0, 0, 0.43);
+  pointer-events: auto;
+}
+
+/* 結算畫面過渡：隱藏對局中的 HUD，並確保小樂立繪鮮明呈現不被半透明遮罩遮蔽 */
+.battle-arena.is-settlement .chapter-tag,
+.battle-arena.is-settlement .battle-exit,
+.battle-arena.is-settlement .combatant-hud,
+.battle-arena.is-settlement .round-oracle,
+.battle-arena.is-settlement .battle-left-cluster,
+.battle-arena.is-settlement .auto-battle-hud-banner,
+.battle-arena.is-settlement .frozen-hand-badge,
+.battle-arena.is-settlement .round-warning-emoji,
+.battle-arena:has(.result-overlay.is-active) .chapter-tag,
+.battle-arena:has(.result-overlay.is-active) .battle-exit,
+.battle-arena:has(.result-overlay.is-active) .combatant-hud,
+.battle-arena:has(.result-overlay.is-active) .round-oracle,
+.battle-arena:has(.result-overlay.is-active) .battle-left-cluster,
+.battle-arena:has(.result-overlay.is-active) .auto-battle-hud-banner,
+.battle-arena:has(.result-overlay.is-active) .frozen-hand-badge,
+.battle-arena:has(.result-overlay.is-active) .round-warning-emoji {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transition: opacity 240ms ease, visibility 240ms ease;
+}
+
+.battle-arena.is-settlement .battle-character-wrap,
+.battle-arena:has(.result-overlay.is-active) .battle-character-wrap {
+  z-index: 50;
+  opacity: 1 !important;
+}
+
+.battle-arena.is-settlement .battle-character-wrap::after,
+.battle-arena:has(.result-overlay.is-active) .battle-character-wrap::after {
+  display: none !important;
 }
 
 .result-card h2 {

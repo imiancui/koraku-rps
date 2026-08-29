@@ -696,6 +696,7 @@ export class AppView {
 
   requestNavigation(screenName) {
     if (screenName !== "battle") {
+      this.battleArena?.classList.remove("is-settlement");
       if (this.battleState?.active) {
         const confirmed = window.confirm("現在撤退將不會得到星砂或經驗，確定離開嗎？");
         if (!confirmed) return;
@@ -729,6 +730,7 @@ export class AppView {
     this.battle.stopAutoBattle();
     if (!this.battle.start(stageId)) return;
     this.postState = null;
+    this.battleArena?.classList.remove("is-settlement");
     this.resultOverlay.classList.remove("is-active");
     this.resultOverlay.setAttribute("aria-hidden", "true");
     this.navigate("battle");
@@ -765,6 +767,7 @@ export class AppView {
     this.closeAutoBattleModal();
     if (!this.battle.startAutoBattle(stageId, rounds)) return;
     this.postState = null;
+    this.battleArena?.classList.remove("is-settlement");
     this.resultOverlay.classList.remove("is-active");
     this.resultOverlay.setAttribute("aria-hidden", "true");
     this.navigate("battle");
@@ -2042,6 +2045,7 @@ export class AppView {
   renderPostBattle(state) {
     if (!state) return;
     this.postState = state;
+    this.battleArena?.classList.add("is-settlement");
     this.resultOverlay.classList.add("is-active");
     this.resultOverlay.setAttribute("aria-hidden", "false");
     if (this.battleCharactersDual) this.battleCharactersDual.hidden = true;
@@ -2141,6 +2145,7 @@ export class AppView {
     if (action === "stages" || action === "home") {
       this.battle.stopAutoBattle();
       this.battle.abandon();
+      this.battleArena?.classList.remove("is-settlement");
       this.resultOverlay.classList.remove("is-active");
       this.navigate(action);
     }
