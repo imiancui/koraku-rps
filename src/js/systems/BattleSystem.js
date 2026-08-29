@@ -68,6 +68,11 @@ export class BattleSystem {
     }
 
     if (options.autoBattle) {
+      const cleared = (profile.records?.clearedStages || []).includes(Number(stageId));
+      if (!cleared) {
+        this.bus.emit("toast", { message: I18n.t("ui.mustClearOnceForAuto"), tone: "danger" });
+        return false;
+      }
       if (!this.autoBattle.active) {
         this.autoBattle = {
           active: true,

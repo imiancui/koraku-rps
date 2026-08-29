@@ -787,6 +787,7 @@ const DICTIONARY = {
       autoBattleToastUpdateLoss: "自動刷關：戰敗！剩餘 {remaining} 場...",
       autoBattleToastFinished: "🎉 自動刷關完成！共進行 {total} 場（勝: {wins}, 敗: {losses}）。",
       autoBattleToastStopped: "已手動停止自動刷關。",
+      mustClearOnceForAuto: "必須先手動戰勝該關卡一次後，才可開啟自動刷關！",
       frozenBadge: "❄️ 霜月冰結：小樂【{hand}】已被封印！",
       ownedCount: "擁有 {total}",
       equippedCountBadge: "(已裝備 {count})",
@@ -1232,6 +1233,7 @@ const DICTIONARY = {
       autoBattleToastUpdateLoss: "自动刷关：战败！剩余 {remaining} 场...",
       autoBattleToastFinished: "🎉 自动刷关完成！共进行 {total} 场（胜: {wins}, 败: {losses}）。",
       autoBattleToastStopped: "已手动停止自动刷关。",
+      mustClearOnceForAuto: "必须先手动战胜该关卡一次后，才可开启自动刷关！",
       frozenBadge: "❄️ 霜月冰结：小乐【{hand}】已被封印！",
       ownedCount: "拥有 {total}",
       equippedCountBadge: "(已装备 {count})",
@@ -1624,6 +1626,7 @@ const DICTIONARY = {
       autoBattleToastUpdateLoss: "Auto-battle: Defeat! {remaining} rounds remaining...",
       autoBattleToastFinished: "🎉 Auto-battle complete! Total {total} rounds (Wins: {wins}, Losses: {losses}).",
       autoBattleToastStopped: "Auto-battle stopped manually.",
+      mustClearOnceForAuto: "You must defeat this stage once before using auto-battle!",
       frozenBadge: "❄️ Frost Blade: Kohaku's [{hand}] is frozen!",
       ownedCount: "Owned {total}",
       equippedCountBadge: "(Equipped {count})",
@@ -2017,6 +2020,7 @@ const DICTIONARY = {
       autoBattleToastStopped: "自動周回を停止しました。",
       autoBattleToastPaused: "自動周回を一時停止しました。手動で続行するか再開を押してください。",
       autoBattleToastResumed: "自動周回を再開しました。",
+      mustClearOnceForAuto: "自動周回を行うには、まず本ステージに一度勝利する必要があります！",
       frozenBadge: "❄️ 霜月氷結：コハクの【{hand}】は封印中！",
       ownedCount: "所持数 {total}",
       equippedCountBadge: "(装備中 {count})",
@@ -3253,7 +3257,7 @@ function sanitizeSave(candidate) {
   const rawCleared = candidate.records?.clearedStages;
   const clearedStages = Array.isArray(rawCleared)
     ? [...rawCleared]
-    : (candidate.records?.bestStage ? Array.from({ length: candidate.records.bestStage }, (_, i) => i + 1) : []);
+    : [];
 
   const rawStats = candidate.records?.stageStats || {};
   const stageStats = {
@@ -3899,6 +3903,11 @@ class BattleSystem {
     }
 
     if (options.autoBattle) {
+      const cleared = (profile.records?.clearedStages || []).includes(Number(stageId));
+      if (!cleared) {
+        this.bus.emit("toast", { message: I18n.t("ui.mustClearOnceForAuto"), tone: "danger" });
+        return false;
+      }
       if (!this.autoBattle.active) {
         this.autoBattle = {
           active: true,
@@ -6068,9 +6077,18 @@ class AppView {
   }
 
   openAutoBattleModal(stageId) {
+    const snapshot = this.store.snapshot();
+    const stage = STAGES.find((s) => s.id === stageId);
+    if (!stage) return;
+    const locked = snapshot.profile.level < stage.requiredLevel;
+    const cleared = (snapshot.records?.clearedStages || []).includes(stageId);
+    if (locked || !cleared) {
+      this.showToast(I18n.t("ui.mustClearOnceForAuto"), "danger");
+      return;
+    }
+
     this.selectedAutoStageId = stageId;
     this.selectedAutoBattleCount = 10;
-    const stage = STAGES.find((s) => s.id === stageId);
     const locStage = I18n.getLocalizedStage(stage || { chapter: "", name: "" });
     const titleEl = $("#auto-battle-stage-title");
     if (titleEl) titleEl.textContent = `${locStage.chapter}・${locStage.name}`;
@@ -6095,6 +6113,16 @@ class AppView {
   }
 
   startAutoBattle(stageId, rounds = 10) {
+    const snapshot = this.store.snapshot();
+    const stage = STAGES.find((s) => s.id === stageId);
+    if (!stage) return;
+    const locked = snapshot.profile.level < stage.requiredLevel;
+    const cleared = (snapshot.records?.clearedStages || []).includes(stageId);
+    if (locked || !cleared) {
+      this.showToast(I18n.t("ui.mustClearOnceForAuto"), "danger");
+      return;
+    }
+
     this.closeAutoBattleModal();
     if (!this.battle.startAutoBattle(stageId, rounds)) return;
     this.postState = null;
@@ -6377,7 +6405,7 @@ class AppView {
     $("#stage-grid").innerHTML = STAGES.map((stage, index) => {
       const locStage = I18n.getLocalizedStage(stage);
       const locked = state.profile.level < stage.requiredLevel;
-      const cleared = (state.records.clearedStages || []).includes(stage.id) || (state.records.bestStage >= stage.id);
+      const cleared = (state.records.clearedStages || []).includes(stage.id);
       const stageStat = state.records?.stageStats?.[stage.id] || { totalAttempts: 0, manualWins: 0, manualLosses: 0, autoWins: 0, autoLosses: 0 };
       const attemptsText = I18n.t("ui.stageAttempts", { total: stageStat.totalAttempts || 0 });
 

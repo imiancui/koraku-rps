@@ -737,9 +737,18 @@ export class AppView {
   }
 
   openAutoBattleModal(stageId) {
+    const snapshot = this.store.snapshot();
+    const stage = STAGES.find((s) => s.id === stageId);
+    if (!stage) return;
+    const locked = snapshot.profile.level < stage.requiredLevel;
+    const cleared = (snapshot.records?.clearedStages || []).includes(stageId);
+    if (locked || !cleared) {
+      this.showToast(I18n.t("ui.mustClearOnceForAuto"), "danger");
+      return;
+    }
+
     this.selectedAutoStageId = stageId;
     this.selectedAutoBattleCount = 10;
-    const stage = STAGES.find((s) => s.id === stageId);
     const locStage = I18n.getLocalizedStage(stage || { chapter: "", name: "" });
     const titleEl = $("#auto-battle-stage-title");
     if (titleEl) titleEl.textContent = `${locStage.chapter}・${locStage.name}`;
@@ -764,6 +773,16 @@ export class AppView {
   }
 
   startAutoBattle(stageId, rounds = 10) {
+    const snapshot = this.store.snapshot();
+    const stage = STAGES.find((s) => s.id === stageId);
+    if (!stage) return;
+    const locked = snapshot.profile.level < stage.requiredLevel;
+    const cleared = (snapshot.records?.clearedStages || []).includes(stageId);
+    if (locked || !cleared) {
+      this.showToast(I18n.t("ui.mustClearOnceForAuto"), "danger");
+      return;
+    }
+
     this.closeAutoBattleModal();
     if (!this.battle.startAutoBattle(stageId, rounds)) return;
     this.postState = null;
@@ -1046,7 +1065,7 @@ export class AppView {
     $("#stage-grid").innerHTML = STAGES.map((stage, index) => {
       const locStage = I18n.getLocalizedStage(stage);
       const locked = state.profile.level < stage.requiredLevel;
-      const cleared = (state.records.clearedStages || []).includes(stage.id) || (state.records.bestStage >= stage.id);
+      const cleared = (state.records.clearedStages || []).includes(stage.id);
       const stageStat = state.records?.stageStats?.[stage.id] || { totalAttempts: 0, manualWins: 0, manualLosses: 0, autoWins: 0, autoLosses: 0 };
       const attemptsText = I18n.t("ui.stageAttempts", { total: stageStat.totalAttempts || 0 });
 

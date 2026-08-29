@@ -93,7 +93,7 @@ function sanitizeSave(candidate) {
   const rawCleared = candidate.records?.clearedStages;
   const clearedStages = Array.isArray(rawCleared)
     ? [...rawCleared]
-    : (candidate.records?.bestStage ? Array.from({ length: candidate.records.bestStage }, (_, i) => i + 1) : []);
+    : [];
 
   const rawStats = candidate.records?.stageStats || {};
   const stageStats = {

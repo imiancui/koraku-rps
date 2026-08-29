@@ -41,8 +41,14 @@ test("自動刷關系統：啟動後自動推進出拳與 QTE，勝利連續重�
 
   const battle = new BattleSystem(bus, store);
 
+  // Before clearing stage 1, startAutoBattle should be rejected
+  assert.equal(battle.startAutoBattle(1, 3), false, "未手動通關前無法開啟自動刷關");
+
+  // Mark stage 1 as cleared
+  store.state.records.clearedStages = [1];
+
   // Start auto-battle for stage 1 with 3 rounds
-  battle.startAutoBattle(1, 3);
+  assert.equal(battle.startAutoBattle(1, 3), true);
   assert.equal(battle.autoBattle.active, true);
   assert.equal(battle.autoBattle.totalRounds, 3);
   assert.equal(battle.autoBattle.remainingRounds, 3);
@@ -72,9 +78,10 @@ test("自動刷關暫停與繼續：支援 pauseAutoBattle / resumeAutoBattle / 
   const bus = new EventBus();
   const persistence = new MemoryPersistence();
   const store = new GameStore(bus, persistence);
+  store.state.records.clearedStages = [1];
 
   const battle = new BattleSystem(bus, store);
-  battle.startAutoBattle(1, 10);
+  assert.equal(battle.startAutoBattle(1, 10), true);
   assert.equal(battle.autoBattle.active, true);
   assert.equal(battle.autoBattle.isPaused, false);
 

@@ -401,6 +401,14 @@
     gap: 8px;
   }
 
+  .auto-battle-hud-banner {
+    right: 10px;
+    bottom: 118px;
+    padding: 5px 12px;
+    gap: 8px;
+    font-size: 10px;
+  }
+
   .hand-button {
     grid-template-columns: 34px 1fr 22px;
     min-height: 38px;
