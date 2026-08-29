@@ -1292,13 +1292,38 @@ export class AppView {
       if (singlePanel) singlePanel.hidden = true;
       if (dualPanel) dualPanel.hidden = false;
 
+      const wasdMap = {
+        up: "W",
+        down: "S",
+        left: "A",
+        right: "D",
+        upLeft: "WA",
+        upRight: "WD",
+        downLeft: "SA",
+        downRight: "SD"
+      };
+      const arrowMap = {
+        up: "↑",
+        down: "↓",
+        left: "←",
+        right: "→",
+        upLeft: "↖",
+        upRight: "↗",
+        downLeft: "↙",
+        downRight: "↘"
+      };
+
       // Render Left Slot
       const leftSeq = $("#dual-qte-sequence-left");
       if (leftSeq && state.left?.sequence) {
         leftSeq.innerHTML = state.left.sequence.map((id, index) => {
           const direction = DIRECTIONS.find((item) => item.id === id);
           const status = index < state.left.index ? " is-done" : index === state.left.index ? " is-current" : "";
-          return '<span class="qte-arrow' + status + '" aria-label="' + (direction?.label || "") + '">' + (direction?.glyph || "") + "</span>";
+          const hint = wasdMap[id] || "";
+          return '<span class="qte-arrow' + status + '" aria-label="' + (direction?.label || "") + '">' +
+            (direction?.glyph || "") +
+            (hint ? '<small class="qte-arrow-key-hint">' + hint + "</small>" : "") +
+            "</span>";
         }).join("");
       }
 
@@ -1308,7 +1333,11 @@ export class AppView {
         rightSeq.innerHTML = state.right.sequence.map((id, index) => {
           const direction = DIRECTIONS.find((item) => item.id === id);
           const status = index < state.right.index ? " is-done" : index === state.right.index ? " is-current" : "";
-          return '<span class="qte-arrow' + status + '" aria-label="' + (direction?.label || "") + '">' + (direction?.glyph || "") + "</span>";
+          const hint = arrowMap[id] || "";
+          return '<span class="qte-arrow' + status + '" aria-label="' + (direction?.label || "") + '">' +
+            (direction?.glyph || "") +
+            (hint ? '<small class="qte-arrow-key-hint">' + hint + "</small>" : "") +
+            "</span>";
         }).join("");
       }
 
@@ -1493,6 +1522,9 @@ export class AppView {
     this.postState = state;
     this.resultOverlay.classList.add("is-active");
     this.resultOverlay.setAttribute("aria-hidden", "false");
+    if (this.battleCharactersDual) this.battleCharactersDual.hidden = true;
+    if (this.battleCharacterSingle) this.battleCharacterSingle.hidden = false;
+    if (this.battleCharacterWrap) this.battleCharacterWrap.classList.remove("is-dual-stage");
     this.battleCharacter.setAttribute("src", state.appearance);
     $("#reward-coins").textContent = "+" + state.reward.coins;
     $("#reward-xp").textContent = "+" + state.reward.xp;

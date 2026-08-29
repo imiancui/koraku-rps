@@ -1810,6 +1810,7 @@
 }
 
 .qte-arrow {
+  position: relative;
   display: grid;
   place-items: center;
   width: clamp(48px, 7vw, 68px);
@@ -1819,6 +1820,23 @@
   color: var(--paper);
   font-size: clamp(25px, 3.6vw, 38px);
   transition: 120ms ease;
+}
+
+.qte-arrow-key-hint {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  font-size: 10px;
+  line-height: 1;
+  font-weight: 700;
+  font-family: var(--sans);
+  color: var(--gold-bright);
+  background: rgba(0, 0, 0, 0.82);
+  padding: 2px 4px;
+  border-radius: 2px;
+  border: 1px solid rgba(216, 182, 106, 0.5);
+  letter-spacing: 0.04em;
+  pointer-events: none;
 }
 
 .qte-arrow.is-current {

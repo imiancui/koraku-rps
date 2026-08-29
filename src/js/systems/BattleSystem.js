@@ -487,7 +487,7 @@ export class BattleSystem {
     const extraQte = this.hasEquipEffect("qte_time")?.extraQteSeconds || 0;
     this.dualQte.start({
       length: this.state.stage.qteLength || 7,
-      durationMs: (BATTLE_RULES.qteSeconds + extraQte) * 1000,
+      durationMs: (BATTLE_RULES.qteSeconds + extraQte) * 1.5 * 1000,
       qteDirections: this.state.stage.qteDirections || "all",
       maxErrors: this.state.stage.maxErrors ?? 1
     });
