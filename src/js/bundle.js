@@ -700,7 +700,7 @@ const DICTIONARY = {
       guideQteTitle: "QTE 絕地反制",
       guideQteDesc: "猜輸後在限定時間內依序輸入方向鍵。反制成功可免除傷害並給予小樂反擊；失敗則承受重擊。",
       guideMorphTitle: "時機變拳秘術",
-      guideMorphDesc: "在看到小樂出拳後的極短反應窗口內，消耗 25 MP 可逆轉為克制對手的手勢！",
+      guideMorphDesc: "在看到小樂出拳後的極短反應窗口內消耗 MP 發動變拳，可在 2 秒內手動選擇手勢反制小樂！若按錯將承擔輸拳或平手摸摸判定。",
       guideDualTitle: "雙手解放奧義",
       guideDualDesc: "在第四章解鎖雙手技能後，可同時以左手與右手獨立出拳，分別對決兩位小樂！",
       // Cheat Modal
@@ -763,6 +763,7 @@ const DICTIONARY = {
       preparing: "準備中",
       countdownCaption: "出拳倒數",
       morphCaption: "按 F 變拳",
+      morphSelectCaption: "2秒內選擇變拳手勢！",
       qteCaption: "反制機會",
       settleCaption: "回合結算",
       battleWon: "勝",
@@ -1148,7 +1149,7 @@ const DICTIONARY = {
       guideQteTitle: "QTE 绝地反制",
       guideQteDesc: "猜输后在限定时间内依次输入方向键。反制成功可免除伤害并给小乐予以反击；失败则承受重创。",
       guideMorphTitle: "时机变拳秘术",
-      guideMorphDesc: "在看到小乐出拳后的极短反应窗口内，消耗 25 MP 可逆转为克制对手的手势！",
+      guideMorphDesc: "在看到小乐出拳后的极短反应窗口内消耗 MP 发动变拳，可在 2 秒内手动选择手势反制小乐！若按错将承担输拳或平手摸摸判定。",
       guideDualTitle: "双手解放奥义",
       guideDualDesc: "在第四章解锁双手技能后，可同时以左手与右手独立出拳，分别对决两位小乐！",
       cheatModalTitle: "⚙️ 测试调试 / 作弊菜单",
@@ -1209,6 +1210,7 @@ const DICTIONARY = {
       preparing: "准备中",
       countdownCaption: "出拳倒计时",
       morphCaption: "按 F 变拳",
+      morphSelectCaption: "2秒内选择变拳手势！",
       qteCaption: "反制机会",
       settleCaption: "回合结算",
       battleWon: "胜",
@@ -1541,7 +1543,7 @@ const DICTIONARY = {
       guideQteTitle: "Clutch QTE Counter",
       guideQteDesc: "When you lose a throw, input direction keys within the time limit. A successful counter cancels damage and strikes back!",
       guideMorphTitle: "Morph Technique",
-      guideMorphDesc: "Spend 25 MP during the short reaction window after seeing her hand to morph into the winning hand!",
+      guideMorphDesc: "Spend MP during the reaction window to enter a 2s Morph state, allowing you to manually choose a counter hand! Wrong choices result in a loss or draw Momo check.",
       guideDualTitle: "Dual Hands Mastery",
       guideDualDesc: "Unlock Dual Hands in Chapter 4 to throw left and right hands independently against Twin Kohakus!",
       cheatModalTitle: "⚙️ Debug & Cheat Menu",
@@ -1602,6 +1604,7 @@ const DICTIONARY = {
       preparing: "Readying",
       countdownCaption: "RPS Countdown",
       morphCaption: "Press F to Morph",
+      morphSelectCaption: "Select Counter Gesture (2s)!",
       qteCaption: "Counter Window",
       settleCaption: "Round Summary",
       battleWon: "WIN",
@@ -1935,7 +1938,7 @@ const DICTIONARY = {
       guideQteTitle: "起死回生の QTE 反撃",
       guideQteDesc: "負けた直後の猶予時間内に方向キーを素早く入力。カウンター成功でダメージ無効＆反撃打撃を与えます！",
       guideMorphTitle: "刹那の変拳秘術",
-      guideMorphDesc: "コハクの手が見えた一瞬の隙に 25 MP を消費して勝ち手に化かす奥義！",
+      guideMorphDesc: "小楽の手が見えた反応時間内にMPを消費して変拳を発動！2秒以内に手勢を選択して反撃せよ。間違えた場合は敗北またはあいこの撫で判定になります。",
       guideDualTitle: "両手解放の極意",
       guideDualDesc: "第4章で両手スキルを解放すると、左手と右手で独立してじゃんけんが可能に！",
       cheatModalTitle: "⚙️ デバッグ・チート設定",
@@ -1996,6 +1999,7 @@ const DICTIONARY = {
       preparing: "構え中",
       countdownCaption: "じゃんけん秒読",
       morphCaption: "Fキーで変拳",
+      morphSelectCaption: "2秒以内に手勢を選択！",
       qteCaption: "反撃チャンス",
       settleCaption: "ターン結果",
       battleWon: "勝",
@@ -3967,6 +3971,7 @@ class BattleSystem {
       countdown: stage.roundSeconds || BATTLE_RULES.roundSeconds,
       reactionRemaining: 0,
       morphUsed: false,
+      morphActive: false,
       isEnemyFrozen: false,
       frozenEnemyHand: null,
       isPaused: false,
@@ -4139,6 +4144,7 @@ class BattleSystem {
     this.state.countdown = roundSeconds;
     this.state.reactionRemaining = 0;
     this.state.morphUsed = false;
+    this.state.morphActive = false;
     this.state.lastChant = null;
     this.state.isPaused = false;
     this.countdownDeadline = performance.now() + roundSeconds * 1000;
@@ -4172,21 +4178,41 @@ class BattleSystem {
   }
 
   selectHand(handId, slot = null) {
-    if (!this.state?.active || this.state.phase !== "countdown" || !HANDS[handId]) return;
-    if (slot === "left") {
-      this.state.selectedHands.left = handId;
-      this.state.selectedHand = handId;
-    } else if (slot === "right") {
-      this.state.selectedHands.right = handId;
-    } else {
-      this.state.selectedHand = handId;
-      this.state.selectedHands.left = handId;
-      if (!this.state.hasDualHandSkill) {
+    if (!this.state?.active || !HANDS[handId]) return;
+    if (this.state.phase === "countdown") {
+      if (slot === "left") {
+        this.state.selectedHands.left = handId;
+        this.state.selectedHand = handId;
+      } else if (slot === "right") {
         this.state.selectedHands.right = handId;
+      } else {
+        this.state.selectedHand = handId;
+        this.state.selectedHands.left = handId;
+        if (!this.state.hasDualHandSkill) {
+          this.state.selectedHands.right = handId;
+        }
       }
+      this.emitState();
+      this.bus.emit("sound", { name: "select" });
+    } else if (this.state.phase === "reaction" && this.state.morphActive) {
+      if (slot === "left") {
+        this.state.selectedHands.left = handId;
+        this.state.selectedHand = handId;
+      } else if (slot === "right") {
+        this.state.selectedHands.right = handId;
+      } else {
+        this.state.selectedHand = handId;
+        this.state.selectedHands.left = handId;
+        if (!this.state.hasDualHandSkill) {
+          this.state.selectedHands.right = handId;
+        }
+      }
+      this.state.morphActive = false;
+      this.clearReactionClocks();
+      this.emitState();
+      this.bus.emit("sound", { name: "select" });
+      this.resolveRound();
     }
-    this.emitState();
-    this.bus.emit("sound", { name: "select" });
   }
 
   revealHands() {
@@ -4266,7 +4292,7 @@ class BattleSystem {
   }
 
   useMorph() {
-    if (!this.state?.active || this.state.phase !== "reaction") {
+    if (!this.state?.active || this.state.phase !== "reaction" || this.state.morphActive) {
       return { ok: false, message: "變拳只能在看見小樂出拳後的反應時間內使用。" };
     }
     const totalDiscount = this.getAllEquipEffects("morph_discount").reduce((sum, eff) => sum + (eff.morphDiscount || 0), 0);
@@ -4278,34 +4304,27 @@ class BattleSystem {
     this.clearReactionClocks();
     this.state.playerMp -= morphCost;
 
-    if (this.state.opponentHands?.left && this.state.opponentHands?.right) {
-      if (this.state.hasDualHandSkill) {
-        this.state.selectedHands.left = getCounterHand(this.state.opponentHands.left);
-        this.state.selectedHands.right = getCounterHand(this.state.opponentHands.right);
-        this.state.selectedHand = this.state.selectedHands.left;
-      } else {
-        const targetEnemy = this.state.enemies.find((e) => e.id === this.state.targetEnemyId && e.alive);
-        const targetOpponentHand = targetEnemy?.id === "right" ? this.state.opponentHands.right : this.state.opponentHands.left;
-        this.state.selectedHand = getCounterHand(targetOpponentHand);
-        this.state.selectedHands.left = this.state.selectedHand;
-        this.state.selectedHands.right = this.state.selectedHand;
-      }
-    } else {
-      const counter = getCounterHand(this.state.opponentHand);
-      this.state.selectedHand = counter;
-      this.state.selectedHands.left = counter;
-      this.state.selectedHands.right = counter;
-    }
-
     this.state.enemyWinningEmoji = null;
     this.state.morphUsed = true;
-    this.state.reactionRemaining = 0;
-    this.store.recordMorphUse();
+    this.state.morphActive = true;
+
+    const morphWindowMs = 2000;
+    this.state.reactionRemaining = morphWindowMs / 1000;
+    this.reactionDeadline = performance.now() + morphWindowMs;
+
     this.emitState();
     this.bus.emit("battle:effect", { type: "morph" });
     this.bus.emit("sound", { name: "skill" });
     this.say(I18n.t("dialogue.morphReaction"), I18n.t("dialogue.speakerKohaku"));
-    this.reactionTimeoutId = this.timers.timeout(() => this.resolveRound(), 320);
+
+    this.reactionTickId = this.timers.interval(() => {
+      this.state.reactionRemaining = Math.max(0, (this.reactionDeadline - performance.now()) / 1000);
+      this.emitState();
+    }, 40);
+    this.reactionTimeoutId = this.timers.timeout(() => {
+      this.state.morphActive = false;
+      this.resolveRound();
+    }, morphWindowMs);
     return { ok: true };
   }
 
@@ -4321,6 +4340,7 @@ class BattleSystem {
   resolveRound() {
     if (!this.state?.active || this.state.phase !== "reaction") return;
     this.clearReactionClocks();
+    this.state.morphActive = false;
 
     const isDualStage = Boolean(this.state.stage?.dualEnemy && this.state.enemies?.length > 1);
     const aliveEnemies = this.state.enemies.filter((e) => e.alive);
@@ -4356,6 +4376,9 @@ class BattleSystem {
         const singleWin = (leftResult === "win" && rightResult !== "win") || (rightResult === "win" && leftResult !== "win");
 
         if (bothWin) {
+          if (this.state.morphUsed) {
+            this.store.recordMorphUse();
+          }
           const leftEnemy = this.state.enemies.find((e) => e.id === "left" && e.alive);
           const rightEnemy = this.state.enemies.find((e) => e.id === "right" && e.alive);
           if (leftEnemy) this.applyDamageToEnemy(leftEnemy, null, false);
@@ -4366,6 +4389,9 @@ class BattleSystem {
         }
 
         if (singleWin) {
+          if (this.state.morphUsed) {
+            this.store.recordMorphUse();
+          }
           const winEnemyId = leftResult === "win" ? "left" : "right";
           this.state.targetEnemyId = winEnemyId;
           const target = this.state.enemies.find((e) => e.id === winEnemyId && e.alive);
@@ -4408,6 +4434,9 @@ class BattleSystem {
       const singleWin = (leftResult === "win" && rightResult !== "win") || (rightResult === "win" && leftResult !== "win");
 
       if (bothWin) {
+        if (this.state.morphUsed) {
+          this.store.recordMorphUse();
+        }
         const leftEnemy = this.state.enemies.find((e) => e.id === "left" && e.alive);
         const rightEnemy = this.state.enemies.find((e) => e.id === "right" && e.alive);
         if (leftEnemy) this.applyDamageToEnemy(leftEnemy, null, false);
@@ -4418,6 +4447,9 @@ class BattleSystem {
       }
 
       if (singleWin) {
+        if (this.state.morphUsed) {
+          this.store.recordMorphUse();
+        }
         const winEnemyId = leftResult === "win" ? "left" : "right";
         this.state.targetEnemyId = winEnemyId;
         const target = this.state.enemies.find((e) => e.id === winEnemyId && e.alive);
@@ -4446,6 +4478,9 @@ class BattleSystem {
       const singleWin = leftResult === "win" || rightResult === "win";
 
       if (bothWin) {
+        if (this.state.morphUsed) {
+          this.store.recordMorphUse();
+        }
         const doubleDamage = this.state.playerDamage * 2;
         const suffix = this.state.morphUsed ? "雙手變拳齊出，造成雙倍壓制傷害！" : "雙手同時獲勝，造成雙倍壓制傷害！";
         this.damageEnemy(suffix, false, doubleDamage);
@@ -4453,6 +4488,9 @@ class BattleSystem {
       }
 
       if (singleWin) {
+        if (this.state.morphUsed) {
+          this.store.recordMorphUse();
+        }
         const suffix = this.state.morphUsed ? "變拳奏效，成功壓制！" : "漂亮地壓過了小樂的手勢！";
         this.damageEnemy(suffix, false);
         return;
@@ -4470,6 +4508,9 @@ class BattleSystem {
       return;
     }
     if (result === "win") {
+      if (this.state.morphUsed) {
+        this.store.recordMorphUse();
+      }
       const suffix = this.state.morphUsed ? "變拳奏效，這一手由你拿下！" : "漂亮地壓過了小樂的手勢！";
       this.damageEnemy(suffix);
       return;
@@ -5911,7 +5952,7 @@ class AppView {
       return;
     }
 
-    if (this.battleState.phase === "countdown") {
+    if (this.battleState.phase === "countdown" || (this.battleState.phase === "reaction" && this.battleState.morphActive)) {
       const isDualHands = Boolean(this.battleState.hasDualHandSkill);
       if (isDualHands) {
         const leftHandByKey = { "1": "rock", "2": "paper", "3": "scissors", "q": "rock", "w": "paper", "e": "scissors" };
@@ -7009,23 +7050,27 @@ class AppView {
       }
     }
 
+    const canSelectHand = state.phase === "countdown" || (state.phase === "reaction" && state.morphActive);
     if (isPlayerDual) {
       if (this.handSelectorSingle) this.handSelectorSingle.hidden = true;
       if (this.handSelectorDual) this.handSelectorDual.hidden = false;
       document.querySelectorAll("[data-hand-slot='left'][data-hand]").forEach((button) => {
         button.classList.toggle("is-selected", button.dataset.hand === state.selectedHands?.left);
-        button.disabled = state.phase !== "countdown";
+        button.classList.toggle("is-morph-target", Boolean(state.phase === "reaction" && state.morphActive));
+        button.disabled = !canSelectHand;
       });
       document.querySelectorAll("[data-hand-slot='right'][data-hand]").forEach((button) => {
         button.classList.toggle("is-selected", button.dataset.hand === state.selectedHands?.right);
-        button.disabled = state.phase !== "countdown";
+        button.classList.toggle("is-morph-target", Boolean(state.phase === "reaction" && state.morphActive));
+        button.disabled = !canSelectHand;
       });
     } else {
       if (this.handSelectorSingle) this.handSelectorSingle.hidden = false;
       if (this.handSelectorDual) this.handSelectorDual.hidden = true;
       document.querySelectorAll("#hand-selector-single [data-hand]").forEach((button) => {
         button.classList.toggle("is-selected", button.dataset.hand === state.selectedHand);
-        button.disabled = state.phase !== "countdown";
+        button.classList.toggle("is-morph-target", Boolean(state.phase === "reaction" && state.morphActive));
+        button.disabled = !canSelectHand;
       });
     }
 
@@ -7062,9 +7107,10 @@ class AppView {
     }
 
     const morph = $("#morph-skill");
-    const morphReady = state.phase === "reaction" && state.playerMp >= 25;
+    const morphReady = state.phase === "reaction" && !state.morphActive && !state.morphUsed && state.playerMp >= 25;
     morph.disabled = !morphReady;
     morph.classList.toggle("is-ready", morphReady);
+    morph.classList.toggle("is-active", Boolean(state.morphActive));
 
     const countdownValue = $("#countdown-value");
     const countdownCaption = $("#countdown-caption");
@@ -7073,7 +7119,7 @@ class AppView {
       countdownCaption.textContent = I18n.t("ui.countdownCaption");
     } else if (state.phase === "reaction") {
       countdownValue.textContent = state.reactionRemaining.toFixed(1);
-      countdownCaption.textContent = I18n.t("ui.morphCaption");
+      countdownCaption.textContent = state.morphActive ? I18n.t("ui.morphSelectCaption") : I18n.t("ui.morphCaption");
     } else if (state.phase === "qte") {
       countdownValue.textContent = "!";
       countdownCaption.textContent = I18n.t("ui.qteCaption");

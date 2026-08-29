@@ -636,7 +636,7 @@ export class AppView {
       return;
     }
 
-    if (this.battleState.phase === "countdown") {
+    if (this.battleState.phase === "countdown" || (this.battleState.phase === "reaction" && this.battleState.morphActive)) {
       const isDualHands = Boolean(this.battleState.hasDualHandSkill);
       if (isDualHands) {
         const leftHandByKey = { "1": "rock", "2": "paper", "3": "scissors", "q": "rock", "w": "paper", "e": "scissors" };
@@ -1734,23 +1734,27 @@ export class AppView {
       }
     }
 
+    const canSelectHand = state.phase === "countdown" || (state.phase === "reaction" && state.morphActive);
     if (isPlayerDual) {
       if (this.handSelectorSingle) this.handSelectorSingle.hidden = true;
       if (this.handSelectorDual) this.handSelectorDual.hidden = false;
       document.querySelectorAll("[data-hand-slot='left'][data-hand]").forEach((button) => {
         button.classList.toggle("is-selected", button.dataset.hand === state.selectedHands?.left);
-        button.disabled = state.phase !== "countdown";
+        button.classList.toggle("is-morph-target", Boolean(state.phase === "reaction" && state.morphActive));
+        button.disabled = !canSelectHand;
       });
       document.querySelectorAll("[data-hand-slot='right'][data-hand]").forEach((button) => {
         button.classList.toggle("is-selected", button.dataset.hand === state.selectedHands?.right);
-        button.disabled = state.phase !== "countdown";
+        button.classList.toggle("is-morph-target", Boolean(state.phase === "reaction" && state.morphActive));
+        button.disabled = !canSelectHand;
       });
     } else {
       if (this.handSelectorSingle) this.handSelectorSingle.hidden = false;
       if (this.handSelectorDual) this.handSelectorDual.hidden = true;
       document.querySelectorAll("#hand-selector-single [data-hand]").forEach((button) => {
         button.classList.toggle("is-selected", button.dataset.hand === state.selectedHand);
-        button.disabled = state.phase !== "countdown";
+        button.classList.toggle("is-morph-target", Boolean(state.phase === "reaction" && state.morphActive));
+        button.disabled = !canSelectHand;
       });
     }
 
@@ -1787,9 +1791,10 @@ export class AppView {
     }
 
     const morph = $("#morph-skill");
-    const morphReady = state.phase === "reaction" && state.playerMp >= 25;
+    const morphReady = state.phase === "reaction" && !state.morphActive && !state.morphUsed && state.playerMp >= 25;
     morph.disabled = !morphReady;
     morph.classList.toggle("is-ready", morphReady);
+    morph.classList.toggle("is-active", Boolean(state.morphActive));
 
     const countdownValue = $("#countdown-value");
     const countdownCaption = $("#countdown-caption");
@@ -1798,7 +1803,7 @@ export class AppView {
       countdownCaption.textContent = I18n.t("ui.countdownCaption");
     } else if (state.phase === "reaction") {
       countdownValue.textContent = state.reactionRemaining.toFixed(1);
-      countdownCaption.textContent = I18n.t("ui.morphCaption");
+      countdownCaption.textContent = state.morphActive ? I18n.t("ui.morphSelectCaption") : I18n.t("ui.morphCaption");
     } else if (state.phase === "qte") {
       countdownValue.textContent = "!";
       countdownCaption.textContent = I18n.t("ui.qteCaption");

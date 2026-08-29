@@ -193,5 +193,6 @@ test("I18n 完整性檢查：繁中、簡中、英文、日文所有關卡、道
     assert.ok(i18n.t("ui.footerEndlessAliceLink"));
     assert.ok(i18n.t("ui.menuRecords"));
     assert.ok(i18n.t("ui.menuRecordsSub"));
+    assert.ok(i18n.t("ui.morphSelectCaption"));
   }
 });

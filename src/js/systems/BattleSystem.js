@@ -128,6 +128,7 @@ export class BattleSystem {
       countdown: stage.roundSeconds || BATTLE_RULES.roundSeconds,
       reactionRemaining: 0,
       morphUsed: false,
+      morphActive: false,
       isEnemyFrozen: false,
       frozenEnemyHand: null,
       isPaused: false,
@@ -300,6 +301,7 @@ export class BattleSystem {
     this.state.countdown = roundSeconds;
     this.state.reactionRemaining = 0;
     this.state.morphUsed = false;
+    this.state.morphActive = false;
     this.state.lastChant = null;
     this.state.isPaused = false;
     this.countdownDeadline = performance.now() + roundSeconds * 1000;
@@ -333,21 +335,41 @@ export class BattleSystem {
   }
 
   selectHand(handId, slot = null) {
-    if (!this.state?.active || this.state.phase !== "countdown" || !HANDS[handId]) return;
-    if (slot === "left") {
-      this.state.selectedHands.left = handId;
-      this.state.selectedHand = handId;
-    } else if (slot === "right") {
-      this.state.selectedHands.right = handId;
-    } else {
-      this.state.selectedHand = handId;
-      this.state.selectedHands.left = handId;
-      if (!this.state.hasDualHandSkill) {
+    if (!this.state?.active || !HANDS[handId]) return;
+    if (this.state.phase === "countdown") {
+      if (slot === "left") {
+        this.state.selectedHands.left = handId;
+        this.state.selectedHand = handId;
+      } else if (slot === "right") {
         this.state.selectedHands.right = handId;
+      } else {
+        this.state.selectedHand = handId;
+        this.state.selectedHands.left = handId;
+        if (!this.state.hasDualHandSkill) {
+          this.state.selectedHands.right = handId;
+        }
       }
+      this.emitState();
+      this.bus.emit("sound", { name: "select" });
+    } else if (this.state.phase === "reaction" && this.state.morphActive) {
+      if (slot === "left") {
+        this.state.selectedHands.left = handId;
+        this.state.selectedHand = handId;
+      } else if (slot === "right") {
+        this.state.selectedHands.right = handId;
+      } else {
+        this.state.selectedHand = handId;
+        this.state.selectedHands.left = handId;
+        if (!this.state.hasDualHandSkill) {
+          this.state.selectedHands.right = handId;
+        }
+      }
+      this.state.morphActive = false;
+      this.clearReactionClocks();
+      this.emitState();
+      this.bus.emit("sound", { name: "select" });
+      this.resolveRound();
     }
-    this.emitState();
-    this.bus.emit("sound", { name: "select" });
   }
 
   revealHands() {
@@ -427,7 +449,7 @@ export class BattleSystem {
   }
 
   useMorph() {
-    if (!this.state?.active || this.state.phase !== "reaction") {
+    if (!this.state?.active || this.state.phase !== "reaction" || this.state.morphActive) {
       return { ok: false, message: "變拳只能在看見小樂出拳後的反應時間內使用。" };
     }
     const totalDiscount = this.getAllEquipEffects("morph_discount").reduce((sum, eff) => sum + (eff.morphDiscount || 0), 0);
@@ -439,34 +461,27 @@ export class BattleSystem {
     this.clearReactionClocks();
     this.state.playerMp -= morphCost;
 
-    if (this.state.opponentHands?.left && this.state.opponentHands?.right) {
-      if (this.state.hasDualHandSkill) {
-        this.state.selectedHands.left = getCounterHand(this.state.opponentHands.left);
-        this.state.selectedHands.right = getCounterHand(this.state.opponentHands.right);
-        this.state.selectedHand = this.state.selectedHands.left;
-      } else {
-        const targetEnemy = this.state.enemies.find((e) => e.id === this.state.targetEnemyId && e.alive);
-        const targetOpponentHand = targetEnemy?.id === "right" ? this.state.opponentHands.right : this.state.opponentHands.left;
-        this.state.selectedHand = getCounterHand(targetOpponentHand);
-        this.state.selectedHands.left = this.state.selectedHand;
-        this.state.selectedHands.right = this.state.selectedHand;
-      }
-    } else {
-      const counter = getCounterHand(this.state.opponentHand);
-      this.state.selectedHand = counter;
-      this.state.selectedHands.left = counter;
-      this.state.selectedHands.right = counter;
-    }
-
     this.state.enemyWinningEmoji = null;
     this.state.morphUsed = true;
-    this.state.reactionRemaining = 0;
-    this.store.recordMorphUse();
+    this.state.morphActive = true;
+
+    const morphWindowMs = 2000;
+    this.state.reactionRemaining = morphWindowMs / 1000;
+    this.reactionDeadline = performance.now() + morphWindowMs;
+
     this.emitState();
     this.bus.emit("battle:effect", { type: "morph" });
     this.bus.emit("sound", { name: "skill" });
     this.say(I18n.t("dialogue.morphReaction"), I18n.t("dialogue.speakerKohaku"));
-    this.reactionTimeoutId = this.timers.timeout(() => this.resolveRound(), 320);
+
+    this.reactionTickId = this.timers.interval(() => {
+      this.state.reactionRemaining = Math.max(0, (this.reactionDeadline - performance.now()) / 1000);
+      this.emitState();
+    }, 40);
+    this.reactionTimeoutId = this.timers.timeout(() => {
+      this.state.morphActive = false;
+      this.resolveRound();
+    }, morphWindowMs);
     return { ok: true };
   }
 
@@ -482,6 +497,7 @@ export class BattleSystem {
   resolveRound() {
     if (!this.state?.active || this.state.phase !== "reaction") return;
     this.clearReactionClocks();
+    this.state.morphActive = false;
 
     const isDualStage = Boolean(this.state.stage?.dualEnemy && this.state.enemies?.length > 1);
     const aliveEnemies = this.state.enemies.filter((e) => e.alive);
@@ -517,6 +533,9 @@ export class BattleSystem {
         const singleWin = (leftResult === "win" && rightResult !== "win") || (rightResult === "win" && leftResult !== "win");
 
         if (bothWin) {
+          if (this.state.morphUsed) {
+            this.store.recordMorphUse();
+          }
           const leftEnemy = this.state.enemies.find((e) => e.id === "left" && e.alive);
           const rightEnemy = this.state.enemies.find((e) => e.id === "right" && e.alive);
           if (leftEnemy) this.applyDamageToEnemy(leftEnemy, null, false);
@@ -527,6 +546,9 @@ export class BattleSystem {
         }
 
         if (singleWin) {
+          if (this.state.morphUsed) {
+            this.store.recordMorphUse();
+          }
           const winEnemyId = leftResult === "win" ? "left" : "right";
           this.state.targetEnemyId = winEnemyId;
           const target = this.state.enemies.find((e) => e.id === winEnemyId && e.alive);
@@ -569,6 +591,9 @@ export class BattleSystem {
       const singleWin = (leftResult === "win" && rightResult !== "win") || (rightResult === "win" && leftResult !== "win");
 
       if (bothWin) {
+        if (this.state.morphUsed) {
+          this.store.recordMorphUse();
+        }
         const leftEnemy = this.state.enemies.find((e) => e.id === "left" && e.alive);
         const rightEnemy = this.state.enemies.find((e) => e.id === "right" && e.alive);
         if (leftEnemy) this.applyDamageToEnemy(leftEnemy, null, false);
@@ -579,6 +604,9 @@ export class BattleSystem {
       }
 
       if (singleWin) {
+        if (this.state.morphUsed) {
+          this.store.recordMorphUse();
+        }
         const winEnemyId = leftResult === "win" ? "left" : "right";
         this.state.targetEnemyId = winEnemyId;
         const target = this.state.enemies.find((e) => e.id === winEnemyId && e.alive);
@@ -607,6 +635,9 @@ export class BattleSystem {
       const singleWin = leftResult === "win" || rightResult === "win";
 
       if (bothWin) {
+        if (this.state.morphUsed) {
+          this.store.recordMorphUse();
+        }
         const doubleDamage = this.state.playerDamage * 2;
         const suffix = this.state.morphUsed ? "雙手變拳齊出，造成雙倍壓制傷害！" : "雙手同時獲勝，造成雙倍壓制傷害！";
         this.damageEnemy(suffix, false, doubleDamage);
@@ -614,6 +645,9 @@ export class BattleSystem {
       }
 
       if (singleWin) {
+        if (this.state.morphUsed) {
+          this.store.recordMorphUse();
+        }
         const suffix = this.state.morphUsed ? "變拳奏效，成功壓制！" : "漂亮地壓過了小樂的手勢！";
         this.damageEnemy(suffix, false);
         return;
@@ -631,6 +665,9 @@ export class BattleSystem {
       return;
     }
     if (result === "win") {
+      if (this.state.morphUsed) {
+        this.store.recordMorphUse();
+      }
       const suffix = this.state.morphUsed ? "變拳奏效，這一手由你拿下！" : "漂亮地壓過了小樂的手勢！";
       this.damageEnemy(suffix);
       return;
