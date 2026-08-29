@@ -3811,6 +3811,7 @@ class BattleSystem {
     this.countdownId = null;
     this.reactionTickId = null;
     this.reactionTimeoutId = null;
+    this.autoRestartTimerId = null;
     this.autoBattle = {
       active: false,
       stageId: null,
@@ -4849,13 +4850,18 @@ class BattleSystem {
       this.bus.emit("auto-battle:update", { ...this.autoBattle, won });
 
       if (this.autoBattle.active && this.autoBattle.remainingRounds > 0) {
-        this.timers.timeout(() => {
-          if (this.autoBattle.active) {
+        if (this.autoRestartTimerId !== null) {
+          this.timers.clearTimeout(this.autoRestartTimerId);
+        }
+        this.autoRestartTimerId = this.timers.timeout(() => {
+          this.autoRestartTimerId = null;
+          if (this.autoBattle.active && this.autoBattle.remainingRounds > 0) {
             this.start(this.autoBattle.stageId, { autoBattle: true });
           }
         }, 800);
       } else {
         this.autoBattle.active = false;
+        this.autoBattle.remainingRounds = 0;
         this.bus.emit("auto-battle:finished", { ...this.autoBattle });
       }
     }
@@ -4864,7 +4870,10 @@ class BattleSystem {
   stopAutoBattle() {
     this.autoBattle.active = false;
     this.autoBattle.remainingRounds = 0;
-    this.stopClocks();
+    if (this.autoRestartTimerId !== null) {
+      this.timers.clearTimeout(this.autoRestartTimerId);
+      this.autoRestartTimerId = null;
+    }
     this.bus.emit("auto-battle:stopped");
     if (this.state) {
       this.state.autoBattle = { ...this.autoBattle };
@@ -4897,6 +4906,10 @@ class BattleSystem {
   }
 
   stopClocks() {
+    if (this.autoRestartTimerId !== null) {
+      this.timers.clearTimeout(this.autoRestartTimerId);
+      this.autoRestartTimerId = null;
+    }
     this.timers.clearAll();
     this.countdownId = null;
     this.reactionTickId = null;
@@ -5914,11 +5927,16 @@ class AppView {
   }
 
   requestNavigation(screenName) {
-    if (this.battleState?.active && screenName !== "battle") {
-      const confirmed = window.confirm("現在撤退將不會得到星砂或經驗，確定離開嗎？");
-      if (!confirmed) return;
-      this.battle.stopAutoBattle();
-      this.battle.abandon();
+    if (screenName !== "battle") {
+      if (this.battleState?.active) {
+        const confirmed = window.confirm("現在撤退將不會得到星砂或經驗，確定離開嗎？");
+        if (!confirmed) return;
+        this.battle.stopAutoBattle();
+        this.battle.abandon();
+      } else {
+        this.battle.stopAutoBattle();
+        this.battle.abandon();
+      }
     }
     this.navigate(screenName);
   }
@@ -5941,6 +5959,7 @@ class AppView {
   }
 
   startStage(stageId) {
+    this.battle.stopAutoBattle();
     if (!this.battle.start(stageId)) return;
     this.postState = null;
     this.resultOverlay.classList.remove("is-active");
@@ -7311,6 +7330,8 @@ class AppView {
       return;
     }
     if (action === "stages" || action === "home") {
+      this.battle.stopAutoBattle();
+      this.battle.abandon();
       this.resultOverlay.classList.remove("is-active");
       this.navigate(action);
     }

@@ -22,6 +22,7 @@ export class BattleSystem {
     this.countdownId = null;
     this.reactionTickId = null;
     this.reactionTimeoutId = null;
+    this.autoRestartTimerId = null;
     this.autoBattle = {
       active: false,
       stageId: null,
@@ -1060,13 +1061,18 @@ export class BattleSystem {
       this.bus.emit("auto-battle:update", { ...this.autoBattle, won });
 
       if (this.autoBattle.active && this.autoBattle.remainingRounds > 0) {
-        this.timers.timeout(() => {
-          if (this.autoBattle.active) {
+        if (this.autoRestartTimerId !== null) {
+          this.timers.clearTimeout(this.autoRestartTimerId);
+        }
+        this.autoRestartTimerId = this.timers.timeout(() => {
+          this.autoRestartTimerId = null;
+          if (this.autoBattle.active && this.autoBattle.remainingRounds > 0) {
             this.start(this.autoBattle.stageId, { autoBattle: true });
           }
         }, 800);
       } else {
         this.autoBattle.active = false;
+        this.autoBattle.remainingRounds = 0;
         this.bus.emit("auto-battle:finished", { ...this.autoBattle });
       }
     }
@@ -1075,7 +1081,10 @@ export class BattleSystem {
   stopAutoBattle() {
     this.autoBattle.active = false;
     this.autoBattle.remainingRounds = 0;
-    this.stopClocks();
+    if (this.autoRestartTimerId !== null) {
+      this.timers.clearTimeout(this.autoRestartTimerId);
+      this.autoRestartTimerId = null;
+    }
     this.bus.emit("auto-battle:stopped");
     if (this.state) {
       this.state.autoBattle = { ...this.autoBattle };
@@ -1108,6 +1117,10 @@ export class BattleSystem {
   }
 
   stopClocks() {
+    if (this.autoRestartTimerId !== null) {
+      this.timers.clearTimeout(this.autoRestartTimerId);
+      this.autoRestartTimerId = null;
+    }
     this.timers.clearAll();
     this.countdownId = null;
     this.reactionTickId = null;

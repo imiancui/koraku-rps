@@ -683,11 +683,16 @@ export class AppView {
   }
 
   requestNavigation(screenName) {
-    if (this.battleState?.active && screenName !== "battle") {
-      const confirmed = window.confirm("現在撤退將不會得到星砂或經驗，確定離開嗎？");
-      if (!confirmed) return;
-      this.battle.stopAutoBattle();
-      this.battle.abandon();
+    if (screenName !== "battle") {
+      if (this.battleState?.active) {
+        const confirmed = window.confirm("現在撤退將不會得到星砂或經驗，確定離開嗎？");
+        if (!confirmed) return;
+        this.battle.stopAutoBattle();
+        this.battle.abandon();
+      } else {
+        this.battle.stopAutoBattle();
+        this.battle.abandon();
+      }
     }
     this.navigate(screenName);
   }
@@ -710,6 +715,7 @@ export class AppView {
   }
 
   startStage(stageId) {
+    this.battle.stopAutoBattle();
     if (!this.battle.start(stageId)) return;
     this.postState = null;
     this.resultOverlay.classList.remove("is-active");
@@ -2080,6 +2086,8 @@ export class AppView {
       return;
     }
     if (action === "stages" || action === "home") {
+      this.battle.stopAutoBattle();
+      this.battle.abandon();
       this.resultOverlay.classList.remove("is-active");
       this.navigate(action);
     }

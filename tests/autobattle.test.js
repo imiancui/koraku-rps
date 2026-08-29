@@ -68,7 +68,7 @@ test("自動刷關系統：啟動後自動推進出拳與 QTE，勝利連續重�
   assert.equal(battle.autoBattle.active, false, "次數歸零後自動刷關結束");
 });
 
-test("自動刷關手動停止：隨時可中止自動連續戰鬥", () => {
+test("自動刷關手動停止：停止後戰鬥維持進行中可由玩家手動接續對局或撤退", () => {
   const bus = new EventBus();
   const persistence = new MemoryPersistence();
   const store = new GameStore(bus, persistence);
@@ -76,8 +76,22 @@ test("自動刷關手動停止：隨時可中止自動連續戰鬥", () => {
   const battle = new BattleSystem(bus, store);
   battle.startAutoBattle(1, 10);
   assert.equal(battle.autoBattle.active, true);
+  assert.equal(battle.state.active, true);
+  assert.equal(battle.state.phase, "countdown");
 
+  // Stop auto battle while in countdown
   battle.stopAutoBattle();
   assert.equal(battle.autoBattle.active, false);
+  assert.equal(battle.state.active, true, "當前對局仍維持進行中");
+  assert.equal(battle.state.phase, "countdown", "倒數階段仍正常繼續");
+
+  // Player manually selects hand
+  battle.selectHand("paper");
+  assert.equal(battle.state.selectedHand, "paper");
+
+  // Player chooses to abandon
   battle.abandon();
+  assert.equal(battle.state.active, false);
+  assert.equal(battle.state.phase, "abandoned");
 });
+
