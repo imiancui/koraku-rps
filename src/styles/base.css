@@ -154,6 +154,22 @@ p {
   border-left: 1px solid var(--line);
 }
 
+button.profile-chip.lang-chip {
+  border-top: 0;
+  border-right: 0;
+  border-bottom: 0;
+  background: transparent;
+  color: var(--paper-soft);
+  cursor: pointer;
+  text-align: left;
+  transition: background 180ms ease, color 180ms ease;
+}
+
+button.profile-chip.lang-chip:hover {
+  background: rgba(216, 182, 106, 0.12);
+  color: var(--gold-bright);
+}
+
 .profile-chip small {
   color: var(--paper-dim);
   font-size: 9px;

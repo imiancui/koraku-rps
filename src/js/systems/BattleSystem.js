@@ -1,4 +1,5 @@
 import { ASSETS, BATTLE_RULES, HANDS, ITEMS, SKILLS, STAGES, EQUIPMENT_ITEMS } from "../config/gameConfig.js";
+import { I18n } from "../services/I18n.js";
 import { TimerRegistry } from "../core/TimerRegistry.js";
 import { QTESystem, DualQTESystem } from "./QTESystem.js";
 import {
@@ -88,7 +89,10 @@ export class BattleSystem {
       appearance: stage.final ? ASSETS.final : ASSETS.default
     };
     this.emitState();
-    this.say(stage.final ? "鏡中的我，可不會手下留情。" : "出拳一決。讓我看看你的決心吧。");
+    this.say(
+      stage.final ? I18n.t("dialogue.introFinal") : I18n.t("dialogue.introNormal"),
+      I18n.t("dialogue.speakerKohaku")
+    );
     this.scheduleRound();
     return true;
   }
@@ -137,16 +141,19 @@ export class BattleSystem {
 
         if (currentCount === 3 && this.state.lastChant !== 3) {
           this.state.lastChant = 3;
-          this.say("剪刀", "小樂");
-          this.bus.emit("battle:countdown-beat", { count: 3, word: "剪刀" });
+          const chant = I18n.t("dialogue.chant3");
+          this.say(chant, I18n.t("dialogue.speakerKohaku"));
+          this.bus.emit("battle:countdown-beat", { count: 3, word: chant });
         } else if (currentCount === 2 && this.state.lastChant !== 2) {
           this.state.lastChant = 2;
-          this.say("石頭", "小樂");
-          this.bus.emit("battle:countdown-beat", { count: 2, word: "石頭" });
+          const chant = I18n.t("dialogue.chant2");
+          this.say(chant, I18n.t("dialogue.speakerKohaku"));
+          this.bus.emit("battle:countdown-beat", { count: 2, word: chant });
         } else if (currentCount === 1 && this.state.lastChant !== 1) {
           this.state.lastChant = 1;
-          this.say("布！", "小樂");
-          this.bus.emit("battle:countdown-beat", { count: 1, word: "布！" });
+          const chant = I18n.t("dialogue.chant1");
+          this.say(chant, I18n.t("dialogue.speakerKohaku"));
+          this.bus.emit("battle:countdown-beat", { count: 1, word: chant });
         }
 
         this.emitState();
@@ -188,8 +195,8 @@ export class BattleSystem {
     this.bus.emit("battle:state", this.snapshot());
   }
 
-  say(text, speaker = "小樂") {
-    this.bus.emit("dialogue", { speaker, text });
+  say(text, speaker = null) {
+    this.bus.emit("dialogue", { speaker: speaker || I18n.t("dialogue.speakerKohaku"), text });
   }
 
   scheduleRound() {
@@ -214,16 +221,19 @@ export class BattleSystem {
 
       if (currentCount === 3 && this.state.lastChant !== 3) {
         this.state.lastChant = 3;
-        this.say("剪刀", "小樂");
-        this.bus.emit("battle:countdown-beat", { count: 3, word: "剪刀" });
+        const chant = I18n.t("dialogue.chant3");
+        this.say(chant, I18n.t("dialogue.speakerKohaku"));
+        this.bus.emit("battle:countdown-beat", { count: 3, word: chant });
       } else if (currentCount === 2 && this.state.lastChant !== 2) {
         this.state.lastChant = 2;
-        this.say("石頭", "小樂");
-        this.bus.emit("battle:countdown-beat", { count: 2, word: "石頭" });
+        const chant = I18n.t("dialogue.chant2");
+        this.say(chant, I18n.t("dialogue.speakerKohaku"));
+        this.bus.emit("battle:countdown-beat", { count: 2, word: chant });
       } else if (currentCount === 1 && this.state.lastChant !== 1) {
         this.state.lastChant = 1;
-        this.say("布！", "小樂");
-        this.bus.emit("battle:countdown-beat", { count: 1, word: "布！" });
+        const chant = I18n.t("dialogue.chant1");
+        this.say(chant, I18n.t("dialogue.speakerKohaku"));
+        this.bus.emit("battle:countdown-beat", { count: 1, word: chant });
       }
 
       this.emitState();
@@ -358,7 +368,7 @@ export class BattleSystem {
     this.emitState();
     this.bus.emit("battle:effect", { type: "morph" });
     this.bus.emit("sound", { name: "skill" });
-    this.say("咦……在最後一瞬間變拳了？", "小樂");
+    this.say(I18n.t("dialogue.morphReaction"), I18n.t("dialogue.speakerKohaku"));
     this.reactionTimeoutId = this.timers.timeout(() => this.resolveRound(), 320);
     return { ok: true };
   }
@@ -588,7 +598,7 @@ export class BattleSystem {
       this.state.targetEnemyId = targetEnemyId;
     }
     this.emitState();
-    this.say("抓到破綻了！想躲開的話，就跟上我的節奏！", "小樂");
+    this.say(I18n.t("dialogue.qteSingleBreak"), I18n.t("dialogue.speakerKohaku"));
     this.bus.emit("sound", { name: "danger" });
     const extraQte = this.hasEquipEffect("qte_time")?.extraQteSeconds || 0;
     this.qte.start({
@@ -604,7 +614,7 @@ export class BattleSystem {
     this.state.isDualQte = true;
     this.state.dualQteResolved = { left: false, right: false };
     this.emitState();
-    this.say("雙重破綻！跟上我們的雙生節奏吧！", "白金小樂");
+    this.say(I18n.t("dialogue.qteDualBreak"), I18n.t("dialogue.speakerPlatinumKohaku"));
     this.bus.emit("sound", { name: "danger" });
     const extraQte = this.hasEquipEffect("qte_time")?.extraQteSeconds || 0;
     this.dualQte.start({
@@ -827,7 +837,7 @@ export class BattleSystem {
     }
 
     this.emitState();
-    this.say(message, result === "loss" ? "小樂" : "旁白");
+    this.say(message, result === "loss" ? I18n.t("dialogue.speakerKohaku") : I18n.t("dialogue.speakerNarrator"));
 
     if (this.state.enemyHp <= 0) {
       this.timers.timeout(() => this.end(true), 1300);
@@ -865,7 +875,15 @@ export class BattleSystem {
     this.emitState();
     this.bus.emit("battle:effect", { type: "item", resource: item.resource, amount: restored });
     this.bus.emit("sound", { name: "heal" });
-    this.say("使用「" + item.name + "」，恢復了 " + restored + " 點 " + item.resource.toUpperCase() + "。", "旁白");
+    const locItem = I18n.getLocalizedItem(item);
+    this.say(
+      I18n.t("dialogue.itemUsed", {
+        name: locItem.name,
+        restored,
+        resource: item.resource.toUpperCase()
+      }),
+      I18n.t("dialogue.speakerNarrator")
+    );
     return { ok: true };
   }
 

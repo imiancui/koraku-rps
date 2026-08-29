@@ -6,6 +6,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 const modulesInOrder = [
   "src/js/config/gameConfig.js",
+  "src/js/services/I18n.js",
   "src/js/core/EventBus.js",
   "src/js/core/TimerRegistry.js",
   "src/js/services/Persistence.js",

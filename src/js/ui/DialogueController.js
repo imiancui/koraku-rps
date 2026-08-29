@@ -19,7 +19,8 @@ export class DialogueController {
     this.textElement.textContent = "";
     const characters = Array.from(text);
     let index = 0;
-    this.setSpeaking(speaker === "小樂");
+    const isSpeaking = Boolean(speaker && !["旁白", "Narrator", "ナレーション"].includes(speaker));
+    this.setSpeaking(isSpeaking);
 
     this.timer = window.setInterval(() => {
       index += 1;

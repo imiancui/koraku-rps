@@ -21,21 +21,25 @@
       </div>
 
       <header class="global-header">
-        <button class="brand-button" type="button" data-nav="home" aria-label="回到首頁">
+        <button class="brand-button" type="button" data-nav="home" aria-label="回到首頁" data-i18n-attr="aria-label:ui.home">
           <span class="brand-mon">狐</span>
           <span class="brand-copy">
-            <strong>狐樂・絆之勝負</strong>
-            <small>KORAKU NO SHŌBU</small>
+            <strong data-i18n="meta.title">狐樂・絆之勝負</strong>
+            <small data-i18n="meta.subtitle">KORAKU NO SHŌBU</small>
           </span>
         </button>
         <div class="profile-strip" aria-label="玩家資料">
-          <span class="profile-chip"><small>等級</small><b id="header-level">01</b></span>
+          <button id="lang-toggle" class="profile-chip lang-chip" type="button" aria-label="切換語系" title="切換語系">
+            <small data-i18n="ui.langToggle">語系</small>
+            <b id="header-lang">繁體中文</b>
+          </button>
+          <span class="profile-chip"><small data-i18n="ui.level">等級</small><b id="header-level">01</b></span>
           <span class="profile-chip profile-xp">
-            <small>經驗</small>
+            <small data-i18n="ui.xp">經驗</small>
             <span class="micro-meter"><i id="header-xp-fill"></i></span>
             <b id="header-xp">0 / 100</b>
           </span>
-          <span class="profile-chip coin-chip"><small>星砂</small><b id="header-coins">0</b></span>
+          <span class="profile-chip coin-chip"><small data-i18n="ui.coins">星砂</small><b id="header-coins">0</b></span>
           <button id="sound-toggle" class="icon-button" type="button" aria-label="切換音效" title="切換音效">♪</button>
         </div>
       </header>
@@ -52,76 +56,76 @@
           </div>
 
           <div class="home-copy">
-            <p class="eyebrow">じゃんけん・狐火異聞</p>
-            <h1 id="home-title"><span>狐樂</span><em>絆之勝負</em></h1>
-            <p class="home-lead">五秒定一手。看穿她的指尖，在敗勢裡抓住唯一的反擊。</p>
+            <p class="eyebrow" data-i18n="meta.eyebrow">じゃんけん・狐火異聞</p>
+            <h1 id="home-title"><span data-i18n="meta.title">狐樂</span><em data-i18n="meta.titleEm">絆之勝負</em></h1>
+            <p class="home-lead" data-i18n="meta.lead">五秒定一手。看穿她的指尖，在敗勢裡抓住唯一的反擊。</p>
 
             <nav class="main-menu" aria-label="主選單">
               <button class="menu-command primary" type="button" data-nav="stages">
                 <span class="command-index">01</span>
-                <span><b>開始對局</b><small>STORY BATTLE</small></span>
+                <span><b data-i18n="ui.menuStages">開始對局</b><small data-i18n="ui.menuStagesSub">STORY BATTLE</small></span>
                 <i>›</i>
               </button>
               <button class="menu-command" type="button" data-nav="growth">
                 <span class="command-index">02</span>
-                <span><b>能力成長</b><small>PLAYER GROWTH</small></span>
+                <span><b data-i18n="ui.menuGrowth">能力成長</b><small data-i18n="ui.menuGrowthSub">PLAYER GROWTH</small></span>
                 <i>›</i>
               </button>
               <button class="menu-command" type="button" data-nav="shop">
                 <span class="command-index">03</span>
-                <span><b>緣側商店</b><small>ITEM SHOP</small></span>
+                <span><b data-i18n="ui.menuShop">緣側商店</b><small data-i18n="ui.menuShopSub">ITEM SHOP</small></span>
                 <i>›</i>
               </button>
               <button class="menu-command" type="button" data-nav="gallery">
                 <span class="command-index">04</span>
-                <span><b>狐娘圖鑑</b><small>ILLUSTRATION GALLERY</small></span>
+                <span><b data-i18n="ui.menuGallery">狐娘圖鑑</b><small data-i18n="ui.menuGallerySub">ILLUSTRATION GALLERY</small></span>
                 <i>›</i>
               </button>
               <button class="menu-command" type="button" data-nav="guide">
                 <span class="command-index">05</span>
-                <span><b>遊戲指南</b><small>HOW TO PLAY</small></span>
+                <span><b data-i18n="ui.menuGuide">遊戲指南</b><small data-i18n="ui.menuGuideSub">HOW TO PLAY</small></span>
                 <i>›</i>
               </button>
               <button class="menu-command" type="button" data-nav="equipment">
                 <span class="command-index">06</span>
-                <span><b>玩家裝備</b><small>EQUIPMENT & BAG</small></span>
+                <span><b data-i18n="ui.menuEquipment">玩家裝備</b><small data-i18n="ui.menuEquipmentSub">EQUIPMENT & BAG</small></span>
                 <i>›</i>
               </button>
             </nav>
 
             <div class="home-record" aria-label="戰績">
-              <span><small>勝</small><b id="record-wins">0</b></span>
+              <span><small data-i18n="ui.wins">勝</small><b id="record-wins">0</b></span>
               <i></i>
-              <span><small>敗</small><b id="record-losses">0</b></span>
+              <span><small data-i18n="ui.losses">敗</small><b id="record-losses">0</b></span>
               <i></i>
-              <span><small>最深章節</small><b id="record-stage">—</b></span>
+              <span><small data-i18n="ui.deepestStage">最深章節</small><b id="record-stage">—</b></span>
             </div>
           </div>
 
           <div class="home-character character-speaker" data-character-speaker>
             <div class="character-halo" aria-hidden="true"></div>
             <img src="./koraku/小樂-預設.png" alt="狐娘小樂的預設造型">
-            <span class="character-seal">対戦<br>受付中</span>
+            <span class="character-seal" data-i18n="ui.receptionSeal">対戦<br>受付中</span>
           </div>
 
           <div class="home-dialogue">
-            <span>小樂</span>
-            <p>準備好了嗎？這次可別把視線移開喔。</p>
+            <span data-i18n="dialogue.speakerKohaku">小樂</span>
+            <p data-i18n="dialogue.homeGreeting">準備好了嗎？這次可別把視線移開喔。</p>
           </div>
           <div class="home-admin-actions">
-            <button id="open-cheat-modal" class="text-button cheat-button" type="button">⚙️ 測試調試 / 作弊選單</button>
-            <button id="reset-save" class="text-button reset-button" type="button">重置存檔</button>
+            <button id="open-cheat-modal" class="text-button cheat-button" type="button" data-i18n="ui.openCheat">⚙️ 測試調試 / 作弊選單</button>
+            <button id="reset-save" class="text-button reset-button" type="button" data-i18n="ui.resetSave">重置存檔</button>
           </div>
         </section>
 
         <section id="screen-stages" class="screen page-screen" aria-labelledby="stages-title">
           <div class="page-backdrop page-backdrop-stage" aria-hidden="true"></div>
           <header class="page-heading">
-            <button class="back-button" type="button" data-nav="home"><span>‹</span> 返回</button>
+            <button class="back-button" type="button" data-nav="home"><span>‹</span> <b data-i18n="ui.back">返回</b></button>
             <div>
               <p class="eyebrow">STORY BATTLE</p>
-              <h2 id="stages-title">選擇章節</h2>
-              <p>小樂會隨章節變得更有耐力。提升等級後，新的鏡界便會開啟。</p>
+              <h2 id="stages-title" data-i18n="ui.stagesTitle">選擇章節</h2>
+              <p data-i18n="ui.stagesSubtitle">小樂會隨章節變得更有耐力。提升等級後，新的鏡界便會開啟。</p>
             </div>
           </header>
           <div id="stage-grid" class="stage-grid"></div>
@@ -130,23 +134,23 @@
         <section id="screen-shop" class="screen page-screen" aria-labelledby="shop-title">
           <div class="page-backdrop page-backdrop-shop" aria-hidden="true"></div>
           <header class="page-heading">
-            <button class="back-button" type="button" data-nav="home"><span>‹</span> 返回</button>
+            <button class="back-button" type="button" data-nav="home"><span>‹</span> <b data-i18n="ui.back">返回</b></button>
             <div>
               <p class="eyebrow">ENGAWA ITEM SHOP</p>
-              <h2 id="shop-title">緣側商店</h2>
-              <p>選購靈藥與神威武裝。購入之裝備會直接放入裝備背包。</p>
+              <h2 id="shop-title" data-i18n="ui.shopTitle">緣側商店</h2>
+              <p data-i18n="ui.shopSubtitle">選購靈藥與神威武裝。購入之裝備會直接放入裝備背包。</p>
             </div>
-            <div class="large-wallet"><small>持有星砂</small><b id="shop-coins">0</b></div>
+            <div class="large-wallet"><small data-i18n="ui.coins">星砂</small><b id="shop-coins">0</b></div>
           </header>
           <!-- Shop Paperdoll Equipment Layout -->
           <details id="shop-paperdoll-details" class="shop-paperdoll-details" open>
             <summary class="shop-paperdoll-summary">
-              <span>✦ 角色穿戴紙娃娃與屬性總覽（點擊格位可直接卸下裝備）</span>
+              <span data-i18n="ui.paperdollSummaryTitle">✦ 角色穿戴紙娃娃與屬性總覽（點擊格位可直接卸下裝備）</span>
               <span class="summary-arrow">▼</span>
             </summary>
             <div class="paperdoll-card shop-paperdoll-card">
               <div class="paperdoll-header">
-                <span class="paperdoll-title">當前穿戴裝備</span>
+                <span class="paperdoll-title" data-i18n="ui.paperdollTitle">當前穿戴裝備</span>
                 <div class="paperdoll-stats-summary" id="shop-paperdoll-stats-summary"></div>
               </div>
               <div class="paperdoll-slots-grid shop-paperdoll-slots-grid">
@@ -204,7 +208,7 @@
 
           <div class="sub-tab-bar shop-filter-bar" role="tablist">
             <button class="sub-tab-btn is-active" type="button" data-shop-filter="all" role="tab">全部</button>
-            <button class="sub-tab-btn" type="button" data-shop-filter="potions" role="tab">消耗靈露</button>
+            <button class="sub-tab-btn" type="button" data-shop-filter="potions" role="tab" data-i18n="ui.shopConsumablesHeading">消耗靈露</button>
             <button class="sub-tab-btn" type="button" data-shop-filter="weapon" role="tab">主手武器</button>
             <button class="sub-tab-btn" type="button" data-shop-filter="offHand" role="tab">副手武防</button>
             <button class="sub-tab-btn" type="button" data-shop-filter="head" role="tab">頭盔</button>
@@ -226,13 +230,13 @@
         <section id="screen-growth" class="screen page-screen" aria-labelledby="growth-title">
           <div class="page-backdrop page-backdrop-growth" aria-hidden="true"></div>
           <header class="page-heading">
-            <button class="back-button" type="button" data-nav="home"><span>‹</span> 返回</button>
+            <button class="back-button" type="button" data-nav="home"><span>‹</span> <b data-i18n="ui.back">返回</b></button>
             <div>
               <p class="eyebrow">PLAYER GROWTH</p>
-              <h2 id="growth-title">能力與修練</h2>
-              <p>每次升等得到 5 點。可分配至基礎能力或修練特殊技能。</p>
+              <h2 id="growth-title" data-i18n="ui.growthTitle">能力與修練</h2>
+              <p data-i18n="ui.growthSubtitle">每次升等得到 5 點。可分配至基礎能力或修練特殊技能。</p>
             </div>
-            <div class="skill-points"><small>可用點數</small><b id="skill-points">0</b><em>SP</em></div>
+            <div class="skill-points"><small data-i18n="ui.unallocatedSp">可用點數</small><b id="skill-points">0</b><em>SP</em></div>
           </header>
           <div class="sub-tab-bar" role="tablist">
             <button class="sub-tab-btn is-active" type="button" data-growth-tab="stats" role="tab">能力強化</button>
@@ -242,7 +246,7 @@
           <div id="skills-grid" class="growth-grid skills-grid" hidden></div>
           <section class="level-progress-card">
             <div>
-              <span>下一等級</span>
+              <span data-i18n="ui.level">下一等級</span>
               <b id="growth-level">Lv. 1</b>
             </div>
             <div class="ornate-meter xp-meter"><i id="growth-xp-fill"></i></div>
@@ -253,11 +257,11 @@
         <section id="screen-gallery" class="screen page-screen" aria-labelledby="gallery-title">
           <div class="page-backdrop page-backdrop-gallery" aria-hidden="true"></div>
           <header class="page-heading">
-            <button class="back-button" type="button" data-nav="home"><span>‹</span> 返回</button>
+            <button class="back-button" type="button" data-nav="home"><span>‹</span> <b data-i18n="ui.back">返回</b></button>
             <div>
               <p class="eyebrow">ILLUSTRATION GALLERY</p>
-              <h2 id="gallery-title">狐娘圖鑑</h2>
-              <p>在此鑑賞小樂的各種姿態。於對局獲勝觸發事件後即可解鎖差分。</p>
+              <h2 id="gallery-title" data-i18n="ui.galleryTitle">狐娘圖鑑</h2>
+              <p data-i18n="ui.gallerySubtitle">在此鑑賞小樂的各種姿態。於對局獲勝觸發事件後即可解鎖差分。</p>
             </div>
           </header>
           <div class="gallery-container">
@@ -266,8 +270,8 @@
                 <img id="gallery-image" src="./koraku/泳裝小樂.png" alt="小樂立繪">
                 <div id="gallery-lock-overlay" class="gallery-lock-overlay">
                   <span class="gallery-lock-icon">🔒</span>
-                  <b>尚未解鎖</b>
-                  <small>於對局勝利後觸發泳裝事件以解鎖</small>
+                  <b data-i18n="ui.notYetUnlocked">尚未解鎖</b>
+                  <small data-i18n="ui.unlockSwimsuitHint">於對局勝利後觸發泳裝事件以解鎖</small>
                 </div>
               </div>
               <div class="gallery-controls">
@@ -284,11 +288,11 @@
         <section id="screen-guide" class="screen page-screen" aria-labelledby="guide-title">
           <div class="page-backdrop page-backdrop-guide" aria-hidden="true"></div>
           <header class="page-heading">
-            <button class="back-button" type="button" data-nav="home"><span>‹</span> 返回</button>
+            <button class="back-button" type="button" data-nav="home"><span>‹</span> <b data-i18n="ui.back">返回</b></button>
             <div>
               <p class="eyebrow">HOW TO PLAY</p>
-              <h2 id="guide-title">遊戲指南</h2>
-              <p>先看懂節奏，再把敗勢變成牽住她手的機會。</p>
+              <h2 id="guide-title" data-i18n="ui.guideTitle">遊戲指南</h2>
+              <p data-i18n="ui.guideSubtitle">先看懂節奏，再把敗勢變成牽住她手的機會。</p>
             </div>
           </header>
           <div class="sub-tab-bar" role="tablist">
@@ -298,26 +302,26 @@
           <div id="guide-basics-grid" class="guide-grid">
             <article class="guide-card">
               <span class="guide-number">一</span>
-              <h3>出拳與看清</h3>
-              <p>倒數結束後亮拳，預留看清階段。若小樂獲勝會在中央跳出巨型 Emoji 警告。</p>
+              <h3 data-i18n="ui.guideRpsTitle">基礎猜拳規則</h3>
+              <p data-i18n="ui.guideRpsDesc">剪刀剋布、布剋石頭、石頭剋剪刀。猜贏對小樂造成傷害，平手可能觸發摸摸，猜輸進入 QTE 反制階段。</p>
               <div class="guide-hands"><i>✊</i><i>✋</i><i>✌</i></div>
             </article>
             <article class="guide-card">
               <span class="guide-number">二</span>
-              <h3>時機變拳</h3>
-              <p>在各關看清窗口內按 F 或「変」，消耗 25 MP 逆轉為剋制手勢造成傷害。</p>
+              <h3 data-i18n="ui.guideMorphTitle">時機變拳秘術</h3>
+              <p data-i18n="ui.guideMorphDesc">在看到小樂出拳後的極短反應窗口內，消耗 25 MP 可逆轉為克制對手的手勢！</p>
               <div class="guide-skill">✦ <b>変</b> <small>25 MP</small></div>
             </article>
             <article class="guide-card">
               <span class="guide-number">三</span>
-              <h3>反制 QTE</h3>
-              <p>猜輸進入 QTE。依關卡難度要求輸入方向指令，成功反制小樂出拳！</p>
+              <h3 data-i18n="ui.guideQteTitle">QTE 絕地反制</h3>
+              <p data-i18n="ui.guideQteDesc">猜輸後在限定時間內依序輸入方向指令。反制成功可免除傷害並給予小樂反擊；失敗則承受重擊。</p>
               <div class="guide-arrows">↖ ↑ ↗<br>←　→<br>↙ ↓ ↘</div>
             </article>
             <article class="guide-card">
               <span class="guide-number">四</span>
-              <h3>技能與圖鑑</h3>
-              <p>Lv.2 可學「摸摸」，平手機率偷摸造成 25 傷害。獲勝觸發泳裝事件後可於圖鑑鑑賞立繪。</p>
+              <h3 data-i18n="ui.guideDualTitle">雙手解放奧義</h3>
+              <p data-i18n="ui.guideDualDesc">在第四章解鎖雙手技能後，可同時以左手與右手獨立出拳，分別對決兩位小樂！</p>
               <div class="guide-reward">勝利獲得經驗與星砂</div>
             </article>
           </div>
@@ -327,20 +331,20 @@
         <section id="screen-equipment" class="screen page-screen" aria-labelledby="equipment-title">
           <div class="page-backdrop page-backdrop-equipment" aria-hidden="true"></div>
           <header class="page-heading">
-            <button class="back-button" type="button" data-nav="home"><span>‹</span> 返回</button>
+            <button class="back-button" type="button" data-nav="home"><span>‹</span> <b data-i18n="ui.back">返回</b></button>
             <div>
               <p class="eyebrow">EQUIPMENT & BAG</p>
-              <h2 id="equipment-title">玩家裝備與紙娃娃</h2>
-              <p>點擊背包中的武具飾品可立即裝備；點擊紙娃娃欄位可卸下裝備。</p>
+              <h2 id="equipment-title" data-i18n="ui.equipmentTitle">玩家裝備與紙娃娃</h2>
+              <p data-i18n="ui.equipmentSubtitle">點擊背包中的武具飾品可立即裝備；點擊紙娃娃欄位可卸下裝備。</p>
             </div>
-            <div class="large-wallet"><small>持有星砂</small><b id="equipment-coins">0</b></div>
+            <div class="large-wallet"><small data-i18n="ui.coins">星砂</small><b id="equipment-coins">0</b></div>
           </header>
 
           <div class="equipment-layout">
             <!-- Left: Character Doll & Slots -->
             <div class="paperdoll-card">
               <div class="paperdoll-header">
-                <span class="paperdoll-title">角色武裝紙娃娃</span>
+                <span class="paperdoll-title" data-i18n="ui.paperdollTitle">角色武裝紙娃娃</span>
                 <div class="paperdoll-stats-summary" id="paperdoll-stats-summary"></div>
               </div>
               <div class="paperdoll-stage">
@@ -412,7 +416,7 @@
             <!-- Right: Equipment Inventory (Bag) -->
             <div class="bag-card">
               <div class="bag-header">
-                <h3>裝備背包</h3>
+                <h3 data-i18n="ui.bagTitle">裝備背包</h3>
                 <span id="bag-count" class="bag-count-badge">0 件裝備</span>
               </div>
               <p class="bag-hint">點擊背包內裝備即可穿戴（雙手武器會同時佔用主副手，單手劍可雙持）。</p>
@@ -421,23 +425,23 @@
               <!-- Consumables Bar in Equipment Page -->
               <div class="equipment-consumables-card">
                 <div class="consumables-header">
-                  <h4>✦ 攜帶靈露</h4>
+                  <h4 data-i18n="ui.shopConsumablesHeading">✦ 攜帶靈露</h4>
                   <small>可在對局中直接使用快捷鍵 4 / 5 飲用</small>
                 </div>
                 <div class="consumables-grid">
                   <div class="consumable-item-badge">
                     <div class="item-orb orb-red"><i>🔴</i></div>
                     <div class="consumable-item-info">
-                      <strong>緋靈露 (HP)</strong>
-                      <p>恢復 25 點生命值</p>
+                      <strong data-i18n="items.hpPotion.name">緋露藥</strong>
+                      <p data-i18n="items.hpPotion.description">溫熱的紅色靈露，在對局中恢復 25 點生命。</p>
                     </div>
                     <span class="consumable-item-count" id="equip-hp-potion-count">0 瓶</span>
                   </div>
                   <div class="consumable-item-badge">
                     <div class="item-orb orb-blue"><i>🔵</i></div>
                     <div class="consumable-item-info">
-                      <strong>蒼月露 (MP)</strong>
-                      <p>恢復 25 點魔力值</p>
+                      <strong data-i18n="items.mpPotion.name">蒼月露</strong>
+                      <p data-i18n="items.mpPotion.description">映著月色的藍色靈露，在對局中恢復 25 點魔力。</p>
                     </div>
                     <span class="consumable-item-count" id="equip-mp-potion-count">0 瓶</span>
                   </div>
@@ -767,13 +771,13 @@
       <div id="battle-pause-modal" class="modal-overlay pause-modal-overlay" hidden aria-hidden="true">
         <div class="modal-card pause-modal-card">
           <header class="modal-header">
-            <h3>⏸️ 對局暫停中</h3>
+            <h3>⏸️ <span data-i18n="ui.qteCaption">對局暫停中</span></h3>
           </header>
           <div class="pause-content">
             <p class="pause-message">戰鬥與 QTE 計時已完全暫停。您可以隨時繼續對局，或放棄本場戰鬥返回大廳。</p>
             <div class="pause-actions">
-              <button type="button" class="button-primary pause-action-btn" id="btn-resume-battle">▶ 繼續戰鬥 <kbd>ESC</kbd></button>
-              <button type="button" class="button-secondary pause-action-btn" id="btn-pause-abandon">🏳️ 放棄對局 (返回大廳)</button>
+              <button type="button" class="button-primary pause-action-btn" id="btn-resume-battle">▶ <span data-i18n="ui.btnRetry">繼續戰鬥</span> <kbd>ESC</kbd></button>
+              <button type="button" class="button-secondary pause-action-btn" id="btn-pause-abandon">🏳️ <span data-i18n="ui.btnReturnHome">放棄對局 (返回大廳)</span></button>
             </div>
           </div>
         </div>
@@ -782,58 +786,58 @@
       <div id="cheat-modal" class="modal-overlay" hidden aria-hidden="true">
         <div class="modal-card cheat-card">
           <header class="modal-header">
-            <h3>⚙️ 測試調試 / 作弊選單</h3>
+            <h3 data-i18n="ui.openCheat">⚙️ 測試調試 / 作弊選單</h3>
             <button id="close-cheat-modal" class="modal-close-btn" type="button">×</button>
           </header>
           <div class="cheat-content">
             <div class="cheat-quick-actions">
-              <button type="button" class="button-primary cheat-quick-btn" id="cheat-unlock-stages-btn">🔓 一鍵解鎖全部關卡</button>
-              <button type="button" class="button-primary cheat-quick-btn" id="cheat-unlock-gallery-btn">🎨 一鍵解鎖全部圖鑑</button>
+              <button type="button" class="button-primary cheat-quick-btn" id="cheat-unlock-stages-btn" data-i18n="ui.cheatUnlockAllStages">🔓 一鍵解鎖全部關卡</button>
+              <button type="button" class="button-primary cheat-quick-btn" id="cheat-unlock-gallery-btn" data-i18n="ui.cheatUnlockAllGallery">🎨 一鍵解鎖全部圖鑑</button>
               <button type="button" class="button-secondary cheat-quick-btn" id="cheat-max-all-btn">⚡ 滿級 + 99999 星砂 + 100 SP</button>
             </div>
             <form id="cheat-form" class="cheat-grid">
               <label class="cheat-field">
-                <span>玩家等級 (Level)</span>
+                <span data-i18n="ui.level">玩家等級 (Level)</span>
                 <input type="number" id="cheat-level" min="1" max="99" value="1">
               </label>
               <label class="cheat-field">
-                <span>經驗值 (XP)</span>
+                <span data-i18n="ui.xp">經驗值 (XP)</span>
                 <input type="number" id="cheat-xp" min="0" value="0">
               </label>
               <label class="cheat-field">
-                <span>可用技能點 (SP)</span>
+                <span data-i18n="ui.unallocatedSp">可用技能點 (SP)</span>
                 <input type="number" id="cheat-sp" min="0" value="0">
               </label>
               <label class="cheat-field">
-                <span>持有星砂 (Coins)</span>
+                <span data-i18n="ui.coins">持有星砂 (Coins)</span>
                 <input type="number" id="cheat-coins" min="0" value="0">
               </label>
               <label class="cheat-field">
-                <span>生命配點 (Vitality SP)</span>
+                <span data-i18n="ui.statHp">生命配點 (Vitality SP)</span>
                 <input type="number" id="cheat-alloc-hp" min="0" value="0">
               </label>
               <label class="cheat-field">
-                <span>魔力配點 (Arcana SP)</span>
+                <span data-i18n="ui.statMp">魔力配點 (Arcana SP)</span>
                 <input type="number" id="cheat-alloc-mp" min="0" value="0">
               </label>
               <label class="cheat-field">
-                <span>攻擊配點 (Damage SP)</span>
+                <span data-i18n="ui.statDamage">攻擊配點 (Damage SP)</span>
                 <input type="number" id="cheat-alloc-dmg" min="0" value="0">
               </label>
               <label class="cheat-field">
-                <span>摸摸技能 (Momo Skill Lv)</span>
+                <span data-i18n="skills.momo.name">摸摸技能 (Momo Skill Lv)</span>
                 <input type="number" id="cheat-skill-momo" min="0" max="10" value="0">
               </label>
               <label class="cheat-field">
-                <span>雙手解放 (Dual Hands Skill)</span>
+                <span data-i18n="skills.dualHand.name">雙手解放 (Dual Hands Skill)</span>
                 <input type="number" id="cheat-skill-dualHand" min="0" max="1" value="0">
               </label>
               <label class="cheat-field">
-                <span>HP 藥水數量</span>
+                <span data-i18n="items.hpPotion.name">HP 藥水數量</span>
                 <input type="number" id="cheat-hp-pot" min="0" value="1">
               </label>
               <label class="cheat-field">
-                <span>MP 藥水數量</span>
+                <span data-i18n="items.mpPotion.name">MP 藥水數量</span>
                 <input type="number" id="cheat-mp-pot" min="0" value="0">
               </label>
               <div class="cheat-actions">

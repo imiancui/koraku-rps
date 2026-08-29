@@ -1,4 +1,5 @@
 import { ASSETS } from "../config/gameConfig.js";
+import { I18n } from "../services/I18n.js";
 
 export class PostBattleSystem {
   constructor(bus, store, random = Math.random) {
@@ -30,9 +31,9 @@ export class PostBattleSystem {
     };
     this.emit();
     if (result.won) {
-      this.say("這次是你贏了。要把勝利用在什麼願望上呢？");
+      this.say(I18n.t("dialogue.postBattleWin"));
     } else {
-      this.say("還有什麼要說的嗎？回去再練練吧！");
+      this.say(I18n.t("dialogue.postBattleLoss"));
     }
   }
 
@@ -42,7 +43,7 @@ export class PostBattleSystem {
     this.state.scene = "swimsuit";
     this.state.appearance = ASSETS.swimsuit;
     this.emit();
-    this.say("泳裝？真拿你沒辦法……只准看一下喔。");
+    this.say(I18n.t("dialogue.askSwimsuitLine"));
   }
 
   startWatermelon() {
@@ -62,7 +63,7 @@ export class PostBattleSystem {
     this.state.strikeStartedAt = performance.now();
     this.emit();
     const nextAttempt = this.state.watermelon.attempts + 1;
-    this.say("第 " + nextAttempt + " 刀。白色指針進入綠色區域時，就喊『就是現在！』！");
+    this.say(I18n.t("dialogue.watermelonAttempt", { nextAttempt }));
   }
 
   strike() {
@@ -84,10 +85,11 @@ export class PostBattleSystem {
     this.state.scene = "watermelonResult";
     this.emit();
     this.bus.emit("sound", { name: success ? "victory" : "hurt" });
+    const remaining = this.state.watermelon.maxAttempts - this.state.watermelon.attempts;
     if (success) {
-      this.say("漂亮！這一刀切中了。還有 " + (this.state.watermelon.maxAttempts - this.state.watermelon.attempts) + " 刀。");
+      this.say(I18n.t("dialogue.watermelonHit", { remaining }));
     } else {
-      this.say("差一點點！還有 " + (this.state.watermelon.maxAttempts - this.state.watermelon.attempts) + " 刀，下一次再來。");
+      this.say(I18n.t("dialogue.watermelonMiss", { remaining }));
     }
   }
 
@@ -100,9 +102,9 @@ export class PostBattleSystem {
     this.emit();
     this.bus.emit("sound", { name: watermelon.successes ? "victory" : "defeat" });
     if (watermelon.successes > 0) {
-      this.say("三刀都結束了！切中 " + watermelon.successes + " 次，真是有趣呢！");
+      this.say(I18n.t("dialogue.watermelonAllHit", { successes: watermelon.successes }));
     } else {
-      this.say("三刀都結束了。下次再一起抓準時機吧。");
+      this.say(I18n.t("dialogue.watermelonDone"));
     }
   }
 
@@ -114,7 +116,7 @@ export class PostBattleSystem {
   }
 
   say(text) {
-    this.bus.emit("dialogue", { speaker: "小樂", text });
+    this.bus.emit("dialogue", { speaker: I18n.t("dialogue.speakerKohaku"), text });
   }
 
   emit() {

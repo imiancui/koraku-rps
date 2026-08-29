@@ -1,4 +1,5 @@
 import { DIRECTIONS, GALLERY_ITEMS, HANDS, ITEMS, SKILLS, STAGES, EQUIPMENT_ITEMS, EQUIPMENT_SLOTS } from "../config/gameConfig.js";
+import { I18n, LOCALES, LOCALE_ORDER } from "../services/I18n.js";
 import {
   arrowDirectionFromKey,
   directionFromKey,
@@ -70,9 +71,43 @@ export class AppView {
   }
 
   init() {
+    this.renderI18n();
     const snapshot = this.store.snapshot();
     this.renderStore(snapshot);
     this.navigate("home");
+  }
+
+  renderI18n() {
+    const locale = I18n.getLocale();
+    document.documentElement.lang = LOCALES[locale]?.code || locale;
+    document.title = I18n.t("meta.title");
+
+    const headerLang = $("#header-lang");
+    if (headerLang) {
+      headerLang.textContent = LOCALES[locale]?.label || "English";
+    }
+
+    document.querySelectorAll("[data-i18n]").forEach((el) => {
+      const key = el.dataset.i18n;
+      const text = I18n.t(key);
+      if (typeof text === "string") {
+        if (text.includes("<br>") || text.includes("<b>") || text.includes("<em>") || text.includes("<kbd>")) {
+          el.innerHTML = text;
+        } else {
+          el.textContent = text;
+        }
+      }
+    });
+
+    document.querySelectorAll("[data-i18n-attr]").forEach((el) => {
+      const pairs = el.dataset.i18nAttr.split(",");
+      pairs.forEach((pair) => {
+        const [attr, key] = pair.split(":");
+        if (attr && key) {
+          el.setAttribute(attr.trim(), I18n.t(key.trim()));
+        }
+      });
+    });
   }
 
   bindEvents() {
@@ -133,6 +168,17 @@ export class AppView {
   }
 
   handleClick(event) {
+    if (event.target.closest("#lang-toggle")) {
+      I18n.cycleLocale();
+      this.renderI18n();
+      this.renderStore(this.store.snapshot());
+      if (this.battleState?.active) {
+        this.renderBattle(this.battleState);
+      }
+      this.bus.emit("sound", { name: "select" });
+      return;
+    }
+
     const navButton = event.target.closest("[data-nav]");
     if (navButton) {
       this.requestNavigation(navButton.dataset.nav);
@@ -597,7 +643,7 @@ export class AppView {
     $("#header-xp-fill").style.width = clampPercent(state.profile.xp, state.xpToNext) + "%";
     $("#record-wins").textContent = state.records.wins;
     $("#record-losses").textContent = state.records.losses;
-    $("#record-stage").textContent = state.records.bestStage ? "第 " + state.records.bestStage + " 章" : "—";
+    $("#record-stage").textContent = state.records.bestStage ? I18n.getLocalizedStage(STAGES.find(s => s.id === state.records.bestStage) || { chapter: "第 " + state.records.bestStage + " 章" }).chapter : "—";
     $("#sound-toggle").textContent = state.settings.muted ? "×" : "♪";
     $("#sound-toggle").setAttribute("aria-label", state.settings.muted ? "開啟音效" : "關閉音效");
     this.renderStages(state);
@@ -612,6 +658,7 @@ export class AppView {
   renderStages(state) {
     const kanji = ["朱", "夕", "月", "鏡"];
     $("#stage-grid").innerHTML = STAGES.map((stage, index) => {
+      const locStage = I18n.getLocalizedStage(stage);
       const locked = state.profile.level < stage.requiredLevel;
       const cleared = state.records.bestStage >= stage.id;
       const classes = [
@@ -619,18 +666,18 @@ export class AppView {
         cleared ? "is-cleared" : "",
         stage.final ? "is-final" : ""
       ].filter(Boolean).join(" ");
-      let status = "進入對局　›";
-      if (locked) status = "需達 Lv. " + stage.requiredLevel + "　🔒";
-      if (cleared) status = "已締結・再次挑戰　✓";
+      let status = I18n.t("ui.enterStage");
+      if (locked) status = I18n.t("ui.stageNeedLevel", { level: stage.requiredLevel });
+      else if (cleared) status = I18n.t("ui.stageCleared");
       return '<button type="button" class="' + classes + '" data-stage="' + stage.id +
         '" data-kanji="' + kanji[index] + '"' + (locked ? " disabled" : "") + '>' +
-        '<span class="stage-chapter">' + stage.chapter + "</span>" +
-        "<h3>" + stage.name + "</h3>" +
-        "<p>" + stage.subtitle + "</p>" +
+        '<span class="stage-chapter">' + locStage.chapter + "</span>" +
+        "<h3>" + locStage.name + "</h3>" +
+        "<p>" + locStage.subtitle + "</p>" +
         '<div class="stage-rule">' +
-        '<span>小樂 HP</span><b>' + stage.enemyHp.toLocaleString("zh-TW") + '</b>' +
-        '<span>建議等級</span><b>Lv. ' + stage.requiredLevel + '</b>' +
-        '<span>勝利獎勵</span><b style="font-size:12px;color:var(--gold-bright);">+' + stage.xpWin + ' EXP / +' + stage.winCoins + ' 星砂</b>' +
+        '<span>' + (stage.final ? "2P" : I18n.t("dialogue.speakerKohaku")) + ' HP</span><b>' + stage.enemyHp.toLocaleString("zh-TW") + '</b>' +
+        '<span>' + I18n.t("ui.level") + '</span><b>Lv. ' + stage.requiredLevel + '</b>' +
+        '<span>' + I18n.t("ui.winReward") + '</span><b style="font-size:12px;color:var(--gold-bright);">+' + stage.xpWin + ' EXP / +' + stage.winCoins + ' ' + I18n.t("ui.coins") + '</b>' +
         '</div>' +
         '<span class="stage-status">' + status + "</span></button>";
     }).join("");
@@ -643,74 +690,65 @@ export class AppView {
 
     const filter = this.activeShopFilter || "all";
     const getSlotLabel = (item) => {
-      if (item.twoHanded) return "主手 (雙手)";
-      if (item.slotType === "weapon") return "主手武器";
-      if (item.slotType === "offHand") return "副手武防";
-      if (item.slotType === "head") return "頭盔";
-      if (item.slotType === "shoulders") return "肩甲";
-      if (item.slotType === "chest") return "胸甲";
-      if (item.slotType === "belt") return "腰帶";
-      if (item.slotType === "boots") return "鞋子";
-      if (item.slotType === "ring") return "戒指";
-      if (item.slotType === "earring") return "耳環";
-      if (item.slotType === "badge") return "胸章";
-      return EQUIPMENT_SLOTS[item.slotType]?.label || "裝備";
+      if (item.twoHanded) return I18n.t("ui.twoHandedBadge");
+      const locSlot = I18n.getLocalizedEquipmentSlot(item.slotType);
+      return locSlot?.label || "裝備";
     };
 
     const categories = [
       {
         id: "potions",
-        title: "消耗靈露",
+        title: I18n.t("ui.shopConsumablesHeading"),
         items: Object.values(ITEMS).map((item) => ({ ...item, isPotion: true }))
       },
       {
         id: "weapon",
-        title: "主手武器",
+        title: I18n.getLocalizedEquipmentSlot("mainHand")?.label || "主手武器",
         items: Object.values(EQUIPMENT_ITEMS).filter((item) => item.slotType === "weapon")
       },
       {
         id: "offHand",
-        title: "副手武防",
+        title: I18n.getLocalizedEquipmentSlot("offHand")?.label || "副手武防",
         items: Object.values(EQUIPMENT_ITEMS).filter((item) => item.slotType === "offHand" || item.id === "dagger_shadow")
       },
       {
         id: "head",
-        title: "頭盔防具",
+        title: I18n.getLocalizedEquipmentSlot("head")?.label || "頭盔",
         items: Object.values(EQUIPMENT_ITEMS).filter((item) => item.slotType === "head")
       },
       {
         id: "shoulders",
-        title: "肩甲防具",
+        title: I18n.getLocalizedEquipmentSlot("shoulders")?.label || "肩甲",
         items: Object.values(EQUIPMENT_ITEMS).filter((item) => item.slotType === "shoulders")
       },
       {
         id: "chest",
-        title: "胸甲防具",
+        title: I18n.getLocalizedEquipmentSlot("chest")?.label || "胸甲",
         items: Object.values(EQUIPMENT_ITEMS).filter((item) => item.slotType === "chest")
       },
       {
         id: "belt",
-        title: "腰帶防具",
+        title: I18n.getLocalizedEquipmentSlot("belt")?.label || "腰帶",
         items: Object.values(EQUIPMENT_ITEMS).filter((item) => item.slotType === "belt")
       },
       {
         id: "boots",
-        title: "鞋子防具",
+        title: I18n.getLocalizedEquipmentSlot("boots")?.label || "鞋子",
         items: Object.values(EQUIPMENT_ITEMS).filter((item) => item.slotType === "boots")
       },
       {
         id: "ring",
-        title: "戒指飾品",
+        title: I18n.getLocalizedEquipmentSlot("ring1")?.label || "戒指",
         items: Object.values(EQUIPMENT_ITEMS).filter((item) => item.slotType === "ring")
       },
       {
         id: "earring",
-        title: "耳環飾品",
+        title: I18n.getLocalizedEquipmentSlot("earring1")?.label || "耳環",
         items: Object.values(EQUIPMENT_ITEMS).filter((item) => item.slotType === "earring")
       },
       {
         id: "badge",
-        title: "胸章飾品",
+        title: I18n.getLocalizedEquipmentSlot("badge")?.label || "胸章",
         items: Object.values(EQUIPMENT_ITEMS).filter((item) => item.slotType === "badge")
       }
     ];
@@ -724,28 +762,27 @@ export class AppView {
 
       cat.items.forEach((item) => {
         if (item.isPotion) {
-          const description = item.resource === "hp"
-            ? "溫熱的紅色靈露，在對局中恢復 25 點生命。"
-            : "映著月色的藍色靈露，在對局中恢復 25 點魔力。";
+          const locItem = I18n.getLocalizedItem(item);
           html += '<article class="shop-equip-card shop-card-potion">' +
             '<div class="item-orb ' + item.color + '"><i>' + item.glyph + "</i></div>" +
             '<div class="shop-equip-info">' +
             '<div class="shop-equip-header">' +
-            '<span class="shop-slot-badge is-potion">【消耗靈露】</span>' +
-            '<span class="shop-equip-name">' + item.name + '</span>' +
+            '<span class="shop-slot-badge is-potion">【' + I18n.t("ui.shopConsumablesHeading") + '】</span>' +
+            '<span class="shop-equip-name">' + locItem.name + '</span>' +
             '</div>' +
-            '<div class="shop-equip-desc">' + description + '</div>' +
+            '<div class="shop-equip-desc">' + locItem.description + '</div>' +
             '<div class="shop-equip-action">' +
-            '<span class="shop-owned">持有數 <b>' + state.inventory[item.id] + '</b></span>' +
+            '<span class="shop-owned">' + I18n.t("ui.itemOwned") + ' <b>' + state.inventory[item.id] + '</b></span>' +
             '<button type="button" class="button-primary" data-buy="' + item.id + '"' +
-            (state.coins < item.price ? " disabled" : "") + '>✦ ' + item.price + ' 購入</button>' +
+            (state.coins < item.price ? " disabled" : "") + '>✦ ' + item.price + ' ' + I18n.t("ui.btnBuy") + '</button>' +
             '</div>' +
             '</div></article>';
         } else {
+          const locItem = I18n.getLocalizedEquipment(item);
           const statParts = [];
-          if (item.stats.damage) statParts.push("攻擊 +" + item.stats.damage);
-          if (item.stats.hp) statParts.push("生命 +" + item.stats.hp);
-          if (item.stats.mp) statParts.push("魔力 +" + item.stats.mp);
+          if (item.stats.damage) statParts.push(I18n.t("ui.statDamage") + " +" + item.stats.damage);
+          if (item.stats.hp) statParts.push(I18n.t("ui.statHp") + " +" + item.stats.hp);
+          if (item.stats.mp) statParts.push(I18n.t("ui.statMp") + " +" + item.stats.mp);
           const statsText = statParts.join(" / ");
           const slotLabel = getSlotLabel(item);
 
@@ -755,15 +792,15 @@ export class AppView {
 
           let actionHtml = "";
           if (isEquipped) {
-            actionHtml = '<span class="shop-status-badge is-equipped">已裝備 ✓</span>' +
-              '<button type="button" class="button-secondary shop-btn-unequip" data-shop-unequip="' + equippedSlot + '">卸下</button>';
+            actionHtml = '<span class="shop-status-badge is-equipped">' + I18n.t("ui.equippedBadge") + '</span>' +
+              '<button type="button" class="button-secondary shop-btn-unequip" data-shop-unequip="' + equippedSlot + '">' + I18n.t("ui.bagUnequipBtn") + '</button>';
           } else if (isOwnedInBag) {
-            actionHtml = '<span class="shop-status-badge is-owned">背包持有</span>' +
-              '<button type="button" class="button-primary shop-btn-equip" data-shop-equip="' + item.id + '">即刻穿戴</button>';
+            actionHtml = '<span class="shop-status-badge is-owned">' + I18n.t("ui.ownedInBag") + '</span>' +
+              '<button type="button" class="button-primary shop-btn-equip" data-shop-equip="' + item.id + '">' + I18n.t("ui.equipNow") + '</button>';
           } else {
-            actionHtml = '<span style="font-size:12px;color:var(--gold);">✦ ' + item.price + ' 星砂</span>' +
+            actionHtml = '<span style="font-size:12px;color:var(--gold);">✦ ' + item.price + ' ' + I18n.t("ui.coins") + '</span>' +
               '<button type="button" class="button-primary" data-buy-equip="' + item.id + '"' +
-              (state.coins < item.price ? " disabled" : "") + '>購入</button>';
+              (state.coins < item.price ? " disabled" : "") + '>' + I18n.t("ui.equipBuy") + '</button>';
           }
 
           html += '<article class="shop-equip-card rarity-' + item.rarity + '" data-equip-tooltip-id="' + item.id + '">' +
@@ -771,10 +808,10 @@ export class AppView {
             '<div class="shop-equip-info">' +
             '<div class="shop-equip-header">' +
             '<span class="shop-slot-badge">【' + slotLabel + '】</span>' +
-            '<span class="shop-equip-name">' + item.name + '</span>' +
+            '<span class="shop-equip-name">' + locItem.name + '</span>' +
             '</div>' +
             '<div class="shop-equip-stats">' + statsText + '</div>' +
-            '<div class="shop-equip-desc">' + item.description + '</div>' +
+            '<div class="shop-equip-desc">' + locItem.description + '</div>' +
             '<div class="shop-equip-action">' + actionHtml + '</div>' +
             '</div></article>';
         }
@@ -792,30 +829,30 @@ export class AppView {
     const cards = [
       {
         id: "damage",
-        label: "攻擊",
+        label: I18n.t("ui.statDamage"),
         code: "DAMAGE",
         glyph: "刃",
         value: state.playerStats.damage,
-        unit: "每次勝利傷害",
-        text: "每投入 1 點，對小樂造成的傷害增加 5。"
+        unit: I18n.t("ui.unitDamage"),
+        text: I18n.t("ui.statAllocDmgDesc")
       },
       {
         id: "hp",
-        label: "生命",
+        label: I18n.t("ui.statHp"),
         code: "VITALITY",
         glyph: "命",
         value: state.playerStats.maxHp,
-        unit: "最大 HP",
-        text: "每投入 1 點，最大生命增加 10。"
+        unit: I18n.t("ui.unitMaxHp"),
+        text: I18n.t("ui.statAllocHpDesc")
       },
       {
         id: "mp",
-        label: "魔力",
+        label: I18n.t("ui.statMp"),
         code: "ARCANA",
         glyph: "魔",
         value: state.playerStats.maxMp,
-        unit: "最大 MP",
-        text: "每投入 1 點，最大魔力增加 10。"
+        unit: I18n.t("ui.unitMaxMp"),
+        text: I18n.t("ui.statAllocMpDesc")
       }
     ];
     if (this.growthGrid) {
@@ -825,12 +862,13 @@ export class AppView {
           "</small><h3>" + card.label + '</h3><div class="stat-value"><b>' + card.value +
           "</b><span>" + card.unit + "</span></div><p>" + card.text +
           '</p><button type="button" class="button-primary" data-allocate="' + card.id + '"' +
-          disabled + ">投入 1 SP　＋</button></article>";
+          disabled + ">" + I18n.t("ui.spInvestBtn") + "</button></article>";
       }).join("");
     }
 
     if (this.skillsGrid) {
       this.skillsGrid.innerHTML = Object.values(SKILLS).map((skill) => {
+        const locSkill = I18n.getLocalizedSkill(skill);
         const unlocked = state.profile.level >= skill.unlockLevel;
         const currentLvl = (state.profile.skills && state.profile.skills[skill.id]) || 0;
         const isMax = currentLvl >= skill.maxLevel;
@@ -840,33 +878,33 @@ export class AppView {
 
         let statValueHtml = "";
         if (skill.id === "momo") {
-          statValueHtml = '<div class="stat-value"><b>' + currentChance + "%</b><span>平手發動率</span></div>";
+          statValueHtml = '<div class="stat-value"><b>' + currentChance + "%</b><span>" + I18n.t("ui.momoProcRate") + "</span></div>";
         } else if (skill.id === "dualHand") {
-          statValueHtml = '<div class="stat-value"><b>' + (currentLvl > 0 ? "已解放" : "未解鎖") + "</b><span>第四關雙手出拳</span></div>";
+          statValueHtml = '<div class="stat-value"><b>' + (currentLvl > 0 ? I18n.t("ui.dualHandUnlocked") : I18n.t("ui.dualHandLocked")) + "</b><span>" + I18n.t("ui.dualHandDescSub") + "</span></div>";
         }
 
-        let buttonText = "修練 (" + skill.costPerLevel + " SP)";
+        let buttonText = I18n.t("ui.btnUpgradeSkill") + " (" + skill.costPerLevel + " SP)";
         let disabled = false;
         if (!unlocked) {
-          buttonText = "需達 Lv. " + skill.unlockLevel + " 解鎖";
+          buttonText = I18n.t("ui.skillLocked", { level: skill.unlockLevel });
           disabled = true;
         } else if (isMax) {
-          buttonText = "已達最高等級 (MAX)";
+          buttonText = I18n.t("ui.skillMaxLevel");
           disabled = true;
         } else if (!canAfford) {
-          buttonText = "投入 " + skill.costPerLevel + " SP (點數不足)";
+          buttonText = I18n.t("ui.skillCostSp", { sp: skill.costPerLevel }) + " (" + I18n.t("ui.insufficientCoins") + ")";
           disabled = true;
         }
 
         const nextTip = (!isMax && unlocked && skill.id === "momo")
-          ? '<br><small style="color:var(--azure-bright);display:block;margin-top:4px;">下一級機率: ' + nextChance + "%</small>"
+          ? '<br><small style="color:var(--azure-bright);display:block;margin-top:4px;">' + I18n.t("ui.nextLevelRate", { chance: nextChance }) + '</small>'
           : "";
 
-        return '<article class="growth-card" data-glyph="' + skill.glyph + '">' +
+        return '<article class="growth-card" data-glyph="' + locSkill.glyph + '">' +
           "<small>" + skill.code + "</small>" +
-          "<h3>" + skill.name + ' <small style="font-size:12px;color:var(--gold);margin-left:6px;">Lv. ' + currentLvl + " / " + skill.maxLevel + "</small></h3>" +
+          "<h3>" + locSkill.name + ' <small style="font-size:12px;color:var(--gold);margin-left:6px;">Lv. ' + currentLvl + " / " + skill.maxLevel + "</small></h3>" +
           statValueHtml +
-          "<p>" + skill.description + nextTip + "</p>" +
+          "<p>" + locSkill.description + nextTip + "</p>" +
           '<button type="button" class="button-primary" data-allocate-skill="' + skill.id + '"' +
           (disabled ? " disabled" : "") + ">" + buttonText + "</button></article>";
       }).join("");
@@ -876,6 +914,7 @@ export class AppView {
   renderGallery(state) {
     const unlocked = Boolean(state.records.unlockedSwimsuit || state.records.bestStage >= 1);
     const currentItem = GALLERY_ITEMS.find((item) => item.id === this.selectedGalleryItem) || GALLERY_ITEMS[0];
+    const locCurrentItem = I18n.getLocalizedGalleryItem(currentItem);
 
     if (this.galleryArtFrame) {
       this.galleryArtFrame.classList.toggle("is-locked", !unlocked);
@@ -884,15 +923,16 @@ export class AppView {
       this.galleryImage.src = currentItem.src;
     }
     if (this.galleryItemTitle) {
-      this.galleryItemTitle.textContent = currentItem.name;
+      this.galleryItemTitle.textContent = locCurrentItem.name;
     }
     if (this.galleryItemDesc) {
-      this.galleryItemDesc.textContent = currentItem.description;
+      this.galleryItemDesc.textContent = locCurrentItem.description;
     }
     if (this.galleryVariantButtons) {
       this.galleryVariantButtons.innerHTML = GALLERY_ITEMS.map((item) => {
+        const locItem = I18n.getLocalizedGalleryItem(item);
         const active = item.id === currentItem.id ? " is-active" : "";
-        return '<button type="button" class="gallery-variant-btn' + active + '" data-gallery-variant="' + item.id + '">' + item.variantName + "</button>";
+        return '<button type="button" class="gallery-variant-btn' + active + '" data-gallery-variant="' + item.id + '">' + locItem.variantName + "</button>";
       }).join("");
     }
   }
@@ -902,19 +942,20 @@ export class AppView {
     if (!bossGrid) return;
     const kanji = ["朱", "夕", "月", "鏡"];
     bossGrid.innerHTML = STAGES.map((stage, index) => {
+      const locStage = I18n.getLocalizedStage(stage);
       const cleared = (state.records.bestStage || 0) >= stage.id;
       return '<article class="guide-card' + (cleared ? " is-cleared" : " is-locked") + '">' +
         '<span class="guide-number">' + kanji[index] + "</span>" +
-        '<small style="color:var(--gold);font-size:10px;letter-spacing:0.2em;display:block;margin-bottom:4px;">' + stage.chapter + "</small>" +
-        "<h3>" + (cleared ? stage.name : "？？？") + "</h3>" +
+        '<small style="color:var(--gold);font-size:10px;letter-spacing:0.2em;display:block;margin-bottom:4px;">' + locStage.chapter + "</small>" +
+        "<h3>" + (cleared ? locStage.name : "？？？") + "</h3>" +
         (cleared
-          ? '<div style="margin:8px 0 10px;font-size:13px;color:var(--gold-bright);font-weight:600;">規則重點：' + stage.bossRuleSummary + "</div>" +
-            '<p style="min-height:80px;color:var(--paper-dim);font-size:12px;line-height:1.7;">' + stage.bossRuleDetail + "</p>" +
-            '<div class="guide-reward" style="margin-top:12px;font-size:13px;">勝利獎勵：+' + stage.xpWin + " EXP / +" + stage.winCoins + " 星砂</div>"
+          ? '<div style="margin:8px 0 10px;font-size:13px;color:var(--gold-bright);font-weight:600;">' + I18n.t("ui.ruleFocus") + locStage.bossRuleSummary + "</div>" +
+            '<p style="min-height:80px;color:var(--paper-dim);font-size:12px;line-height:1.7;">' + locStage.bossRuleDetail + "</p>" +
+            '<div class="guide-reward" style="margin-top:12px;font-size:13px;">' + I18n.t("ui.winReward") + '+' + stage.xpWin + " EXP / +" + stage.winCoins + " " + I18n.t("ui.coins") + "</div>"
           : '<div style="min-height:140px;display:grid;place-content:center;text-align:center;color:var(--paper-dim);">' +
             '<span style="font-size:28px;margin-bottom:6px;">🔒</span>' +
-            '<b style="color:var(--paper-dim);font-size:13px;">尚未通關</b>' +
-            '<small style="margin-top:4px;font-size:11px;color:var(--paper-dim);">打贏此關卡後揭曉具體規則</small>' +
+            '<b style="color:var(--paper-dim);font-size:13px;">' + I18n.t("ui.notCleared") + "</b>" +
+            '<small style="margin-top:4px;font-size:11px;color:var(--paper-dim);">' + I18n.t("ui.unlockRuleAfterClear") + "</small>" +
             "</div>"
         ) +
         "</article>";
@@ -938,10 +979,10 @@ export class AppView {
     const bag = state.inventoryEquipment || [];
 
     if ($("#equipment-coins")) $("#equipment-coins").textContent = state.coins.toLocaleString("zh-TW");
-    if ($("#bag-count")) $("#bag-count").textContent = `${bag.length} 件裝備`;
+    if ($("#bag-count")) $("#bag-count").textContent = `${bag.length} ` + I18n.t("ui.menuEquipment");
 
-    if ($("#equip-hp-potion-count")) $("#equip-hp-potion-count").textContent = `${state.inventory?.hpPotion || 0} 瓶`;
-    if ($("#equip-mp-potion-count")) $("#equip-mp-potion-count").textContent = `${state.inventory?.mpPotion || 0} 瓶`;
+    if ($("#equip-hp-potion-count")) $("#equip-hp-potion-count").textContent = `${state.inventory?.hpPotion || 0}`;
+    if ($("#equip-mp-potion-count")) $("#equip-mp-potion-count").textContent = `${state.inventory?.mpPotion || 0}`;
 
     // Render paperdoll slots (both growth screen and shop screen)
     const isMainTwoHanded = Boolean(equip.mainHand && EQUIPMENT_ITEMS[equip.mainHand]?.twoHanded);
@@ -949,14 +990,17 @@ export class AppView {
     Object.keys(EQUIPMENT_SLOTS).forEach((slotKey) => {
       const itemId = equip[slotKey];
       const item = itemId ? EQUIPMENT_ITEMS[itemId] : null;
+      const locSlot = I18n.getLocalizedEquipmentSlot(slotKey);
 
       document.querySelectorAll(`[data-slot="${slotKey}"]`).forEach((slotBtn) => {
         const box = slotBtn.querySelector(".slot-box");
+        const tag = slotBtn.querySelector(".slot-tag");
+        if (tag && locSlot) tag.textContent = locSlot.label;
         if (!box) return;
 
         if (slotKey === "offHand" && isMainTwoHanded) {
           slotBtn.classList.add("is-two-handed-locked");
-          box.innerHTML = '<span class="slot-placeholder" style="font-size:12px;color:var(--gold);">⚔️ (雙手佔用)</span>';
+          box.innerHTML = '<span class="slot-placeholder" style="font-size:12px;color:var(--gold);">' + I18n.t("ui.twoHandedOccupied") + '</span>';
           slotBtn.removeAttribute("data-equip-tooltip-id");
           return;
         } else {
@@ -964,10 +1008,11 @@ export class AppView {
         }
 
         if (item) {
+          const locItem = I18n.getLocalizedEquipment(item);
           slotBtn.setAttribute("data-equip-tooltip-id", item.id);
           box.innerHTML = `
             <span class="slot-item-icon">${item.icon}</span>
-            <span class="slot-item-name rarity-${item.rarity}">${item.name}</span>
+            <span class="slot-item-name rarity-${item.rarity}">${locItem.name}</span>
           `;
         } else {
           slotBtn.removeAttribute("data-equip-tooltip-id");
@@ -978,9 +1023,9 @@ export class AppView {
 
     // Render stats summary for both panels
     const statsHtml = `
-      <span>HP<b>${state.playerStats.maxHp}</b></span>
-      <span>MP<b>${state.playerStats.maxMp}</b></span>
-      <span>ATK<b>${state.playerStats.damage}</b></span>
+      <span>${I18n.t("ui.statHp")}<b>${state.playerStats.maxHp}</b></span>
+      <span>${I18n.t("ui.statMp")}<b>${state.playerStats.maxMp}</b></span>
+      <span>${I18n.t("ui.statDamage")}<b>${state.playerStats.damage}</b></span>
     `;
     if ($("#paperdoll-stats-summary")) $("#paperdoll-stats-summary").innerHTML = statsHtml;
     if ($("#shop-paperdoll-stats-summary")) $("#shop-paperdoll-stats-summary").innerHTML = statsHtml;
@@ -989,17 +1034,19 @@ export class AppView {
     const bagGrid = $("#equipment-bag-grid");
     if (bagGrid) {
       if (bag.length === 0) {
-        bagGrid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px 10px;color:var(--paper-dim);">背包空空如也，可至緣側商店選購裝備。</div>';
+        bagGrid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px 10px;color:var(--paper-dim);">' + I18n.t("ui.bagEmpty") + '</div>';
       } else {
         bagGrid.innerHTML = bag.map((itemId) => {
           const item = EQUIPMENT_ITEMS[itemId];
           if (!item) return "";
+          const locItem = I18n.getLocalizedEquipment(item);
+          const locSlot = I18n.getLocalizedEquipmentSlot(item.slotType);
           return `
             <button type="button" class="bag-item-card rarity-${item.rarity}" data-equip-bag-item="${item.id}" data-equip-tooltip-id="${item.id}">
               <span class="bag-item-icon">${item.icon}</span>
               <div class="bag-item-info">
-                <span class="bag-item-name">${item.name}</span>
-                <span class="bag-item-type">${item.twoHanded ? "雙手武器" : (EQUIPMENT_SLOTS[item.slotType]?.label || item.slotType)}</span>
+                <span class="bag-item-name">${locItem.name}</span>
+                <span class="bag-item-type">${item.twoHanded ? I18n.t("ui.twoHandedBadge") : (locSlot?.label || item.slotType)}</span>
               </div>
             </button>
           `;
@@ -1065,40 +1112,24 @@ export class AppView {
   showTooltip(itemId, x, y) {
     const item = EQUIPMENT_ITEMS[itemId];
     if (!item || !this.equipTooltip) return;
-
-    let effectHtml = "";
-    if (item.effect) {
-      let effectLabel = "";
-      if (item.effect.type === "burn") effectLabel = `【狐火燃燒】回合結束額外造成 ${item.effect.burnDamage} 點燃燒傷害`;
-      if (item.effect.type === "freeze") effectLabel = `【寒霜凝滯】勝出 30% 機率冰凍小樂，下回合反應時間 +0.5 秒`;
-      if (item.effect.type === "thunder") effectLabel = `【迅雷反制】QTE 反制成功追加 ${item.effect.qteBonusDamage} 點雷擊傷害`;
-      if (item.effect.type === "burst") effectLabel = `【霸者破甲】出拳勝利傷害為 1.5 倍（雙手佔用）`;
-      if (item.effect.type === "shield") effectLabel = `【靈壁減傷】受傷減免 ${item.effect.damageReduction} 點`;
-      if (item.effect.type === "shadow") effectLabel = `【連擊刺擊】平手摸摸傷害 +${item.effect.momoDamageBonus} 點`;
-      if (item.effect.type === "potion_boost") effectLabel = `【藥泉共鳴】藥水回復效果 +${item.effect.potionBoost} 點`;
-      if (item.effect.type === "qte_time") effectLabel = `【神行步法】QTE 反制時限延長 ${item.effect.extraQteSeconds} 秒`;
-      if (item.effect.type === "morph_discount") effectLabel = `【靈玉凝神】變拳 MP 消耗降低 ${item.effect.morphDiscount} 點`;
-      if (item.effect.type === "coin_boost") effectLabel = `【羈絆之證】戰勝獲得星砂 +20%`;
-      effectHtml = `<div class="tooltip-effect">${effectLabel}</div>`;
-    }
+    const locItem = I18n.getLocalizedEquipment(item);
 
     const statParts = [];
-    if (item.stats?.damage) statParts.push(`攻擊 +${item.stats.damage}`);
-    if (item.stats?.hp) statParts.push(`生命 +${item.stats.hp}`);
-    if (item.stats?.mp) statParts.push(`魔力 +${item.stats.mp}`);
+    if (item.stats?.damage) statParts.push(`${I18n.t("ui.statDamage")} +${item.stats.damage}`);
+    if (item.stats?.hp) statParts.push(`${I18n.t("ui.statHp")} +${item.stats.hp}`);
+    if (item.stats?.mp) statParts.push(`${I18n.t("ui.statMp")} +${item.stats.mp}`);
     const statsHtml = statParts.length > 0 ? `<div class="tooltip-stats">${statParts.join(" / ")}</div>` : "";
 
     this.equipTooltip.innerHTML = `
       <div class="tooltip-header rarity-${item.rarity}">
         <span class="tooltip-icon">${item.icon}</span>
         <div>
-          <div class="tooltip-title">${item.name}</div>
-          <small style="font-size:10px;text-transform:uppercase;">${item.rarity} ${item.twoHanded ? "雙手巨劍" : "裝備"}</small>
+          <div class="tooltip-title">${locItem.name}</div>
+          <small style="font-size:10px;text-transform:uppercase;">${item.rarity} ${item.twoHanded ? I18n.t("ui.twoHandedBadge") : ""}</small>
         </div>
       </div>
       ${statsHtml}
-      ${effectHtml}
-      <div class="tooltip-desc">${item.description}</div>
+      <div class="tooltip-desc">${locItem.description}</div>
     `;
 
     const posX = Math.min(window.innerWidth - 270, x + 15);
@@ -1117,8 +1148,9 @@ export class AppView {
     const justRevealed = this.previousBattlePhase === "countdown" && state.phase === "reaction";
     this.previousBattlePhase = state.phase;
     this.battleState = state;
-    $("#battle-chapter").textContent = state.stage.chapter;
-    $("#battle-stage-name").textContent = state.stage.name;
+    const locStage = I18n.getLocalizedStage(state.stage);
+    $("#battle-chapter").textContent = locStage.chapter;
+    $("#battle-stage-name").textContent = locStage.name;
     $("#round-number").textContent = state.round;
     $("#player-hp-text").textContent = state.playerHp + " / " + state.playerMaxHp;
     $("#player-hp-fill").style.width = clampPercent(state.playerHp, state.playerMaxHp) + "%";
@@ -1135,7 +1167,7 @@ export class AppView {
       const left = state.enemies.find((e) => e.id === "left");
       const right = state.enemies.find((e) => e.id === "right");
       if (left) {
-        $("#enemy-left-name").textContent = left.name;
+        $("#enemy-left-name").textContent = I18n.t("dialogue.speakerPlatinumKohaku") + "・" + I18n.t("directions.left");
         $("#enemy-left-hp-text").textContent = left.hp.toLocaleString("zh-TW") + " / " + left.maxHp.toLocaleString("zh-TW");
         $("#enemy-left-hp-fill").style.width = clampPercent(left.hp, left.maxHp) + "%";
         const leftCard = document.querySelector("[data-target-enemy='left']");
@@ -1145,7 +1177,7 @@ export class AppView {
         }
       }
       if (right) {
-        $("#enemy-right-name").textContent = right.name;
+        $("#enemy-right-name").textContent = I18n.t("dialogue.speakerPlatinumKohaku") + "・" + I18n.t("directions.right");
         $("#enemy-right-hp-text").textContent = right.hp.toLocaleString("zh-TW") + " / " + right.maxHp.toLocaleString("zh-TW");
         $("#enemy-right-hp-fill").style.width = clampPercent(right.hp, right.maxHp) + "%";
         const rightCard = document.querySelector("[data-target-enemy='right']");
@@ -1157,7 +1189,7 @@ export class AppView {
     } else {
       if (singleHud) singleHud.hidden = false;
       if (dualHud) dualHud.hidden = true;
-      $("#enemy-name").textContent = state.stage.final ? "白金小樂" : "小樂";
+      $("#enemy-name").textContent = state.stage.final ? I18n.t("dialogue.speakerPlatinumKohaku") : I18n.t("dialogue.speakerKohaku");
       $("#enemy-hp-text").textContent = state.enemyHp.toLocaleString("zh-TW") + " / " + state.enemyMaxHp.toLocaleString("zh-TW");
       $("#enemy-hp-fill").style.width = clampPercent(state.enemyHp, state.enemyMaxHp) + "%";
     }
@@ -1197,8 +1229,8 @@ export class AppView {
     if (isPlayerDual) {
       if (this.playerHandWrapSingle) this.playerHandWrapSingle.hidden = true;
       if (this.playerHandWrapDual) this.playerHandWrapDual.hidden = false;
-      const leftPlayerHand = HANDS[state.selectedHands?.left || "rock"];
-      const rightPlayerHand = HANDS[state.selectedHands?.right || "rock"];
+      const leftPlayerHand = I18n.getLocalizedHand(state.selectedHands?.left || "rock");
+      const rightPlayerHand = I18n.getLocalizedHand(state.selectedHands?.right || "rock");
       $("#player-left-hand-display").textContent = leftPlayerHand.glyph;
       $("#player-left-hand-label").textContent = leftPlayerHand.label;
       $("#player-right-hand-display").textContent = rightPlayerHand.glyph;
@@ -1206,8 +1238,9 @@ export class AppView {
     } else {
       if (this.playerHandWrapSingle) this.playerHandWrapSingle.hidden = false;
       if (this.playerHandWrapDual) this.playerHandWrapDual.hidden = true;
-      $("#player-hand-display").textContent = HANDS[state.selectedHand].glyph;
-      $("#player-hand-label").textContent = HANDS[state.selectedHand].label;
+      const playerHand = I18n.getLocalizedHand(state.selectedHand);
+      $("#player-hand-display").textContent = playerHand.glyph;
+      $("#player-hand-label").textContent = playerHand.label;
     }
 
     const singleHandWrap = $("#enemy-hand-wrap-single");
@@ -1218,31 +1251,31 @@ export class AppView {
       if (singleHandWrap) singleHandWrap.hidden = true;
       if (dualHandWrap) dualHandWrap.hidden = false;
 
-      const leftHand = HANDS[state.opponentHands.left];
-      const rightHand = HANDS[state.opponentHands.right];
+      const leftHand = I18n.getLocalizedHand(state.opponentHands.left);
+      const rightHand = I18n.getLocalizedHand(state.opponentHands.right);
 
       if (state.phase === "countdown") {
         $("#enemy-left-hand-display").textContent = "✊";
-        $("#enemy-left-hand-label").textContent = state.countdown <= 3 ? "準備中" : "未揭曉";
+        $("#enemy-left-hand-label").textContent = state.countdown <= 3 ? I18n.t("ui.preparing") : I18n.t("ui.unrevealed");
         $("#enemy-right-hand-display").textContent = "✊";
-        $("#enemy-right-hand-label").textContent = state.countdown <= 3 ? "準備中" : "未揭曉";
+        $("#enemy-right-hand-label").textContent = state.countdown <= 3 ? I18n.t("ui.preparing") : I18n.t("ui.unrevealed");
       } else {
         $("#enemy-left-hand-display").textContent = leftHand ? leftHand.glyph : "？";
-        $("#enemy-left-hand-label").textContent = leftHand ? leftHand.label : "未揭曉";
+        $("#enemy-left-hand-label").textContent = leftHand ? leftHand.label : I18n.t("ui.unrevealed");
         $("#enemy-right-hand-display").textContent = rightHand ? rightHand.glyph : "？";
-        $("#enemy-right-hand-label").textContent = rightHand ? rightHand.label : "未揭曉";
+        $("#enemy-right-hand-label").textContent = rightHand ? rightHand.label : I18n.t("ui.unrevealed");
       }
     } else {
       if (singleHandWrap) singleHandWrap.hidden = false;
       if (dualHandWrap) dualHandWrap.hidden = true;
 
-      const opponent = HANDS[state.opponentHand];
+      const opponent = I18n.getLocalizedHand(state.opponentHand);
       if (state.phase === "countdown") {
         $("#enemy-hand-display").textContent = "✊";
-        $("#enemy-hand-label").textContent = state.countdown <= 3 ? "準備中" : "未揭曉";
+        $("#enemy-hand-label").textContent = state.countdown <= 3 ? I18n.t("ui.preparing") : I18n.t("ui.unrevealed");
       } else {
         $("#enemy-hand-display").textContent = opponent ? opponent.glyph : "？";
-        $("#enemy-hand-label").textContent = opponent ? opponent.label : "未揭曉";
+        $("#enemy-hand-label").textContent = opponent ? opponent.label : I18n.t("ui.unrevealed");
       }
     }
 
@@ -1281,16 +1314,16 @@ export class AppView {
     const countdownCaption = $("#countdown-caption");
     if (state.phase === "countdown") {
       countdownValue.textContent = state.countdown;
-      countdownCaption.textContent = "出拳倒數";
+      countdownCaption.textContent = I18n.t("ui.countdownCaption");
     } else if (state.phase === "reaction") {
       countdownValue.textContent = state.reactionRemaining.toFixed(1);
-      countdownCaption.textContent = "按 F 變拳";
+      countdownCaption.textContent = I18n.t("ui.morphCaption");
     } else if (state.phase === "qte") {
       countdownValue.textContent = "!";
-      countdownCaption.textContent = "反制機會";
+      countdownCaption.textContent = I18n.t("ui.qteCaption");
     } else {
-      countdownValue.textContent = state.lastResult === "win" ? "勝" : state.lastResult === "loss" ? "負" : "和";
-      countdownCaption.textContent = "回合結算";
+      countdownValue.textContent = state.lastResult === "win" ? I18n.t("ui.battleWon") : state.lastResult === "loss" ? I18n.t("ui.battleLost") : I18n.t("ui.battleDraw");
+      countdownCaption.textContent = I18n.t("ui.settleCaption");
     }
 
     if (justRevealed) {
@@ -1572,7 +1605,7 @@ export class AppView {
     watermelonGame.hidden = state.scene !== "watermelonAim";
     this.setWatermelonTicker(state.scene === "watermelonAim");
     $("#watermelon-attempt").textContent = "第 " + (watermelon.attempts + 1) + " 刀 / " + watermelon.maxAttempts;
-    $("#watermelon-successes").textContent = "切中 " + watermelon.successes + " 次";
+    $("#watermelon-successes").textContent = I18n.t("ui.watermelonScore") + " " + watermelon.successes;
     const tolerance = state.tolerance ?? (0.13 * (0.5 ** watermelon.successes));
     $("#watermelon-target").style.left = (state.target * 100) + "%";
     $("#watermelon-target").style.width = (tolerance * 2 * 100) + "%";
@@ -1581,40 +1614,35 @@ export class AppView {
     let actions = "";
 
     if (state.scene === "defeat") {
-      $("#result-title").textContent = "敗北・凝視";
-      $("#result-message").textContent = "小樂居高臨下地看著你，留下 50 星砂作為練習的證明。";
+      $("#result-title").textContent = I18n.t("ui.postBattleDefeatTitle");
+      $("#result-message").textContent = I18n.t("ui.postBattleDefeatDesc");
       actions = this.postButtons(true);
     } else if (state.scene === "victory") {
-      $("#result-title").textContent = "勝利・結緣";
-      $("#result-message").textContent = "你拆解了小樂的架勢。現在，可以向她提出勝者的願望。";
+      $("#result-title").textContent = I18n.t("ui.postBattleVictoryTitle");
+      $("#result-message").textContent = I18n.t("ui.postBattleVictoryDesc");
       actions =
-        '<button type="button" class="button-primary" data-post-action="swimsuit">請小樂穿泳裝 <kbd>SPACE</kbd></button>' +
+        '<button type="button" class="button-primary" data-post-action="swimsuit">' + I18n.t("ui.btnAskSwimsuitSpace") + '</button>' +
         this.postButtons(false);
     } else if (state.scene === "swimsuit") {
-      $("#result-title").textContent = "勝者的願望";
-      $("#result-message").textContent = "小樂換上了泳裝，也準備好了木棒。";
+      $("#result-title").textContent = I18n.t("ui.postBattleVictoryTitle");
+      $("#result-message").textContent = I18n.t("dialogue.askSwimsuitLine");
       actions =
-        '<button type="button" class="button-primary" data-post-action="watermelon">玩蒙眼切西瓜 <kbd>SPACE</kbd></button>' +
+        '<button type="button" class="button-primary" data-post-action="watermelon">' + I18n.t("ui.btnPlayWatermelonSpace") + '</button>' +
         this.postButtons(false);
     } else if (state.scene === "watermelonAim") {
-      $("#result-title").textContent = "蒙眼切西瓜・第 " + (watermelon.attempts + 1) + " 刀";
-      $("#result-message").textContent = "白色指針進入綠色區域後，立即按下「就是現在！」。";
+      $("#result-title").textContent = I18n.t("ui.watermelonTitle");
+      $("#result-message").textContent = I18n.t("ui.watermelonDesc");
       actions = "";
     } else if (state.scene === "watermelonResult") {
       const remaining = watermelon.maxAttempts - watermelon.attempts;
-      const cutMessage = watermelon.lastCutSuccess ? "切中了！" : "這一刀沒有碰到西瓜。";
-      $("#result-title").textContent = watermelon.lastCutSuccess ? "漂亮一擊" : "差一點點";
-      $("#result-message").textContent = cutMessage + "還有 " + remaining + " 刀，完成三刀後才會結算獎勵。";
-      watermelonStatus.textContent = "目前切中 " + watermelon.successes + " 次・第 " + watermelon.attempts + " / " + watermelon.maxAttempts + " 刀";
+      $("#result-title").textContent = watermelon.lastCutSuccess ? "Hit!" : "Miss!";
+      $("#result-message").textContent = (watermelon.lastCutSuccess ? I18n.t("dialogue.watermelonHit", { remaining }) : I18n.t("dialogue.watermelonMiss", { remaining }));
       actions =
-        '<button type="button" class="button-primary" data-post-action="watermelon">進行第 ' + (watermelon.attempts + 1) + " 刀 <kbd>SPACE</kbd></button>" +
+        '<button type="button" class="button-primary" data-post-action="watermelon">' + I18n.t("ui.btnNextStrikeSpace", { attempt: watermelon.attempts + 1 }) + '</button>' +
         this.postButtons(false);
     } else if (state.scene === "watermelonComplete") {
-      $("#result-title").textContent = "西瓜大結算";
-      $("#result-message").textContent = "三刀完成，成功切中 " + watermelon.successes + " 次。";
-      watermelonStatus.textContent = watermelon.rewardXp > 0
-        ? "西瓜獎勵　＋" + watermelon.rewardXp + " EXP" + (watermelon.levelsGained ? "　Lv.＋" + watermelon.levelsGained : "")
-        : "本次沒有切中西瓜，未獲得額外經驗。";
+      $("#result-title").textContent = I18n.t("ui.postBattleVictoryTitle");
+      $("#result-message").textContent = (watermelon.successes > 0 ? I18n.t("dialogue.watermelonAllHit", { successes: watermelon.successes }) : I18n.t("dialogue.watermelonDone"));
       actions = this.postButtons(false);
     }
 
@@ -1634,9 +1662,9 @@ export class AppView {
 
   postButtons(rematchPrimary) {
     const rematchClass = rematchPrimary ? "button-primary" : "button-secondary";
-    return '<button type="button" class="' + rematchClass + '" data-post-action="rematch">再次挑戰 <kbd>E</kbd></button>' +
-      '<button type="button" class="button-secondary" data-post-action="stages">選擇章節 <kbd>C</kbd></button>' +
-      '<button type="button" class="button-secondary" data-post-action="home">回大廳 <kbd>Q</kbd></button>';
+    return '<button type="button" class="' + rematchClass + '" data-post-action="rematch">' + I18n.t("ui.btnRematch") + '</button>' +
+      '<button type="button" class="button-secondary" data-post-action="stages">' + I18n.t("ui.btnSelectStages") + '</button>' +
+      '<button type="button" class="button-secondary" data-post-action="home">' + I18n.t("ui.btnReturnHome") + '</button>';
   }
 
   handlePostAction(action) {
