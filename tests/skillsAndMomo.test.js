@@ -190,6 +190,7 @@ test("雙手解放技能對抗單隻小樂：單勝常規傷害、雙勝雙倍�
   assert.equal(battle.state.hasDualHandSkill, true);
 
   // Case 1: Left Rock, Right Scissors vs Enemy Scissors (Left wins, Right draws -> Round Won!)
+  battle.state.phase = "countdown";
   battle.selectHand("rock", "left");
   battle.selectHand("scissors", "right");
   battle.state.phase = "reaction";
@@ -199,31 +200,35 @@ test("雙手解放技能對抗單隻小樂：單勝常規傷害、雙勝雙倍�
   assert.equal(battle.state.enemyHp, hpBefore - battle.state.playerDamage, "單手獲勝應扣除常規傷害");
 
   // Case 2: Left Rock, Right Rock vs Enemy Scissors (Both win -> Double Damage!)
-  battle.state.phase = "reaction";
-  battle.state.opponentHand = "scissors";
+  battle.state.phase = "countdown";
   battle.selectHand("rock", "left");
   battle.selectHand("rock", "right");
+  battle.state.phase = "reaction";
+  battle.state.opponentHand = "scissors";
   hpBefore = battle.state.enemyHp;
   battle.resolveRound();
   assert.equal(battle.state.enemyHp, hpBefore - (battle.state.playerDamage * 2), "雙手同時獲勝應扣除雙倍傷害");
 
   // Case 3: Left Paper, Right Scissors vs Enemy Scissors (Left loses, Right draws -> Draw/Safe Escape)
-  battle.state.phase = "reaction";
-  battle.state.opponentHand = "scissors";
+  battle.state.phase = "countdown";
   battle.selectHand("paper", "left");
   battle.selectHand("scissors", "right");
+  battle.state.phase = "reaction";
+  battle.state.opponentHand = "scissors";
   battle.resolveRound();
   assert.notEqual(battle.state.phase, "qte", "一負一平不應觸發 QTE 懲罰（安全脫離）");
 
   // Case 4: Left Paper, Right Paper vs Enemy Scissors (Both lose -> Triggers QTE!)
-  battle.state.phase = "reaction";
-  battle.state.opponentHand = "scissors";
+  battle.state.phase = "countdown";
   battle.selectHand("paper", "left");
   battle.selectHand("paper", "right");
+  battle.state.phase = "reaction";
+  battle.state.opponentHand = "scissors";
   battle.resolveRound();
   assert.equal(battle.state.phase, "qte", "雙手皆輸應觸發 QTE 反制");
   battle.abandon();
 });
+
 
 
 
