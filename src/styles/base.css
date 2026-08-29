@@ -435,6 +435,8 @@ select.profile-chip.lang-select option {
   color: #171a21;
   border-color: #66c0f4;
 }
+
+.debug-panel {
   position: fixed;
   z-index: 999;
   right: 8px;
