@@ -169,6 +169,12 @@ export class AppView {
       this.showToast(I18n.t("ui.autoBattleToastFinished", { total: info.totalRounds, wins: info.wins, losses: info.losses }), "success");
       this.requestNavigation("stages");
     });
+    this.bus.on("auto-battle:paused", (info) => {
+      this.updateAutoBattleButton(true, info);
+    });
+    this.bus.on("auto-battle:resumed", (info) => {
+      this.updateAutoBattleButton(false, info);
+    });
     this.bus.on("auto-battle:stopped", () => {
       // Toast shown by button handler, no duplicate needed
     });
@@ -1535,6 +1541,35 @@ export class AppView {
     if (this.equipTooltip) this.equipTooltip.hidden = true;
   }
 
+  updateAutoBattleButton(isPaused, autoBattleInfo = null) {
+    const toggleBtn = document.querySelector("#btn-toggle-autobattle, #btn-stop-autobattle, .btn-toggle-autobattle");
+    const toggleIcon = document.querySelector("#btn-toggle-autobattle-icon, .toggle-icon");
+    const toggleText = document.querySelector("#btn-toggle-autobattle-text");
+    const autoBattleText = document.querySelector("#auto-battle-hud-text");
+
+    if (toggleBtn) {
+      toggleBtn.classList.toggle("is-paused", Boolean(isPaused));
+    }
+    if (toggleIcon) {
+      toggleIcon.textContent = isPaused ? "▶" : "⏸";
+    }
+    if (toggleText) {
+      toggleText.textContent = isPaused ? I18n.t("ui.btnResumeAutoBattle") : I18n.t("ui.btnPauseAutoBattle");
+    }
+
+    const info = autoBattleInfo || this.battle?.autoBattle;
+    if (info?.active && autoBattleText) {
+      const currentRun = info.totalRounds - info.remainingRounds + 1;
+      const templateKey = isPaused ? "ui.autoBattleHudPaused" : "ui.autoBattleHudRunning";
+      autoBattleText.textContent = I18n.t(templateKey, {
+        current: Math.min(currentRun, info.totalRounds),
+        total: info.totalRounds,
+        wins: info.wins,
+        losses: info.losses
+      });
+    }
+  }
+
   renderBattle(state) {
     if (!state) return;
     const justRevealed = this.previousBattlePhase === "countdown" && state.phase === "reaction";
@@ -1699,34 +1734,10 @@ export class AppView {
 
     // Auto-Battle HUD Banner
     const autoBattleBanner = $("#auto-battle-hud-banner");
-    const autoBattleText = $("#auto-battle-hud-text");
-    const toggleIcon = $("#btn-toggle-autobattle-icon");
-    const toggleText = $("#btn-toggle-autobattle-text");
-    const toggleBtn = $("#btn-toggle-autobattle") || $("#btn-stop-autobattle");
-
     if (autoBattleBanner) {
       if (state.autoBattle?.active) {
         autoBattleBanner.hidden = false;
-        const isPaused = Boolean(state.autoBattle.isPaused);
-        if (toggleBtn) {
-          toggleBtn.classList.toggle("is-paused", isPaused);
-        }
-        if (toggleIcon) {
-          toggleIcon.textContent = isPaused ? "▶" : "⏸";
-        }
-        if (toggleText) {
-          toggleText.textContent = isPaused ? I18n.t("ui.btnResumeAutoBattle") : I18n.t("ui.btnPauseAutoBattle");
-        }
-        if (autoBattleText) {
-          const currentRun = state.autoBattle.totalRounds - state.autoBattle.remainingRounds + 1;
-          const templateKey = isPaused ? "ui.autoBattleHudPaused" : "ui.autoBattleHudRunning";
-          autoBattleText.textContent = I18n.t(templateKey, {
-            current: Math.min(currentRun, state.autoBattle.totalRounds),
-            total: state.autoBattle.totalRounds,
-            wins: state.autoBattle.wins,
-            losses: state.autoBattle.losses
-          });
-        }
+        this.updateAutoBattleButton(Boolean(state.autoBattle.isPaused), state.autoBattle);
       } else {
         autoBattleBanner.hidden = true;
       }

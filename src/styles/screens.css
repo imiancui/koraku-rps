@@ -3135,17 +3135,17 @@
 /* Auto-Battle HUD Banner */
 .auto-battle-hud-banner {
   position: absolute;
-  top: 12px;
+  top: 76px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 6px 16px;
-  background: rgba(18, 12, 28, 0.92);
+  padding: 6px 18px;
+  background: rgba(18, 12, 28, 0.94);
   border: 1px solid var(--gold-bright);
   border-radius: 20px;
-  box-shadow: 0 0 16px rgba(230, 160, 40, 0.35);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.6), 0 0 16px rgba(230, 160, 40, 0.35);
   z-index: 100;
   font-size: 12px;
   color: var(--paper);
@@ -3153,8 +3153,8 @@
 }
 
 @keyframes bannerPulse {
-  0%, 100% { box-shadow: 0 0 10px rgba(230, 160, 40, 0.3); }
-  50% { box-shadow: 0 0 20px rgba(255, 190, 60, 0.6); }
+  0%, 100% { box-shadow: 0 4px 14px rgba(230, 160, 40, 0.3); }
+  50% { box-shadow: 0 4px 22px rgba(255, 190, 60, 0.6); }
 }
 
 .auto-battle-icon {
@@ -3228,7 +3228,7 @@
 /* Frozen Kohaku Hand Badge */
 .frozen-hand-badge {
   position: absolute;
-  top: 52px;
+  top: 118px;
   left: 50%;
   transform: translateX(-50%);
   padding: 5px 14px;
