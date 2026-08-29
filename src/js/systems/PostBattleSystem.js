@@ -74,7 +74,10 @@ export class PostBattleSystem {
     const success = distance <= tolerance;
     this.state.watermelon.attempts += 1;
     this.state.watermelon.lastCutSuccess = success;
-    if (success) this.state.watermelon.successes += 1;
+    if (success) {
+      this.state.watermelon.successes += 1;
+    }
+    this.store?.recordWatermelonStageCut?.(this.state.watermelon.attempts, success);
     this.state.appearance = success ? ASSETS.watermelon : ASSETS.swimsuit;
 
     if (this.state.watermelon.attempts >= this.state.watermelon.maxAttempts) {

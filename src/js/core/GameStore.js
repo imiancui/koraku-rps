@@ -27,7 +27,59 @@ const DEFAULT_SAVE = Object.freeze({
     badge: null
   },
   inventoryEquipment: [],
-  records: { wins: 0, losses: 0, bestStage: 0, unlockedSwimsuit: false },
+  records: {
+    wins: 0,
+    losses: 0,
+    bestStage: 0,
+    unlockedSwimsuit: false,
+    clearedStages: [],
+    totalCoinsEarned: 0,
+    totalXpEarned: 0,
+    totalBattles: 0,
+    manualWins: 0,
+    manualLosses: 0,
+    autoWins: 0,
+    autoLosses: 0,
+    watermelonSlices: 0,
+    consumablesUsed: { hpPotion: 0, mpPotion: 0 },
+    morphUses: 0,
+    watermelonStageStats: {
+      1: { attempts: 0, successes: 0 },
+      2: { attempts: 0, successes: 0 },
+      3: { attempts: 0, successes: 0 }
+    },
+    damageDealt: {
+      total: 0,
+      byStage: { 1: 0, 2: 0, 3: 0, 4: 0 }
+    },
+    damageTaken: {
+      total: 0,
+      byStage: { 1: 0, 2: 0, 3: 0, 4: 0 }
+    },
+    qteStats: {
+      totalAttempts: 0,
+      totalSuccesses: 0,
+      byStage: {
+        1: { attempts: 0, successes: 0 },
+        2: { attempts: 0, successes: 0 },
+        3: { attempts: 0, successes: 0 },
+        4: { attempts: 0, successes: 0 }
+      }
+    },
+    rewardsByStage: {
+      1: { coins: 0, xp: 0 },
+      2: { coins: 0, xp: 0 },
+      3: { coins: 0, xp: 0 },
+      4: { coins: 0, xp: 0 }
+    },
+    stageStats: {
+      1: { totalAttempts: 0, manualWins: 0, manualLosses: 0, autoWins: 0, autoLosses: 0 },
+      2: { totalAttempts: 0, manualWins: 0, manualLosses: 0, autoWins: 0, autoLosses: 0 },
+      3: { totalAttempts: 0, manualWins: 0, manualLosses: 0, autoWins: 0, autoLosses: 0 },
+      4: { totalAttempts: 0, manualWins: 0, manualLosses: 0, autoWins: 0, autoLosses: 0 }
+    },
+    recentBattles: []
+  },
   settings: { muted: false }
 });
 
@@ -38,6 +90,19 @@ function freshSave() {
 function sanitizeSave(candidate) {
   if (!candidate || candidate.version !== 1) return freshSave();
   const base = freshSave();
+  const rawCleared = candidate.records?.clearedStages;
+  const clearedStages = Array.isArray(rawCleared)
+    ? [...rawCleared]
+    : (candidate.records?.bestStage ? Array.from({ length: candidate.records.bestStage }, (_, i) => i + 1) : []);
+
+  const rawStats = candidate.records?.stageStats || {};
+  const stageStats = {
+    1: { totalAttempts: 0, manualWins: 0, manualLosses: 0, autoWins: 0, autoLosses: 0, ...(rawStats[1] || {}) },
+    2: { totalAttempts: 0, manualWins: 0, manualLosses: 0, autoWins: 0, autoLosses: 0, ...(rawStats[2] || {}) },
+    3: { totalAttempts: 0, manualWins: 0, manualLosses: 0, autoWins: 0, autoLosses: 0, ...(rawStats[3] || {}) },
+    4: { totalAttempts: 0, manualWins: 0, manualLosses: 0, autoWins: 0, autoLosses: 0, ...(rawStats[4] || {}) }
+  };
+
   return {
     ...base,
     ...candidate,
@@ -56,7 +121,65 @@ function sanitizeSave(candidate) {
     inventory: { ...base.inventory, ...candidate.inventory },
     equipment: { ...base.equipment, ...candidate.equipment },
     inventoryEquipment: Array.isArray(candidate.inventoryEquipment) ? [...candidate.inventoryEquipment] : [],
-    records: { ...base.records, ...candidate.records },
+    records: {
+      ...base.records,
+      ...candidate.records,
+      clearedStages,
+      totalCoinsEarned: candidate.records?.totalCoinsEarned ?? candidate.coins ?? 0,
+      totalXpEarned: candidate.records?.totalXpEarned ?? 0,
+      totalBattles: candidate.records?.totalBattles ?? ((candidate.records?.wins || 0) + (candidate.records?.losses || 0)),
+      manualWins: candidate.records?.manualWins ?? candidate.records?.wins ?? 0,
+      manualLosses: candidate.records?.manualLosses ?? candidate.records?.losses ?? 0,
+      autoWins: candidate.records?.autoWins ?? 0,
+      autoLosses: candidate.records?.autoLosses ?? 0,
+      watermelonSlices: candidate.records?.watermelonSlices ?? 0,
+      consumablesUsed: {
+        hpPotion: candidate.records?.consumablesUsed?.hpPotion || 0,
+        mpPotion: candidate.records?.consumablesUsed?.mpPotion || 0
+      },
+      morphUses: candidate.records?.morphUses || 0,
+      watermelonStageStats: {
+        1: { attempts: candidate.records?.watermelonStageStats?.[1]?.attempts || 0, successes: candidate.records?.watermelonStageStats?.[1]?.successes || 0 },
+        2: { attempts: candidate.records?.watermelonStageStats?.[2]?.attempts || 0, successes: candidate.records?.watermelonStageStats?.[2]?.successes || 0 },
+        3: { attempts: candidate.records?.watermelonStageStats?.[3]?.attempts || 0, successes: candidate.records?.watermelonStageStats?.[3]?.successes || 0 }
+      },
+      damageDealt: {
+        total: candidate.records?.damageDealt?.total || 0,
+        byStage: {
+          1: candidate.records?.damageDealt?.byStage?.[1] || 0,
+          2: candidate.records?.damageDealt?.byStage?.[2] || 0,
+          3: candidate.records?.damageDealt?.byStage?.[3] || 0,
+          4: candidate.records?.damageDealt?.byStage?.[4] || 0
+        }
+      },
+      damageTaken: {
+        total: candidate.records?.damageTaken?.total || 0,
+        byStage: {
+          1: candidate.records?.damageTaken?.byStage?.[1] || 0,
+          2: candidate.records?.damageTaken?.byStage?.[2] || 0,
+          3: candidate.records?.damageTaken?.byStage?.[3] || 0,
+          4: candidate.records?.damageTaken?.byStage?.[4] || 0
+        }
+      },
+      qteStats: {
+        totalAttempts: candidate.records?.qteStats?.totalAttempts || 0,
+        totalSuccesses: candidate.records?.qteStats?.totalSuccesses || 0,
+        byStage: {
+          1: { attempts: candidate.records?.qteStats?.byStage?.[1]?.attempts || 0, successes: candidate.records?.qteStats?.byStage?.[1]?.successes || 0 },
+          2: { attempts: candidate.records?.qteStats?.byStage?.[2]?.attempts || 0, successes: candidate.records?.qteStats?.byStage?.[2]?.successes || 0 },
+          3: { attempts: candidate.records?.qteStats?.byStage?.[3]?.attempts || 0, successes: candidate.records?.qteStats?.byStage?.[3]?.successes || 0 },
+          4: { attempts: candidate.records?.qteStats?.byStage?.[4]?.attempts || 0, successes: candidate.records?.qteStats?.byStage?.[4]?.successes || 0 }
+        }
+      },
+      rewardsByStage: {
+        1: { coins: candidate.records?.rewardsByStage?.[1]?.coins || 0, xp: candidate.records?.rewardsByStage?.[1]?.xp || 0 },
+        2: { coins: candidate.records?.rewardsByStage?.[2]?.coins || 0, xp: candidate.records?.rewardsByStage?.[2]?.xp || 0 },
+        3: { coins: candidate.records?.rewardsByStage?.[3]?.coins || 0, xp: candidate.records?.rewardsByStage?.[3]?.xp || 0 },
+        4: { coins: candidate.records?.rewardsByStage?.[4]?.coins || 0, xp: candidate.records?.rewardsByStage?.[4]?.xp || 0 }
+      },
+      recentBattles: Array.isArray(candidate.records?.recentBattles) ? candidate.records.recentBattles.slice(0, 100) : [],
+      stageStats
+    },
     settings: { ...base.settings, ...candidate.settings }
   };
 }
@@ -123,15 +246,49 @@ export class GameStore {
           slot = "mainHand";
         } else if (!this.state.equipment.offHand && !EQUIPMENT_ITEMS[this.state.equipment.mainHand]?.twoHanded) {
           slot = "offHand";
+        } else if (this.state.equipment.mainHand === itemId && this.state.equipment.offHand !== itemId && !EQUIPMENT_ITEMS[this.state.equipment.mainHand]?.twoHanded) {
+          slot = "offHand";
+        } else if (this.state.equipment.offHand === itemId && this.state.equipment.mainHand !== itemId) {
+          slot = "mainHand";
         } else {
           slot = "mainHand";
         }
       } else if (item.slotType === "offHand") {
-        slot = "offHand";
+        if (!this.state.equipment.offHand && !EQUIPMENT_ITEMS[this.state.equipment.mainHand]?.twoHanded) {
+          slot = "offHand";
+        } else if (!this.state.equipment.mainHand) {
+          slot = "mainHand";
+        } else if (this.state.equipment.offHand === itemId && this.state.equipment.mainHand !== itemId) {
+          slot = "mainHand";
+        } else if (this.state.equipment.mainHand === itemId && this.state.equipment.offHand !== itemId && !EQUIPMENT_ITEMS[this.state.equipment.mainHand]?.twoHanded) {
+          slot = "offHand";
+        } else {
+          slot = "offHand";
+        }
       } else if (item.slotType === "ring") {
-        slot = !this.state.equipment.ring1 ? "ring1" : (!this.state.equipment.ring2 ? "ring2" : "ring1");
+        if (!this.state.equipment.ring1) {
+          slot = "ring1";
+        } else if (!this.state.equipment.ring2) {
+          slot = "ring2";
+        } else if (this.state.equipment.ring1 === itemId && this.state.equipment.ring2 !== itemId) {
+          slot = "ring2";
+        } else if (this.state.equipment.ring2 === itemId && this.state.equipment.ring1 !== itemId) {
+          slot = "ring1";
+        } else {
+          slot = "ring1";
+        }
       } else if (item.slotType === "earring") {
-        slot = !this.state.equipment.earring1 ? "earring1" : (!this.state.equipment.earring2 ? "earring2" : "earring1");
+        if (!this.state.equipment.earring1) {
+          slot = "earring1";
+        } else if (!this.state.equipment.earring2) {
+          slot = "earring2";
+        } else if (this.state.equipment.earring1 === itemId && this.state.equipment.earring2 !== itemId) {
+          slot = "earring2";
+        } else if (this.state.equipment.earring2 === itemId && this.state.equipment.earring1 !== itemId) {
+          slot = "earring1";
+        } else {
+          slot = "earring1";
+        }
       } else {
         slot = item.slotType;
       }
@@ -139,6 +296,18 @@ export class GameStore {
 
     if (!EQUIPMENT_SLOTS[slot]) {
       return { ok: false, message: "無效的裝備欄位。" };
+    }
+
+    // Validate slot compatibility
+    const isValidSlot =
+      (slot === "mainHand" && (item.slotType === "weapon" || item.slotType === "offHand")) ||
+      (slot === "offHand" && (item.slotType === "offHand" || (item.slotType === "weapon" && !item.twoHanded))) ||
+      ((slot === "ring1" || slot === "ring2") && item.slotType === "ring") ||
+      ((slot === "earring1" || slot === "earring2") && item.slotType === "earring") ||
+      (item.slotType === slot);
+
+    if (!isValidSlot) {
+      return { ok: false, message: `無法將「${item.name}」穿戴至 ${EQUIPMENT_SLOTS[slot]?.label || slot}。` };
     }
 
     // Two-handed logic
@@ -227,7 +396,99 @@ export class GameStore {
     }
   }
 
-  recordBattle(won, stage) {
+  getTheoreticalDPS() {
+    const stats = computePlayerStats(this.state.profile, this.state.equipment);
+    const baseDamage = stats.damage || 25;
+
+    // Greatsword multiplier
+    const mainItem = EQUIPMENT_ITEMS[this.state.equipment.mainHand];
+    const greatswordMult = mainItem?.twoHanded && mainItem?.effect?.type === "greatsword_damage_boost"
+      ? (mainItem.effect.multiplier || 1.5)
+      : 1.0;
+
+    // Dual hands multiplier (approx 1.5x expected damage factor)
+    const hasDualHand = Boolean(this.state.profile.skills?.dualHand > 0);
+    const dualHandMult = hasDualHand ? 1.5 : 1.0;
+
+    // Equip passive DOTs (Flame sword, etc.)
+    let passiveDamagePerTurn = 0;
+    for (const slotKey of Object.values(this.state.equipment)) {
+      if (!slotKey) continue;
+      const item = EQUIPMENT_ITEMS[slotKey];
+      if (item?.effect?.type === "burn_on_round_end") {
+        passiveDamagePerTurn += (item.effect.damage || 30);
+      } else if (item?.effect?.type === "reflect_damage") {
+        passiveDamagePerTurn += (item.effect.damage || 40) * 0.25;
+      }
+    }
+
+    // Momo Touch draw skill expected value
+    const momoLvl = this.state.profile.skills?.momo || 0;
+    const momoExpectedPerTurn = (momoLvl * 0.1) * 25 * 0.33;
+
+    // Standard turn cycle duration ~3.5s
+    const turnDuration = 3.5;
+    const totalExpectedPerTurn = (baseDamage * greatswordMult * dualHandMult) + passiveDamagePerTurn + momoExpectedPerTurn;
+    const dps = Math.max(1, totalExpectedPerTurn / turnDuration);
+    return Math.round(dps * 10) / 10;
+  }
+
+  recordPotionUse(type) {
+    if (!this.state.records.consumablesUsed) {
+      this.state.records.consumablesUsed = { hpPotion: 0, mpPotion: 0 };
+    }
+    this.state.records.consumablesUsed[type] = (this.state.records.consumablesUsed[type] || 0) + 1;
+    this.commit("record-potion");
+  }
+
+  recordMorphUse() {
+    this.state.records.morphUses = (this.state.records.morphUses || 0) + 1;
+    this.commit("record-morph");
+  }
+
+  recordWatermelonStageCut(strikeIndex, success) {
+    if (!this.state.records.watermelonStageStats) {
+      this.state.records.watermelonStageStats = {
+        1: { attempts: 0, successes: 0 },
+        2: { attempts: 0, successes: 0 },
+        3: { attempts: 0, successes: 0 }
+      };
+    }
+    const idx = Math.max(1, Math.min(3, Number(strikeIndex) || 1));
+    if (!this.state.records.watermelonStageStats[idx]) {
+      this.state.records.watermelonStageStats[idx] = { attempts: 0, successes: 0 };
+    }
+    this.state.records.watermelonStageStats[idx].attempts += 1;
+    if (success) {
+      this.state.records.watermelonStageStats[idx].successes += 1;
+      this.state.records.watermelonSlices = (this.state.records.watermelonSlices || 0) + 1;
+    }
+    this.commit("record-watermelon-cut");
+  }
+
+  recordQteAttempt(stageId, success) {
+    if (!this.state.records.qteStats) {
+      this.state.records.qteStats = { totalAttempts: 0, totalSuccesses: 0, byStage: {} };
+    }
+    this.state.records.qteStats.totalAttempts = (this.state.records.qteStats.totalAttempts || 0) + 1;
+    if (success) {
+      this.state.records.qteStats.totalSuccesses = (this.state.records.qteStats.totalSuccesses || 0) + 1;
+    }
+    if (stageId) {
+      const sId = Number(stageId);
+      if (!this.state.records.qteStats.byStage[sId]) {
+        this.state.records.qteStats.byStage[sId] = { attempts: 0, successes: 0 };
+      }
+      this.state.records.qteStats.byStage[sId].attempts += 1;
+      if (success) {
+        this.state.records.qteStats.byStage[sId].successes += 1;
+      }
+    }
+    this.commit("record-qte");
+  }
+
+  recordBattle(won, stage, options = {}) {
+    const isAuto = Boolean(options.isAuto);
     let stageCoins = won ? (stage?.winCoins ?? BATTLE_RULES.winCoins) : (stage?.lossCoins ?? BATTLE_RULES.lossCoins);
     const stageXp = won ? (stage?.xpWin ?? 0) : (stage?.xpLoss ?? 0);
 
@@ -244,19 +505,116 @@ export class GameStore {
     };
     this.state.coins += reward.coins;
     this.state.records[won ? "wins" : "losses"] += 1;
-    if (won && stage?.id) {
-      this.state.records.bestStage = Math.max(this.state.records.bestStage, stage.id);
+    this.state.records.totalBattles = (this.state.records.totalBattles || 0) + 1;
+    this.state.records.totalCoinsEarned = (this.state.records.totalCoinsEarned || 0) + reward.coins;
+    this.state.records.totalXpEarned = (this.state.records.totalXpEarned || 0) + reward.xp;
+
+    if (won) {
+      if (isAuto) this.state.records.autoWins = (this.state.records.autoWins || 0) + 1;
+      else this.state.records.manualWins = (this.state.records.manualWins || 0) + 1;
+
+      if (stage?.id) {
+        this.state.records.bestStage = Math.max(this.state.records.bestStage || 0, stage.id);
+        if (!this.state.records.clearedStages) this.state.records.clearedStages = [];
+        if (!this.state.records.clearedStages.includes(stage.id)) {
+          this.state.records.clearedStages.push(stage.id);
+        }
+      }
+    } else {
+      if (isAuto) this.state.records.autoLosses = (this.state.records.autoLosses || 0) + 1;
+      else this.state.records.manualLosses = (this.state.records.manualLosses || 0) + 1;
     }
+
+    if (stage?.id) {
+      const stageNum = Number(stage.id);
+      if (!this.state.records.stageStats) this.state.records.stageStats = {};
+      if (!this.state.records.stageStats[stageNum]) {
+        this.state.records.stageStats[stageNum] = { totalAttempts: 0, manualWins: 0, manualLosses: 0, autoWins: 0, autoLosses: 0 };
+      }
+      const stat = this.state.records.stageStats[stageNum];
+      stat.totalAttempts = (stat.totalAttempts || 0) + 1;
+      if (isAuto) {
+        if (won) stat.autoWins = (stat.autoWins || 0) + 1;
+        else stat.autoLosses = (stat.autoLosses || 0) + 1;
+      } else {
+        if (won) stat.manualWins = (stat.manualWins || 0) + 1;
+        else stat.manualLosses = (stat.manualLosses || 0) + 1;
+      }
+
+      // Rewards by stage
+      if (!this.state.records.rewardsByStage) this.state.records.rewardsByStage = {};
+      if (!this.state.records.rewardsByStage[stageNum]) {
+        this.state.records.rewardsByStage[stageNum] = { coins: 0, xp: 0 };
+      }
+      this.state.records.rewardsByStage[stageNum].coins += reward.coins;
+      this.state.records.rewardsByStage[stageNum].xp += reward.xp;
+    }
+
+    // Damage & combat log recording if provided in options
+    const damageDealt = Math.max(0, Number(options.damageDealt) || 0);
+    const damageTaken = Math.max(0, Number(options.damageTaken) || 0);
+    const durationSec = Math.max(1, Number(options.durationSec) || 1);
+    const dps = Math.round((damageDealt / durationSec) * 10) / 10;
+
+    if (!this.state.records.damageDealt) {
+      this.state.records.damageDealt = { total: 0, byStage: {} };
+    }
+    this.state.records.damageDealt.total = (this.state.records.damageDealt.total || 0) + damageDealt;
+
+    if (!this.state.records.damageTaken) {
+      this.state.records.damageTaken = { total: 0, byStage: {} };
+    }
+    this.state.records.damageTaken.total = (this.state.records.damageTaken.total || 0) + damageTaken;
+
+    if (stage?.id) {
+      const stageNum = Number(stage.id);
+      if (!this.state.records.damageDealt.byStage) this.state.records.damageDealt.byStage = {};
+      this.state.records.damageDealt.byStage[stageNum] = (this.state.records.damageDealt.byStage[stageNum] || 0) + damageDealt;
+
+      if (!this.state.records.damageTaken.byStage) this.state.records.damageTaken.byStage = {};
+      this.state.records.damageTaken.byStage[stageNum] = (this.state.records.damageTaken.byStage[stageNum] || 0) + damageTaken;
+    }
+
+    if (!this.state.records.recentBattles) {
+      this.state.records.recentBattles = [];
+    }
+    this.state.records.recentBattles.unshift({
+      stageId: stage?.id || 1,
+      stageName: stage?.name || "初逢・朱鳥居",
+      chapter: stage?.chapter || "壹ノ章",
+      won,
+      isAuto,
+      durationSec,
+      damageDealt,
+      damageTaken,
+      dps,
+      timestamp: Date.now()
+    });
+    if (this.state.records.recentBattles.length > 100) {
+      this.state.records.recentBattles.length = 100;
+    }
+
     const gained = applyExperience(this.state.profile, reward.xp);
     this.state.profile = gained.profile;
     reward.levelsGained = gained.levelsGained;
+    reward.dps = dps;
+    reward.damageDealt = damageDealt;
+    reward.damageTaken = damageTaken;
+    reward.durationSec = durationSec;
     this.commit("battle-result");
     return reward;
+  }
+
+  recordWatermelonSlice() {
+    this.state.records.watermelonSlices = (this.state.records.watermelonSlices || 0) + 1;
+    this.commit("record-watermelon-slice");
   }
 
   grantExperience(amount, reason = "bonus-experience") {
     const safeAmount = Math.max(0, Number(amount) || 0);
     if (safeAmount === 0) return { xp: 0, levelsGained: 0 };
+
+    this.state.records.totalXpEarned = (this.state.records.totalXpEarned || 0) + safeAmount;
 
     const gained = applyExperience(this.state.profile, safeAmount);
     this.state.profile = gained.profile;
@@ -298,6 +656,7 @@ export class GameStore {
 
   cheatUnlockAll() {
     this.state.records.bestStage = 4;
+    this.state.records.clearedStages = [1, 2, 3, 4];
     this.commit("cheat-unlock-all");
     return { ok: true, message: "已解鎖全部 4 個關卡與 BOSS 說明！" };
   }

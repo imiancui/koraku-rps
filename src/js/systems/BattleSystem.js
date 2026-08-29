@@ -22,6 +22,14 @@ export class BattleSystem {
     this.countdownId = null;
     this.reactionTickId = null;
     this.reactionTimeoutId = null;
+    this.autoBattle = {
+      active: false,
+      stageId: null,
+      totalRounds: 0,
+      remainingRounds: 0,
+      wins: 0,
+      losses: 0
+    };
     this.bus.on("qte:finished", (result) => this.resolveQte(result));
     this.bus.on("qte:slot-success", ({ slot, enemyId }) => {
       if (this.state?.active && this.state.phase === "qte" && this.state.isDualQte) {
@@ -30,20 +38,26 @@ export class BattleSystem {
     });
   }
 
-  hasEquipEffect(effectType) {
+  getAllEquipEffects(effectType) {
     const snapshot = this.store.snapshot();
     const equipment = snapshot.equipment || {};
+    const effects = [];
     for (const itemId of Object.values(equipment)) {
       if (!itemId) continue;
       const item = EQUIPMENT_ITEMS[itemId];
       if (item?.effect?.type === effectType) {
-        return item.effect;
+        effects.push(item.effect);
       }
     }
-    return null;
+    return effects;
   }
 
-  start(stageId) {
+  hasEquipEffect(effectType) {
+    const effects = this.getAllEquipEffects(effectType);
+    return effects.length > 0 ? effects[0] : null;
+  }
+
+  start(stageId, options = {}) {
     const stage = STAGES.find((item) => item.id === Number(stageId));
     const profile = this.store.snapshot();
     if (!stage || profile.profile.level < stage.requiredLevel) {
@@ -51,7 +65,26 @@ export class BattleSystem {
       return false;
     }
 
+    if (options.autoBattle) {
+      if (!this.autoBattle.active) {
+        this.autoBattle = {
+          active: true,
+          stageId: Number(stageId),
+          totalRounds: options.autoBattleRounds || 10,
+          remainingRounds: options.autoBattleRounds || 10,
+          wins: 0,
+          losses: 0
+        };
+      }
+    } else {
+      this.autoBattle.active = false;
+      this.autoBattle.remainingRounds = 0;
+    }
+
     this.stopClocks();
+    this.battleStartTime = Date.now();
+    this.battleDamageDealt = 0;
+    this.battleDamageTaken = 0;
     const stats = profile.playerStats;
     const hasDualHandSkill = Boolean(profile.profile?.skills?.dualHand > 0);
 
@@ -85,6 +118,7 @@ export class BattleSystem {
       reactionRemaining: 0,
       morphUsed: false,
       isEnemyFrozen: false,
+      frozenEnemyHand: null,
       isPaused: false,
       appearance: stage.final ? ASSETS.final : ASSETS.default
     };
@@ -95,6 +129,16 @@ export class BattleSystem {
     );
     this.scheduleRound();
     return true;
+  }
+
+  startAutoBattle(stageId, rounds = 10) {
+    return this.start(stageId, { autoBattle: true, autoBattleRounds: rounds });
+  }
+
+  stopAutoBattle() {
+    this.autoBattle.active = false;
+    this.bus.emit("auto-battle:stopped", { ...this.autoBattle });
+    this.emitState();
   }
 
   togglePause() {
@@ -188,7 +232,12 @@ export class BattleSystem {
   }
 
   snapshot() {
-    return this.state ? structuredClone(this.state) : null;
+    return this.state
+      ? {
+          ...structuredClone(this.state),
+          autoBattle: { ...this.autoBattle }
+        }
+      : null;
   }
 
   emitState() {
@@ -213,6 +262,10 @@ export class BattleSystem {
     this.state.isPaused = false;
     this.countdownDeadline = performance.now() + roundSeconds * 1000;
     this.emitState();
+
+    if (this.autoBattle.active) {
+      this.runAutoBattleCountdown();
+    }
 
     this.countdownId = this.timers.interval(() => {
       const remaining = Math.max(0, this.countdownDeadline - performance.now());
@@ -239,6 +292,39 @@ export class BattleSystem {
       this.emitState();
       if (remaining <= 0) this.revealHands();
     }, 80);
+  }
+
+  runAutoBattleCountdown() {
+    if (!this.state?.active || !this.autoBattle.active || this.state.phase !== "countdown") return;
+    this.timers.timeout(() => {
+      if (!this.state?.active || !this.autoBattle.active || this.state.phase !== "countdown") return;
+
+      const frozen = this.state.frozenEnemyHand;
+      const hands = ["rock", "paper", "scissors"];
+      let leftHand = "rock";
+      let rightHand = "scissors";
+
+      if (frozen === "scissors") {
+        leftHand = "paper";
+        rightHand = "rock";
+      } else if (frozen === "rock") {
+        leftHand = "scissors";
+        rightHand = "paper";
+      } else if (frozen === "paper") {
+        leftHand = "rock";
+        rightHand = "scissors";
+      } else {
+        leftHand = hands[Math.floor(this.random() * hands.length)];
+        rightHand = hands[(hands.indexOf(leftHand) + 1) % 3];
+      }
+
+      if (this.state.hasDualHandSkill) {
+        this.selectHand(leftHand, "left");
+        this.selectHand(rightHand, "right");
+      } else {
+        this.selectHand(leftHand);
+      }
+    }, 200);
   }
 
   selectHand(handId, slot = null) {
@@ -269,10 +355,17 @@ export class BattleSystem {
 
     const isDualStage = Boolean(this.state.stage?.dualEnemy && this.state.enemies?.length > 1);
     const aliveEnemies = this.state.enemies.filter((e) => e.alive);
+    const frozenHand = this.state.frozenEnemyHand;
+
+    const getFilteredHand = () => {
+      const allHands = ["rock", "paper", "scissors"];
+      const pool = frozenHand ? allHands.filter((h) => h !== frozenHand) : allHands;
+      return pool[Math.floor(this.random() * pool.length)];
+    };
 
     if (isDualStage && aliveEnemies.length >= 2) {
-      const leftHand = getRandomHand(this.random);
-      const rightHand = getRandomHand(this.random);
+      const leftHand = getFilteredHand();
+      const rightHand = getFilteredHand();
       this.state.opponentHands = { left: leftHand, right: rightHand };
       this.state.opponentHand = leftHand;
 
@@ -294,13 +387,12 @@ export class BattleSystem {
         }
       }
     } else {
-      const hand = getRandomHand(this.random);
+      const hand = getFilteredHand();
       this.state.opponentHand = hand;
       this.state.opponentHands = { main: hand };
       if (this.state.hasDualHandSkill) {
         const leftResult = compareHands(this.state.selectedHands.left, hand);
         const rightResult = compareHands(this.state.selectedHands.right, hand);
-        // Only if BOTH hands lose does Kohaku win and show winning emoji
         if (leftResult === "loss" && rightResult === "loss") {
           this.state.enemyWinningEmoji = HANDS[hand].glyph;
         } else {
@@ -312,16 +404,21 @@ export class BattleSystem {
       }
     }
 
+    // Clear frozen hand after rolling
+    this.state.frozenEnemyHand = null;
+
     let reactionWindowMs = this.state.stage?.reactionWindowMs ?? BATTLE_RULES.reactionWindowMs;
-    if (this.state.isEnemyFrozen) {
-      reactionWindowMs += 500;
-      this.state.isEnemyFrozen = false;
-    }
     this.state.reactionRemaining = reactionWindowMs / 1000;
 
     this.reactionDeadline = performance.now() + reactionWindowMs;
     this.emitState();
     this.bus.emit("sound", { name: "reveal" });
+
+    if (this.autoBattle.active && this.state.enemyWinningEmoji && this.state.playerMp >= 25) {
+      this.timers.timeout(() => {
+        if (this.state?.phase === "reaction") this.useMorph();
+      }, 100);
+    }
 
     this.reactionTickId = this.timers.interval(() => {
       this.state.reactionRemaining = Math.max(0, (this.reactionDeadline - performance.now()) / 1000);
@@ -334,8 +431,8 @@ export class BattleSystem {
     if (!this.state?.active || this.state.phase !== "reaction") {
       return { ok: false, message: "變拳只能在看見小樂出拳後的反應時間內使用。" };
     }
-    const morphDiscount = this.hasEquipEffect("morph_discount")?.morphDiscount || 0;
-    const morphCost = Math.max(10, BATTLE_RULES.morphCost - morphDiscount);
+    const totalDiscount = this.getAllEquipEffects("morph_discount").reduce((sum, eff) => sum + (eff.morphDiscount || 0), 0);
+    const morphCost = Math.max(5, BATTLE_RULES.morphCost - totalDiscount);
 
     if (this.state.playerMp < morphCost) {
       return { ok: false, message: "MP 不足，無法使用變拳。" };
@@ -365,6 +462,7 @@ export class BattleSystem {
     this.state.enemyWinningEmoji = null;
     this.state.morphUsed = true;
     this.state.reactionRemaining = 0;
+    this.store.recordMorphUse();
     this.emitState();
     this.bus.emit("battle:effect", { type: "morph" });
     this.bus.emit("sound", { name: "skill" });
@@ -401,49 +499,41 @@ export class BattleSystem {
           return;
         }
 
-        if (leftResult === "loss") {
-          if (rightResult === "win") {
-            const rightEnemy = this.state.enemies.find((e) => e.id === "right" && e.alive);
-            if (rightEnemy) this.applyDamageToEnemy(rightEnemy, null, false);
+        const singleLoss = (leftResult === "loss" && rightResult !== "loss") || (rightResult === "loss" && leftResult !== "loss");
+        if (singleLoss) {
+          const losingToEnemyId = leftResult === "loss" ? "left" : "right";
+          const winningOverEnemyId = leftResult === "win" ? "left" : (rightResult === "win" ? "right" : null);
+          if (winningOverEnemyId) {
+            const wonEnemy = this.state.enemies.find((e) => e.id === winningOverEnemyId && e.alive);
+            if (wonEnemy) this.applyDamageToEnemy(wonEnemy, null, false);
           }
-          this.state.targetEnemyId = "left";
+          this.state.targetEnemyId = losingToEnemyId;
           this.bus.emit("battle:effect", { type: "player-rps-loss" });
           this.bus.emit("sound", { name: "punch" });
-          this.startQte("left");
+          this.startQte(losingToEnemyId);
           return;
         }
 
-        if (rightResult === "loss") {
-          if (leftResult === "win") {
-            const leftEnemy = this.state.enemies.find((e) => e.id === "left" && e.alive);
-            if (leftEnemy) this.applyDamageToEnemy(leftEnemy, null, false);
-          }
-          this.state.targetEnemyId = "right";
-          this.bus.emit("battle:effect", { type: "player-rps-loss" });
-          this.bus.emit("sound", { name: "punch" });
-          this.startQte("right");
-          return;
-        }
+        const bothWin = leftResult === "win" && rightResult === "win";
+        const singleWin = (leftResult === "win" && rightResult !== "win") || (rightResult === "win" && leftResult !== "win");
 
-        // No losses on either side
-        let anyWin = false;
-        if (leftResult === "win") {
+        if (bothWin) {
           const leftEnemy = this.state.enemies.find((e) => e.id === "left" && e.alive);
-          if (leftEnemy) {
-            anyWin = true;
-            this.applyDamageToEnemy(leftEnemy, null, false);
-          }
-        }
-        if (rightResult === "win") {
           const rightEnemy = this.state.enemies.find((e) => e.id === "right" && e.alive);
-          if (rightEnemy) {
-            anyWin = true;
-            this.applyDamageToEnemy(rightEnemy, null, false);
-          }
+          if (leftEnemy) this.applyDamageToEnemy(leftEnemy, null, false);
+          if (rightEnemy) this.applyDamageToEnemy(rightEnemy, null, false);
+          const suffix = this.state.morphUsed ? "雙手變拳齊出，完美破除雙生合擊！" : "雙手同時獲勝，漂亮破除雙生合擊！";
+          this.finishRound("win", suffix);
+          return;
         }
 
-        if (anyWin) {
-          this.finishRound("win", this.state.morphUsed ? "變拳奏效，成功壓制！" : "漂亮地壓過了小樂的手勢！");
+        if (singleWin) {
+          const winEnemyId = leftResult === "win" ? "left" : "right";
+          this.state.targetEnemyId = winEnemyId;
+          const target = this.state.enemies.find((e) => e.id === winEnemyId && e.alive);
+          if (target) this.applyDamageToEnemy(target, null, false);
+          const suffix = this.state.morphUsed ? "變拳擊破一手，成功壓制！" : "單手獲勝，成功壓制一手！";
+          this.finishRound("win", suffix);
           return;
         }
 
@@ -451,48 +541,51 @@ export class BattleSystem {
         return;
       }
 
-      // Single hand vs dual enemy
-      const evalResult = evaluateDualRps(
-        this.state.selectedHand,
-        this.state.opponentHands.left,
-        this.state.opponentHands.right
-      );
+      const leftResult = compareHands(this.state.selectedHand, this.state.opponentHands.left);
+      const rightResult = compareHands(this.state.selectedHand, this.state.opponentHands.right);
 
-      if (evalResult.isDualLoss) {
+      if (leftResult === "loss" && rightResult === "loss") {
         this.bus.emit("battle:effect", { type: "player-rps-loss" });
         this.bus.emit("sound", { name: "punch" });
         this.startDualQte();
         return;
       }
 
-      if (evalResult.isSingleLoss) {
-        const lostEnemyId = evalResult.losses[0];
-        const wonEnemyId = evalResult.wins[0];
-        if (wonEnemyId) {
-          const wonEnemy = this.state.enemies.find((e) => e.id === wonEnemyId && e.alive);
-          if (wonEnemy) {
-            this.applyDamageToEnemy(wonEnemy, null, false);
-          }
+      const singleLoss = (leftResult === "loss" && rightResult !== "loss") || (rightResult === "loss" && leftResult !== "loss");
+      if (singleLoss) {
+        const losingToEnemyId = leftResult === "loss" ? "left" : "right";
+        const winningOverEnemyId = leftResult === "win" ? "left" : (rightResult === "win" ? "right" : null);
+        if (winningOverEnemyId) {
+          const wonEnemy = this.state.enemies.find((e) => e.id === winningOverEnemyId && e.alive);
+          if (wonEnemy) this.applyDamageToEnemy(wonEnemy, null, false);
         }
-        this.state.targetEnemyId = lostEnemyId;
+        this.state.targetEnemyId = losingToEnemyId;
         this.bus.emit("battle:effect", { type: "player-rps-loss" });
         this.bus.emit("sound", { name: "punch" });
-        this.startQte(lostEnemyId);
+        this.startQte(losingToEnemyId);
         return;
       }
 
-      // No losses: check wins
-      let anyWin = false;
-      evalResult.wins.forEach((wonEnemyId) => {
-        const wonEnemy = this.state.enemies.find((e) => e.id === wonEnemyId && e.alive);
-        if (wonEnemy) {
-          anyWin = true;
-          this.applyDamageToEnemy(wonEnemy, null, false);
-        }
-      });
+      const bothWin = leftResult === "win" && rightResult === "win";
+      const singleWin = (leftResult === "win" && rightResult !== "win") || (rightResult === "win" && leftResult !== "win");
 
-      if (anyWin) {
-        this.finishRound("win", this.state.morphUsed ? "變拳奏效，成功壓制！" : "漂亮地壓過了小樂的手勢！");
+      if (bothWin) {
+        const leftEnemy = this.state.enemies.find((e) => e.id === "left" && e.alive);
+        const rightEnemy = this.state.enemies.find((e) => e.id === "right" && e.alive);
+        if (leftEnemy) this.applyDamageToEnemy(leftEnemy, null, false);
+        if (rightEnemy) this.applyDamageToEnemy(rightEnemy, null, false);
+        const suffix = this.state.morphUsed ? "變拳齊出，一併壓制雙生小樂！" : "雙拳齊勝，完美克制雙生小樂！";
+        this.finishRound("win", suffix);
+        return;
+      }
+
+      if (singleWin) {
+        const winEnemyId = leftResult === "win" ? "left" : "right";
+        this.state.targetEnemyId = winEnemyId;
+        const target = this.state.enemies.find((e) => e.id === winEnemyId && e.alive);
+        if (target) this.applyDamageToEnemy(target, null, false);
+        const suffix = this.state.morphUsed ? "變拳奏效，成功壓制一手！" : "單手壓制，削弱了雙生陣勢！";
+        this.finishRound("win", suffix);
         return;
       }
 
@@ -569,7 +662,7 @@ export class BattleSystem {
             return;
           }
 
-          const shadowBonus = this.hasEquipEffect("shadow")?.momoDamageBonus || 0;
+          const shadowBonus = this.getAllEquipEffects("shadow").reduce((sum, eff) => sum + (eff.momoDamageBonus || 0), 0);
           const momoDamage = SKILLS.momo.damage + shadowBonus;
           target.hp = Math.max(0, target.hp - momoDamage);
           if (target.hp === 0) target.alive = false;
@@ -600,13 +693,17 @@ export class BattleSystem {
     this.emitState();
     this.say(I18n.t("dialogue.qteSingleBreak"), I18n.t("dialogue.speakerKohaku"));
     this.bus.emit("sound", { name: "danger" });
-    const extraQte = this.hasEquipEffect("qte_time")?.extraQteSeconds || 0;
+    const extraQte = this.getAllEquipEffects("qte_time").reduce((sum, eff) => sum + (eff.extraQteSeconds || 0), 0);
     this.qte.start({
       length: this.state.stage.qteLength || BATTLE_RULES.qteLength,
       durationMs: (BATTLE_RULES.qteSeconds + extraQte) * 1000,
       qteDirections: this.state.stage.qteDirections || "all",
       maxErrors: this.state.stage.maxErrors ?? Infinity
     });
+
+    if (this.autoBattle.active) {
+      this.runAutoQte();
+    }
   }
 
   startDualQte() {
@@ -616,35 +713,52 @@ export class BattleSystem {
     this.emitState();
     this.say(I18n.t("dialogue.qteDualBreak"), I18n.t("dialogue.speakerPlatinumKohaku"));
     this.bus.emit("sound", { name: "danger" });
-    const extraQte = this.hasEquipEffect("qte_time")?.extraQteSeconds || 0;
+    const extraQte = this.getAllEquipEffects("qte_time").reduce((sum, eff) => sum + (eff.extraQteSeconds || 0), 0);
     this.dualQte.start({
       length: this.state.stage.qteLength || 7,
       durationMs: (BATTLE_RULES.qteSeconds + extraQte) * 1.5 * 1000,
       qteDirections: this.state.stage.qteDirections || "all",
       maxErrors: this.state.stage.maxErrors ?? 1
     });
+
+    if (this.autoBattle.active) {
+      this.runAutoQte();
+    }
+  }
+
+  runAutoQte() {
+    if (!this.state?.active || !this.autoBattle.active || this.state.phase !== "qte") return;
+    this.timers.timeout(() => {
+      if (!this.state?.active || !this.autoBattle.active || this.state.phase !== "qte") return;
+      if (this.state.isDualQte) {
+        this.dualQte.finish();
+      } else {
+        this.qte.finish(true);
+      }
+    }, 250);
   }
 
   inputQte(directionId, slot = null) {
     if (this.state?.phase !== "qte") return false;
     if (this.state.isDualQte) {
-      if (slot === "left") return this.dualQte.inputLeft(directionId);
-      if (slot === "right") return this.dualQte.inputRight(directionId);
-      if (this.dualQte.left.completed) return this.dualQte.inputRight(directionId);
-      return this.dualQte.inputLeft(directionId);
+      return this.dualQte.input(directionId, slot);
     }
     return this.qte.input(directionId);
   }
 
-  handleDualQteSlotSuccess(enemyId) {
-    if (!this.state?.active || !this.state.isDualQte) return;
-    if (this.state.dualQteResolved?.[enemyId]) return;
-    this.state.dualQteResolved[enemyId] = true;
+  handleDualQteSlotSuccess(slotOrEnemyId) {
+    const enemyId = slotOrEnemyId === "left" ? "left" : "right";
+    const slot = slotOrEnemyId === "left" ? "left" : "right";
+    if (this.state.dualQteResolved && this.state.dualQteResolved[slot]) return;
+    if (this.state.dualQteResolved) this.state.dualQteResolved[slot] = true;
 
-    const target = this.state.enemies.find((e) => e.id === enemyId && e.alive);
-    if (target) {
-      this.applyDamageToEnemy(target, null, true);
-    }
+    const targetEnemy = this.state.enemies.find((e) => e.id === enemyId && e.alive)
+      || this.state.enemies.find((e) => e.alive);
+    if (!targetEnemy) return;
+
+    this.applyDamageToEnemy(targetEnemy, null, true);
+    this.say(`化解了${targetEnemy.name}的單側攻勢！`, "你");
+    this.emitState();
   }
 
   resolveQte(result) {
@@ -675,10 +789,12 @@ export class BattleSystem {
     }
 
     if (result.success) {
+      this.store.recordQteAttempt(this.state?.stage?.id, true);
       const counter = getQteCounterNarration(this.state.selectedHand);
       this.state.selectedHand = counter.changedHand;
       this.damageEnemy(counter.text, true);
     } else {
+      this.store.recordQteAttempt(this.state?.stage?.id, false);
       this.damagePlayer("節奏慢了一拍，小樂的攻勢命中了你。");
     }
   }
@@ -687,20 +803,33 @@ export class BattleSystem {
     if (!target || !target.alive) return;
     let amount = damageAmount ?? this.state.playerDamage;
     if (countered) {
-      amount += (this.hasEquipEffect("thunder")?.qteBonusDamage || 0);
+      amount += this.getAllEquipEffects("thunder").reduce((sum, eff) => sum + (eff.qteBonusDamage || 0), 0);
     } else if (!damageAmount && this.hasEquipEffect("burst")) {
       amount = Math.round(amount * (this.hasEquipEffect("burst")?.winMultiplier || 1.5));
     }
 
     target.hp = Math.max(0, target.hp - amount);
+    this.battleDamageDealt = (this.battleDamageDealt || 0) + amount;
     if (target.hp === 0) target.alive = false;
     this.state.enemyHp = this.state.enemies.reduce((acc, e) => acc + e.hp, 0);
     this.state.targetEnemyId = this.state.enemies.find((e) => e.alive)?.id || target.id;
 
-    const freeze = this.hasEquipEffect("freeze");
-    if (freeze && this.random() < (freeze.freezeChance || 0.3)) {
-      this.state.isEnemyFrozen = true;
-      this.bus.emit("battle:effect", { type: "freeze" });
+    const freezeEffects = this.getAllEquipEffects("freeze");
+    if (freezeEffects.length > 0) {
+      const didFreeze = freezeEffects.some((eff) => this.random() < (eff.freezeChance || 0.3));
+      if (didFreeze) {
+        const hands = ["rock", "paper", "scissors"];
+        const frozenHand = hands[Math.floor(this.random() * hands.length)];
+        this.state.frozenEnemyHand = frozenHand;
+        this.state.isEnemyFrozen = true;
+        this.bus.emit("battle:effect", {
+          type: "freeze",
+          frozenHand,
+          handLabel: HANDS[frozenHand].label,
+          handGlyph: HANDS[frozenHand].glyph
+        });
+        this.say(`❄️ 霜月冰結！小樂的手掌被凍結，下一回合無法出【${HANDS[frozenHand].label}】！`, "小樂");
+      }
     }
 
     this.bus.emit("battle:effect", {
@@ -736,12 +865,13 @@ export class BattleSystem {
     }
 
     const multiplier = this.state.stage.enemyDamageMultiplier || 1;
-    const shield = this.hasEquipEffect("shield");
-    const armor = this.hasEquipEffect("armor_reduction");
-    const reduction = (shield ? (shield.damageReduction || 0) : 0) + (armor ? (armor.damageReduction || 0) : 0);
+    const shieldReduction = this.getAllEquipEffects("shield").reduce((sum, eff) => sum + (eff.damageReduction || 0), 0);
+    const armorReduction = this.getAllEquipEffects("armor_reduction").reduce((sum, eff) => sum + (eff.damageReduction || 0), 0);
+    const reduction = shieldReduction + armorReduction;
     const totalDamage = Math.max(1, (BATTLE_RULES.enemyDamage * multiplier) - reduction);
 
     this.state.playerHp = Math.max(0, this.state.playerHp - totalDamage);
+    this.battleDamageTaken = (this.battleDamageTaken || 0) + totalDamage;
     this.bus.emit("battle:effect", {
       type: "player-hit",
       amount: totalDamage
@@ -749,17 +879,18 @@ export class BattleSystem {
     this.bus.emit("sound", { name: "hurt" });
 
     // Reflect check
-    const reflect = this.hasEquipEffect("reflect");
-    if (reflect && reflect.reflectDamage > 0) {
+    const reflectDamage = this.getAllEquipEffects("reflect").reduce((sum, eff) => sum + (eff.reflectDamage || 0), 0);
+    if (reflectDamage > 0) {
       const target = this.state.enemies.find((e) => e.id === this.state.targetEnemyId && e.alive)
         || this.state.enemies.find((e) => e.alive);
       if (target) {
-        target.hp = Math.max(0, target.hp - reflect.reflectDamage);
+        target.hp = Math.max(0, target.hp - reflectDamage);
+        this.battleDamageDealt = (this.battleDamageDealt || 0) + reflectDamage;
         if (target.hp === 0) target.alive = false;
         this.state.enemyHp = this.state.enemies.reduce((acc, e) => acc + e.hp, 0);
         this.bus.emit("battle:effect", {
           type: "enemy-hit",
-          amount: reflect.reflectDamage,
+          amount: reflectDamage,
           targetId: target.id
         });
       }
@@ -778,13 +909,14 @@ export class BattleSystem {
     }
 
     const multiplier = this.state.stage.enemyDamageMultiplier || 1;
-    const shield = this.hasEquipEffect("shield");
-    const armor = this.hasEquipEffect("armor_reduction");
-    const reduction = (shield ? (shield.damageReduction || 0) : 0) + (armor ? (armor.damageReduction || 0) : 0);
+    const shieldReduction = this.getAllEquipEffects("shield").reduce((sum, eff) => sum + (eff.damageReduction || 0), 0);
+    const armorReduction = this.getAllEquipEffects("armor_reduction").reduce((sum, eff) => sum + (eff.damageReduction || 0), 0);
+    const reduction = shieldReduction + armorReduction;
     const singleDamage = Math.max(1, (BATTLE_RULES.enemyDamage * multiplier) - reduction);
     const totalDamage = singleDamage * count;
 
     this.state.playerHp = Math.max(0, this.state.playerHp - totalDamage);
+    this.battleDamageTaken = (this.battleDamageTaken || 0) + totalDamage;
     this.bus.emit("battle:effect", {
       type: "player-hit",
       amount: totalDamage
@@ -792,17 +924,18 @@ export class BattleSystem {
     this.bus.emit("sound", { name: "hurt" });
 
     // Reflect check
-    const reflect = this.hasEquipEffect("reflect");
-    if (reflect && reflect.reflectDamage > 0) {
+    const reflectDamage = this.getAllEquipEffects("reflect").reduce((sum, eff) => sum + (eff.reflectDamage || 0), 0);
+    if (reflectDamage > 0) {
       const target = this.state.enemies.find((e) => e.id === this.state.targetEnemyId && e.alive)
         || this.state.enemies.find((e) => e.alive);
       if (target) {
-        target.hp = Math.max(0, target.hp - reflect.reflectDamage);
+        target.hp = Math.max(0, target.hp - reflectDamage);
+        this.battleDamageDealt = (this.battleDamageDealt || 0) + reflectDamage;
         if (target.hp === 0) target.alive = false;
         this.state.enemyHp = this.state.enemies.reduce((acc, e) => acc + e.hp, 0);
         this.bus.emit("battle:effect", {
           type: "enemy-hit",
-          amount: reflect.reflectDamage,
+          amount: reflectDamage,
           targetId: target.id
         });
       }
@@ -816,24 +949,24 @@ export class BattleSystem {
     this.state.lastResult = result;
 
     // MP Regen effect check
-    const mpRegen = this.hasEquipEffect("mp_regen")?.mpRegen || 0;
-    if (mpRegen > 0) {
-      this.state.playerMp = Math.min(this.state.playerMaxMp, this.state.playerMp + mpRegen);
+    const totalMpRegen = this.getAllEquipEffects("mp_regen").reduce((sum, eff) => sum + (eff.mpRegen || 0), 0);
+    if (totalMpRegen > 0) {
+      this.state.playerMp = Math.min(this.state.playerMaxMp, this.state.playerMp + totalMpRegen);
     }
 
     // Burn effect check
-    const burn = this.hasEquipEffect("burn");
-    if (burn && this.state.enemyHp > 0) {
-      const burnDamage = burn.burnDamage || 30;
+    const totalBurn = this.getAllEquipEffects("burn").reduce((sum, eff) => sum + (eff.burnDamage || 0), 0);
+    if (totalBurn > 0 && this.state.enemyHp > 0) {
       const target = this.state.enemies.find((e) => e.id === this.state.targetEnemyId && e.alive)
         || this.state.enemies.find((e) => e.alive);
       if (target) {
-        target.hp = Math.max(0, target.hp - burnDamage);
+        target.hp = Math.max(0, target.hp - totalBurn);
+        this.battleDamageDealt = (this.battleDamageDealt || 0) + totalBurn;
         if (target.hp === 0) target.alive = false;
         this.state.enemyHp = this.state.enemies.reduce((acc, e) => acc + e.hp, 0);
         this.state.targetEnemyId = this.state.enemies.find((e) => e.alive)?.id || target.id;
       }
-      this.bus.emit("battle:effect", { type: "burn", amount: burnDamage, targetId: target?.id });
+      this.bus.emit("battle:effect", { type: "burn", amount: totalBurn, targetId: target?.id });
     }
 
     this.emitState();
@@ -865,8 +998,9 @@ export class BattleSystem {
     if (!this.store.consumeItem(itemId)) {
       return { ok: false, message: item.shortName + "已用完。" };
     }
+    this.store.recordPotionUse(item.resource === "hp" ? "hpPotion" : "mpPotion");
 
-    const potionBoost = this.hasEquipEffect("potion_boost")?.potionBoost || 0;
+    const potionBoost = this.getAllEquipEffects("potion_boost").reduce((sum, eff) => sum + (eff.potionBoost || 0), 0);
     const restoreAmount = item.restore + potionBoost;
 
     const before = this.state[valueKey];
@@ -895,25 +1029,71 @@ export class BattleSystem {
     this.state.active = false;
     this.state.phase = "ended";
     this.state.won = won;
-    const reward = this.store.recordBattle(won, this.state.stage);
+    const durationSec = Math.max(1, Math.round((Date.now() - (this.battleStartTime || Date.now())) / 1000));
+    const reward = this.store.recordBattle(won, this.state.stage, {
+      isAuto: Boolean(this.autoBattle?.active),
+      damageDealt: this.battleDamageDealt || 0,
+      damageTaken: this.battleDamageTaken || 0,
+      durationSec
+    });
     this.emitState();
     this.bus.emit("battle:ended", {
       won,
       stage: this.state.stage,
       reward,
-      battle: this.snapshot()
+      combatDps: reward.dps,
+      damageDealt: this.battleDamageDealt || 0,
+      damageTaken: this.battleDamageTaken || 0,
+      durationSec,
+      battle: this.snapshot(),
+      autoBattle: { ...this.autoBattle }
     });
     this.bus.emit("sound", { name: won ? "victory" : "defeat" });
+
+    if (this.autoBattle.active) {
+      this.autoBattle.remainingRounds -= 1;
+      if (won) {
+        this.autoBattle.wins += 1;
+      } else {
+        this.autoBattle.losses += 1;
+      }
+      this.bus.emit("auto-battle:update", { ...this.autoBattle, won });
+
+      if (this.autoBattle.active && this.autoBattle.remainingRounds > 0) {
+        this.timers.timeout(() => {
+          if (this.autoBattle.active) {
+            this.start(this.autoBattle.stageId, { autoBattle: true });
+          }
+        }, 800);
+      } else {
+        this.autoBattle.active = false;
+        this.bus.emit("auto-battle:finished", { ...this.autoBattle });
+      }
+    }
+  }
+
+  stopAutoBattle() {
+    this.autoBattle.active = false;
+    this.autoBattle.remainingRounds = 0;
+    this.stopClocks();
+    this.bus.emit("auto-battle:stopped");
+    if (this.state) {
+      this.state.autoBattle = { ...this.autoBattle };
+      this.emitState();
+    }
   }
 
   abandon() {
-    if (!this.state) return;
+    this.stopAutoBattle();
     this.qte.stop();
     this.dualQte.stop();
     this.stopClocks();
-    this.state.active = false;
-    this.state.phase = "abandoned";
-    this.emitState();
+    if (this.state) {
+      this.state.active = false;
+      this.state.phase = "abandoned";
+      this.state.autoBattle = { ...this.autoBattle };
+      this.emitState();
+    }
   }
 
   clearReactionClocks() {

@@ -29,10 +29,14 @@
           </span>
         </button>
         <div class="profile-strip" aria-label="玩家資料">
-          <button id="lang-toggle" class="profile-chip lang-chip" type="button" aria-label="切換語系" title="切換語系">
-            <small data-i18n="ui.langToggle">語系</small>
-            <b id="header-lang">繁體中文</b>
-          </button>
+          <div class="lang-select-wrap">
+            <select id="lang-select" class="profile-chip lang-select" aria-label="切換語系" title="切換語系">
+              <option value="zh-Hant">繁體中文</option>
+              <option value="zh-Hans">简体中文</option>
+              <option value="en">English</option>
+              <option value="ja">日本語</option>
+            </select>
+          </div>
           <span class="profile-chip"><small data-i18n="ui.level">等級</small><b id="header-level">01</b></span>
           <span class="profile-chip profile-xp">
             <small data-i18n="ui.xp">經驗</small>
@@ -57,7 +61,7 @@
 
           <div class="home-copy">
             <p class="eyebrow" data-i18n="meta.eyebrow">じゃんけん・狐火異聞</p>
-            <h1 id="home-title"><span data-i18n="meta.title">狐樂</span><em data-i18n="meta.titleEm">絆之勝負</em></h1>
+            <h1 id="home-title"><span data-i18n="meta.title">狐樂</span><em data-i18n="meta.titleEm">Endless Koraku</em></h1>
             <p class="home-lead" data-i18n="meta.lead">五秒定一手。看穿她的指尖，在敗勢裡抓住唯一的反擊。</p>
 
             <nav class="main-menu" aria-label="主選單">
@@ -89,6 +93,11 @@
               <button class="menu-command" type="button" data-nav="equipment">
                 <span class="command-index">06</span>
                 <span><b data-i18n="ui.menuEquipment">玩家裝備</b><small data-i18n="ui.menuEquipmentSub">EQUIPMENT & BAG</small></span>
+                <i>›</i>
+              </button>
+              <button class="menu-command" type="button" data-nav="records">
+                <span class="command-index">07</span>
+                <span><b data-i18n="ui.menuRecords">戰績統計</b><small data-i18n="ui.menuRecordsSub">RECORDS & STATS</small></span>
                 <i>›</i>
               </button>
             </nav>
@@ -451,6 +460,167 @@
           </div>
         </section>
 
+        <section id="screen-records" class="screen page-screen" aria-labelledby="records-title">
+          <div class="page-backdrop page-backdrop-records" aria-hidden="true"></div>
+          <header class="page-heading">
+            <button class="back-button" type="button" data-nav="home"><span>‹</span> <b data-i18n="ui.back">返回</b></button>
+            <div>
+              <p class="eyebrow" data-i18n="ui.menuRecordsSub">JOURNEY RECORDS</p>
+              <h2 id="records-title" data-i18n="ui.homeRecordsTitle">旅程紀錄與戰鬥分析</h2>
+              <p data-i18n="ui.homeRecordsDesc">詳細記錄您在各章節的戰績、實戰輸出表現、裝備配置與各項成長統計。</p>
+            </div>
+          </header>
+
+          <div class="records-page-container">
+            <!-- Top Section: Player Profile & Theoretical DPS & Consumables Summary -->
+            <div class="records-top-grid">
+              <div class="records-profile-card">
+                <div class="records-profile-header">
+                  <h4 data-i18n="ui.currentLevelXp">冒險等級與經驗</h4>
+                  <span class="records-level-tag">Lv. <b id="records-level">1</b></span>
+                </div>
+                <div class="records-xp-row">
+                  <span id="records-xp-text">0 / 100 EXP</span>
+                  <div class="ornate-meter xp-meter"><i id="records-xp-fill" style="width: 0%;"></i></div>
+                </div>
+                <div class="records-dps-badge">
+                  <span class="records-dps-icon">⚡</span>
+                  <div>
+                    <small data-i18n="ui.theoreticalDps">理論 DPS</small>
+                    <b id="records-theoretical-dps">0.0</b>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Consumables & Skills Card -->
+              <div class="records-consumables-card">
+                <h4 data-i18n="ui.consumablesUsed">消耗品使用累計</h4>
+                <div class="records-consumables-items">
+                  <div class="records-consumable-pill">
+                    <span>🔴</span>
+                    <strong id="records-hp-potions-used">0 瓶</strong>
+                  </div>
+                  <div class="records-consumable-pill">
+                    <span>🔵</span>
+                    <strong id="records-mp-potions-used">0 瓶</strong>
+                  </div>
+                  <div class="records-consumable-pill wide">
+                    <span data-i18n="ui.morphSuccesses">變拳逆轉成功</span>
+                    <strong id="records-morph-uses">0 次</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Read-Only Current Equipment Paperdoll -->
+            <div class="records-section-card">
+              <div class="records-section-header">
+                <h4 data-i18n="ui.currentEquipment">當前穿戴裝備</h4>
+                <small style="color:var(--paper-dim);">（唯讀檢視・裝備更換請至「玩家裝備」頁）</small>
+              </div>
+              <div id="records-paperdoll" class="records-paperdoll-grid"></div>
+            </div>
+
+            <!-- Lifetime 6-Card Stats Summary Grid -->
+            <div class="home-stats-grid">
+              <div class="stat-card">
+                <span class="stat-card-icon">💰</span>
+                <div class="stat-card-data">
+                  <small data-i18n="ui.statTotalCoinsEarned">累計獲得星砂</small>
+                  <b id="home-stat-coins">0</b>
+                </div>
+              </div>
+              <div class="stat-card">
+                <span class="stat-card-icon">✨</span>
+                <div class="stat-card-data">
+                  <small data-i18n="ui.statTotalXpEarned">累計獲得經驗</small>
+                  <b id="home-stat-xp">0</b>
+                </div>
+              </div>
+              <div class="stat-card">
+                <span class="stat-card-icon">⚔️</span>
+                <div class="stat-card-data">
+                  <small data-i18n="ui.statTotalBattles">總對局場次</small>
+                  <b id="home-stat-battles">0</b>
+                </div>
+              </div>
+              <div class="stat-card">
+                <span class="stat-card-icon">🍉</span>
+                <div class="stat-card-data">
+                  <small data-i18n="ui.statWatermelonHits">西瓜切中累計</small>
+                  <b id="home-stat-watermelon">0</b>
+                </div>
+              </div>
+              <div class="stat-card stat-card-wide">
+                <span class="stat-card-icon">🎮</span>
+                <div class="stat-card-data">
+                  <small data-i18n="ui.statManualRecord">手動對決戰績</small>
+                  <b id="home-stat-manual-record">0 勝 / 0 敗 (0%)</b>
+                </div>
+              </div>
+              <div class="stat-card stat-card-wide">
+                <span class="stat-card-icon">⚡</span>
+                <div class="stat-card-data">
+                  <small data-i18n="ui.statAutoRecord">自動刷關戰績</small>
+                  <b id="home-stat-auto-record">0 勝 / 0 敗 (0%)</b>
+                </div>
+              </div>
+            </div>
+
+            <!-- Watermelon Slicing 3-Stage Analysis -->
+            <div class="records-section-card">
+              <div class="records-section-header">
+                <h4 data-i18n="ui.watermelonCutAnalysis">切西瓜階段命中分析</h4>
+              </div>
+              <div class="records-table-wrap">
+                <table class="records-stats-table" id="records-watermelon-table">
+                  <thead>
+                    <tr>
+                      <th>階段</th>
+                      <th>出刀記錄 (命中 / 落空)</th>
+                      <th>成功率</th>
+                    </tr>
+                  </thead>
+                  <tbody id="records-watermelon-tbody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Per-Stage Detailed Breakdown Table -->
+            <div class="records-section-card">
+              <div class="records-section-header">
+                <h4 data-i18n="ui.stageStatsBreakdownTitle">各章節挑戰統計與傷害分析</h4>
+              </div>
+              <div class="records-table-wrap">
+                <table class="records-stats-table" id="records-stage-breakdown-table">
+                  <thead>
+                    <tr>
+                      <th>章節關卡</th>
+                      <th>挑戰場次與勝率</th>
+                      <th>造成傷害</th>
+                      <th>承受傷害</th>
+                      <th>QTE 成功率</th>
+                      <th>獲取獎勵</th>
+                    </tr>
+                  </thead>
+                  <tbody id="records-stage-breakdown-tbody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Recent 100 Battles Log -->
+            <div class="records-section-card">
+              <div class="records-section-header">
+                <h4 data-i18n="ui.recentBattlesTitle">最近 100 局對戰紀錄</h4>
+                <small style="color:var(--paper-dim);">實時紀錄實戰 DPS、造成傷害與承受傷害</small>
+              </div>
+              <div class="records-recent-battles-wrap">
+                <div id="records-recent-battles-list" class="records-recent-battles-list"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section id="screen-battle" class="screen battle-screen" aria-label="猜拳戰鬥">
           <div id="battle-arena" class="battle-arena">
             <div class="battle-backdrop" aria-hidden="true">
@@ -463,6 +633,18 @@
               <b id="battle-stage-name">初逢・朱鳥居</b>
             </div>
             <button id="abandon-battle" class="battle-exit" type="button">撤退</button>
+
+            <!-- Auto Battle HUD Banner -->
+            <div id="auto-battle-hud-banner" class="auto-battle-hud-banner" hidden>
+              <span class="auto-battle-icon">⚡</span>
+              <span id="auto-battle-hud-text">自動刷關中：第 1 / 10 次（勝: 0, 敗: 0）</span>
+              <button type="button" id="btn-stop-autobattle" class="button-secondary btn-stop-autobattle">⏹ 停止刷關</button>
+            </div>
+
+            <!-- Frozen Kohaku Hand Badge -->
+            <div id="frozen-hand-badge" class="frozen-hand-badge" hidden>
+              <span>❄️ 霜月冰結：小樂【<b id="frozen-hand-badge-label">石頭</b>】已被封印！</span>
+            </div>
 
             <!-- 畫面中央小樂出拳放大警告 Emoji -->
             <div id="round-warning-emoji" class="round-warning-emoji" aria-hidden="true"></div>
@@ -743,9 +925,15 @@
                 <h2 id="result-title">勝負已分</h2>
                 <p id="result-message">這一戰留下了新的羈絆。</p>
                 <div class="reward-row">
-                  <span><small>星砂</small><b id="reward-coins">+100</b></span>
-                  <span><small>經驗</small><b id="reward-xp">+150</b></span>
-                  <span id="reward-level-wrap"><small>升等</small><b id="reward-level">+1</b></span>
+                  <span><small data-i18n="ui.coins">星砂</small><b id="reward-coins">+100</b></span>
+                  <span><small>EXP</small><b id="reward-xp">+150</b></span>
+                  <span id="reward-level-wrap"><small data-i18n="ui.levelUp">升等</small><b id="reward-level">+1</b></span>
+                </div>
+                <div class="settlement-combat-stats-row" id="settlement-combat-stats-row">
+                  <span class="combat-dps-tag"><small data-i18n="ui.combatDps">實戰 DPS</small><b id="reward-combat-dps">0.0</b></span>
+                  <span class="combat-dmg-tag"><small data-i18n="ui.damageDealt">造成傷害</small><b id="reward-damage-dealt">0</b></span>
+                  <span class="combat-taken-tag"><small data-i18n="ui.damageTaken">承受傷害</small><b id="reward-damage-taken">0</b></span>
+                  <span class="combat-time-tag"><small data-i18n="ui.battleDuration">耗時</small><b id="reward-duration">0s</b></span>
                 </div>
                 <div id="postbattle-actions" class="result-actions"></div>
                 <div id="watermelon-game" class="watermelon-game" hidden>
@@ -771,13 +959,41 @@
       <div id="battle-pause-modal" class="modal-overlay pause-modal-overlay" hidden aria-hidden="true">
         <div class="modal-card pause-modal-card">
           <header class="modal-header">
-            <h3>⏸️ <span data-i18n="ui.qteCaption">對局暫停中</span></h3>
+            <h3><span data-i18n="ui.pauseModalTitle">⏸️ 對局暫停中</span></h3>
           </header>
           <div class="pause-content">
-            <p class="pause-message">戰鬥與 QTE 計時已完全暫停。您可以隨時繼續對局，或放棄本場戰鬥返回大廳。</p>
+            <p class="pause-message" data-i18n="ui.pauseModalDesc">戰鬥與 QTE 計時已完全暫停。您可以隨時繼續對局，或放棄本場戰鬥返回大廳。</p>
             <div class="pause-actions">
-              <button type="button" class="button-primary pause-action-btn" id="btn-resume-battle">▶ <span data-i18n="ui.btnRetry">繼續戰鬥</span> <kbd>ESC</kbd></button>
-              <button type="button" class="button-secondary pause-action-btn" id="btn-pause-abandon">🏳️ <span data-i18n="ui.btnReturnHome">放棄對局 (返回大廳)</span></button>
+              <button type="button" class="button-primary pause-action-btn" id="btn-resume-battle">▶ <span data-i18n="ui.btnResumeBattle">繼續戰鬥</span> <kbd>ESC</kbd></button>
+              <button type="button" class="button-secondary pause-action-btn" id="btn-pause-abandon">🏳️ <span data-i18n="ui.btnAbandonBattle">放棄對局 (返回大廳)</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Auto Battle Config Modal -->
+      <div id="auto-battle-modal" class="modal-overlay" hidden aria-hidden="true">
+        <div class="modal-card auto-battle-card">
+          <header class="modal-header">
+            <h3><span data-i18n="ui.autoBattleModalTitle">⚡ 自動連續刷關設定</span></h3>
+            <button id="close-auto-battle-modal" class="modal-close-btn" type="button">×</button>
+          </header>
+          <div class="auto-battle-modal-content">
+            <h4 id="auto-battle-stage-title" class="auto-battle-stage-title">壹ノ章・初逢・朱鳥居</h4>
+            <p class="auto-battle-desc" data-i18n="ui.autoBattleModalDesc">自動為您進行出拳、變拳與 QTE 反制。獲勝時直接跳過切西瓜領取獎勵並接續下一場；失敗時自動扣除次數繼續重試。</p>
+            <div class="auto-battle-count-select">
+              <label data-i18n="ui.autoBattleCountLabel">選擇連續刷關次數：</label>
+              <div class="auto-battle-count-buttons">
+                <button type="button" class="count-btn" data-battle-count="5">5</button>
+                <button type="button" class="count-btn is-active" data-battle-count="10">10</button>
+                <button type="button" class="count-btn" data-battle-count="20">20</button>
+                <button type="button" class="count-btn" data-battle-count="50">50</button>
+                <button type="button" class="count-btn" data-battle-count="99">99</button>
+              </div>
+            </div>
+            <div class="auto-battle-modal-actions">
+              <button type="button" class="button-primary" id="btn-start-autobattle-confirm" data-i18n="ui.btnStartAutoBattle">⚡ 開始自動刷關</button>
+              <button type="button" class="button-secondary" id="btn-cancel-autobattle" data-i18n="ui.btnCancel">取消</button>
             </div>
           </div>
         </div>
@@ -850,6 +1066,15 @@
 
       <div id="equip-tooltip" class="equip-tooltip" hidden></div>
       <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+      <footer class="app-footer" aria-label="頁腳資訊">
+        <a href="https://store.steampowered.com/app/1425000" target="_blank" rel="noopener noreferrer" class="footer-game-link">
+          <span class="footer-link-icon">🎮</span>
+          <span class="footer-link-name">Endless Alice</span>
+          <span class="footer-link-desc" data-i18n="ui.footerEndlessAliceLink">前往 Steam 探索《Endless Alice》</span>
+          <span class="footer-link-badge">Steam ↗</span>
+        </a>
+      </footer>
     </div>
     <script src="./src/js/bundle.js"></script>
   </body>

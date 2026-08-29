@@ -154,20 +154,46 @@ p {
   border-left: 1px solid var(--line);
 }
 
-button.profile-chip.lang-chip {
+.lang-select-wrap {
+  display: flex;
+  align-items: center;
+}
+
+select.profile-chip.lang-select {
+  display: block;
+  min-width: 96px;
+  height: 38px;
+  padding: 6px 24px 6px 10px;
   border-top: 0;
   border-right: 0;
   border-bottom: 0;
-  background: transparent;
+  border-left: 1px solid var(--line);
+  background: rgba(18, 14, 24, 0.75);
   color: var(--paper-soft);
+  font: 500 13px/1 var(--serif);
+  letter-spacing: 0.08em;
   cursor: pointer;
-  text-align: left;
-  transition: background 180ms ease, color 180ms ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23d8b66a'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  border-radius: 4px;
+  transition: all 180ms ease;
 }
 
-button.profile-chip.lang-chip:hover {
-  background: rgba(216, 182, 106, 0.12);
+select.profile-chip.lang-select:hover,
+select.profile-chip.lang-select:focus {
+  background-color: rgba(216, 182, 106, 0.15);
   color: var(--gold-bright);
+  outline: none;
+  border-color: var(--gold);
+}
+
+select.profile-chip.lang-select option {
+  background: #14121a;
+  color: #fff;
+  font-size: 13px;
+  padding: 8px;
 }
 
 .profile-chip small {
@@ -343,7 +369,72 @@ button.profile-chip.lang-chip:hover {
   border: 2px solid var(--ink-950);
 }
 
-.debug-panel {
+/* App Footer - Endless Alice Steam Link */
+.app-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 16px 20px;
+  background: rgba(10, 8, 14, 0.85);
+  border-top: 1px solid rgba(216, 182, 106, 0.2);
+  margin-top: auto;
+}
+
+.footer-game-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 18px;
+  background: linear-gradient(135deg, rgba(30, 20, 45, 0.9), rgba(15, 12, 25, 0.95));
+  border: 1px solid rgba(216, 182, 106, 0.35);
+  border-radius: 24px;
+  color: var(--paper-soft);
+  text-decoration: none;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  transition: all 220ms ease;
+}
+
+.footer-game-link:hover {
+  background: linear-gradient(135deg, rgba(60, 35, 90, 0.95), rgba(35, 20, 55, 0.98));
+  border-color: var(--gold-bright);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 22px rgba(216, 182, 106, 0.25);
+}
+
+.footer-link-icon {
+  font-size: 16px;
+}
+
+.footer-link-name {
+  font: 700 14px/1 var(--serif);
+  color: var(--gold-bright);
+  letter-spacing: 0.08em;
+}
+
+.footer-link-desc {
+  color: var(--paper-dim);
+  font-size: 12px;
+}
+
+.footer-link-badge {
+  padding: 2px 8px;
+  background: #171a21;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  color: #66c0f4;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.footer-game-link:hover .footer-link-badge {
+  background: #66c0f4;
+  color: #171a21;
+  border-color: #66c0f4;
+}
   position: fixed;
   z-index: 999;
   right: 8px;

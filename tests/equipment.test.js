@@ -107,3 +107,62 @@ test("胸甲裝備穿戴與卸下：正確裝備至 chest 格位並加成屬性"
   assert.deepEqual(store.state.inventoryEquipment, ["chest_samurai"]);
 });
 
+test("重複購買與雙持裝備：支援購買多件同名裝備與雙耳環、雙盾雙持", () => {
+  const bus = new EventBus();
+  const persistence = new MemoryPersistence();
+  const store = new GameStore(bus, persistence);
+
+  store.state.coins = 2000;
+
+  // Buy 2 earrings
+  const b1 = store.buyEquipment("earring_magatama");
+  const b2 = store.buyEquipment("earring_magatama");
+  assert.equal(b1.ok, true);
+  assert.equal(b2.ok, true);
+  assert.deepEqual(store.state.inventoryEquipment, ["earring_magatama", "earring_magatama"]);
+
+  // Equip both earrings to earring1 and earring2
+  store.equipItem("earring_magatama");
+  assert.equal(store.state.equipment.earring1, "earring_magatama");
+  assert.deepEqual(store.state.inventoryEquipment, ["earring_magatama"]);
+
+  store.equipItem("earring_magatama");
+  assert.equal(store.state.equipment.earring2, "earring_magatama");
+  assert.deepEqual(store.state.inventoryEquipment, []);
+
+  // Buy 2 shields and dual wield them in mainHand and offHand
+  store.buyEquipment("shield_suzaku");
+  store.buyEquipment("shield_suzaku");
+  assert.deepEqual(store.state.inventoryEquipment, ["shield_suzaku", "shield_suzaku"]);
+
+  store.equipItem("shield_suzaku", "mainHand");
+  store.equipItem("shield_suzaku", "offHand");
+  assert.equal(store.state.equipment.mainHand, "shield_suzaku");
+  assert.equal(store.state.equipment.offHand, "shield_suzaku");
+  assert.deepEqual(store.state.inventoryEquipment, []);
+
+  // Stats include both shields (100 base + 200*2 = 500)
+  const stats = store.snapshot().playerStats;
+  assert.equal(stats.maxHp, 100 + (EQUIPMENT_ITEMS.shield_suzaku.stats.hp * 2));
+
+  // Test equipping 2nd earring when slot 2 already has another earring
+  store.state.equipment.earring1 = "earring_magatama";
+  store.state.equipment.earring2 = "earring_ruby"; // hypothetical or occupied
+  store.state.inventoryEquipment = ["earring_magatama"];
+  // Calling equipItem without targetSlot when earring1 already has earring_magatama MUST target earring2
+  const equip2nd = store.equipItem("earring_magatama");
+  assert.equal(equip2nd.ok, true);
+  assert.equal(store.state.equipment.earring1, "earring_magatama");
+  assert.equal(store.state.equipment.earring2, "earring_magatama", "第二件同名耳環必須自動穿戴至 earring2 欄位");
+
+  // Test equipping 2nd ring when slot 2 already has another ring
+  store.state.equipment.ring1 = "ring_ruby";
+  store.state.equipment.ring2 = "ring_sapphire";
+  store.state.inventoryEquipment = ["ring_ruby"];
+  const equip2ndRing = store.equipItem("ring_ruby");
+  assert.equal(equip2ndRing.ok, true);
+  assert.equal(store.state.equipment.ring1, "ring_ruby");
+  assert.equal(store.state.equipment.ring2, "ring_ruby", "第二件同名戒指必須自動穿戴至 ring2 欄位");
+});
+
+

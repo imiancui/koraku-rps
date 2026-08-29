@@ -82,9 +82,9 @@ export class AppView {
     document.documentElement.lang = LOCALES[locale]?.code || locale;
     document.title = I18n.t("meta.title");
 
-    const headerLang = $("#header-lang");
-    if (headerLang) {
-      headerLang.textContent = LOCALES[locale]?.label || "English";
+    const langSelect = $("#lang-select");
+    if (langSelect) {
+      langSelect.value = locale;
     }
 
     document.querySelectorAll("[data-i18n]").forEach((el) => {
@@ -121,6 +121,19 @@ export class AppView {
       this.renderHeldQteDirections();
     });
 
+    const langSelect = $("#lang-select");
+    if (langSelect) {
+      langSelect.addEventListener("change", (e) => {
+        I18n.setLocale(e.target.value);
+        this.renderI18n();
+        this.renderStore(this.store.snapshot());
+        if (this.battleState?.active) {
+          this.renderBattle(this.battleState);
+        }
+        this.bus.emit("sound", { name: "select" });
+      });
+    }
+
     const cheatForm = $("#cheat-form");
     if (cheatForm) {
       cheatForm.addEventListener("submit", (e) => {
@@ -146,6 +159,19 @@ export class AppView {
     this.bus.on("qte:wrong", (data) => this.flashQteWrong(data?.slot));
     this.bus.on("postbattle:state", (state) => this.renderPostBattle(state));
     this.bus.on("toast", (toast) => this.showToast(toast.message, toast.tone));
+    this.bus.on("auto-battle:update", (info) => {
+      const msg = info.won
+        ? I18n.t("ui.autoBattleToastUpdateWin", { remaining: info.remainingRounds })
+        : I18n.t("ui.autoBattleToastUpdateLoss", { remaining: info.remainingRounds });
+      this.showToast(msg, info.won ? "success" : "danger");
+    });
+    this.bus.on("auto-battle:finished", (info) => {
+      this.showToast(I18n.t("ui.autoBattleToastFinished", { total: info.totalRounds, wins: info.wins, losses: info.losses }), "success");
+      this.requestNavigation("stages");
+    });
+    this.bus.on("auto-battle:stopped", () => {
+      this.showToast(I18n.t("ui.autoBattleToastStopped"), "warning");
+    });
   }
 
   handleCountdownBeat() {
@@ -185,9 +211,45 @@ export class AppView {
       return;
     }
 
+    const autoStageBtn = event.target.closest("[data-auto-stage]");
+    if (autoStageBtn) {
+      const stageId = Number(autoStageBtn.dataset.autoStage);
+      this.openAutoBattleModal(stageId);
+      return;
+    }
+
     const stageButton = event.target.closest("[data-stage]");
     if (stageButton) {
       this.startStage(Number(stageButton.dataset.stage));
+      return;
+    }
+
+    if (event.target.closest("#close-auto-battle-modal") || event.target.closest("#btn-cancel-autobattle")) {
+      this.closeAutoBattleModal();
+      return;
+    }
+
+    const countBtn = event.target.closest("[data-battle-count]");
+    if (countBtn) {
+      this.selectedAutoBattleCount = Number(countBtn.dataset.battleCount) || 10;
+      document.querySelectorAll("[data-battle-count]").forEach((btn) => {
+        btn.classList.toggle("is-active", Number(btn.dataset.battleCount) === this.selectedAutoBattleCount);
+      });
+      return;
+    }
+
+    if (event.target.closest("#btn-start-autobattle-confirm")) {
+      if (this.selectedAutoStageId) {
+        this.startAutoBattle(this.selectedAutoStageId, this.selectedAutoBattleCount || 10);
+      }
+      return;
+    }
+
+    if (event.target.closest("#btn-stop-autobattle")) {
+      this.battle.stopAutoBattle();
+      const banner = $("#auto-battle-hud-banner");
+      if (banner) banner.hidden = true;
+      this.showToast(I18n.t("ui.autoBattleToastStopped"), "warning");
       return;
     }
 
@@ -608,6 +670,7 @@ export class AppView {
     if (this.battleState?.active && screenName !== "battle") {
       const confirmed = window.confirm("現在撤退將不會得到星砂或經驗，確定離開嗎？");
       if (!confirmed) return;
+      this.battle.stopAutoBattle();
       this.battle.abandon();
     }
     this.navigate(screenName);
@@ -625,11 +688,49 @@ export class AppView {
     next.scrollTop = 0;
     if (screenName === "gallery") {
       this.renderGallery(this.store.snapshot());
+    } else if (screenName === "records") {
+      this.renderHomeRecords(this.store.snapshot());
     }
   }
 
   startStage(stageId) {
     if (!this.battle.start(stageId)) return;
+    this.postState = null;
+    this.resultOverlay.classList.remove("is-active");
+    this.resultOverlay.setAttribute("aria-hidden", "true");
+    this.navigate("battle");
+  }
+
+  openAutoBattleModal(stageId) {
+    this.selectedAutoStageId = stageId;
+    this.selectedAutoBattleCount = 10;
+    const stage = STAGES.find((s) => s.id === stageId);
+    const locStage = I18n.getLocalizedStage(stage || { chapter: "", name: "" });
+    const titleEl = $("#auto-battle-stage-title");
+    if (titleEl) titleEl.textContent = `${locStage.chapter}・${locStage.name}`;
+
+    document.querySelectorAll("[data-battle-count]").forEach((btn) => {
+      btn.classList.toggle("is-active", Number(btn.dataset.battleCount) === this.selectedAutoBattleCount);
+    });
+
+    const modal = $("#auto-battle-modal");
+    if (modal) {
+      modal.hidden = false;
+      modal.setAttribute("aria-hidden", "false");
+    }
+  }
+
+  closeAutoBattleModal() {
+    const modal = $("#auto-battle-modal");
+    if (modal) {
+      modal.hidden = true;
+      modal.setAttribute("aria-hidden", "true");
+    }
+  }
+
+  startAutoBattle(stageId, rounds = 10) {
+    this.closeAutoBattleModal();
+    if (!this.battle.startAutoBattle(stageId, rounds)) return;
     this.postState = null;
     this.resultOverlay.classList.remove("is-active");
     this.resultOverlay.setAttribute("aria-hidden", "true");
@@ -646,6 +747,7 @@ export class AppView {
     $("#record-stage").textContent = state.records.bestStage ? I18n.getLocalizedStage(STAGES.find(s => s.id === state.records.bestStage) || { chapter: "第 " + state.records.bestStage + " 章" }).chapter : "—";
     $("#sound-toggle").textContent = state.settings.muted ? "×" : "♪";
     $("#sound-toggle").setAttribute("aria-label", state.settings.muted ? "開啟音效" : "關閉音效");
+    this.renderHomeRecords(state);
     this.renderStages(state);
     this.renderShop(state);
     this.renderGrowth(state);
@@ -655,12 +757,241 @@ export class AppView {
     this.renderInventory(state);
   }
 
+  renderHomeRecords(state) {
+    if (!state) return;
+    const records = state.records || {};
+
+    // 1. Profile Level, XP and Theoretical DPS
+    if ($("#records-level")) $("#records-level").textContent = state.profile.level;
+    const xpPercent = state.xpToNext > 0 ? Math.min(100, Math.round((state.profile.xp / state.xpToNext) * 100)) : 100;
+    if ($("#records-xp-text")) $("#records-xp-text").textContent = `${state.profile.xp} / ${state.xpToNext} EXP (${xpPercent}%)`;
+    if ($("#records-xp-fill")) $("#records-xp-fill").style.width = `${xpPercent}%`;
+    const theoDps = this.store.getTheoreticalDPS();
+    if ($("#records-theoretical-dps")) $("#records-theoretical-dps").textContent = theoDps;
+
+    // 2. Consumables & Morph Uses
+    if ($("#records-hp-potions-used")) {
+      const hpCount = records.consumablesUsed?.hpPotion || 0;
+      $("#records-hp-potions-used").textContent = `${hpCount} 瓶`;
+    }
+    if ($("#records-mp-potions-used")) {
+      const mpCount = records.consumablesUsed?.mpPotion || 0;
+      $("#records-mp-potions-used").textContent = `${mpCount} 瓶`;
+    }
+    if ($("#records-morph-uses")) {
+      $("#records-morph-uses").textContent = `${records.morphUses || 0} 次`;
+    }
+
+    // 3. Read-Only Paperdoll
+    const paperdollEl = $("#records-paperdoll");
+    if (paperdollEl) {
+      const equip = state.equipment || {};
+      const isMainTwoHanded = Boolean(equip.mainHand && EQUIPMENT_ITEMS[equip.mainHand]?.twoHanded);
+      paperdollEl.innerHTML = Object.keys(EQUIPMENT_SLOTS).map((slotKey) => {
+        const itemId = equip[slotKey];
+        const item = itemId ? EQUIPMENT_ITEMS[itemId] : null;
+        const locSlot = I18n.getLocalizedEquipmentSlot(slotKey);
+        if (slotKey === "offHand" && isMainTwoHanded) {
+          return `
+            <div class="records-paperdoll-item is-two-handed-locked">
+              <span class="records-paperdoll-item-icon">🔒</span>
+              <div class="records-paperdoll-item-info">
+                <span class="records-paperdoll-slot-tag">${locSlot?.label || slotKey}</span>
+                <span class="records-paperdoll-item-name" style="color:var(--gold);">${I18n.t("ui.twoHandedOccupied")}</span>
+              </div>
+            </div>
+          `;
+        }
+        if (item) {
+          const locItem = I18n.getLocalizedEquipment(item);
+          return `
+            <div class="records-paperdoll-item rarity-${item.rarity}" data-equip-tooltip-id="${item.id}">
+              <span class="records-paperdoll-item-icon">${item.icon}</span>
+              <div class="records-paperdoll-item-info">
+                <span class="records-paperdoll-slot-tag">${locSlot?.label || slotKey}</span>
+                <span class="records-paperdoll-item-name rarity-${item.rarity}">${locItem.name}</span>
+              </div>
+            </div>
+          `;
+        }
+        return `
+          <div class="records-paperdoll-item" style="opacity:0.5;">
+            <span class="records-paperdoll-item-icon">${EQUIPMENT_SLOTS[slotKey].icon}</span>
+            <div class="records-paperdoll-item-info">
+              <span class="records-paperdoll-slot-tag">${locSlot?.label || slotKey}</span>
+              <span class="records-paperdoll-item-name" style="color:var(--paper-dim);">未裝備</span>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    // 4. Lifetime 6 Cards
+    const totalCoins = records.totalCoinsEarned ?? state.coins ?? 0;
+    const totalXp = records.totalXpEarned ?? 0;
+    const totalBattles = records.totalBattles ?? ((records.wins || 0) + (records.losses || 0));
+    const manualWins = records.manualWins ?? records.wins ?? 0;
+    const manualLosses = records.manualLosses ?? records.losses ?? 0;
+    const autoWins = records.autoWins ?? 0;
+    const autoLosses = records.autoLosses ?? 0;
+    const watermelonHits = records.watermelonSlices ?? 0;
+
+    const manualTotal = manualWins + manualLosses;
+    const manualWinRate = manualTotal > 0 ? Math.round((manualWins / manualTotal) * 100) : 0;
+    const autoTotal = autoWins + autoLosses;
+    const autoWinRate = autoTotal > 0 ? Math.round((autoWins / autoTotal) * 100) : 0;
+
+    if ($("#home-stat-coins")) $("#home-stat-coins").textContent = totalCoins.toLocaleString("zh-TW");
+    if ($("#home-stat-xp")) $("#home-stat-xp").textContent = totalXp.toLocaleString("zh-TW");
+    if ($("#home-stat-battles")) $("#home-stat-battles").textContent = totalBattles.toLocaleString("zh-TW");
+    if ($("#home-stat-watermelon")) $("#home-stat-watermelon").textContent = watermelonHits.toLocaleString("zh-TW");
+    if ($("#home-stat-manual-record")) $("#home-stat-manual-record").textContent = `${manualWins} ${I18n.t("ui.wins")} / ${manualLosses} ${I18n.t("ui.losses")} (${manualWinRate}%)`;
+    if ($("#home-stat-auto-record")) $("#home-stat-auto-record").textContent = `${autoWins} ${I18n.t("ui.wins")} / ${autoLosses} ${I18n.t("ui.losses")} (${autoWinRate}%)`;
+
+    // 5. Watermelon Slicing 3-Stage Analysis Table
+    const watermelonTbody = $("#records-watermelon-tbody");
+    if (watermelonTbody) {
+      const wStats = records.watermelonStageStats || {};
+      let totalAttempts = 0;
+      let totalSuccesses = 0;
+
+      const stageRows = [1, 2, 3].map((stageIdx) => {
+        const st = wStats[stageIdx] || { attempts: 0, successes: 0 };
+        totalAttempts += (st.attempts || 0);
+        totalSuccesses += (st.successes || 0);
+        const failures = Math.max(0, (st.attempts || 0) - (st.successes || 0));
+        const rate = st.attempts > 0 ? Math.round((st.successes / st.attempts) * 100) : 0;
+        const rateClass = rate >= 70 ? "rate-high" : (rate >= 40 ? "rate-mid" : "rate-low");
+        const stageLabel = I18n.t("ui.strikeStage", { index: stageIdx });
+
+        return `
+          <tr>
+            <td><b>${stageLabel}</b></td>
+            <td>${st.attempts} 刀 (${st.successes} 中 / ${failures} 空)</td>
+            <td><span class="rate-badge ${rateClass}">${rate}%</span></td>
+          </tr>
+        `;
+      }).join("");
+
+      const totalFailures = Math.max(0, totalAttempts - totalSuccesses);
+      const totalRate = totalAttempts > 0 ? Math.round((totalSuccesses / totalAttempts) * 100) : 0;
+      const totalRateClass = totalRate >= 70 ? "rate-high" : (totalRate >= 40 ? "rate-mid" : "rate-low");
+
+      watermelonTbody.innerHTML = stageRows + `
+        <tr class="total-row">
+          <td><b>${I18n.t("ui.strikeTotal")}</b></td>
+          <td>${totalAttempts} 刀 (${totalSuccesses} 中 / ${totalFailures} 空)</td>
+          <td><span class="rate-badge ${totalRateClass}">${totalRate}%</span></td>
+        </tr>
+      `;
+    }
+
+    // 6. Per-Stage Breakdown Table (Damage, QTE, Challenges, Rewards)
+    const stageBreakdownTbody = $("#records-stage-breakdown-tbody");
+    if (stageBreakdownTbody) {
+      let totalAtt = 0;
+      let totalW = 0;
+      let totalL = 0;
+      let totalDealt = 0;
+      let totalTaken = 0;
+      let totalQteAtt = 0;
+      let totalQteSucc = 0;
+      let totalCoinsEarned = 0;
+      let totalXpEarned = 0;
+
+      const stageRows = STAGES.map((stage) => {
+        const locStage = I18n.getLocalizedStage(stage);
+        const sStat = records.stageStats?.[stage.id] || { totalAttempts: 0, manualWins: 0, manualLosses: 0, autoWins: 0, autoLosses: 0 };
+        const sWins = (sStat.manualWins || 0) + (sStat.autoWins || 0);
+        const sLosses = (sStat.manualLosses || 0) + (sStat.autoLosses || 0);
+        const sAttempts = sStat.totalAttempts || (sWins + sLosses);
+        const sWinRate = sAttempts > 0 ? Math.round((sWins / sAttempts) * 100) : 0;
+
+        const sDealt = records.damageDealt?.byStage?.[stage.id] || 0;
+        const sTaken = records.damageTaken?.byStage?.[stage.id] || 0;
+
+        const sQte = records.qteStats?.byStage?.[stage.id] || { attempts: 0, successes: 0 };
+        const sQteRate = sQte.attempts > 0 ? Math.round((sQte.successes / sQte.attempts) * 100) : 0;
+        const qteRateClass = sQteRate >= 70 ? "rate-high" : (sQteRate >= 40 ? "rate-mid" : "rate-low");
+
+        const sRewards = records.rewardsByStage?.[stage.id] || { coins: 0, xp: 0 };
+
+        totalAtt += sAttempts;
+        totalW += sWins;
+        totalL += sLosses;
+        totalDealt += sDealt;
+        totalTaken += sTaken;
+        totalQteAtt += (sQte.attempts || 0);
+        totalQteSucc += (sQte.successes || 0);
+        totalCoinsEarned += (sRewards.coins || 0);
+        totalXpEarned += (sRewards.xp || 0);
+
+        return `
+          <tr>
+            <td><b>${locStage.chapter}・${locStage.name}</b></td>
+            <td>${sAttempts} 次 (${sWins}勝 / ${sLosses}敗, ${sWinRate}%)</td>
+            <td style="color:#73d13d;font-weight:600;">${sDealt.toLocaleString("zh-TW")}</td>
+            <td style="color:#ff7875;font-weight:600;">${sTaken.toLocaleString("zh-TW")}</td>
+            <td><span class="rate-badge ${qteRateClass}">${sQte.successes}/${sQte.attempts} (${sQteRate}%)</span></td>
+            <td>+${sRewards.coins.toLocaleString("zh-TW")} ${I18n.t("ui.coins")} / +${sRewards.xp.toLocaleString("zh-TW")} EXP</td>
+          </tr>
+        `;
+      }).join("");
+
+      const totalWinRate = totalAtt > 0 ? Math.round((totalW / totalAtt) * 100) : 0;
+      const totalQteRate = totalQteAtt > 0 ? Math.round((totalQteSucc / totalQteAtt) * 100) : 0;
+      const totalQteClass = totalQteRate >= 70 ? "rate-high" : (totalQteRate >= 40 ? "rate-mid" : "rate-low");
+
+      stageBreakdownTbody.innerHTML = stageRows + `
+        <tr class="total-row">
+          <td><b>加總總計</b></td>
+          <td>${totalAtt} 次 (${totalW}勝 / ${totalL}敗, ${totalWinRate}%)</td>
+          <td style="color:#73d13d;font-weight:bold;">${totalDealt.toLocaleString("zh-TW")}</td>
+          <td style="color:#ff7875;font-weight:bold;">${totalTaken.toLocaleString("zh-TW")}</td>
+          <td><span class="rate-badge ${totalQteClass}">${totalQteSucc}/${totalQteAtt} (${totalQteRate}%)</span></td>
+          <td>+${totalCoinsEarned.toLocaleString("zh-TW")} ${I18n.t("ui.coins")} / +${totalXpEarned.toLocaleString("zh-TW")} EXP</td>
+        </tr>
+      `;
+    }
+
+    // 7. Recent 100 Battles Log List
+    const recentBattlesList = $("#records-recent-battles-list");
+    if (recentBattlesList) {
+      const recent = records.recentBattles || [];
+      if (recent.length === 0) {
+        recentBattlesList.innerHTML = '<div style="text-align:center;padding:30px;color:var(--paper-dim);">目前尚無對戰紀錄，快去挑戰小樂吧！</div>';
+      } else {
+        recentBattlesList.innerHTML = recent.map((b, idx) => {
+          const resultClass = b.won ? "win" : "loss";
+          const resultText = b.won ? I18n.t("ui.resultWin") : I18n.t("ui.resultLoss");
+          const modeText = b.isAuto ? I18n.t("ui.modeAuto") : I18n.t("ui.modeManual");
+          const timeStr = b.timestamp ? new Date(b.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : "";
+
+          return `
+            <div class="recent-battle-card">
+              <span class="recent-battle-result ${resultClass}">${resultText}</span>
+              <span class="recent-battle-stage">${b.chapter ? b.chapter + '・' : ''}${b.stageName || "關卡"}</span>
+              <span class="recent-battle-mode">${modeText} (${b.durationSec || 1}s)</span>
+              <span class="recent-battle-dps">DPS <b>${b.dps ?? 0}</b></span>
+              <span class="recent-battle-damage">造成 <b>${b.damageDealt || 0}</b> / 承受 <b>${b.damageTaken || 0}</b></span>
+              <small style="color:var(--paper-dim);">${timeStr}</small>
+            </div>
+          `;
+        }).join("");
+      }
+    }
+  }
+
   renderStages(state) {
     const kanji = ["朱", "夕", "月", "鏡"];
     $("#stage-grid").innerHTML = STAGES.map((stage, index) => {
       const locStage = I18n.getLocalizedStage(stage);
       const locked = state.profile.level < stage.requiredLevel;
-      const cleared = state.records.bestStage >= stage.id;
+      const cleared = (state.records.clearedStages || []).includes(stage.id) || (state.records.bestStage >= stage.id);
+      const stageStat = state.records?.stageStats?.[stage.id] || { totalAttempts: 0, autoWins: 0, manualLosses: 0 };
+      const attemptsText = I18n.t("ui.stageAttempts", { total: stageStat.totalAttempts || 0 });
+      const recordBadgeText = I18n.t("ui.stageRecordBadge", { autoWins: stageStat.autoWins || 0, manualLosses: stageStat.manualLosses || 0 });
+
       const classes = [
         "stage-card",
         cleared ? "is-cleared" : "",
@@ -669,8 +1000,7 @@ export class AppView {
       let status = I18n.t("ui.enterStage");
       if (locked) status = I18n.t("ui.stageNeedLevel", { level: stage.requiredLevel });
       else if (cleared) status = I18n.t("ui.stageCleared");
-      return '<button type="button" class="' + classes + '" data-stage="' + stage.id +
-        '" data-kanji="' + kanji[index] + '"' + (locked ? " disabled" : "") + '>' +
+      return '<div class="' + classes + '" data-kanji="' + kanji[index] + '">' +
         '<span class="stage-chapter">' + locStage.chapter + "</span>" +
         "<h3>" + locStage.name + "</h3>" +
         "<p>" + locStage.subtitle + "</p>" +
@@ -679,7 +1009,14 @@ export class AppView {
         '<span>' + I18n.t("ui.level") + '</span><b>Lv. ' + stage.requiredLevel + '</b>' +
         '<span>' + I18n.t("ui.winReward") + '</span><b style="font-size:12px;color:var(--gold-bright);">+' + stage.xpWin + ' EXP / +' + stage.winCoins + ' ' + I18n.t("ui.coins") + '</b>' +
         '</div>' +
-        '<span class="stage-status">' + status + "</span></button>";
+        '<div class="stage-metrics-row">' +
+        '<div class="stage-metric-attempts"><span>' + attemptsText + '</span></div>' +
+        '<div class="stage-metric-breakdown"><span>' + recordBadgeText + '</span></div>' +
+        '</div>' +
+        '<div class="stage-actions-row">' +
+        '<button type="button" class="button-primary" data-stage="' + stage.id + '"' + (locked ? " disabled" : "") + '>' + status + "</button>" +
+        (cleared && !locked ? '<button type="button" class="stage-btn-auto" data-auto-stage="' + stage.id + '">' + I18n.t("ui.btnAutoBattle") + '</button>' : "") +
+        '</div></div>';
     }).join("");
   }
 
@@ -786,22 +1123,27 @@ export class AppView {
           const statsText = statParts.join(" / ");
           const slotLabel = getSlotLabel(item);
 
-          const equippedSlot = Object.keys(state.equipment || {}).find((s) => state.equipment[s] === item.id);
-          const isEquipped = Boolean(equippedSlot);
-          const isOwnedInBag = (state.inventoryEquipment || []).includes(item.id);
+          const equippedSlots = Object.keys(state.equipment || {}).filter((s) => state.equipment[s] === item.id);
+          const equippedCount = equippedSlots.length;
+          const bagCount = (state.inventoryEquipment || []).filter((id) => id === item.id).length;
+          const totalOwned = equippedCount + bagCount;
 
-          let actionHtml = "";
-          if (isEquipped) {
-            actionHtml = '<span class="shop-status-badge is-equipped">' + I18n.t("ui.equippedBadge") + '</span>' +
-              '<button type="button" class="button-secondary shop-btn-unequip" data-shop-unequip="' + equippedSlot + '">' + I18n.t("ui.bagUnequipBtn") + '</button>';
-          } else if (isOwnedInBag) {
-            actionHtml = '<span class="shop-status-badge is-owned">' + I18n.t("ui.ownedInBag") + '</span>' +
-              '<button type="button" class="button-primary shop-btn-equip" data-shop-equip="' + item.id + '">' + I18n.t("ui.equipNow") + '</button>';
-          } else {
-            actionHtml = '<span style="font-size:12px;color:var(--gold);">✦ ' + item.price + ' ' + I18n.t("ui.coins") + '</span>' +
-              '<button type="button" class="button-primary" data-buy-equip="' + item.id + '"' +
-              (state.coins < item.price ? " disabled" : "") + '>' + I18n.t("ui.equipBuy") + '</button>';
+          let countBadge = "";
+          if (totalOwned > 0) {
+            const ownedStr = I18n.t("ui.ownedCount", { total: totalOwned });
+            const equippedStr = equippedCount > 0 ? " " + I18n.t("ui.equippedCountBadge", { count: equippedCount }) : "";
+            countBadge = '<span class="shop-owned" style="font-size:12px;margin-right:4px;">' + ownedStr + equippedStr + '</span>';
           }
+
+          let equipBtn = "";
+          if (bagCount > 0) {
+            equipBtn = '<button type="button" class="button-secondary shop-btn-equip" data-shop-equip="' + item.id + '" style="padding:6px 12px;font-size:12px;">' + I18n.t("ui.equipNow") + '</button>';
+          }
+
+          const buyBtn = '<button type="button" class="button-primary" data-buy-equip="' + item.id + '"' +
+            (state.coins < item.price ? " disabled" : "") + '>✦ ' + item.price + ' ' + I18n.t("ui.btnBuy") + '</button>';
+
+          const actionHtml = '<div style="display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:6px;">' + countBadge + equipBtn + buyBtn + '</div>';
 
           html += '<article class="shop-equip-card rarity-' + item.rarity + '" data-equip-tooltip-id="' + item.id + '">' +
             '<div class="shop-equip-icon">' + item.icon + '</div>' +
@@ -1022,10 +1364,12 @@ export class AppView {
     });
 
     // Render stats summary for both panels
+    const theoDps = this.store.getTheoreticalDPS();
     const statsHtml = `
       <span>${I18n.t("ui.statHp")}<b>${state.playerStats.maxHp}</b></span>
       <span>${I18n.t("ui.statMp")}<b>${state.playerStats.maxMp}</b></span>
       <span>${I18n.t("ui.statDamage")}<b>${state.playerStats.damage}</b></span>
+      <span style="color:var(--gold-bright);">${I18n.t("ui.theoreticalDps")}<b>${theoDps}</b></span>
     `;
     if ($("#paperdoll-stats-summary")) $("#paperdoll-stats-summary").innerHTML = statsHtml;
     if ($("#shop-paperdoll-stats-summary")) $("#shop-paperdoll-stats-summary").innerHTML = statsHtml;
@@ -1303,6 +1647,41 @@ export class AppView {
     if (pauseModal) {
       pauseModal.hidden = !state.isPaused;
       pauseModal.setAttribute("aria-hidden", String(!state.isPaused));
+    }
+
+    // Auto-Battle HUD Banner
+    const autoBattleBanner = $("#auto-battle-hud-banner");
+    const autoBattleText = $("#auto-battle-hud-text");
+    if (autoBattleBanner) {
+      if (state.autoBattle?.active) {
+        autoBattleBanner.hidden = false;
+        if (autoBattleText) {
+          const currentRun = state.autoBattle.totalRounds - state.autoBattle.remainingRounds + 1;
+          autoBattleText.textContent = I18n.t("ui.autoBattleHudRunning", {
+            current: Math.min(currentRun, state.autoBattle.totalRounds),
+            total: state.autoBattle.totalRounds,
+            wins: state.autoBattle.wins,
+            losses: state.autoBattle.losses
+          });
+        }
+      } else {
+        autoBattleBanner.hidden = true;
+      }
+    }
+
+    // Frozen Kohaku Hand Badge
+    const frozenBadge = $("#frozen-hand-badge");
+    const frozenLabel = $("#frozen-hand-badge-label");
+    if (frozenBadge) {
+      if (state.frozenEnemyHand) {
+        frozenBadge.hidden = false;
+        if (frozenLabel) {
+          const handObj = I18n.getLocalizedHand(state.frozenEnemyHand);
+          frozenBadge.innerHTML = '<span>' + I18n.t("ui.frozenBadge", { hand: '<b id="frozen-hand-badge-label">' + (handObj?.label || "") + '</b>' }) + '</span>';
+        }
+      } else {
+        frozenBadge.hidden = true;
+      }
     }
 
     const morph = $("#morph-skill");
@@ -1598,6 +1977,10 @@ export class AppView {
     $("#reward-xp").textContent = "+" + state.reward.xp;
     $("#reward-level").textContent = "+" + state.reward.levelsGained;
     $("#reward-level-wrap").hidden = state.reward.levelsGained <= 0;
+    if ($("#reward-combat-dps")) $("#reward-combat-dps").textContent = `${state.reward?.dps ?? 0.0}`;
+    if ($("#reward-damage-dealt")) $("#reward-damage-dealt").textContent = `${state.reward?.damageDealt ?? 0}`;
+    if ($("#reward-damage-taken")) $("#reward-damage-taken").textContent = `${state.reward?.damageTaken ?? 0}`;
+    if ($("#reward-duration")) $("#reward-duration").textContent = `${state.reward?.durationSec ?? 0}s`;
     $("#result-kicker").textContent = state.won ? "BATTLE COMPLETE" : "BATTLE FAILED";
 
     const watermelon = state.watermelon;

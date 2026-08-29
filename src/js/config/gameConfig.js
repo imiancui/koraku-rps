@@ -304,8 +304,8 @@ export const EQUIPMENT_ITEMS = Object.freeze({
     icon: "❄️⚔️",
     price: 300,
     stats: { damage: 20, hp: 0, mp: 30 },
-    effect: { type: "freeze", freezeChance: 0.3, reactionDelay: 0.5 },
-    description: "極北寒潭萃取的靈刃。猜拳獲勝時 30% 機率冰凍小樂，使下一回合反應時間延長 +0.5 秒。"
+    effect: { type: "freeze", freezeChance: 0.3 },
+    description: "極北寒潭萃取的靈刃。猜拳獲勝時 30% 機率凍結小樂手掌，使下一回合隨機無法出剪刀、石頭或布其一！"
   },
   sword_thunder: {
     id: "sword_thunder",
