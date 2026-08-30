@@ -1291,6 +1291,8 @@
 .battle-character-wrap.is-dual-stage {
   left: 50%;
   width: min(85vw, 1100px);
+  bottom: clamp(170px, 25vh, 280px);
+  height: 82%;
 }
 
 .character-single-slot {

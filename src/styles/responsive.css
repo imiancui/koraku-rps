@@ -42,6 +42,12 @@
     left: 58%;
     width: 58vw;
   }
+
+  .battle-character-wrap.is-dual-stage {
+    left: 50%;
+    width: min(88vw, 980px);
+    bottom: clamp(160px, 24vh, 260px);
+  }
 }
 
 @media (max-height: 780px) and (min-width: 721px) {
@@ -549,7 +555,26 @@
   }
 
   .battle-character-wrap.is-dual-stage {
-    width: 96vw !important;
+    top: 172px !important;
+    bottom: auto !important;
+    width: min(94vw, 400px) !important;
+    height: clamp(230px, 33vh, 290px) !important;
+    z-index: 10;
+  }
+
+  .battle-character-wrap.is-dual-stage .characters-dual-wrap {
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+
+  .battle-character-wrap.is-dual-stage .character-dual-slot {
+    width: 48%;
+    height: 100%;
+  }
+
+  .battle-character-wrap.is-dual-stage .character-dual-slot img {
+    object-fit: contain;
+    object-position: center bottom;
   }
 
   .battle-character-wrap::after {
@@ -584,8 +609,8 @@
   /* Round oracle placed cleanly below Boss HP bar */
   .round-oracle {
     left: 50%;
-    top: 86px;
-    width: min(84vw, 270px);
+    top: 118px;
+    width: min(88vw, 290px);
     padding: 3px 8px 4px;
     border: 1px solid rgba(216, 182, 106, 0.35);
     background: linear-gradient(135deg, rgba(11, 13, 21, 0.94), rgba(25, 28, 41, 0.88));
@@ -1056,9 +1081,14 @@
   }
 
   .round-oracle {
-    top: 84px;
-    width: min(86vw, 260px);
+    top: 118px;
+    width: min(88vw, 280px);
     padding: 3px 6px 4px;
+  }
+
+  .battle-character-wrap.is-dual-stage {
+    top: 172px !important;
+    height: clamp(210px, 31vh, 270px) !important;
   }
 
   .battle-left-cluster {
