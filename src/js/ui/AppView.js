@@ -1,4 +1,4 @@
-import { DIRECTIONS, GALLERY_ITEMS, HANDS, ITEMS, SKILLS, STAGES, EQUIPMENT_ITEMS, EQUIPMENT_SLOTS } from "../config/gameConfig.js";
+import { DIRECTIONS, DIRECTION_SVGS, getDirectionSvg, GALLERY_ITEMS, HANDS, ITEMS, SKILLS, STAGES, EQUIPMENT_ITEMS, EQUIPMENT_SLOTS } from "../config/gameConfig.js";
 import { I18n, LOCALES, LOCALE_ORDER } from "../services/I18n.js";
 import {
   arrowDirectionFromKey,
@@ -122,19 +122,22 @@ export class AppView {
     } catch (_) {}
 
     let activeBattle = null;
+    let savedStageId = 1;
     try {
       const savedBattle = sessionStorage.getItem("koraku_active_battle");
       if (savedBattle) activeBattle = JSON.parse(savedBattle);
+      savedStageId = Number(sessionStorage.getItem("koraku_active_stage")) || activeBattle?.stageId || this.store.snapshot().records?.bestStage || 1;
     } catch (_) {}
 
-    if (targetScreen === "battle" && activeBattle?.stageId) {
+    if (targetScreen === "battle") {
+      const stageToRun = activeBattle?.stageId || savedStageId || 1;
       if (typeof window !== "undefined" && window.history) {
         window.history.replaceState({ screen: "battle" }, "", "#battle");
       }
-      if (activeBattle.isAuto) {
-        this.startAutoBattle(activeBattle.stageId, activeBattle.remainingRounds || 10);
+      if (activeBattle?.isAuto) {
+        this.startAutoBattle(stageToRun, activeBattle.remainingRounds || 10);
       } else {
-        this.startStage(activeBattle.stageId);
+        this.startStage(stageToRun);
       }
     } else {
       if (typeof window !== "undefined" && window.history) {
@@ -996,6 +999,10 @@ export class AppView {
     this.postBattle?.closeAutoWatermelon?.();
     this.battle.stopAutoBattle();
     if (!this.battle.start(stageId)) return;
+    try {
+      sessionStorage.setItem("koraku_active_battle", JSON.stringify({ stageId, isAuto: false }));
+      sessionStorage.setItem("koraku_active_stage", String(stageId));
+    } catch (_) {}
     this.postState = null;
     this.battleArena?.classList.remove("is-settlement");
     this.resultOverlay.classList.remove("is-active");
@@ -1046,10 +1053,11 @@ export class AppView {
     const snapshot = this.store.snapshot();
     const stage = STAGES.find((s) => s.id === stageId);
     if (!stage) return;
-    const locked = snapshot.profile.level < stage.requiredLevel;
+    const isCleared = (snapshot.records?.clearedStages || []).includes(stageId);
+    const locked = !isCleared && snapshot.profile.level < stage.requiredLevel;
     const stageStat = snapshot.records?.stageStats?.[stageId] || { totalAttempts: 0, manualWins: 0, manualLosses: 0, autoWins: 0, autoLosses: 0 };
-    const hasWins = ((stageStat.manualWins || 0) + (stageStat.autoWins || 0)) > 0 || (stageId === 1 && ((snapshot.records?.wins || 0) > 0 || (snapshot.records?.manualWins || 0) > 0));
-    const cleared = (snapshot.records?.clearedStages || []).includes(stageId) && hasWins;
+    const hasWins = isCleared || ((stageStat.manualWins || 0) + (stageStat.autoWins || 0)) > 0 || (stageId === 1 && ((snapshot.records?.wins || 0) > 0 || (snapshot.records?.manualWins || 0) > 0));
+    const cleared = isCleared && hasWins;
     if (locked || !cleared) {
       this.showToast(I18n.t("ui.mustClearOnceForAuto"), "danger");
       return;
@@ -1057,6 +1065,10 @@ export class AppView {
 
     this.closeAutoBattleModal();
     if (!this.battle.startAutoBattle(stageId, rounds)) return;
+    try {
+      sessionStorage.setItem("koraku_active_battle", JSON.stringify({ stageId, isAuto: true, remainingRounds: rounds }));
+      sessionStorage.setItem("koraku_active_stage", String(stageId));
+    } catch (_) {}
     this.postState = null;
     this.battleArena?.classList.remove("is-settlement");
     this.resultOverlay.classList.remove("is-active");
@@ -1117,17 +1129,30 @@ export class AppView {
     const theoDps = this.store.getTheoreticalDPS();
     if ($("#records-theoretical-dps")) $("#records-theoretical-dps").textContent = theoDps;
 
-    // 2. Consumables & Morph Uses
+    // 2. Consumables, Momo & Morph Uses
     if ($("#records-hp-potions-used")) {
       const hpCount = records.consumablesUsed?.hpPotion || 0;
-      $("#records-hp-potions-used").textContent = `${hpCount} 瓶`;
+      const hpRestored = records.restoredTotal?.hp || 0;
+      $("#records-hp-potions-used").textContent = `${hpCount} 瓶 (+${hpRestored.toLocaleString("zh-TW")} HP)`;
     }
     if ($("#records-mp-potions-used")) {
       const mpCount = records.consumablesUsed?.mpPotion || 0;
-      $("#records-mp-potions-used").textContent = `${mpCount} 瓶`;
+      const mpRestored = records.restoredTotal?.mp || 0;
+      $("#records-mp-potions-used").textContent = `${mpCount} 瓶 (+${mpRestored.toLocaleString("zh-TW")} MP)`;
     }
     if ($("#records-morph-uses")) {
-      $("#records-morph-uses").textContent = `${records.morphUses || 0} 次`;
+      const morphAtt = records.morphStats?.attempts || records.morphUses || 0;
+      const morphSucc = records.morphStats?.successes || records.morphUses || 0;
+      const morphDmg = records.morphStats?.damage || 0;
+      const morphRate = morphAtt > 0 ? Math.round((morphSucc / morphAtt) * 100) : 0;
+      $("#records-morph-uses").textContent = `${morphSucc}/${morphAtt} 次 (${morphRate}%, ${morphDmg.toLocaleString("zh-TW")} 傷)`;
+    }
+    if ($("#records-momo-stats")) {
+      const momoAtt = records.momoStats?.attempts || 0;
+      const momoSucc = records.momoStats?.successes || 0;
+      const momoDmg = records.momoStats?.damage || 0;
+      const momoRate = momoAtt > 0 ? Math.round((momoSucc / momoAtt) * 100) : 0;
+      $("#records-momo-stats").textContent = `${momoSucc}/${momoAtt} 次 (${momoRate}%, ${momoDmg.toLocaleString("zh-TW")} 傷)`;
     }
 
     // 3. Read-Only Paperdoll
@@ -1321,13 +1346,43 @@ export class AppView {
           const outcomeText = b.won ? I18n.t("ui.battleWon") : I18n.t("ui.battleLost");
           const modeBadge = b.isAuto ? '<span class="battle-log-mode is-auto">⚡ 自動</span>' : '<span class="battle-log-mode is-manual">🎮 手動</span>';
           
-          const stageObj = STAGES.find(s => s.id === b.stageId);
-          const stageMult = stageObj?.rewardMultiplier ?? (b.stageId === 4 ? 8 : (b.stageId === 3 ? 2 : (b.stageId === 2 ? 1.25 : 1)));
-          const rewardCoins = b.rewardCoins !== undefined ? b.rewardCoins : (b.won ? Math.round(100 * stageMult) : Math.round(50 * stageMult));
-          const rewardXp = b.rewardXp !== undefined ? b.rewardXp : (b.won ? (stageObj?.reward?.xp ?? 100) : 0);
-          const rewardText = b.won 
-            ? `+${rewardCoins} ${I18n.t("ui.coins")} / +${rewardXp} EXP` 
-            : `+${rewardCoins} ${I18n.t("ui.coins")}`;
+          const rewardCoins = b.rewardCoins ?? (b.won ? 100 : 0);
+          const rewardXp = b.rewardXp ?? (b.won ? 100 : 0);
+          const rewardText = b.won || rewardCoins > 0 || rewardXp > 0
+            ? `+${rewardCoins.toLocaleString("zh-TW")} ${I18n.t("ui.coins")} / +${rewardXp.toLocaleString("zh-TW")} EXP` 
+            : `0 ${I18n.t("ui.coins")} / 0 EXP`;
+
+          const dateStr = b.timestamp ? new Date(b.timestamp).toLocaleString("zh-TW", {
+            year: "numeric", month: "2-digit", day: "2-digit",
+            hour: "2-digit", minute: "2-digit", second: "2-digit",
+            hour12: false
+          }) : "";
+
+          const watermelonText = b.watermelonSlices !== undefined && b.watermelonSlices !== null
+            ? (typeof b.watermelonSlices === "string" ? b.watermelonSlices : `${b.watermelonSlices}/3`)
+            : "-";
+
+          let qteText = "-";
+          if (b.qteTotal && b.qteTotal > 0) {
+            const qRate = Math.round(((b.qteHits || 0) / b.qteTotal) * 100);
+            qteText = `${b.qteHits || 0}/${b.qteTotal} (${qRate}%)`;
+          }
+
+          const hpUsed = b.hpPotionUsed || 0;
+          const mpUsed = b.mpPotionUsed || 0;
+          const hpRestored = b.hpRestored || 0;
+          const mpRestored = b.mpRestored || 0;
+          const potionText = (hpUsed > 0 || mpUsed > 0)
+            ? `HP: ${hpUsed}瓶 (+${hpRestored}) / MP: ${mpUsed}瓶 (+${mpRestored})`
+            : "-";
+
+          const momoText = (b.momoAttempts && b.momoAttempts > 0)
+            ? `${b.momoSuccesses || 0}/${b.momoAttempts} (${Math.round(((b.momoSuccesses || 0) / b.momoAttempts) * 100)}%, ${(b.momoDamage || 0).toLocaleString("zh-TW")}傷)`
+            : "-";
+
+          const morphText = (b.morphCount && b.morphCount > 0)
+            ? `${b.morphCount}次 (${(b.morphDamage || 0).toLocaleString("zh-TW")}傷)`
+            : "-";
 
           return `
             <div class="battle-log-card ${outcomeClass}">
@@ -1336,6 +1391,7 @@ export class AppView {
                 <span class="battle-log-stage">${locStage.name}</span>
                 ${modeBadge}
                 <span class="battle-log-outcome ${outcomeClass}">${outcomeText}</span>
+                ${dateStr ? `<span class="battle-log-time">${dateStr}</span>` : ""}
               </div>
               <div class="battle-log-body">
                 <div class="battle-log-stat">
@@ -1357,6 +1413,26 @@ export class AppView {
                 <div class="battle-log-stat">
                   <small>戰鬥耗時</small>
                   <span>${b.durationSec || 1} 秒</span>
+                </div>
+                <div class="battle-log-stat">
+                  <small>🍉 切西瓜</small>
+                  <strong style="color:#73d13d;">${watermelonText}</strong>
+                </div>
+                <div class="battle-log-stat">
+                  <small>🎯 QTE 反制</small>
+                  <span>${qteText}</span>
+                </div>
+                <div class="battle-log-stat">
+                  <small>🍶 靈露使用</small>
+                  <span>${potionText}</span>
+                </div>
+                <div class="battle-log-stat">
+                  <small>🐾 摸摸發動</small>
+                  <span>${momoText}</span>
+                </div>
+                <div class="battle-log-stat">
+                  <small>✦ 變拳逆轉</small>
+                  <span>${morphText}</span>
                 </div>
               </div>
             </div>
@@ -2422,8 +2498,8 @@ export class AppView {
           const status = index < state.left.index ? " is-done" : index === state.left.index ? " is-current" : "";
           const hint = wasdMap[id] || "";
           return '<span class="qte-arrow' + status + '" aria-label="' + (direction?.label || "") + '">' +
-            (direction?.glyph || "") +
-            (hint ? '<small class="qte-arrow-key-hint">' + hint + "</small>" : "") +
+            (getDirectionSvg(id) || direction?.glyph || "") +
+            (hint ? '<small class="qte-arrow-key-hint keyboard-only">' + hint + "</small>" : "") +
             "</span>";
         }).join("");
       }
@@ -2436,8 +2512,8 @@ export class AppView {
           const status = index < state.right.index ? " is-done" : index === state.right.index ? " is-current" : "";
           const hint = arrowMap[id] || "";
           return '<span class="qte-arrow' + status + '" aria-label="' + (direction?.label || "") + '">' +
-            (direction?.glyph || "") +
-            (hint ? '<small class="qte-arrow-key-hint">' + hint + "</small>" : "") +
+            (getDirectionSvg(id) || direction?.glyph || "") +
+            (hint ? '<small class="qte-arrow-key-hint keyboard-only">' + hint + "</small>" : "") +
             "</span>";
         }).join("");
       }
@@ -2493,7 +2569,7 @@ export class AppView {
     $("#qte-sequence").innerHTML = state.sequence.map((id, index) => {
       const direction = DIRECTIONS.find((item) => item.id === id);
       const status = index < state.index ? " is-done" : index === state.index ? " is-current" : "";
-      return '<span class="qte-arrow' + status + '" aria-label="' + direction.label + '">' + direction.glyph + "</span>";
+      return '<span class="qte-arrow' + status + '" aria-label="' + direction.label + '">' + (getDirectionSvg(id) || direction.glyph) + "</span>";
     }).join("");
     $("#qte-timer-fill").style.width = Math.max(0, Math.min(100, state.progress * 100)) + "%";
     $("#qte-time").textContent = (state.remainingMs / 1000).toFixed(2);
@@ -2505,13 +2581,15 @@ export class AppView {
     if (!hintEl || !expected) return;
     const chord = getDirectionChord(expected);
     if (chord) {
-      const glyphs = chord.map((id) => DIRECTIONS.find((item) => item.id === id)?.glyph);
-      hintEl.innerHTML = '斜向 <b>' + glyphs[0] + "</b><i>＋</i><b>" + glyphs[1] + "</b>";
+      const svg1 = getDirectionSvg(chord[0]) || chord[0];
+      const svg2 = getDirectionSvg(chord[1]) || chord[1];
+      hintEl.innerHTML = '斜向 <b>' + svg1 + "</b><i>＋</i><b>" + svg2 + "</b>";
       hintEl.classList.add("is-chord");
     } else {
       const direction = DIRECTIONS.find((item) => item.id === expected);
       const keyTip = mode === "WASD" ? (direction?.keys?.find((k) => ["w", "a", "s", "d", "q", "e", "z", "c"].includes(k))?.toUpperCase() || "") : "";
-      hintEl.innerHTML = '輸入 <b>' + (direction?.glyph || "—") + "</b>" + (keyTip ? " (" + keyTip + ")" : "");
+      const svg = getDirectionSvg(expected) || direction?.glyph || "—";
+      hintEl.innerHTML = '輸入 <b>' + svg + "</b>" + (keyTip ? '<span class="keyboard-only"> (' + keyTip + ")</span>" : "");
       hintEl.classList.remove("is-chord");
     }
   }
@@ -2522,12 +2600,14 @@ export class AppView {
     const hint = $("#qte-input-hint");
     if (!hint) return;
     if (chord) {
-      const glyphs = chord.map((id) => DIRECTIONS.find((item) => item.id === id)?.glyph);
-      hint.innerHTML = '斜向合成 <b>' + glyphs[0] + "</b><i>＋</i><b>" + glyphs[1] + "</b>";
+      const svg1 = getDirectionSvg(chord[0]) || chord[0];
+      const svg2 = getDirectionSvg(chord[1]) || chord[1];
+      hint.innerHTML = '斜向合成 <b>' + svg1 + "</b><i>＋</i><b>" + svg2 + "</b>";
       hint.classList.add("is-chord");
     } else {
       const direction = DIRECTIONS.find((item) => item.id === expected);
-      hint.innerHTML = '單方向輸入 <b>' + (direction?.glyph || "—") + "</b>";
+      const svg = getDirectionSvg(expected) || direction?.glyph || "—";
+      hint.innerHTML = '單方向輸入 <b>' + svg + "</b>";
       hint.classList.remove("is-chord");
     }
   }
@@ -2644,7 +2724,7 @@ export class AppView {
     this.setWatermelonTicker(state.scene === "watermelonAim");
     $("#watermelon-attempt").textContent = "第 " + (watermelon.attempts + 1) + " 刀 / " + watermelon.maxAttempts;
     $("#watermelon-successes").textContent = I18n.t("ui.watermelonScore") + " " + watermelon.successes;
-    const tolerance = state.tolerance ?? (0.13 * (0.5 ** watermelon.attempts));
+    const tolerance = state.tolerance ?? (0.13 * (0.825 ** watermelon.attempts));
     $("#watermelon-target").style.left = (state.target * 100) + "%";
     $("#watermelon-target").style.width = (tolerance * 2 * 100) + "%";
     const watermelonStatus = $("#watermelon-status");
@@ -2740,7 +2820,7 @@ export class AppView {
     if (successesEl) successesEl.textContent = I18n.t("ui.watermelonScore") + " " + watermelon.successes;
 
     const targetEl = $("#auto-watermelon-target");
-    const tolerance = state.tolerance ?? (0.13 * (0.5 ** (watermelon.attempts || 0)));
+    const tolerance = state.tolerance ?? (0.13 * (0.825 ** (watermelon.attempts || 0)));
     if (targetEl) {
       targetEl.style.left = ((state.target || 0.5) * 100) + "%";
       targetEl.style.width = (tolerance * 2 * 100) + "%";

@@ -97,6 +97,17 @@ export class BattleSystem {
     this.battleStartTime = Date.now();
     this.battleDamageDealt = 0;
     this.battleDamageTaken = 0;
+    this.battleHpPotionUsed = 0;
+    this.battleMpPotionUsed = 0;
+    this.battleHpRestored = 0;
+    this.battleMpRestored = 0;
+    this.battleMomoAttempts = 0;
+    this.battleMomoSuccesses = 0;
+    this.battleMomoDamage = 0;
+    this.battleMorphCount = 0;
+    this.battleMorphDamage = 0;
+    this.battleQteHits = 0;
+    this.battleQteTotal = 0;
     const stats = profile.playerStats;
     const hasDualHandSkill = Boolean(profile.profile?.skills?.dualHand > 0);
 
@@ -462,6 +473,7 @@ export class BattleSystem {
     this.clearReactionClocks();
     this.state.playerMp -= morphCost;
 
+    this.battleMorphCount = (this.battleMorphCount || 0) + 1;
     this.state.enemyWinningEmoji = null;
     this.state.morphUsed = true;
     this.state.morphActive = true;
@@ -534,9 +546,6 @@ export class BattleSystem {
         const singleWin = (leftResult === "win" && rightResult !== "win") || (rightResult === "win" && leftResult !== "win");
 
         if (bothWin) {
-          if (this.state.morphUsed) {
-            this.store.recordMorphUse();
-          }
           const leftEnemy = this.state.enemies.find((e) => e.id === "left" && e.alive);
           const rightEnemy = this.state.enemies.find((e) => e.id === "right" && e.alive);
           if (leftEnemy) this.applyDamageToEnemy(leftEnemy, null, false);
@@ -547,9 +556,6 @@ export class BattleSystem {
         }
 
         if (singleWin) {
-          if (this.state.morphUsed) {
-            this.store.recordMorphUse();
-          }
           const winEnemyId = leftResult === "win" ? "left" : "right";
           this.state.targetEnemyId = winEnemyId;
           const target = this.state.enemies.find((e) => e.id === winEnemyId && e.alive);
@@ -592,9 +598,6 @@ export class BattleSystem {
       const singleWin = (leftResult === "win" && rightResult !== "win") || (rightResult === "win" && leftResult !== "win");
 
       if (bothWin) {
-        if (this.state.morphUsed) {
-          this.store.recordMorphUse();
-        }
         const leftEnemy = this.state.enemies.find((e) => e.id === "left" && e.alive);
         const rightEnemy = this.state.enemies.find((e) => e.id === "right" && e.alive);
         if (leftEnemy) this.applyDamageToEnemy(leftEnemy, null, false);
@@ -605,9 +608,6 @@ export class BattleSystem {
       }
 
       if (singleWin) {
-        if (this.state.morphUsed) {
-          this.store.recordMorphUse();
-        }
         const winEnemyId = leftResult === "win" ? "left" : "right";
         this.state.targetEnemyId = winEnemyId;
         const target = this.state.enemies.find((e) => e.id === winEnemyId && e.alive);
@@ -636,9 +636,6 @@ export class BattleSystem {
       const singleWin = leftResult === "win" || rightResult === "win";
 
       if (bothWin) {
-        if (this.state.morphUsed) {
-          this.store.recordMorphUse();
-        }
         const doubleDamage = this.state.playerDamage * 2;
         const suffix = this.state.morphUsed ? "雙手變拳齊出，造成雙倍壓制傷害！" : "雙手同時獲勝，造成雙倍壓制傷害！";
         this.damageEnemy(suffix, false, doubleDamage);
@@ -646,9 +643,6 @@ export class BattleSystem {
       }
 
       if (singleWin) {
-        if (this.state.morphUsed) {
-          this.store.recordMorphUse();
-        }
         const suffix = this.state.morphUsed ? "變拳奏效，成功壓制！" : "漂亮地壓過了小樂的手勢！";
         this.damageEnemy(suffix, false);
         return;
@@ -666,9 +660,6 @@ export class BattleSystem {
       return;
     }
     if (result === "win") {
-      if (this.state.morphUsed) {
-        this.store.recordMorphUse();
-      }
       const suffix = this.state.morphUsed ? "變拳奏效，這一手由你拿下！" : "漂亮地壓過了小樂的手勢！";
       this.damageEnemy(suffix);
       return;
@@ -683,12 +674,14 @@ export class BattleSystem {
     if (momoLvl > 0) {
       const procChance = momoLvl * 0.10;
       if (this.random() < procChance) {
+        this.battleMomoAttempts = (this.battleMomoAttempts || 0) + 1;
         const aliveEnemies = this.state.enemies.filter((e) => e.alive);
         if (aliveEnemies.length > 0) {
           const target = aliveEnemies[Math.floor(this.random() * aliveEnemies.length)];
           const dodgeRate = this.state.stage?.momoDodgeRate || 0;
           const isDodged = this.random() < dodgeRate;
           if (isDodged) {
+            this.store.recordMomoProc({ success: false, damage: 0 });
             this.bus.emit("battle:effect", {
               type: "enemy-dodge",
               targetId: target.id,
@@ -705,6 +698,10 @@ export class BattleSystem {
           if (target.hp === 0) target.alive = false;
           this.state.enemyHp = this.state.enemies.reduce((acc, e) => acc + e.hp, 0);
           this.state.targetEnemyId = this.state.enemies.find((e) => e.alive)?.id || target.id;
+          this.battleMomoSuccesses = (this.battleMomoSuccesses || 0) + 1;
+          this.battleMomoDamage = (this.battleMomoDamage || 0) + momoDamage;
+          this.battleDamageDealt = (this.battleDamageDealt || 0) + momoDamage;
+          this.store.recordMomoProc({ success: true, damage: momoDamage });
           this.bus.emit("battle:effect", {
             type: "enemy-hit",
             amount: momoDamage,
@@ -783,6 +780,9 @@ export class BattleSystem {
     if (result.mode === "dual") {
       const leftSuccess = result.left?.success;
       const rightSuccess = result.right?.success;
+      this.battleQteTotal = (this.battleQteTotal || 0) + 2;
+      if (leftSuccess) this.battleQteHits = (this.battleQteHits || 0) + 1;
+      if (rightSuccess) this.battleQteHits = (this.battleQteHits || 0) + 1;
 
       if (leftSuccess && !this.state.dualQteResolved?.left) {
         this.handleDualQteSlotSuccess("left");
@@ -805,7 +805,9 @@ export class BattleSystem {
       return;
     }
 
+    this.battleQteTotal = (this.battleQteTotal || 0) + 1;
     if (result.success) {
+      this.battleQteHits = (this.battleQteHits || 0) + 1;
       this.store.recordQteAttempt(this.state?.stage?.id, true);
       const counter = getQteCounterNarration(this.state.selectedHand);
       this.state.selectedHand = counter.changedHand;
@@ -827,6 +829,10 @@ export class BattleSystem {
 
     target.hp = Math.max(0, target.hp - amount);
     this.battleDamageDealt = (this.battleDamageDealt || 0) + amount;
+    if (this.state.morphUsed) {
+      this.battleMorphDamage = (this.battleMorphDamage || 0) + amount;
+      this.store.recordMorphUse({ success: true, damage: amount });
+    }
     if (target.hp === 0) target.alive = false;
     this.state.enemyHp = this.state.enemies.reduce((acc, e) => acc + e.hp, 0);
     this.state.targetEnemyId = this.state.enemies.find((e) => e.alive)?.id || target.id;
@@ -1015,7 +1021,6 @@ export class BattleSystem {
     if (!this.store.consumeItem(itemId)) {
       return { ok: false, message: item.shortName + "已用完。" };
     }
-    this.store.recordPotionUse(item.resource === "hp" ? "hpPotion" : "mpPotion");
 
     const potionBoost = this.getAllEquipEffects("potion_boost").reduce((sum, eff) => sum + (eff.potionBoost || 0), 0);
     const restoreAmount = item.restore + potionBoost;
@@ -1023,6 +1028,15 @@ export class BattleSystem {
     const before = this.state[valueKey];
     this.state[valueKey] = Math.min(this.state[maxKey], before + restoreAmount);
     const restored = this.state[valueKey] - before;
+
+    if (item.resource === "hp") {
+      this.battleHpPotionUsed = (this.battleHpPotionUsed || 0) + 1;
+      this.battleHpRestored = (this.battleHpRestored || 0) + restored;
+    } else {
+      this.battleMpPotionUsed = (this.battleMpPotionUsed || 0) + 1;
+      this.battleMpRestored = (this.battleMpRestored || 0) + restored;
+    }
+    this.store.recordPotionUse(item.resource === "hp" ? "hpPotion" : "mpPotion", { restored });
     this.emitState();
     this.bus.emit("battle:effect", { type: "item", resource: item.resource, amount: restored });
     this.bus.emit("sound", { name: "heal" });
@@ -1051,7 +1065,18 @@ export class BattleSystem {
       isAuto: Boolean(this.autoBattle?.active),
       damageDealt: this.battleDamageDealt || 0,
       damageTaken: this.battleDamageTaken || 0,
-      durationSec
+      durationSec,
+      hpPotionUsed: this.battleHpPotionUsed || 0,
+      mpPotionUsed: this.battleMpPotionUsed || 0,
+      hpRestored: this.battleHpRestored || 0,
+      mpRestored: this.battleMpRestored || 0,
+      momoAttempts: this.battleMomoAttempts || 0,
+      momoSuccesses: this.battleMomoSuccesses || 0,
+      momoDamage: this.battleMomoDamage || 0,
+      morphCount: this.battleMorphCount || 0,
+      morphDamage: this.battleMorphDamage || 0,
+      qteHits: this.battleQteHits || null,
+      qteTotal: this.battleQteTotal || null
     });
     this.emitState();
     this.bus.emit("battle:ended", {

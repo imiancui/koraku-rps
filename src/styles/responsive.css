@@ -879,8 +879,20 @@
     font-size: 9px;
   }
 
+  .keyboard-only {
+    display: none !important;
+  }
+
+  .battle-log-header .battle-log-time {
+    font-size: 10px !important;
+    color: var(--paper-dim) !important;
+    opacity: 0.85;
+    margin-left: auto;
+  }
+
   .qte-panel {
-    padding: 23px 14px 16px;
+    padding: 18px 10px 14px;
+    width: min(96vw, 420px);
   }
 
   .qte-sequence {
@@ -888,33 +900,101 @@
   }
 
   .qte-pad {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    width: min(90vw, 290px);
+    margin: 12px auto 6px;
+  }
+
+  .qte-pad button {
+    height: 48px;
+    min-height: 48px;
+    font-size: 20px;
+    border-radius: 4px;
     display: grid;
+    place-items: center;
+    padding: 0;
+  }
+
+  .qte-pad button .qte-dir-svg {
+    width: 22px;
+    height: 22px;
   }
 
   .dual-qte-split-grid {
     grid-template-columns: 1fr;
-    gap: 8px;
-    margin: 8px 0;
+    gap: 6px;
+    margin: 6px 0;
   }
 
   .dual-qte-slot {
-    padding: 8px 6px;
+    padding: 6px 8px;
+  }
+
+  .dual-qte-slot .slot-header {
+    margin-bottom: 6px;
+    padding-bottom: 4px;
   }
 
   .dual-qte-slot .qte-sequence {
     gap: 4px;
-    margin: 6px 0;
+    margin: 4px 0;
   }
 
   .dual-qte-slot .qte-arrow {
-    width: 34px;
-    font-size: 19px;
+    width: 32px;
+    height: 32px;
+    font-size: 18px;
+  }
+
+  .dual-qte-slot .qte-arrow .qte-dir-svg {
+    width: 20px;
+    height: 20px;
   }
 
   .dual-qte-touch-controls {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex !important;
+    justify-content: space-between;
+    align-items: flex-end;
     gap: 8px;
+    width: 100%;
+    margin-top: 10px;
+    padding: 0 2px;
+  }
+
+  .dual-touch-col {
+    flex: 1;
+    max-width: 49%;
+  }
+
+  .dual-touch-col .dual-pad-label {
+    font-size: 10px;
+    color: var(--gold);
+    margin-bottom: 4px;
+  }
+
+  .is-dual-touch-pad {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 4px !important;
+    width: 100% !important;
+    margin: 0 !important;
+  }
+
+  .is-dual-touch-pad button {
+    height: 46px !important;
+    min-height: 46px !important;
+    font-size: 17px !important;
+    border-radius: 4px !important;
+    display: grid;
+    place-items: center;
+    padding: 0 !important;
+  }
+
+  .is-dual-touch-pad button .qte-dir-svg {
+    width: 20px;
+    height: 20px;
   }
 
   /* --------------------------------------------------------------------------

@@ -31,13 +31,15 @@ test("初始玩家帶一瓶 HP 藥水與 100/50 基礎資源", () => {
   assert.equal(state.playerStats.maxMp, 50);
 });
 
-test("勝敗分別給予 100 與 50 星砂", () => {
+test("勝敗獎勵計算：勝利全額，戰敗無傷為0，造成25%血條損失獲得10%獎勵", () => {
   const store = new GameStore(new EventBus(), new MemoryPersistence());
   const win = store.recordBattle(true, STAGES[0]);
-  const loss = store.recordBattle(false, STAGES[0]);
+  const lossNoDmg = store.recordBattle(false, STAGES[0], { damageDealt: 0 });
+  const loss25Pct = store.recordBattle(false, STAGES[0], { damageDealt: 250 });
   assert.equal(win.coins, 100);
-  assert.equal(loss.coins, 50);
-  assert.equal(store.snapshot().coins, 150);
+  assert.equal(lossNoDmg.coins, 0);
+  assert.equal(loss25Pct.coins, 5);
+  assert.equal(store.snapshot().coins, 105);
 });
 
 test("商店扣除 100 星砂並增加指定藥水", () => {

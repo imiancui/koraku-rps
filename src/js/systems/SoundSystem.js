@@ -34,17 +34,25 @@ export class SoundSystem {
     if (typeof window === "undefined") return;
     const unlock = () => {
       this.ensureContext();
-      if (this.context && this.context.state === "suspended") {
-        this.context.resume().catch(() => {});
+      if (this.context) {
+        if (this.context.state === "suspended") {
+          this.context.resume().catch(() => {});
+        }
+        try {
+          const buffer = this.context.createBuffer(1, 1, 22050);
+          const source = this.context.createBufferSource();
+          source.buffer = buffer;
+          source.connect(this.context.destination);
+          source.start(0);
+        } catch (_) {}
       }
       this.updateMusicState();
-      window.removeEventListener("pointerdown", unlock);
-      window.removeEventListener("keydown", unlock);
-      window.removeEventListener("touchstart", unlock);
+      if (this.context && this.context.state === "running") {
+        events.forEach((evt) => window.removeEventListener(evt, unlock));
+      }
     };
-    window.addEventListener("pointerdown", unlock, { passive: true });
-    window.addEventListener("keydown", unlock, { passive: true });
-    window.addEventListener("touchstart", unlock, { passive: true });
+    const events = ["pointerdown", "touchstart", "touchend", "click", "keydown"];
+    events.forEach((evt) => window.addEventListener(evt, unlock, { passive: true }));
   }
 
   ensureContext() {

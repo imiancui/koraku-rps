@@ -40,14 +40,14 @@ test("戰績與統計紀錄系統：累計獲得星砂、EXP、總場次、手�
     autoLosses: 0
   });
 
-  // Manual Loss Stage 1 (+50 coins, +40 xp)
-  store.recordBattle(false, { id: 1, lossCoins: 50, xpLoss: 40 }, { isAuto: false });
+  // Manual Loss Stage 1 (with 250 damage on 1000 HP -> 10% reward: +5 coins, +4 xp)
+  store.recordBattle(false, { id: 1, lossCoins: 50, xpLoss: 40, enemyHp: 1000 }, { isAuto: false, damageDealt: 250 });
   assert.equal(store.state.records.totalBattles, 2);
   assert.equal(store.state.records.losses, 1);
   assert.equal(store.state.records.manualLosses, 1);
   assert.equal(store.state.records.autoLosses, 0);
-  assert.equal(store.state.records.totalCoinsEarned, 150);
-  assert.equal(store.state.records.totalXpEarned, 160);
+  assert.equal(store.state.records.totalCoinsEarned, 105);
+  assert.equal(store.state.records.totalXpEarned, 124);
   assert.deepEqual(store.state.records.stageStats[1], {
     totalAttempts: 2,
     manualWins: 1,

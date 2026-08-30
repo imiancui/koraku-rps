@@ -11,12 +11,12 @@
     <meta property="og:title" content="狐樂・絆之勝負 — Endless Koraku">
     <meta property="og:description" content="與狐娘小樂進行猜拳、QTE 反制、升級與泳裝事件的日式 ACGN 網頁小遊戲。">
     <title>狐樂・絆之勝負</title>
-    <link rel="stylesheet" href="./src/styles/tokens.css?v=202608310542">
-    <link rel="stylesheet" href="./src/styles/base.css?v=202608310542">
-    <link rel="stylesheet" href="./src/styles/components.css?v=202608310542">
-    <link rel="stylesheet" href="./src/styles/screens.css?v=202608310542">
-    <link rel="stylesheet" href="./src/styles/animations.css?v=202608310542">
-    <link rel="stylesheet" href="./src/styles/responsive.css?v=202608310542">
+    <link rel="stylesheet" href="./src/styles/tokens.css?v=202608310615">
+    <link rel="stylesheet" href="./src/styles/base.css?v=202608310615">
+    <link rel="stylesheet" href="./src/styles/components.css?v=202608310615">
+    <link rel="stylesheet" href="./src/styles/screens.css?v=202608310615">
+    <link rel="stylesheet" href="./src/styles/animations.css?v=202608310615">
+    <link rel="stylesheet" href="./src/styles/responsive.css?v=202608310615">
   </head>
   <body>
     <div id="app" class="app-shell" data-screen="home">
@@ -353,7 +353,19 @@
               <span class="guide-number">三</span>
               <h3 data-i18n="ui.guideQteTitle">QTE 絕地反制</h3>
               <p data-i18n="ui.guideQteDesc">猜輸後在限定時間內依序輸入方向指令。反制成功可免除傷害並給予小樂反擊；失敗則承受重擊。</p>
-              <div class="guide-arrows">↖ ↑ ↗<br>←　→<br>↙ ↓ ↘</div>
+              <div class="guide-arrows">
+                <span><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 6v8h2V9.41l9.29 9.3 1.42-1.42L9.41 8H14V6H6z"/></svg></span>
+                <span><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 4l-7 7 1.41 1.41L11 7.83V20h2V7.83l4.59 4.58L19 11z"/></svg></span>
+                <span><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18 6h-8v2h4.59L5.29 17.29l1.42 1.42L16 9.41V14h2V6z"/></svg></span>
+                <br>
+                <span><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 12l7-7 1.41 1.41L7.83 11H20v2H7.83l4.58 4.59L11 19z"/></svg></span>
+                <span class="guide-arrow-spacer">✦</span>
+                <span><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 12l-7-7-1.41 1.41L16.17 11H4v2h12.17l-4.58 4.59L14 19z"/></svg></span>
+                <br>
+                <span><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 18h8v-2H9.41l9.3-9.29-1.42-1.42L8 14.59V10H6v8z"/></svg></span>
+                <span><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 20l7-7-1.41-1.41L13 16.17V4h-2v12.17l-4.59-4.58L5 13z"/></svg></span>
+                <span><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18 18v-8h-2v4.59L6.71 5.29 5.29 6.71 14.59 16H10v2h8z"/></svg></span>
+              </div>
             </article>
             <article class="guide-card">
               <span class="guide-number">四</span>
@@ -522,19 +534,23 @@
 
               <!-- Consumables & Skills Card -->
               <div class="records-consumables-card">
-                <h4 data-i18n="ui.consumablesUsed">消耗品使用累計</h4>
+                <h4 data-i18n="ui.consumablesUsed">消耗品與技能施展累計</h4>
                 <div class="records-consumables-items">
                   <div class="records-consumable-pill">
-                    <span>🔴</span>
-                    <strong id="records-hp-potions-used">0 瓶</strong>
+                    <span>🔴 緋露藥</span>
+                    <strong id="records-hp-potions-used">0 瓶 (+0 HP)</strong>
                   </div>
                   <div class="records-consumable-pill">
-                    <span>🔵</span>
-                    <strong id="records-mp-potions-used">0 瓶</strong>
+                    <span>🔵 蒼月露</span>
+                    <strong id="records-mp-potions-used">0 瓶 (+0 MP)</strong>
                   </div>
                   <div class="records-consumable-pill wide">
-                    <span data-i18n="ui.morphSuccesses">變拳逆轉成功</span>
-                    <strong id="records-morph-uses">0 次</strong>
+                    <span data-i18n="ui.morphSuccesses">✦ 變拳逆轉</span>
+                    <strong id="records-morph-uses">0/0 次 (0%, 0 傷)</strong>
+                  </div>
+                  <div class="records-consumable-pill wide">
+                    <span data-i18n="ui.momoStats">🐾 偷摸發動</span>
+                    <strong id="records-momo-stats">0/0 次 (0%, 0 傷)</strong>
                   </div>
                 </div>
               </div>
@@ -870,24 +886,24 @@
                 <div class="qte-timer"><i id="qte-timer-fill"></i></div>
                 <b id="qte-time">5.00</b>
                 <div id="qte-pad" class="qte-pad" aria-label="方向輸入">
-                  <button type="button" data-direction="upLeft">↖</button>
-                  <button type="button" data-direction="up">↑</button>
-                  <button type="button" data-direction="upRight">↗</button>
-                  <button type="button" data-direction="left">←</button>
+                  <button type="button" data-direction="upLeft" aria-label="左上"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 6v8h2V9.41l9.29 9.3 1.42-1.42L9.41 8H14V6H6z"/></svg></button>
+                  <button type="button" data-direction="up" aria-label="上"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 4l-7 7 1.41 1.41L11 7.83V20h2V7.83l4.59 4.58L19 11z"/></svg></button>
+                  <button type="button" data-direction="upRight" aria-label="右上"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18 6h-8v2h4.59L5.29 17.29l1.42 1.42L16 9.41V14h2V6z"/></svg></button>
+                  <button type="button" data-direction="left" aria-label="左"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 12l7-7 1.41 1.41L7.83 11H20v2H7.83l4.58 4.59L11 19z"/></svg></button>
                   <span></span>
-                  <button type="button" data-direction="right">→</button>
-                  <button type="button" data-direction="downLeft">↙</button>
-                  <button type="button" data-direction="down">↓</button>
-                  <button type="button" data-direction="downRight">↘</button>
+                  <button type="button" data-direction="right" aria-label="右"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 12l-7-7-1.41 1.41L16.17 11H4v2h12.17l-4.58 4.59L14 19z"/></svg></button>
+                  <button type="button" data-direction="downLeft" aria-label="左下"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 18h8v-2H9.41l9.3-9.29-1.42-1.42L8 14.59V10H6v8z"/></svg></button>
+                  <button type="button" data-direction="down" aria-label="下"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 20l7-7-1.41-1.41L13 16.17V4h-2v12.17l-4.59-4.58L5 13z"/></svg></button>
+                  <button type="button" data-direction="downRight" aria-label="右下"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18 18v-8h-2v4.59L6.71 5.29 5.29 6.71 14.59 16H10v2h8z"/></svg></button>
                 </div>
-                <small>支援方向鍵、WASD 及數字鍵盤</small>
+                <small class="keyboard-only">支援方向鍵、WASD 及數字鍵盤</small>
               </div>
 
               <!-- Dual QTE Panel (Stage 4 dual loss) -->
               <div id="qte-panel-dual" class="qte-panel qte-panel-dual" hidden>
                 <p class="eyebrow">DUAL COUNTER CHANCE</p>
                 <h2>雙生破綻・左右分屏反制</h2>
-                <p id="dual-qte-description">左側以 WASD 操作，右側以 方向鍵 操作（可自由選擇先解哪側）</p>
+                <p id="dual-qte-description"><span class="keyboard-only">左側以 WASD 操作，右側以 方向鍵 操作；</span>雙手可同時進行解題，點擊或鍵盤皆可</p>
                 <div class="qte-timer"><i id="dual-qte-timer-fill"></i></div>
                 <b id="dual-qte-time">7.00</b>
                 
@@ -895,7 +911,7 @@
                   <!-- Left Slot (WASD) -->
                   <div class="dual-qte-slot" id="dual-qte-slot-left">
                     <div class="slot-header">
-                      <span class="slot-badge wasd-badge">WASD 控制</span>
+                      <span class="slot-badge wasd-badge keyboard-only">WASD 控制</span>
                       <strong class="slot-target-name">白金小樂・左</strong>
                       <span class="slot-status-indicator" id="dual-qte-left-status">進行中</span>
                     </div>
@@ -906,7 +922,7 @@
                   <!-- Right Slot (Arrow keys) -->
                   <div class="dual-qte-slot" id="dual-qte-slot-right">
                     <div class="slot-header">
-                      <span class="slot-badge arrow-badge">方向鍵 控制</span>
+                      <span class="slot-badge arrow-badge keyboard-only">方向鍵 控制</span>
                       <strong class="slot-target-name">白金小樂・右</strong>
                       <span class="slot-status-indicator" id="dual-qte-right-status">進行中</span>
                     </div>
@@ -917,36 +933,36 @@
 
                 <div id="dual-qte-pad-wrap" class="dual-qte-touch-controls">
                   <div class="dual-touch-col">
-                    <small>左側 (WASD)</small>
+                    <small class="dual-pad-label">左側<span class="keyboard-only"> (WASD)</span></small>
                     <div class="qte-pad is-dual-touch-pad" id="touch-pad-left">
-                      <button type="button" data-dual-slot="left" data-direction="upLeft">↖</button>
-                      <button type="button" data-dual-slot="left" data-direction="up">↑</button>
-                      <button type="button" data-dual-slot="left" data-direction="upRight">↗</button>
-                      <button type="button" data-dual-slot="left" data-direction="left">←</button>
+                      <button type="button" data-dual-slot="left" data-direction="upLeft" aria-label="左上"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 6v8h2V9.41l9.29 9.3 1.42-1.42L9.41 8H14V6H6z"/></svg></button>
+                      <button type="button" data-dual-slot="left" data-direction="up" aria-label="上"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 4l-7 7 1.41 1.41L11 7.83V20h2V7.83l4.59 4.58L19 11z"/></svg></button>
+                      <button type="button" data-dual-slot="left" data-direction="upRight" aria-label="右上"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18 6h-8v2h4.59L5.29 17.29l1.42 1.42L16 9.41V14h2V6z"/></svg></button>
+                      <button type="button" data-dual-slot="left" data-direction="left" aria-label="左"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 12l7-7 1.41 1.41L7.83 11H20v2H7.83l4.58 4.59L11 19z"/></svg></button>
                       <span></span>
-                      <button type="button" data-dual-slot="left" data-direction="right">→</button>
-                      <button type="button" data-dual-slot="left" data-direction="downLeft">↙</button>
-                      <button type="button" data-dual-slot="left" data-direction="down">↓</button>
-                      <button type="button" data-dual-slot="left" data-direction="downRight">↘</button>
+                      <button type="button" data-dual-slot="left" data-direction="right" aria-label="右"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 12l-7-7-1.41 1.41L16.17 11H4v2h12.17l-4.58 4.59L14 19z"/></svg></button>
+                      <button type="button" data-dual-slot="left" data-direction="downLeft" aria-label="左下"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 18h8v-2H9.41l9.3-9.29-1.42-1.42L8 14.59V10H6v8z"/></svg></button>
+                      <button type="button" data-dual-slot="left" data-direction="down" aria-label="下"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 20l7-7-1.41-1.41L13 16.17V4h-2v12.17l-4.59-4.58L5 13z"/></svg></button>
+                      <button type="button" data-dual-slot="left" data-direction="downRight" aria-label="右下"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18 18v-8h-2v4.59L6.71 5.29 5.29 6.71 14.59 16H10v2h8z"/></svg></button>
                     </div>
                   </div>
                   <div class="dual-touch-col">
-                    <small>右側 (方向鍵)</small>
+                    <small class="dual-pad-label">右側<span class="keyboard-only"> (方向鍵)</span></small>
                     <div class="qte-pad is-dual-touch-pad" id="touch-pad-right">
-                      <button type="button" data-dual-slot="right" data-direction="upLeft">↖</button>
-                      <button type="button" data-dual-slot="right" data-direction="up">↑</button>
-                      <button type="button" data-dual-slot="right" data-direction="upRight">↗</button>
-                      <button type="button" data-dual-slot="right" data-direction="left">←</button>
+                      <button type="button" data-dual-slot="right" data-direction="upLeft" aria-label="左上"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 6v8h2V9.41l9.29 9.3 1.42-1.42L9.41 8H14V6H6z"/></svg></button>
+                      <button type="button" data-dual-slot="right" data-direction="up" aria-label="上"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 4l-7 7 1.41 1.41L11 7.83V20h2V7.83l4.59 4.58L19 11z"/></svg></button>
+                      <button type="button" data-dual-slot="right" data-direction="upRight" aria-label="右上"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18 6h-8v2h4.59L5.29 17.29l1.42 1.42L16 9.41V14h2V6z"/></svg></button>
+                      <button type="button" data-dual-slot="right" data-direction="left" aria-label="左"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 12l7-7 1.41 1.41L7.83 11H20v2H7.83l4.58 4.59L11 19z"/></svg></button>
                       <span></span>
-                      <button type="button" data-dual-slot="right" data-direction="right">→</button>
-                      <button type="button" data-dual-slot="right" data-direction="downLeft">↙</button>
-                      <button type="button" data-dual-slot="right" data-direction="down">↓</button>
-                      <button type="button" data-dual-slot="right" data-direction="downRight">↘</button>
+                      <button type="button" data-dual-slot="right" data-direction="right" aria-label="右"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 12l-7-7-1.41 1.41L16.17 11H4v2h12.17l-4.58 4.59L14 19z"/></svg></button>
+                      <button type="button" data-dual-slot="right" data-direction="downLeft" aria-label="左下"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 18h8v-2H9.41l9.3-9.29-1.42-1.42L8 14.59V10H6v8z"/></svg></button>
+                      <button type="button" data-dual-slot="right" data-direction="down" aria-label="下"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 20l7-7-1.41-1.41L13 16.17V4h-2v12.17l-4.59-4.58L5 13z"/></svg></button>
+                      <button type="button" data-dual-slot="right" data-direction="downRight" aria-label="右下"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18 18v-8h-2v4.59L6.71 5.29 5.29 6.71 14.59 16H10v2h8z"/></svg></button>
                     </div>
                   </div>
                 </div>
 
-                <small class="dual-qte-footer-hint">左手按 WASD、右手按方向鍵；完成單側立即扣減該側小樂 HP！</small>
+                <small class="dual-qte-footer-hint keyboard-only">左手按 WASD、右手按方向鍵；完成單側立即扣減該側小樂 HP！</small>
               </div>
             </section>
 
@@ -1295,6 +1311,6 @@
       <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
     </div>
-    <script src="./src/js/bundle.js?v=202608310542"></script>
+    <script src="./src/js/bundle.js?v=202608310615"></script>
   </body>
 </html>

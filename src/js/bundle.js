@@ -20,6 +20,21 @@ const HANDS = Object.freeze({
 
 const HAND_ORDER = Object.freeze(["rock", "paper", "scissors"]);
 
+const DIRECTION_SVGS = Object.freeze({
+  up: '<svg class="qte-dir-svg" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M12 4l-7 7 1.41 1.41L11 7.83V20h2V7.83l4.59 4.58L19 11z"/></svg>',
+  down: '<svg class="qte-dir-svg" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M12 20l7-7-1.41-1.41L13 16.17V4h-2v12.17l-4.59-4.58L5 13z"/></svg>',
+  left: '<svg class="qte-dir-svg" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M4 12l7-7 1.41 1.41L7.83 11H20v2H7.83l4.58 4.59L11 19z"/></svg>',
+  right: '<svg class="qte-dir-svg" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M20 12l-7-7-1.41 1.41L16.17 11H4v2h12.17l-4.58 4.59L14 19z"/></svg>',
+  upLeft: '<svg class="qte-dir-svg" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M6 6v8h2V9.41l9.29 9.3 1.42-1.42L9.41 8H14V6H6z"/></svg>',
+  upRight: '<svg class="qte-dir-svg" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M18 6h-8v2h4.59L5.29 17.29l1.42 1.42L16 9.41V14h2V6z"/></svg>',
+  downLeft: '<svg class="qte-dir-svg" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M6 18h8v-2H9.41l9.3-9.29-1.42-1.42L8 14.59V10H6v8z"/></svg>',
+  downRight: '<svg class="qte-dir-svg" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M18 18v-8h-2v4.59L6.71 5.29 5.29 6.71 14.59 16H10v2h8z"/></svg>'
+});
+
+function getDirectionSvg(id) {
+  return DIRECTION_SVGS[id] || "";
+}
+
 const DIRECTIONS = Object.freeze([
   { id: "upLeft", glyph: "↖", label: "左上", keys: ["q", "7"] },
   { id: "up", glyph: "↑", label: "上", keys: ["w", "arrowup", "8"] },
@@ -578,6 +593,7 @@ const DICTIONARY = {
       currentLevelXp: "冒険レベルと経験値",
       consumablesUsed: "消費アイテム使用累計",
       morphSuccesses: "後出し変化成功",
+      momoStats: "なでなで発動",
       watermelonCutAnalysis: "スイカ割り段階別命中分析",
       strikeStage: "第 {index} 刀",
       strikeTotal: "三刀合計",
@@ -605,6 +621,7 @@ const DICTIONARY = {
       currentLevelXp: "Level & EXP Progress",
       consumablesUsed: "Consumables Used",
       morphSuccesses: "Morph Reversals",
+      momoStats: "Momo Petting Procs",
       watermelonCutAnalysis: "Watermelon Slicing Stage Analysis",
       strikeStage: "Strike {index}",
       strikeTotal: "All 3 Strikes",
@@ -632,6 +649,7 @@ const DICTIONARY = {
       currentLevelXp: "冒险等级与经验",
       consumablesUsed: "消耗品使用累计",
       morphSuccesses: "变拳逆转成功",
+      momoStats: "偷摸发动",
       watermelonCutAnalysis: "切西瓜阶段命中分析",
       strikeStage: "第 {index} 刀",
       strikeTotal: "三刀加总",
@@ -659,6 +677,7 @@ const DICTIONARY = {
       currentLevelXp: "冒險等級與經驗",
       consumablesUsed: "消耗品使用累計",
       morphSuccesses: "變拳逆轉成功",
+      momoStats: "偷摸發動",
       watermelonCutAnalysis: "切西瓜階段命中分析",
       strikeStage: "第 {index} 刀",
       strikeTotal: "三刀加總",
@@ -3544,6 +3563,9 @@ const DEFAULT_SAVE = Object.freeze({
     watermelonSlices: 0,
     consumablesUsed: { hpPotion: 0, mpPotion: 0 },
     morphUses: 0,
+    momoStats: { attempts: 0, successes: 0, damage: 0 },
+    morphStats: { attempts: 0, successes: 0, damage: 0 },
+    restoredTotal: { hp: 0, mp: 0 },
     watermelonStageStats: {
       1: { attempts: 0, successes: 0 },
       2: { attempts: 0, successes: 0 },
@@ -3651,6 +3673,20 @@ function sanitizeSave(candidate) {
         mpPotion: candidate.records?.consumablesUsed?.mpPotion || 0
       },
       morphUses: candidate.records?.morphUses || 0,
+      momoStats: {
+        attempts: candidate.records?.momoStats?.attempts || 0,
+        successes: candidate.records?.momoStats?.successes || 0,
+        damage: candidate.records?.momoStats?.damage || 0
+      },
+      morphStats: {
+        attempts: candidate.records?.morphStats?.attempts || 0,
+        successes: candidate.records?.morphStats?.successes || 0,
+        damage: candidate.records?.morphStats?.damage || 0
+      },
+      restoredTotal: {
+        hp: candidate.records?.restoredTotal?.hp || 0,
+        mp: candidate.records?.restoredTotal?.mp || 0
+      },
       watermelonStageStats: {
         1: { attempts: candidate.records?.watermelonStageStats?.[1]?.attempts || 0, successes: candidate.records?.watermelonStageStats?.[1]?.successes || 0 },
         2: { attempts: candidate.records?.watermelonStageStats?.[2]?.attempts || 0, successes: candidate.records?.watermelonStageStats?.[2]?.successes || 0 },
@@ -3946,17 +3982,48 @@ class GameStore {
     return Math.round(dps * 10) / 10;
   }
 
-  recordPotionUse(type) {
+  recordPotionUse(type, options = {}) {
     if (!this.state.records.consumablesUsed) {
       this.state.records.consumablesUsed = { hpPotion: 0, mpPotion: 0 };
     }
     this.state.records.consumablesUsed[type] = (this.state.records.consumablesUsed[type] || 0) + 1;
+    if (!this.state.records.restoredTotal) {
+      this.state.records.restoredTotal = { hp: 0, mp: 0 };
+    }
+    if (options.restored) {
+      if (type === "hpPotion") this.state.records.restoredTotal.hp = (this.state.records.restoredTotal.hp || 0) + options.restored;
+      else if (type === "mpPotion") this.state.records.restoredTotal.mp = (this.state.records.restoredTotal.mp || 0) + options.restored;
+    }
     this.commit("record-potion");
   }
 
-  recordMorphUse() {
+  recordMorphUse(options = {}) {
     this.state.records.morphUses = (this.state.records.morphUses || 0) + 1;
+    if (!this.state.records.morphStats) {
+      this.state.records.morphStats = { attempts: 0, successes: 0, damage: 0 };
+    }
+    this.state.records.morphStats.attempts = (this.state.records.morphStats.attempts || 0) + 1;
+    if (options.success !== false) {
+      this.state.records.morphStats.successes = (this.state.records.morphStats.successes || 0) + 1;
+    }
+    if (options.damage) {
+      this.state.records.morphStats.damage = (this.state.records.morphStats.damage || 0) + options.damage;
+    }
     this.commit("record-morph");
+  }
+
+  recordMomoProc(options = {}) {
+    if (!this.state.records.momoStats) {
+      this.state.records.momoStats = { attempts: 0, successes: 0, damage: 0 };
+    }
+    this.state.records.momoStats.attempts = (this.state.records.momoStats.attempts || 0) + 1;
+    if (options.success) {
+      this.state.records.momoStats.successes = (this.state.records.momoStats.successes || 0) + 1;
+      if (options.damage) {
+        this.state.records.momoStats.damage = (this.state.records.momoStats.damage || 0) + options.damage;
+      }
+    }
+    this.commit("record-momo");
   }
 
   recordWatermelonStageCut(strikeIndex, success) {
@@ -3967,7 +4034,7 @@ class GameStore {
         3: { attempts: 0, successes: 0 }
       };
     }
-    const idx = Math.max(1, Math.min(3, Number(strikeIndex) || 1));
+    const idx = Number(strikeIndex) || 1;
     if (!this.state.records.watermelonStageStats[idx]) {
       this.state.records.watermelonStageStats[idx] = { attempts: 0, successes: 0 };
     }
@@ -3996,7 +4063,7 @@ class GameStore {
     return true;
   }
 
-  setWatermelonStock(value) {
+  setWatermelonStock(value = 0) {
     if (!this.state.records) this.state.records = {};
     this.state.records.watermelonStock = Math.min(999, Math.max(0, Number(value) || 0));
     this.commit("set-watermelon-stock");
@@ -4026,13 +4093,35 @@ class GameStore {
 
   recordBattle(won, stage, options = {}) {
     const isAuto = Boolean(options.isAuto);
-    let stageCoins = won ? (stage?.winCoins ?? BATTLE_RULES.winCoins) : (stage?.lossCoins ?? BATTLE_RULES.lossCoins);
-    const stageXp = won ? (stage?.xpWin ?? 0) : (stage?.xpLoss ?? 0);
+    const damageDealt = Math.max(0, Number(options.damageDealt) || 0);
+    const damageTaken = Math.max(0, Number(options.damageTaken) || 0);
+    const durationSec = Math.max(1, Number(options.durationSec) || 1);
 
-    // Badge of bond 20% coin boost
-    const badgeItem = EQUIPMENT_ITEMS[this.state.equipment.badge];
-    if (won && badgeItem?.effect?.type === "coin_boost") {
-      stageCoins = Math.round(stageCoins * (badgeItem.effect.coinMultiplier || 1.2));
+    let stageCoins = 0;
+    let stageXp = 0;
+
+    if (won) {
+      stageCoins = stage?.winCoins ?? BATTLE_RULES.winCoins;
+      stageXp = stage?.xpWin ?? 0;
+      // Badge of bond 20% coin boost
+      const badgeItem = EQUIPMENT_ITEMS[this.state.equipment.badge];
+      if (badgeItem?.effect?.type === "coin_boost") {
+        stageCoins = Math.round(stageCoins * (badgeItem.effect.coinMultiplier || 1.2));
+      }
+    } else {
+      // LOSS REWARDS:
+      // 未對小樂造成傷害時0獎勵，對小樂造成25%血條損失時才會有當前的獎勵的10%
+      const enemyMaxHp = stage?.enemyHp ?? 1000;
+      const hpLossRatio = enemyMaxHp > 0 ? (damageDealt / enemyMaxHp) : 0;
+      if (hpLossRatio >= 0.25) {
+        const baseLossCoins = stage?.lossCoins ?? BATTLE_RULES.lossCoins;
+        const baseLossXp = stage?.xpLoss ?? 0;
+        stageCoins = Math.floor(baseLossCoins * 0.10);
+        stageXp = Math.floor(baseLossXp * 0.10);
+      } else {
+        stageCoins = 0;
+        stageXp = 0;
+      }
     }
 
     const reward = {
@@ -4092,9 +4181,6 @@ class GameStore {
     }
 
     // Damage & combat log recording if provided in options
-    const damageDealt = Math.max(0, Number(options.damageDealt) || 0);
-    const damageTaken = Math.max(0, Number(options.damageTaken) || 0);
-    const durationSec = Math.max(1, Number(options.durationSec) || 1);
     const dps = Math.round((damageDealt / durationSec) * 10) / 10;
 
     if (!this.state.records.damageDealt) {
@@ -4131,7 +4217,19 @@ class GameStore {
       dps,
       rewardCoins: reward.coins,
       rewardXp: reward.xp,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      watermelonSlices: options.watermelonSlices ?? null,
+      qteHits: options.qteHits ?? null,
+      qteTotal: options.qteTotal ?? null,
+      hpPotionUsed: options.hpPotionUsed ?? 0,
+      mpPotionUsed: options.mpPotionUsed ?? 0,
+      hpRestored: options.hpRestored ?? 0,
+      mpRestored: options.mpRestored ?? 0,
+      momoAttempts: options.momoAttempts ?? 0,
+      momoSuccesses: options.momoSuccesses ?? 0,
+      momoDamage: options.momoDamage ?? 0,
+      morphCount: options.morphCount ?? 0,
+      morphDamage: options.morphDamage ?? 0
     });
     if (this.state.records.recentBattles.length > 100) {
       this.state.records.recentBattles.length = 100;
@@ -4354,6 +4452,17 @@ class BattleSystem {
     this.battleStartTime = Date.now();
     this.battleDamageDealt = 0;
     this.battleDamageTaken = 0;
+    this.battleHpPotionUsed = 0;
+    this.battleMpPotionUsed = 0;
+    this.battleHpRestored = 0;
+    this.battleMpRestored = 0;
+    this.battleMomoAttempts = 0;
+    this.battleMomoSuccesses = 0;
+    this.battleMomoDamage = 0;
+    this.battleMorphCount = 0;
+    this.battleMorphDamage = 0;
+    this.battleQteHits = 0;
+    this.battleQteTotal = 0;
     const stats = profile.playerStats;
     const hasDualHandSkill = Boolean(profile.profile?.skills?.dualHand > 0);
 
@@ -4719,6 +4828,7 @@ class BattleSystem {
     this.clearReactionClocks();
     this.state.playerMp -= morphCost;
 
+    this.battleMorphCount = (this.battleMorphCount || 0) + 1;
     this.state.enemyWinningEmoji = null;
     this.state.morphUsed = true;
     this.state.morphActive = true;
@@ -4791,9 +4901,6 @@ class BattleSystem {
         const singleWin = (leftResult === "win" && rightResult !== "win") || (rightResult === "win" && leftResult !== "win");
 
         if (bothWin) {
-          if (this.state.morphUsed) {
-            this.store.recordMorphUse();
-          }
           const leftEnemy = this.state.enemies.find((e) => e.id === "left" && e.alive);
           const rightEnemy = this.state.enemies.find((e) => e.id === "right" && e.alive);
           if (leftEnemy) this.applyDamageToEnemy(leftEnemy, null, false);
@@ -4804,9 +4911,6 @@ class BattleSystem {
         }
 
         if (singleWin) {
-          if (this.state.morphUsed) {
-            this.store.recordMorphUse();
-          }
           const winEnemyId = leftResult === "win" ? "left" : "right";
           this.state.targetEnemyId = winEnemyId;
           const target = this.state.enemies.find((e) => e.id === winEnemyId && e.alive);
@@ -4849,9 +4953,6 @@ class BattleSystem {
       const singleWin = (leftResult === "win" && rightResult !== "win") || (rightResult === "win" && leftResult !== "win");
 
       if (bothWin) {
-        if (this.state.morphUsed) {
-          this.store.recordMorphUse();
-        }
         const leftEnemy = this.state.enemies.find((e) => e.id === "left" && e.alive);
         const rightEnemy = this.state.enemies.find((e) => e.id === "right" && e.alive);
         if (leftEnemy) this.applyDamageToEnemy(leftEnemy, null, false);
@@ -4862,9 +4963,6 @@ class BattleSystem {
       }
 
       if (singleWin) {
-        if (this.state.morphUsed) {
-          this.store.recordMorphUse();
-        }
         const winEnemyId = leftResult === "win" ? "left" : "right";
         this.state.targetEnemyId = winEnemyId;
         const target = this.state.enemies.find((e) => e.id === winEnemyId && e.alive);
@@ -4893,9 +4991,6 @@ class BattleSystem {
       const singleWin = leftResult === "win" || rightResult === "win";
 
       if (bothWin) {
-        if (this.state.morphUsed) {
-          this.store.recordMorphUse();
-        }
         const doubleDamage = this.state.playerDamage * 2;
         const suffix = this.state.morphUsed ? "雙手變拳齊出，造成雙倍壓制傷害！" : "雙手同時獲勝，造成雙倍壓制傷害！";
         this.damageEnemy(suffix, false, doubleDamage);
@@ -4903,9 +4998,6 @@ class BattleSystem {
       }
 
       if (singleWin) {
-        if (this.state.morphUsed) {
-          this.store.recordMorphUse();
-        }
         const suffix = this.state.morphUsed ? "變拳奏效，成功壓制！" : "漂亮地壓過了小樂的手勢！";
         this.damageEnemy(suffix, false);
         return;
@@ -4923,9 +5015,6 @@ class BattleSystem {
       return;
     }
     if (result === "win") {
-      if (this.state.morphUsed) {
-        this.store.recordMorphUse();
-      }
       const suffix = this.state.morphUsed ? "變拳奏效，這一手由你拿下！" : "漂亮地壓過了小樂的手勢！";
       this.damageEnemy(suffix);
       return;
@@ -4940,12 +5029,14 @@ class BattleSystem {
     if (momoLvl > 0) {
       const procChance = momoLvl * 0.10;
       if (this.random() < procChance) {
+        this.battleMomoAttempts = (this.battleMomoAttempts || 0) + 1;
         const aliveEnemies = this.state.enemies.filter((e) => e.alive);
         if (aliveEnemies.length > 0) {
           const target = aliveEnemies[Math.floor(this.random() * aliveEnemies.length)];
           const dodgeRate = this.state.stage?.momoDodgeRate || 0;
           const isDodged = this.random() < dodgeRate;
           if (isDodged) {
+            this.store.recordMomoProc({ success: false, damage: 0 });
             this.bus.emit("battle:effect", {
               type: "enemy-dodge",
               targetId: target.id,
@@ -4962,6 +5053,10 @@ class BattleSystem {
           if (target.hp === 0) target.alive = false;
           this.state.enemyHp = this.state.enemies.reduce((acc, e) => acc + e.hp, 0);
           this.state.targetEnemyId = this.state.enemies.find((e) => e.alive)?.id || target.id;
+          this.battleMomoSuccesses = (this.battleMomoSuccesses || 0) + 1;
+          this.battleMomoDamage = (this.battleMomoDamage || 0) + momoDamage;
+          this.battleDamageDealt = (this.battleDamageDealt || 0) + momoDamage;
+          this.store.recordMomoProc({ success: true, damage: momoDamage });
           this.bus.emit("battle:effect", {
             type: "enemy-hit",
             amount: momoDamage,
@@ -5040,6 +5135,9 @@ class BattleSystem {
     if (result.mode === "dual") {
       const leftSuccess = result.left?.success;
       const rightSuccess = result.right?.success;
+      this.battleQteTotal = (this.battleQteTotal || 0) + 2;
+      if (leftSuccess) this.battleQteHits = (this.battleQteHits || 0) + 1;
+      if (rightSuccess) this.battleQteHits = (this.battleQteHits || 0) + 1;
 
       if (leftSuccess && !this.state.dualQteResolved?.left) {
         this.handleDualQteSlotSuccess("left");
@@ -5062,7 +5160,9 @@ class BattleSystem {
       return;
     }
 
+    this.battleQteTotal = (this.battleQteTotal || 0) + 1;
     if (result.success) {
+      this.battleQteHits = (this.battleQteHits || 0) + 1;
       this.store.recordQteAttempt(this.state?.stage?.id, true);
       const counter = getQteCounterNarration(this.state.selectedHand);
       this.state.selectedHand = counter.changedHand;
@@ -5084,6 +5184,10 @@ class BattleSystem {
 
     target.hp = Math.max(0, target.hp - amount);
     this.battleDamageDealt = (this.battleDamageDealt || 0) + amount;
+    if (this.state.morphUsed) {
+      this.battleMorphDamage = (this.battleMorphDamage || 0) + amount;
+      this.store.recordMorphUse({ success: true, damage: amount });
+    }
     if (target.hp === 0) target.alive = false;
     this.state.enemyHp = this.state.enemies.reduce((acc, e) => acc + e.hp, 0);
     this.state.targetEnemyId = this.state.enemies.find((e) => e.alive)?.id || target.id;
@@ -5272,7 +5376,6 @@ class BattleSystem {
     if (!this.store.consumeItem(itemId)) {
       return { ok: false, message: item.shortName + "已用完。" };
     }
-    this.store.recordPotionUse(item.resource === "hp" ? "hpPotion" : "mpPotion");
 
     const potionBoost = this.getAllEquipEffects("potion_boost").reduce((sum, eff) => sum + (eff.potionBoost || 0), 0);
     const restoreAmount = item.restore + potionBoost;
@@ -5280,6 +5383,15 @@ class BattleSystem {
     const before = this.state[valueKey];
     this.state[valueKey] = Math.min(this.state[maxKey], before + restoreAmount);
     const restored = this.state[valueKey] - before;
+
+    if (item.resource === "hp") {
+      this.battleHpPotionUsed = (this.battleHpPotionUsed || 0) + 1;
+      this.battleHpRestored = (this.battleHpRestored || 0) + restored;
+    } else {
+      this.battleMpPotionUsed = (this.battleMpPotionUsed || 0) + 1;
+      this.battleMpRestored = (this.battleMpRestored || 0) + restored;
+    }
+    this.store.recordPotionUse(item.resource === "hp" ? "hpPotion" : "mpPotion", { restored });
     this.emitState();
     this.bus.emit("battle:effect", { type: "item", resource: item.resource, amount: restored });
     this.bus.emit("sound", { name: "heal" });
@@ -5308,7 +5420,18 @@ class BattleSystem {
       isAuto: Boolean(this.autoBattle?.active),
       damageDealt: this.battleDamageDealt || 0,
       damageTaken: this.battleDamageTaken || 0,
-      durationSec
+      durationSec,
+      hpPotionUsed: this.battleHpPotionUsed || 0,
+      mpPotionUsed: this.battleMpPotionUsed || 0,
+      hpRestored: this.battleHpRestored || 0,
+      mpRestored: this.battleMpRestored || 0,
+      momoAttempts: this.battleMomoAttempts || 0,
+      momoSuccesses: this.battleMomoSuccesses || 0,
+      momoDamage: this.battleMomoDamage || 0,
+      morphCount: this.battleMorphCount || 0,
+      morphDamage: this.battleMorphDamage || 0,
+      qteHits: this.battleQteHits || null,
+      qteTotal: this.battleQteTotal || null
     });
     this.emitState();
     this.bus.emit("battle:ended", {
@@ -5493,8 +5616,8 @@ class PostBattleSystem {
       this.state.watermelon.attempts >= this.state.watermelon.maxAttempts
     ) return;
     const attempts = this.state.watermelon.attempts;
-    this.state.tolerance = 0.13 * (0.5 ** attempts);
-    this.state.strikeDuration = 1800 / (1.25 ** attempts);
+    this.state.tolerance = 0.13 * (0.825 ** attempts);
+    this.state.strikeDuration = 1800 / (1.175 ** attempts);
     this.state.scene = "watermelonAim";
     this.state.appearance = ASSETS.swimsuit;
     const minTarget = this.state.tolerance + 0.05;
@@ -5510,7 +5633,7 @@ class PostBattleSystem {
     if (this.state?.scene !== "watermelonAim") return;
     const marker = this.getMarkerPosition();
     const distance = Math.abs(marker - this.state.target);
-    const tolerance = this.state.tolerance ?? (0.13 * (0.5 ** this.state.watermelon.attempts));
+    const tolerance = this.state.tolerance ?? (0.13 * (0.825 ** this.state.watermelon.attempts));
     const success = distance <= tolerance;
     this.state.watermelon.attempts += 1;
     this.state.watermelon.lastCutSuccess = success;
@@ -5585,8 +5708,8 @@ class PostBattleSystem {
       };
     } else if (this.autoWatermelonState.scene === "watermelonResult") {
       const attempts = this.autoWatermelonState.watermelon.attempts;
-      this.autoWatermelonState.tolerance = 0.13 * (0.5 ** attempts);
-      this.autoWatermelonState.strikeDuration = 1800 / (1.25 ** attempts);
+      this.autoWatermelonState.tolerance = 0.13 * (0.825 ** attempts);
+      this.autoWatermelonState.strikeDuration = 1800 / (1.175 ** attempts);
       this.autoWatermelonState.scene = "watermelonAim";
       this.autoWatermelonState.appearance = ASSETS.swimsuit;
       this.autoWatermelonState.strikeStartedAt = performance.now();
@@ -5606,7 +5729,7 @@ class PostBattleSystem {
     if (!this.autoWatermelonState || this.autoWatermelonState.scene !== "watermelonAim") return;
     const marker = this.getAutoMarkerPosition();
     const distance = Math.abs(marker - this.autoWatermelonState.target);
-    const tolerance = this.autoWatermelonState.tolerance ?? (0.13 * (0.5 ** this.autoWatermelonState.watermelon.attempts));
+    const tolerance = this.autoWatermelonState.tolerance ?? (0.13 * (0.825 ** this.autoWatermelonState.watermelon.attempts));
     const success = distance <= tolerance;
     this.autoWatermelonState.watermelon.attempts += 1;
     this.autoWatermelonState.watermelon.lastCutSuccess = success;
@@ -5716,17 +5839,25 @@ class SoundSystem {
     if (typeof window === "undefined") return;
     const unlock = () => {
       this.ensureContext();
-      if (this.context && this.context.state === "suspended") {
-        this.context.resume().catch(() => {});
+      if (this.context) {
+        if (this.context.state === "suspended") {
+          this.context.resume().catch(() => {});
+        }
+        try {
+          const buffer = this.context.createBuffer(1, 1, 22050);
+          const source = this.context.createBufferSource();
+          source.buffer = buffer;
+          source.connect(this.context.destination);
+          source.start(0);
+        } catch (_) {}
       }
       this.updateMusicState();
-      window.removeEventListener("pointerdown", unlock);
-      window.removeEventListener("keydown", unlock);
-      window.removeEventListener("touchstart", unlock);
+      if (this.context && this.context.state === "running") {
+        events.forEach((evt) => window.removeEventListener(evt, unlock));
+      }
     };
-    window.addEventListener("pointerdown", unlock, { passive: true });
-    window.addEventListener("keydown", unlock, { passive: true });
-    window.addEventListener("touchstart", unlock, { passive: true });
+    const events = ["pointerdown", "touchstart", "touchend", "click", "keydown"];
+    events.forEach((evt) => window.addEventListener(evt, unlock, { passive: true }));
   }
 
   ensureContext() {
@@ -6511,19 +6642,22 @@ class AppView {
     } catch (_) {}
 
     let activeBattle = null;
+    let savedStageId = 1;
     try {
       const savedBattle = sessionStorage.getItem("koraku_active_battle");
       if (savedBattle) activeBattle = JSON.parse(savedBattle);
+      savedStageId = Number(sessionStorage.getItem("koraku_active_stage")) || activeBattle?.stageId || this.store.snapshot().records?.bestStage || 1;
     } catch (_) {}
 
-    if (targetScreen === "battle" && activeBattle?.stageId) {
+    if (targetScreen === "battle") {
+      const stageToRun = activeBattle?.stageId || savedStageId || 1;
       if (typeof window !== "undefined" && window.history) {
         window.history.replaceState({ screen: "battle" }, "", "#battle");
       }
-      if (activeBattle.isAuto) {
-        this.startAutoBattle(activeBattle.stageId, activeBattle.remainingRounds || 10);
+      if (activeBattle?.isAuto) {
+        this.startAutoBattle(stageToRun, activeBattle.remainingRounds || 10);
       } else {
-        this.startStage(activeBattle.stageId);
+        this.startStage(stageToRun);
       }
     } else {
       if (typeof window !== "undefined" && window.history) {
@@ -7385,6 +7519,10 @@ class AppView {
     this.postBattle?.closeAutoWatermelon?.();
     this.battle.stopAutoBattle();
     if (!this.battle.start(stageId)) return;
+    try {
+      sessionStorage.setItem("koraku_active_battle", JSON.stringify({ stageId, isAuto: false }));
+      sessionStorage.setItem("koraku_active_stage", String(stageId));
+    } catch (_) {}
     this.postState = null;
     this.battleArena?.classList.remove("is-settlement");
     this.resultOverlay.classList.remove("is-active");
@@ -7435,10 +7573,11 @@ class AppView {
     const snapshot = this.store.snapshot();
     const stage = STAGES.find((s) => s.id === stageId);
     if (!stage) return;
-    const locked = snapshot.profile.level < stage.requiredLevel;
+    const isCleared = (snapshot.records?.clearedStages || []).includes(stageId);
+    const locked = !isCleared && snapshot.profile.level < stage.requiredLevel;
     const stageStat = snapshot.records?.stageStats?.[stageId] || { totalAttempts: 0, manualWins: 0, manualLosses: 0, autoWins: 0, autoLosses: 0 };
-    const hasWins = ((stageStat.manualWins || 0) + (stageStat.autoWins || 0)) > 0 || (stageId === 1 && ((snapshot.records?.wins || 0) > 0 || (snapshot.records?.manualWins || 0) > 0));
-    const cleared = (snapshot.records?.clearedStages || []).includes(stageId) && hasWins;
+    const hasWins = isCleared || ((stageStat.manualWins || 0) + (stageStat.autoWins || 0)) > 0 || (stageId === 1 && ((snapshot.records?.wins || 0) > 0 || (snapshot.records?.manualWins || 0) > 0));
+    const cleared = isCleared && hasWins;
     if (locked || !cleared) {
       this.showToast(I18n.t("ui.mustClearOnceForAuto"), "danger");
       return;
@@ -7446,6 +7585,10 @@ class AppView {
 
     this.closeAutoBattleModal();
     if (!this.battle.startAutoBattle(stageId, rounds)) return;
+    try {
+      sessionStorage.setItem("koraku_active_battle", JSON.stringify({ stageId, isAuto: true, remainingRounds: rounds }));
+      sessionStorage.setItem("koraku_active_stage", String(stageId));
+    } catch (_) {}
     this.postState = null;
     this.battleArena?.classList.remove("is-settlement");
     this.resultOverlay.classList.remove("is-active");
@@ -7506,17 +7649,30 @@ class AppView {
     const theoDps = this.store.getTheoreticalDPS();
     if ($("#records-theoretical-dps")) $("#records-theoretical-dps").textContent = theoDps;
 
-    // 2. Consumables & Morph Uses
+    // 2. Consumables, Momo & Morph Uses
     if ($("#records-hp-potions-used")) {
       const hpCount = records.consumablesUsed?.hpPotion || 0;
-      $("#records-hp-potions-used").textContent = `${hpCount} 瓶`;
+      const hpRestored = records.restoredTotal?.hp || 0;
+      $("#records-hp-potions-used").textContent = `${hpCount} 瓶 (+${hpRestored.toLocaleString("zh-TW")} HP)`;
     }
     if ($("#records-mp-potions-used")) {
       const mpCount = records.consumablesUsed?.mpPotion || 0;
-      $("#records-mp-potions-used").textContent = `${mpCount} 瓶`;
+      const mpRestored = records.restoredTotal?.mp || 0;
+      $("#records-mp-potions-used").textContent = `${mpCount} 瓶 (+${mpRestored.toLocaleString("zh-TW")} MP)`;
     }
     if ($("#records-morph-uses")) {
-      $("#records-morph-uses").textContent = `${records.morphUses || 0} 次`;
+      const morphAtt = records.morphStats?.attempts || records.morphUses || 0;
+      const morphSucc = records.morphStats?.successes || records.morphUses || 0;
+      const morphDmg = records.morphStats?.damage || 0;
+      const morphRate = morphAtt > 0 ? Math.round((morphSucc / morphAtt) * 100) : 0;
+      $("#records-morph-uses").textContent = `${morphSucc}/${morphAtt} 次 (${morphRate}%, ${morphDmg.toLocaleString("zh-TW")} 傷)`;
+    }
+    if ($("#records-momo-stats")) {
+      const momoAtt = records.momoStats?.attempts || 0;
+      const momoSucc = records.momoStats?.successes || 0;
+      const momoDmg = records.momoStats?.damage || 0;
+      const momoRate = momoAtt > 0 ? Math.round((momoSucc / momoAtt) * 100) : 0;
+      $("#records-momo-stats").textContent = `${momoSucc}/${momoAtt} 次 (${momoRate}%, ${momoDmg.toLocaleString("zh-TW")} 傷)`;
     }
 
     // 3. Read-Only Paperdoll
@@ -7710,13 +7866,43 @@ class AppView {
           const outcomeText = b.won ? I18n.t("ui.battleWon") : I18n.t("ui.battleLost");
           const modeBadge = b.isAuto ? '<span class="battle-log-mode is-auto">⚡ 自動</span>' : '<span class="battle-log-mode is-manual">🎮 手動</span>';
           
-          const stageObj = STAGES.find(s => s.id === b.stageId);
-          const stageMult = stageObj?.rewardMultiplier ?? (b.stageId === 4 ? 8 : (b.stageId === 3 ? 2 : (b.stageId === 2 ? 1.25 : 1)));
-          const rewardCoins = b.rewardCoins !== undefined ? b.rewardCoins : (b.won ? Math.round(100 * stageMult) : Math.round(50 * stageMult));
-          const rewardXp = b.rewardXp !== undefined ? b.rewardXp : (b.won ? (stageObj?.reward?.xp ?? 100) : 0);
-          const rewardText = b.won 
-            ? `+${rewardCoins} ${I18n.t("ui.coins")} / +${rewardXp} EXP` 
-            : `+${rewardCoins} ${I18n.t("ui.coins")}`;
+          const rewardCoins = b.rewardCoins ?? (b.won ? 100 : 0);
+          const rewardXp = b.rewardXp ?? (b.won ? 100 : 0);
+          const rewardText = b.won || rewardCoins > 0 || rewardXp > 0
+            ? `+${rewardCoins.toLocaleString("zh-TW")} ${I18n.t("ui.coins")} / +${rewardXp.toLocaleString("zh-TW")} EXP` 
+            : `0 ${I18n.t("ui.coins")} / 0 EXP`;
+
+          const dateStr = b.timestamp ? new Date(b.timestamp).toLocaleString("zh-TW", {
+            year: "numeric", month: "2-digit", day: "2-digit",
+            hour: "2-digit", minute: "2-digit", second: "2-digit",
+            hour12: false
+          }) : "";
+
+          const watermelonText = b.watermelonSlices !== undefined && b.watermelonSlices !== null
+            ? (typeof b.watermelonSlices === "string" ? b.watermelonSlices : `${b.watermelonSlices}/3`)
+            : "-";
+
+          let qteText = "-";
+          if (b.qteTotal && b.qteTotal > 0) {
+            const qRate = Math.round(((b.qteHits || 0) / b.qteTotal) * 100);
+            qteText = `${b.qteHits || 0}/${b.qteTotal} (${qRate}%)`;
+          }
+
+          const hpUsed = b.hpPotionUsed || 0;
+          const mpUsed = b.mpPotionUsed || 0;
+          const hpRestored = b.hpRestored || 0;
+          const mpRestored = b.mpRestored || 0;
+          const potionText = (hpUsed > 0 || mpUsed > 0)
+            ? `HP: ${hpUsed}瓶 (+${hpRestored}) / MP: ${mpUsed}瓶 (+${mpRestored})`
+            : "-";
+
+          const momoText = (b.momoAttempts && b.momoAttempts > 0)
+            ? `${b.momoSuccesses || 0}/${b.momoAttempts} (${Math.round(((b.momoSuccesses || 0) / b.momoAttempts) * 100)}%, ${(b.momoDamage || 0).toLocaleString("zh-TW")}傷)`
+            : "-";
+
+          const morphText = (b.morphCount && b.morphCount > 0)
+            ? `${b.morphCount}次 (${(b.morphDamage || 0).toLocaleString("zh-TW")}傷)`
+            : "-";
 
           return `
             <div class="battle-log-card ${outcomeClass}">
@@ -7725,6 +7911,7 @@ class AppView {
                 <span class="battle-log-stage">${locStage.name}</span>
                 ${modeBadge}
                 <span class="battle-log-outcome ${outcomeClass}">${outcomeText}</span>
+                ${dateStr ? `<span class="battle-log-time">${dateStr}</span>` : ""}
               </div>
               <div class="battle-log-body">
                 <div class="battle-log-stat">
@@ -7746,6 +7933,26 @@ class AppView {
                 <div class="battle-log-stat">
                   <small>戰鬥耗時</small>
                   <span>${b.durationSec || 1} 秒</span>
+                </div>
+                <div class="battle-log-stat">
+                  <small>🍉 切西瓜</small>
+                  <strong style="color:#73d13d;">${watermelonText}</strong>
+                </div>
+                <div class="battle-log-stat">
+                  <small>🎯 QTE 反制</small>
+                  <span>${qteText}</span>
+                </div>
+                <div class="battle-log-stat">
+                  <small>🍶 靈露使用</small>
+                  <span>${potionText}</span>
+                </div>
+                <div class="battle-log-stat">
+                  <small>🐾 摸摸發動</small>
+                  <span>${momoText}</span>
+                </div>
+                <div class="battle-log-stat">
+                  <small>✦ 變拳逆轉</small>
+                  <span>${morphText}</span>
                 </div>
               </div>
             </div>
@@ -8811,8 +9018,8 @@ class AppView {
           const status = index < state.left.index ? " is-done" : index === state.left.index ? " is-current" : "";
           const hint = wasdMap[id] || "";
           return '<span class="qte-arrow' + status + '" aria-label="' + (direction?.label || "") + '">' +
-            (direction?.glyph || "") +
-            (hint ? '<small class="qte-arrow-key-hint">' + hint + "</small>" : "") +
+            (getDirectionSvg(id) || direction?.glyph || "") +
+            (hint ? '<small class="qte-arrow-key-hint keyboard-only">' + hint + "</small>" : "") +
             "</span>";
         }).join("");
       }
@@ -8825,8 +9032,8 @@ class AppView {
           const status = index < state.right.index ? " is-done" : index === state.right.index ? " is-current" : "";
           const hint = arrowMap[id] || "";
           return '<span class="qte-arrow' + status + '" aria-label="' + (direction?.label || "") + '">' +
-            (direction?.glyph || "") +
-            (hint ? '<small class="qte-arrow-key-hint">' + hint + "</small>" : "") +
+            (getDirectionSvg(id) || direction?.glyph || "") +
+            (hint ? '<small class="qte-arrow-key-hint keyboard-only">' + hint + "</small>" : "") +
             "</span>";
         }).join("");
       }
@@ -8882,7 +9089,7 @@ class AppView {
     $("#qte-sequence").innerHTML = state.sequence.map((id, index) => {
       const direction = DIRECTIONS.find((item) => item.id === id);
       const status = index < state.index ? " is-done" : index === state.index ? " is-current" : "";
-      return '<span class="qte-arrow' + status + '" aria-label="' + direction.label + '">' + direction.glyph + "</span>";
+      return '<span class="qte-arrow' + status + '" aria-label="' + direction.label + '">' + (getDirectionSvg(id) || direction.glyph) + "</span>";
     }).join("");
     $("#qte-timer-fill").style.width = Math.max(0, Math.min(100, state.progress * 100)) + "%";
     $("#qte-time").textContent = (state.remainingMs / 1000).toFixed(2);
@@ -8894,13 +9101,15 @@ class AppView {
     if (!hintEl || !expected) return;
     const chord = getDirectionChord(expected);
     if (chord) {
-      const glyphs = chord.map((id) => DIRECTIONS.find((item) => item.id === id)?.glyph);
-      hintEl.innerHTML = '斜向 <b>' + glyphs[0] + "</b><i>＋</i><b>" + glyphs[1] + "</b>";
+      const svg1 = getDirectionSvg(chord[0]) || chord[0];
+      const svg2 = getDirectionSvg(chord[1]) || chord[1];
+      hintEl.innerHTML = '斜向 <b>' + svg1 + "</b><i>＋</i><b>" + svg2 + "</b>";
       hintEl.classList.add("is-chord");
     } else {
       const direction = DIRECTIONS.find((item) => item.id === expected);
       const keyTip = mode === "WASD" ? (direction?.keys?.find((k) => ["w", "a", "s", "d", "q", "e", "z", "c"].includes(k))?.toUpperCase() || "") : "";
-      hintEl.innerHTML = '輸入 <b>' + (direction?.glyph || "—") + "</b>" + (keyTip ? " (" + keyTip + ")" : "");
+      const svg = getDirectionSvg(expected) || direction?.glyph || "—";
+      hintEl.innerHTML = '輸入 <b>' + svg + "</b>" + (keyTip ? '<span class="keyboard-only"> (' + keyTip + ")</span>" : "");
       hintEl.classList.remove("is-chord");
     }
   }
@@ -8911,12 +9120,14 @@ class AppView {
     const hint = $("#qte-input-hint");
     if (!hint) return;
     if (chord) {
-      const glyphs = chord.map((id) => DIRECTIONS.find((item) => item.id === id)?.glyph);
-      hint.innerHTML = '斜向合成 <b>' + glyphs[0] + "</b><i>＋</i><b>" + glyphs[1] + "</b>";
+      const svg1 = getDirectionSvg(chord[0]) || chord[0];
+      const svg2 = getDirectionSvg(chord[1]) || chord[1];
+      hint.innerHTML = '斜向合成 <b>' + svg1 + "</b><i>＋</i><b>" + svg2 + "</b>";
       hint.classList.add("is-chord");
     } else {
       const direction = DIRECTIONS.find((item) => item.id === expected);
-      hint.innerHTML = '單方向輸入 <b>' + (direction?.glyph || "—") + "</b>";
+      const svg = getDirectionSvg(expected) || direction?.glyph || "—";
+      hint.innerHTML = '單方向輸入 <b>' + svg + "</b>";
       hint.classList.remove("is-chord");
     }
   }
@@ -9033,7 +9244,7 @@ class AppView {
     this.setWatermelonTicker(state.scene === "watermelonAim");
     $("#watermelon-attempt").textContent = "第 " + (watermelon.attempts + 1) + " 刀 / " + watermelon.maxAttempts;
     $("#watermelon-successes").textContent = I18n.t("ui.watermelonScore") + " " + watermelon.successes;
-    const tolerance = state.tolerance ?? (0.13 * (0.5 ** watermelon.attempts));
+    const tolerance = state.tolerance ?? (0.13 * (0.825 ** watermelon.attempts));
     $("#watermelon-target").style.left = (state.target * 100) + "%";
     $("#watermelon-target").style.width = (tolerance * 2 * 100) + "%";
     const watermelonStatus = $("#watermelon-status");
@@ -9129,7 +9340,7 @@ class AppView {
     if (successesEl) successesEl.textContent = I18n.t("ui.watermelonScore") + " " + watermelon.successes;
 
     const targetEl = $("#auto-watermelon-target");
-    const tolerance = state.tolerance ?? (0.13 * (0.5 ** (watermelon.attempts || 0)));
+    const tolerance = state.tolerance ?? (0.13 * (0.825 ** (watermelon.attempts || 0)));
     if (targetEl) {
       targetEl.style.left = ((state.target || 0.5) * 100) + "%";
       targetEl.style.width = (tolerance * 2 * 100) + "%";

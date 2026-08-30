@@ -88,8 +88,8 @@ export class PostBattleSystem {
       this.state.watermelon.attempts >= this.state.watermelon.maxAttempts
     ) return;
     const attempts = this.state.watermelon.attempts;
-    this.state.tolerance = 0.13 * (0.5 ** attempts);
-    this.state.strikeDuration = 1800 / (1.25 ** attempts);
+    this.state.tolerance = 0.13 * (0.825 ** attempts);
+    this.state.strikeDuration = 1800 / (1.175 ** attempts);
     this.state.scene = "watermelonAim";
     this.state.appearance = ASSETS.swimsuit;
     const minTarget = this.state.tolerance + 0.05;
@@ -105,7 +105,7 @@ export class PostBattleSystem {
     if (this.state?.scene !== "watermelonAim") return;
     const marker = this.getMarkerPosition();
     const distance = Math.abs(marker - this.state.target);
-    const tolerance = this.state.tolerance ?? (0.13 * (0.5 ** this.state.watermelon.attempts));
+    const tolerance = this.state.tolerance ?? (0.13 * (0.825 ** this.state.watermelon.attempts));
     const success = distance <= tolerance;
     this.state.watermelon.attempts += 1;
     this.state.watermelon.lastCutSuccess = success;
@@ -180,8 +180,8 @@ export class PostBattleSystem {
       };
     } else if (this.autoWatermelonState.scene === "watermelonResult") {
       const attempts = this.autoWatermelonState.watermelon.attempts;
-      this.autoWatermelonState.tolerance = 0.13 * (0.5 ** attempts);
-      this.autoWatermelonState.strikeDuration = 1800 / (1.25 ** attempts);
+      this.autoWatermelonState.tolerance = 0.13 * (0.825 ** attempts);
+      this.autoWatermelonState.strikeDuration = 1800 / (1.175 ** attempts);
       this.autoWatermelonState.scene = "watermelonAim";
       this.autoWatermelonState.appearance = ASSETS.swimsuit;
       this.autoWatermelonState.strikeStartedAt = performance.now();
@@ -201,7 +201,7 @@ export class PostBattleSystem {
     if (!this.autoWatermelonState || this.autoWatermelonState.scene !== "watermelonAim") return;
     const marker = this.getAutoMarkerPosition();
     const distance = Math.abs(marker - this.autoWatermelonState.target);
-    const tolerance = this.autoWatermelonState.tolerance ?? (0.13 * (0.5 ** this.autoWatermelonState.watermelon.attempts));
+    const tolerance = this.autoWatermelonState.tolerance ?? (0.13 * (0.825 ** this.autoWatermelonState.watermelon.attempts));
     const success = distance <= tolerance;
     this.autoWatermelonState.watermelon.attempts += 1;
     this.autoWatermelonState.watermelon.lastCutSuccess = success;

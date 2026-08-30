@@ -45,6 +45,9 @@ const DEFAULT_SAVE = Object.freeze({
     watermelonSlices: 0,
     consumablesUsed: { hpPotion: 0, mpPotion: 0 },
     morphUses: 0,
+    momoStats: { attempts: 0, successes: 0, damage: 0 },
+    morphStats: { attempts: 0, successes: 0, damage: 0 },
+    restoredTotal: { hp: 0, mp: 0 },
     watermelonStageStats: {
       1: { attempts: 0, successes: 0 },
       2: { attempts: 0, successes: 0 },
@@ -152,6 +155,20 @@ function sanitizeSave(candidate) {
         mpPotion: candidate.records?.consumablesUsed?.mpPotion || 0
       },
       morphUses: candidate.records?.morphUses || 0,
+      momoStats: {
+        attempts: candidate.records?.momoStats?.attempts || 0,
+        successes: candidate.records?.momoStats?.successes || 0,
+        damage: candidate.records?.momoStats?.damage || 0
+      },
+      morphStats: {
+        attempts: candidate.records?.morphStats?.attempts || 0,
+        successes: candidate.records?.morphStats?.successes || 0,
+        damage: candidate.records?.morphStats?.damage || 0
+      },
+      restoredTotal: {
+        hp: candidate.records?.restoredTotal?.hp || 0,
+        mp: candidate.records?.restoredTotal?.mp || 0
+      },
       watermelonStageStats: {
         1: { attempts: candidate.records?.watermelonStageStats?.[1]?.attempts || 0, successes: candidate.records?.watermelonStageStats?.[1]?.successes || 0 },
         2: { attempts: candidate.records?.watermelonStageStats?.[2]?.attempts || 0, successes: candidate.records?.watermelonStageStats?.[2]?.successes || 0 },
@@ -447,17 +464,48 @@ export class GameStore {
     return Math.round(dps * 10) / 10;
   }
 
-  recordPotionUse(type) {
+  recordPotionUse(type, options = {}) {
     if (!this.state.records.consumablesUsed) {
       this.state.records.consumablesUsed = { hpPotion: 0, mpPotion: 0 };
     }
     this.state.records.consumablesUsed[type] = (this.state.records.consumablesUsed[type] || 0) + 1;
+    if (!this.state.records.restoredTotal) {
+      this.state.records.restoredTotal = { hp: 0, mp: 0 };
+    }
+    if (options.restored) {
+      if (type === "hpPotion") this.state.records.restoredTotal.hp = (this.state.records.restoredTotal.hp || 0) + options.restored;
+      else if (type === "mpPotion") this.state.records.restoredTotal.mp = (this.state.records.restoredTotal.mp || 0) + options.restored;
+    }
     this.commit("record-potion");
   }
 
-  recordMorphUse() {
+  recordMorphUse(options = {}) {
     this.state.records.morphUses = (this.state.records.morphUses || 0) + 1;
+    if (!this.state.records.morphStats) {
+      this.state.records.morphStats = { attempts: 0, successes: 0, damage: 0 };
+    }
+    this.state.records.morphStats.attempts = (this.state.records.morphStats.attempts || 0) + 1;
+    if (options.success !== false) {
+      this.state.records.morphStats.successes = (this.state.records.morphStats.successes || 0) + 1;
+    }
+    if (options.damage) {
+      this.state.records.morphStats.damage = (this.state.records.morphStats.damage || 0) + options.damage;
+    }
     this.commit("record-morph");
+  }
+
+  recordMomoProc(options = {}) {
+    if (!this.state.records.momoStats) {
+      this.state.records.momoStats = { attempts: 0, successes: 0, damage: 0 };
+    }
+    this.state.records.momoStats.attempts = (this.state.records.momoStats.attempts || 0) + 1;
+    if (options.success) {
+      this.state.records.momoStats.successes = (this.state.records.momoStats.successes || 0) + 1;
+      if (options.damage) {
+        this.state.records.momoStats.damage = (this.state.records.momoStats.damage || 0) + options.damage;
+      }
+    }
+    this.commit("record-momo");
   }
 
   recordWatermelonStageCut(strikeIndex, success) {
@@ -468,7 +516,7 @@ export class GameStore {
         3: { attempts: 0, successes: 0 }
       };
     }
-    const idx = Math.max(1, Math.min(3, Number(strikeIndex) || 1));
+    const idx = Number(strikeIndex) || 1;
     if (!this.state.records.watermelonStageStats[idx]) {
       this.state.records.watermelonStageStats[idx] = { attempts: 0, successes: 0 };
     }
@@ -497,7 +545,7 @@ export class GameStore {
     return true;
   }
 
-  setWatermelonStock(value) {
+  setWatermelonStock(value = 0) {
     if (!this.state.records) this.state.records = {};
     this.state.records.watermelonStock = Math.min(999, Math.max(0, Number(value) || 0));
     this.commit("set-watermelon-stock");
@@ -527,13 +575,35 @@ export class GameStore {
 
   recordBattle(won, stage, options = {}) {
     const isAuto = Boolean(options.isAuto);
-    let stageCoins = won ? (stage?.winCoins ?? BATTLE_RULES.winCoins) : (stage?.lossCoins ?? BATTLE_RULES.lossCoins);
-    const stageXp = won ? (stage?.xpWin ?? 0) : (stage?.xpLoss ?? 0);
+    const damageDealt = Math.max(0, Number(options.damageDealt) || 0);
+    const damageTaken = Math.max(0, Number(options.damageTaken) || 0);
+    const durationSec = Math.max(1, Number(options.durationSec) || 1);
 
-    // Badge of bond 20% coin boost
-    const badgeItem = EQUIPMENT_ITEMS[this.state.equipment.badge];
-    if (won && badgeItem?.effect?.type === "coin_boost") {
-      stageCoins = Math.round(stageCoins * (badgeItem.effect.coinMultiplier || 1.2));
+    let stageCoins = 0;
+    let stageXp = 0;
+
+    if (won) {
+      stageCoins = stage?.winCoins ?? BATTLE_RULES.winCoins;
+      stageXp = stage?.xpWin ?? 0;
+      // Badge of bond 20% coin boost
+      const badgeItem = EQUIPMENT_ITEMS[this.state.equipment.badge];
+      if (badgeItem?.effect?.type === "coin_boost") {
+        stageCoins = Math.round(stageCoins * (badgeItem.effect.coinMultiplier || 1.2));
+      }
+    } else {
+      // LOSS REWARDS:
+      // 未對小樂造成傷害時0獎勵，對小樂造成25%血條損失時才會有當前的獎勵的10%
+      const enemyMaxHp = stage?.enemyHp ?? 1000;
+      const hpLossRatio = enemyMaxHp > 0 ? (damageDealt / enemyMaxHp) : 0;
+      if (hpLossRatio >= 0.25) {
+        const baseLossCoins = stage?.lossCoins ?? BATTLE_RULES.lossCoins;
+        const baseLossXp = stage?.xpLoss ?? 0;
+        stageCoins = Math.floor(baseLossCoins * 0.10);
+        stageXp = Math.floor(baseLossXp * 0.10);
+      } else {
+        stageCoins = 0;
+        stageXp = 0;
+      }
     }
 
     const reward = {
@@ -593,9 +663,6 @@ export class GameStore {
     }
 
     // Damage & combat log recording if provided in options
-    const damageDealt = Math.max(0, Number(options.damageDealt) || 0);
-    const damageTaken = Math.max(0, Number(options.damageTaken) || 0);
-    const durationSec = Math.max(1, Number(options.durationSec) || 1);
     const dps = Math.round((damageDealt / durationSec) * 10) / 10;
 
     if (!this.state.records.damageDealt) {
@@ -632,7 +699,19 @@ export class GameStore {
       dps,
       rewardCoins: reward.coins,
       rewardXp: reward.xp,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      watermelonSlices: options.watermelonSlices ?? null,
+      qteHits: options.qteHits ?? null,
+      qteTotal: options.qteTotal ?? null,
+      hpPotionUsed: options.hpPotionUsed ?? 0,
+      mpPotionUsed: options.mpPotionUsed ?? 0,
+      hpRestored: options.hpRestored ?? 0,
+      mpRestored: options.mpRestored ?? 0,
+      momoAttempts: options.momoAttempts ?? 0,
+      momoSuccesses: options.momoSuccesses ?? 0,
+      momoDamage: options.momoDamage ?? 0,
+      morphCount: options.morphCount ?? 0,
+      morphDamage: options.morphDamage ?? 0
     });
     if (this.state.records.recentBattles.length > 100) {
       this.state.records.recentBattles.length = 100;

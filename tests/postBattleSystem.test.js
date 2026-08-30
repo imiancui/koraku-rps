@@ -36,7 +36,7 @@ test("切西瓜固定三刀，成功每刀結算 100 額外經驗", () => {
   assert.deepEqual(granted, [300]);
 });
 
-test("切西瓜不管成功失敗，下一刀綠色安全範圍縮小 50%、速度增加 25%", () => {
+test("切西瓜不管成功失敗，下一刀綠色安全範圍縮小 17.5%、速度增加 17.5%", () => {
   const store = {
     grantExperience(amount) {
       return { xp: amount, levelsGained: 0 };
@@ -60,8 +60,8 @@ test("切西瓜不管成功失敗，下一刀綠色安全範圍縮小 50%、速�
 
   // Knife 2: after 1 attempt (even if missed)
   system.startWatermelon();
-  assert.equal(system.state.tolerance, 0.065, "第 2 刀安全範圍仍應縮小 50% (0.065)");
-  assert.equal(system.state.strikeDuration, 1440, "第 2 刀速度仍應增加 25% (週期 1440ms)");
+  assert.ok(Math.abs(system.state.tolerance - 0.10725) < 0.0001, "第 2 刀安全範圍縮小 17.5% (0.10725)");
+  assert.ok(Math.abs(system.state.strikeDuration - (1800 / 1.175)) < 0.1, "第 2 刀速度增加 17.5% (週期 ~1531.9ms)");
 
   // Force hit on knife 2
   system.state.target = 0.5;
@@ -72,8 +72,8 @@ test("切西瓜不管成功失敗，下一刀綠色安全範圍縮小 50%、速�
 
   // Knife 3: after 2 attempts
   system.startWatermelon();
-  assert.equal(system.state.tolerance, 0.0325, "第 3 刀安全範圍再次縮小 50% (0.0325)");
-  assert.equal(system.state.strikeDuration, 1152, "第 3 刀速度再次增加 25% (週期 1152ms)");
+  assert.ok(Math.abs(system.state.tolerance - (0.13 * (0.825 ** 2))) < 0.0001, "第 3 刀安全範圍再次縮小 17.5%");
+  assert.ok(Math.abs(system.state.strikeDuration - (1800 / (1.175 ** 2))) < 0.1, "第 3 刀速度再次增加 17.5%");
 });
 
 test("戰勝結算畫面初始為 victory 階段，請小樂穿泳裝後切換至 swimsuit 階段", () => {

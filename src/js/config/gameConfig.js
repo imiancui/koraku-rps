@@ -14,6 +14,21 @@ export const HANDS = Object.freeze({
 
 export const HAND_ORDER = Object.freeze(["rock", "paper", "scissors"]);
 
+export const DIRECTION_SVGS = Object.freeze({
+  up: '<svg class="qte-dir-svg" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M12 4l-7 7 1.41 1.41L11 7.83V20h2V7.83l4.59 4.58L19 11z"/></svg>',
+  down: '<svg class="qte-dir-svg" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M12 20l7-7-1.41-1.41L13 16.17V4h-2v12.17l-4.59-4.58L5 13z"/></svg>',
+  left: '<svg class="qte-dir-svg" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M4 12l7-7 1.41 1.41L7.83 11H20v2H7.83l4.58 4.59L11 19z"/></svg>',
+  right: '<svg class="qte-dir-svg" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M20 12l-7-7-1.41 1.41L16.17 11H4v2h12.17l-4.58 4.59L14 19z"/></svg>',
+  upLeft: '<svg class="qte-dir-svg" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M6 6v8h2V9.41l9.29 9.3 1.42-1.42L9.41 8H14V6H6z"/></svg>',
+  upRight: '<svg class="qte-dir-svg" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M18 6h-8v2h4.59L5.29 17.29l1.42 1.42L16 9.41V14h2V6z"/></svg>',
+  downLeft: '<svg class="qte-dir-svg" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M6 18h8v-2H9.41l9.3-9.29-1.42-1.42L8 14.59V10H6v8z"/></svg>',
+  downRight: '<svg class="qte-dir-svg" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M18 18v-8h-2v4.59L6.71 5.29 5.29 6.71 14.59 16H10v2h8z"/></svg>'
+});
+
+export function getDirectionSvg(id) {
+  return DIRECTION_SVGS[id] || "";
+}
+
 export const DIRECTIONS = Object.freeze([
   { id: "upLeft", glyph: "↖", label: "左上", keys: ["q", "7"] },
   { id: "up", glyph: "↑", label: "上", keys: ["w", "arrowup", "8"] },
