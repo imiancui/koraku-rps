@@ -537,11 +537,11 @@
   .battle-character-wrap {
     left: 50% !important;
     right: auto !important;
-    top: 96px !important;
+    top: 72px !important;
     bottom: auto !important;
     transform: translateX(-50%) !important;
     width: min(85vw, 360px) !important;
-    height: 60vh !important;
+    height: 62vh !important;
     opacity: 0.96 !important;
     z-index: 10;
     pointer-events: none;
@@ -643,13 +643,13 @@
     display: none;
   }
 
-  /* Left Cluster: Items & Player HP/MP docked bottom-left */
+  /* Left Cluster: Items & Player HP/MP docked bottom-left (wider for comfortable HUD) */
   .battle-left-cluster {
     display: flex;
     flex-direction: column;
     left: 8px;
     bottom: 58px;
-    width: min(44vw, 155px);
+    width: min(48vw, 185px);
     gap: 5px;
     z-index: 30;
   }
@@ -667,20 +667,20 @@
     margin-top: 1px;
   }
 
-  /* Right Hand Selector: Docked bottom-right for easy right-thumb tapping */
+  /* Right Hand Selector: position:fixed to break out of parent container and dock at viewport bottom-right */
   .hand-selector {
-    position: absolute !important;
+    position: fixed !important;
     right: 8px !important;
     left: auto !important;
-    bottom: 58px !important;
-    width: min(48vw, 175px) !important;
+    bottom: calc(58px + env(safe-area-inset-bottom, 0px)) !important;
+    width: min(44vw, 165px) !important;
     top: auto !important;
     z-index: 35 !important;
   }
 
   .auto-battle-hud-banner {
     right: 8px;
-    bottom: 180px;
+    bottom: 220px;
     padding: 5px 12px;
     gap: 8px;
     font-size: 10px;
@@ -1064,14 +1064,14 @@
   .battle-left-cluster {
     left: 6px;
     bottom: 58px;
-    width: min(44vw, 145px);
+    width: min(46vw, 170px);
     gap: 4px;
   }
 
   .hand-selector {
     right: 6px !important;
-    bottom: 58px !important;
-    width: min(48vw, 165px) !important;
+    bottom: calc(58px + env(safe-area-inset-bottom, 0px)) !important;
+    width: min(42vw, 155px) !important;
   }
 
   .floating-autobattle-watermelon {
