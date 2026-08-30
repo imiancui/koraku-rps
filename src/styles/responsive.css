@@ -226,7 +226,7 @@
   }
 
   /* --------------------------------------------------------------------------
-     Home Screen: Fluid Scroll, Safe Area, Subtle Character Background
+     Home Screen: Vibrant Visible Character on Right & Readable Menu on Left
      -------------------------------------------------------------------------- */
   .home-screen {
     overflow-y: auto !important;
@@ -266,7 +266,9 @@
   .menu-command {
     min-height: 44px;
     padding: 6px 12px;
-    background: linear-gradient(90deg, rgba(16, 19, 29, 0.94), rgba(16, 19, 29, 0.72));
+    max-width: min(84vw, 330px);
+    background: linear-gradient(90deg, rgba(14, 16, 25, 0.92) 0%, rgba(14, 16, 25, 0.65) 75%, rgba(14, 16, 25, 0.25) 100%);
+    backdrop-filter: blur(4px);
   }
 
   .menu-command b {
@@ -288,6 +290,7 @@
     padding-bottom: 0;
     margin-top: 14px;
     margin-bottom: 8px;
+    max-width: min(84vw, 330px);
   }
 
   .home-admin-actions {
@@ -303,13 +306,15 @@
 
   .home-character {
     position: absolute;
-    z-index: 1 !important;
-    right: -25%;
+    z-index: 5 !important;
+    right: -12vw;
     bottom: 0;
-    width: 100%;
-    height: 75%;
-    opacity: 0.38 !important;
+    width: 82vw;
+    max-width: 380px;
+    height: 75vh;
+    opacity: 0.95 !important;
     pointer-events: none;
+    filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.65));
   }
 
   .home-character img {
@@ -501,6 +506,7 @@
 
   .gallery-lightbox-title-wrap {
     gap: 8px;
+    flex-wrap: wrap;
   }
 
   .gallery-lightbox-header h3 {
@@ -526,27 +532,28 @@
   }
 
   /* --------------------------------------------------------------------------
-     Battle Screen Mobile HUD
+     Battle Screen Mobile: Centered Kohaku, Bottom-Right Hand Selector, Lowered Oracle
      -------------------------------------------------------------------------- */
   .battle-character-wrap {
-    left: 56%;
-    bottom: 95px;
-    width: 90%;
-    height: 75%;
-    opacity: 0.76;
+    left: 50% !important;
+    right: auto !important;
+    top: 96px !important;
+    bottom: auto !important;
+    transform: translateX(-50%) !important;
+    width: min(85vw, 360px) !important;
+    height: 60vh !important;
+    opacity: 0.96 !important;
+    z-index: 10;
+    pointer-events: none;
+    filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.65));
   }
 
   .battle-character-wrap.is-dual-stage {
-    left: 50%;
-    width: 98%;
+    width: 96vw !important;
   }
 
   .battle-character-wrap::after {
-    content: "";
-    position: absolute;
-    z-index: 3;
-    inset: 0;
-    background: linear-gradient(90deg, rgba(10, 12, 19, 0.38), transparent 54%);
+    display: none;
   }
 
   .chapter-tag {
@@ -560,9 +567,9 @@
   }
 
   .enemy-hud {
-    top: 54px;
-    left: 14px;
-    width: calc(100% - 28px);
+    top: 48px;
+    left: 12px;
+    width: calc(100% - 24px);
     transform: none;
   }
 
@@ -574,15 +581,17 @@
     padding: 6px 10px;
   }
 
+  /* Round oracle placed cleanly below Boss HP bar */
   .round-oracle {
     left: 50%;
-    top: 50px;
-    width: min(84vw, 310px);
-    padding: 5px 10px 6px;
+    top: 86px;
+    width: min(84vw, 270px);
+    padding: 3px 8px 4px;
     border: 1px solid rgba(216, 182, 106, 0.35);
     background: linear-gradient(135deg, rgba(11, 13, 21, 0.94), rgba(25, 28, 41, 0.88));
     box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
     transform: translateX(-50%);
+    z-index: 25;
   }
 
   .round-label {
@@ -596,77 +605,82 @@
   }
 
   .hand-versus {
-    grid-template-columns: 1fr 22px 1fr;
-    gap: 0 4px;
+    grid-template-columns: 1fr 20px 1fr;
+    gap: 0 3px;
   }
 
   .hand-versus strong {
-    font-size: 20px;
+    font-size: 17px;
   }
 
   .hand-versus b {
-    font-size: 10px;
+    font-size: 9.5px;
   }
 
   .hand-versus small {
-    font-size: 6.5px;
+    font-size: 6px;
   }
 
   .hand-versus > span {
-    width: 18px;
-    height: 18px;
-    font-size: 8.5px;
+    width: 16px;
+    height: 16px;
+    font-size: 8px;
   }
 
   .round-countdown {
     right: -8px;
     top: 50%;
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     transform: translateY(-50%);
   }
 
   .round-countdown b {
-    font-size: 13px;
+    font-size: 12px;
   }
 
   .round-countdown small {
     display: none;
   }
 
+  /* Left Cluster: Items & Player HP/MP docked bottom-left */
   .battle-left-cluster {
     display: flex;
     flex-direction: column;
-    left: 10px;
-    bottom: 72px;
-    width: min(52vw, 220px);
-    gap: 6px;
-    z-index: 35;
-  }
-
-  .hand-selector {
-    order: 1;
-    position: static;
-    top: auto;
-    width: 100%;
+    left: 8px;
+    bottom: 58px;
+    width: min(44vw, 155px);
+    gap: 5px;
+    z-index: 30;
   }
 
   .quick-slots {
-    order: 2;
+    order: 1;
     position: static;
     width: 100%;
   }
 
   .player-hud {
-    order: 3;
+    order: 2;
     position: static;
     width: 100%;
-    margin-top: 2px;
+    margin-top: 1px;
+  }
+
+  /* Right Hand Selector: Docked bottom-right for easy right-thumb tapping */
+  .hand-selector {
+    position: absolute !important;
+    right: 8px !important;
+    left: auto !important;
+    bottom: 58px !important;
+    width: min(48vw, 175px) !important;
+    top: auto !important;
+    z-index: 35 !important;
   }
 
   .auto-battle-hud-banner {
-    right: 10px;
-    bottom: 72px;
+    right: 8px;
+    bottom: 180px;
     padding: 5px 12px;
     gap: 8px;
     font-size: 10px;
@@ -679,24 +693,28 @@
   }
 
   .hand-selector-group {
+    display: flex;
+    flex-direction: column;
     gap: 4px;
+    width: 100%;
   }
 
   .hand-button {
-    grid-template-columns: 28px 1fr auto;
-    min-height: 32px;
+    grid-template-columns: 26px 1fr;
+    min-height: 34px;
     padding: 2px 8px;
-    background: rgba(12, 15, 23, 0.9);
+    background: rgba(12, 15, 23, 0.94);
+    border: 1px solid rgba(216, 182, 106, 0.3);
     border-radius: 4px;
   }
 
   .hand-button i {
-    font-size: 18px;
+    font-size: 17px;
   }
 
   .hand-button span {
-    font-size: 11px;
-    letter-spacing: 0.1em;
+    font-size: 11.5px;
+    letter-spacing: 0.08em;
   }
 
   .hand-button kbd {
@@ -715,7 +733,7 @@
   }
 
   .dual-hand-sub-column .hand-button {
-    grid-template-columns: 20px 1fr;
+    grid-template-columns: 18px 1fr;
     min-height: 28px;
     padding: 2px 4px;
   }
@@ -739,12 +757,12 @@
   }
 
   .slot-grid {
-    grid-template: repeat(3, 38px) / repeat(3, 38px);
+    grid-template: repeat(3, 36px) / repeat(3, 36px);
   }
 
   .soul-slot {
-    width: 34px;
-    height: 34px;
+    width: 32px;
+    height: 32px;
     margin: 1px;
   }
 
@@ -753,7 +771,7 @@
   }
 
   .slot-content i {
-    font-size: 14px;
+    font-size: 13px;
   }
 
   .slot-content small {
@@ -770,63 +788,63 @@
 
   .hud-name {
     gap: 6px;
-    margin-bottom: 3px;
+    margin-bottom: 2px;
   }
 
   .hud-name > span {
-    width: 24px;
-    height: 24px;
-    font-size: 11px;
+    width: 22px;
+    height: 22px;
+    font-size: 10px;
   }
 
   .hud-name b {
-    font-size: 12px;
+    font-size: 11.5px;
   }
 
   .hud-name em {
-    font-size: 9px;
+    font-size: 8.5px;
   }
 
   .ornate-meter {
-    height: 11px;
+    height: 10px;
     padding: 2px;
   }
 
   .resource-row {
-    gap: 6px;
-    margin-top: 3px;
+    gap: 5px;
+    margin-top: 2px;
   }
 
   .resource-row > span {
-    font-size: 8px;
+    font-size: 7.5px;
   }
 
   .resource-row em {
-    font-size: 9px;
+    font-size: 8.5px;
   }
 
   .avg-dialogue {
     bottom: 6px;
     width: calc(100% - 16px);
-    min-height: 50px;
-    max-height: 62px;
-    padding: 13px 18px 5px 52px;
+    min-height: 48px;
+    max-height: 58px;
+    padding: 12px 16px 4px 48px;
     border: 1px solid rgba(216, 182, 106, 0.45);
   }
 
   .avg-dialogue > span {
     left: 10px;
     top: -9px;
-    min-width: 44px;
-    padding: 2px 8px;
-    font-size: 10px;
+    min-width: 42px;
+    padding: 2px 7px;
+    font-size: 9.5px;
     letter-spacing: 0.08em;
   }
 
   .avg-dialogue p {
     font-size: 11px;
     line-height: 1.35;
-    max-height: 34px;
+    max-height: 32px;
     overflow: hidden;
   }
 
@@ -875,49 +893,52 @@
   }
 
   /* --------------------------------------------------------------------------
-     Mobile Settlement & Watermelon: Non-overlapping, Scrollable Fluid Flow
+     Mobile Settlement & Watermelon: Kohaku Prominent at Top & Bottom-Docked Scrollable Card
      -------------------------------------------------------------------------- */
   .battle-arena.is-settlement .battle-character-wrap,
   .battle-arena:has(.result-overlay.is-active) .battle-character-wrap {
-    z-index: 1 !important;
-    opacity: 0.22 !important;
+    position: absolute !important;
+    top: 10px !important;
+    bottom: auto !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    width: min(82vw, 320px) !important;
+    height: 48vh !important;
+    opacity: 1 !important;
+    z-index: 20 !important;
     pointer-events: none !important;
-    bottom: 0 !important;
-    right: -10% !important;
-    left: auto !important;
-    width: 100% !important;
-    height: 80% !important;
-    filter: blur(1px);
-    transform: none !important;
+    filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.75)) !important;
   }
 
   .result-overlay {
     position: absolute;
     inset: 0;
-    z-index: 60;
+    z-index: 30;
     display: flex !important;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    padding: max(14px, env(safe-area-inset-top)) 10px calc(max(28px, env(safe-area-inset-bottom)) + 24px) !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+    padding: 0 10px calc(max(24px, env(safe-area-inset-bottom)) + 20px) !important;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch;
     pointer-events: auto !important;
-    background: rgba(8, 10, 16, 0.82);
-    backdrop-filter: blur(8px);
+    background: linear-gradient(180deg, transparent 0%, rgba(8, 10, 16, 0.6) 28%, rgba(8, 10, 16, 0.92) 50%, rgba(8, 10, 16, 0.98) 100%) !important;
   }
 
   .result-card {
     position: relative;
-    z-index: 10;
+    z-index: 35;
     width: 100% !important;
-    max-width: 480px;
-    margin: auto 0 !important;
-    padding: 18px 14px !important;
+    max-width: 440px;
+    margin-top: 38vh !important;
+    margin-bottom: 16px !important;
+    padding: 16px 14px !important;
     border-radius: 8px;
-    border: 1px solid rgba(216, 182, 106, 0.4);
-    background: linear-gradient(180deg, rgba(16, 20, 31, 0.97), rgba(9, 11, 18, 0.98)) !important;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.85);
+    border: 1px solid rgba(216, 182, 106, 0.45);
+    background: rgba(13, 16, 26, 0.94) !important;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.9);
   }
 
   .result-card h2 {
@@ -1027,6 +1048,7 @@
   .menu-command {
     min-height: 42px;
     padding: 5px 10px;
+    max-width: min(86vw, 310px);
   }
 
   .menu-command b {
@@ -1034,16 +1056,22 @@
   }
 
   .round-oracle {
-    top: 46px;
-    width: min(86vw, 280px);
+    top: 84px;
+    width: min(86vw, 260px);
     padding: 3px 6px 4px;
   }
 
   .battle-left-cluster {
     left: 6px;
-    bottom: 66px;
-    width: min(50vw, 175px);
+    bottom: 58px;
+    width: min(44vw, 145px);
     gap: 4px;
+  }
+
+  .hand-selector {
+    right: 6px !important;
+    bottom: 58px !important;
+    width: min(48vw, 165px) !important;
   }
 
   .floating-autobattle-watermelon {

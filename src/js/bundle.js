@@ -7889,6 +7889,13 @@ class AppView {
     const unlocked = this.isGalleryItemUnlocked(currentItem, this.store.snapshot());
     if (!unlocked) return;
 
+    // 手機/觸控螢幕：直接開啟新分頁瀏覽原圖，以便使用者進行雙指放大 (Pinch to Zoom) 與長按下載
+    const isMobile = window.innerWidth <= 780 || ("ontouchstart" in window) || (navigator.maxTouchPoints > 0);
+    if (isMobile) {
+      window.open(currentItem.src, "_blank");
+      return;
+    }
+
     const locItem = I18n.getLocalizedGalleryItem(currentItem);
     const dimsMap = {
       "koraku_default": "4000 × 4000 px (Original)",
@@ -7900,12 +7907,16 @@ class AppView {
     const titleEl = $("#gallery-lightbox-title");
     const dimsEl = $("#gallery-lightbox-dims");
     const imgEl = $("#gallery-lightbox-image");
+    const tabLinkEl = $("#btn-open-image-tab");
 
     if (titleEl) titleEl.textContent = locItem.name;
     if (dimsEl) dimsEl.textContent = dimsMap[currentItem.id] || "Ultra HD";
     if (imgEl) {
       imgEl.src = currentItem.src;
       imgEl.alt = locItem.name;
+    }
+    if (tabLinkEl) {
+      tabLinkEl.href = currentItem.src;
     }
 
     if (this.galleryLightboxModal) {
