@@ -11,12 +11,12 @@
     <meta property="og:title" content="狐樂・絆之勝負 — Endless Koraku">
     <meta property="og:description" content="與狐娘小樂進行猜拳、QTE 反制、升級與泳裝事件的日式 ACGN 網頁小遊戲。">
     <title>狐樂・絆之勝負</title>
-    <link rel="stylesheet" href="./src/styles/tokens.css?v=202608310315">
-    <link rel="stylesheet" href="./src/styles/base.css?v=202608310315">
-    <link rel="stylesheet" href="./src/styles/components.css?v=202608310315">
-    <link rel="stylesheet" href="./src/styles/screens.css?v=202608310315">
-    <link rel="stylesheet" href="./src/styles/animations.css?v=202608310315">
-    <link rel="stylesheet" href="./src/styles/responsive.css?v=202608310315">
+    <link rel="stylesheet" href="./src/styles/tokens.css?v=202608310325">
+    <link rel="stylesheet" href="./src/styles/base.css?v=202608310325">
+    <link rel="stylesheet" href="./src/styles/components.css?v=202608310325">
+    <link rel="stylesheet" href="./src/styles/screens.css?v=202608310325">
+    <link rel="stylesheet" href="./src/styles/animations.css?v=202608310325">
+    <link rel="stylesheet" href="./src/styles/responsive.css?v=202608310325">
   </head>
   <body>
     <div id="app" class="app-shell" data-screen="home">
@@ -1098,7 +1098,13 @@
           <div class="save-record-content">
             <!-- 1. Current Save Overview -->
             <div class="save-record-section">
-              <h4 class="save-section-heading" data-i18n="ui.saveOverviewTitle">當前存檔狀態概覽</h4>
+              <div class="save-section-header-row">
+                <h4 class="save-section-heading" data-i18n="ui.saveOverviewTitle">當前存檔狀態概覽</h4>
+                <button type="button" class="save-view-records-btn" id="btn-save-to-records" data-nav="records">
+                  <svg class="admin-btn-icon" viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                  <span data-i18n="ui.btnViewRecordsDetail">查看戰績統計詳情 ›</span>
+                </button>
+              </div>
               <div class="save-overview-grid">
                 <div class="save-overview-item">
                   <small data-i18n="ui.saveOverviewLevel">冒險等級</small>
@@ -1117,6 +1123,10 @@
                   <strong id="save-overview-battles">0 場 (0 勝 / 0 敗)</strong>
                 </div>
               </div>
+              <p class="save-records-sync-hint">
+                <svg class="hint-icon" viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                <span data-i18n="ui.saveRecordsHint">存檔種子碼會完整保存所有冒險歷程、全章節戰績、手動/自動勝敗紀錄、歷程 DPS 分析與西瓜切中統計，跨裝置載入時將全部無損還原。</span>
+              </p>
             </div>
 
             <!-- 2. Export Save Seed -->
@@ -1126,7 +1136,10 @@
               <div class="save-code-box">
                 <textarea id="save-seed-output" class="save-code-textarea" readonly rows="3" spellcheck="false" title="點擊全選"></textarea>
                 <div class="save-code-actions">
-                  <button type="button" id="btn-copy-save-seed" class="button-primary save-action-btn" data-i18n="ui.btnCopySaveSeed">📋 複製種子碼</button>
+                  <button type="button" id="btn-copy-save-seed" class="button-primary save-action-btn">
+                    <svg class="admin-btn-icon" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                    <span data-i18n="ui.btnCopySaveSeed">複製種子碼</span>
+                  </button>
                 </div>
               </div>
             </div>
@@ -1138,7 +1151,10 @@
               <div class="save-code-box">
                 <textarea id="save-seed-input" class="save-code-textarea" rows="3" placeholder="在此貼上存檔種子碼（如 KORAKU1_...）" data-i18n-attr="placeholder:ui.importSeedPlaceholder" spellcheck="false"></textarea>
                 <div class="save-code-actions">
-                  <button type="button" id="btn-import-save-seed" class="button-primary save-action-btn" data-i18n="ui.btnImportSaveSeed">📥 載入並套用種子碼</button>
+                  <button type="button" id="btn-import-save-seed" class="button-primary save-action-btn">
+                    <svg class="admin-btn-icon" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                    <span data-i18n="ui.btnImportSaveSeed">載入並套用種子碼</span>
+                  </button>
                 </div>
               </div>
             </div>
@@ -1148,7 +1164,10 @@
               <h4 class="save-section-heading danger-heading" data-i18n="ui.dangerZoneTitle">存檔重置與刪除管理</h4>
               <p class="save-section-desc danger-desc" data-i18n="ui.dangerZoneDesc">清除本裝置上的所有遊戲進度（等級、星砂、裝備、技能與戰績），回歸初始狀態：</p>
               <div class="save-danger-actions">
-                <button type="button" id="btn-modal-reset-save" class="button-danger" data-i18n="ui.btnModalResetSave">🗑️ 重置存檔（清除所有紀錄）</button>
+                <button type="button" id="btn-modal-reset-save" class="button-danger">
+                  <svg class="admin-btn-icon" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                  <span data-i18n="ui.btnModalResetSave">重置存檔（清除所有紀錄）</span>
+                </button>
               </div>
             </div>
           </div>
@@ -1267,6 +1286,6 @@
       <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
     </div>
-    <script src="./src/js/bundle.js?v=202608310315"></script>
+    <script src="./src/js/bundle.js?v=202608310325"></script>
   </body>
 </html>

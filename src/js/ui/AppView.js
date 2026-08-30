@@ -343,6 +343,9 @@ export class AppView {
 
     const navButton = event.target.closest("[data-nav]");
     if (navButton) {
+      if (this.saveRecordModal && !this.saveRecordModal.hidden) {
+        this.closeSaveRecordModal();
+      }
       this.requestNavigation(navButton.dataset.nav);
       return;
     }

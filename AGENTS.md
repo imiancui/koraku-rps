@@ -57,3 +57,22 @@ Product spec: `OPENSPEC.md`. Follow the workspace OpenSpec workflow in `D:\game-
 
 **發布規範**：
 每當完成新功能或修復並通過測試與建置後，必須將 `New-game-project-4` 最新提交同步推送至 GitHub 遠端倉庫 `imiancui/koraku-rps` 的 `main` 分支，確保 GitHub Pages 與 `https://koraku.app/` 即時更新為最新版本。
+
+---
+
+## 5. 視覺設計與全域 UI 風格統一規範 (Visual Design & UI Consistency)
+
+為維持遊戲整體高品質的 ACGN 沉浸感與視覺一致性，所有頁面、彈窗、按鈕與元件必須嚴格遵循以下設計標準：
+
+1. **暗黑神社動漫調性 (Japanese Dark Anime Shrine Aesthetic)**：
+   - 核心色系嚴格採用神社朱紅 (`var(--crimson)`)、神聖金黃 (`var(--gold)`, `var(--gold-bright)`)、深邃墨夜 (`var(--night-pure)`) 與宣紙柔白 (`var(--paper)`）。
+   - 邊框與陰影需具備古典和風半透明金箔質感，避免使用高飽和度的非和風雜色。
+2. **嚴格禁止彩色 OS Emoji (No Colorful OS Emoji Icons)**：
+   - 全遊戲的所有 UI 按鈕、系統選單、彈窗標題、功能標籤與對白提示中，**一律嚴格禁止使用作業系統原生彩色 Emoji 圖示（如 💾, ⚙️, 📋, 📥, 🗑️, ⚡, ⏸️, 🏳️ 等）**。
+   - 所有圖示必須採用內嵌向量 SVG 或主題色樣式（套用 `fill="currentColor"` 或主題色變數），使其色彩與按鈕字體、懸停金光完美統一。
+3. **文字與圖示分離 (Separation of Icon & Localized Label)**：
+   - 包含圖示的按鈕與標題，必須將向量 `<svg>` 與文字標籤 `<span data-i18n="...">` 分開包裹，確保在地化字典（`I18n.js`）只包含純文字字串，避免語系切換時覆蓋向量圖示。
+4. **跨裝置響應式排版與點擊安全 (Responsive & Click Safety)**：
+   - 所有管理彈窗與行動端按鈕必須具備獨立的 `z-index`、適當的觸控熱區（最小 40px 高度）與 `pointer-events: auto;`。
+   - 角色立繪等裝飾層必須設置 `pointer-events: none;`，嚴格防止點擊穿透或事件攔截。
+
