@@ -1270,9 +1270,9 @@
   position: absolute;
   z-index: 5;
   left: 54%;
-  bottom: clamp(65px, 10vh, 120px);
+  bottom: clamp(100px, 16vh, 200px);
   width: min(52vw, 760px);
-  height: 92%;
+  height: 94%;
   pointer-events: none;
   transform: translateX(-50%);
   transition: transform 240ms ease, opacity 240ms ease, bottom 240ms ease;

@@ -306,7 +306,7 @@
 
   .home-character {
     position: absolute;
-    z-index: 5 !important;
+    z-index: 15 !important;
     right: -12vw;
     bottom: 0;
     width: 82vw;
