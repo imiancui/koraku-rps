@@ -17,7 +17,7 @@
 - **支援語言**：繁體中文 (`zh-Hant`)、簡體中文 (`zh-Hans`)、英文 (`en`)、日文 (`ja`)。
 - **技術棧**：原生 ES Modules、HTML5、CSS3、Web Audio API 合成音效、localStorage。
 - **執行期相依**：零外部相依套件，純原生模組化架構。
-- **線上發布**：GitHub Pages (`https://imiancui.github.io/koraku-rps`)。
+- **線上發布**：GitHub Pages / Custom Domain (`https://koraku.app/`)。
 
 ---
 

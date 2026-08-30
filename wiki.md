@@ -2,7 +2,7 @@
 
 > **版本**：2.0.0 (Master Release)  
 > **適用專案**：`New-game-project-4`  
-> **線上遊玩網址**：https://imiancui.github.io/koraku-rps  
+> **線上遊玩網址**：https://koraku.app/  
 > **支援語系**：繁體中文 (`zh-Hant`)、簡體中文 (`zh-Hans`)、English (`en`)、日本語 (`ja`)
 
 ---

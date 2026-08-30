@@ -10,12 +10,13 @@
 
 ## 1. 核心專案概覽 (System Overview)
 
-本專案為純原生（Vanilla ES Modules / HTML5 / CSS3 / Web Audio API）架構的日式 ACGN 猜拳 RPG 對決遊戲。無前端框架、無外部執行期套件相依，可直接於本機或透過 GitHub Pages 部署運行。
+本專案為純原生（Vanilla ES Modules / HTML5 / CSS3 / Web Audio API）架構的日式 ACGN 猜拳 RPG 對決遊戲。無前端框架、無外部執行期套件相依，可直接於本機或透過 GitHub Pages / 自訂網域（`https://koraku.app/`）部署運行。
 
 ### 1.1 核心命令
 - **執行測試**：`npm test`（Node.js 原生測試執行器，89 項測試）
 - **打包發布**：`npm run build` 或 `node scripts/build.mjs`（生成 `src/js/bundle.js`）
 - **產生 Excel 規格表**：`npm run specs:excel`
+- **線上網址**：`https://koraku.app/`
 - **本地伺服器**：`npm run dev` 或 `npm start`（預設監聽 `http://127.0.0.1:4173/`）
 - **Tailscale 共享**：`npm run start:tailscale`
 

@@ -50,10 +50,10 @@ Product spec: `OPENSPEC.md`. Follow the workspace OpenSpec workflow in `D:\game-
 
 ---
 
-## 4. 部署與發布規範 (Deployment to GitHub Pages)
+## 4. 部署與發布規範 (Deployment to GitHub Pages & Custom Domain)
 
-本專案線上部署網址為：**https://imiancui.github.io/koraku-rps**
-對應 GitHub 倉庫：`imiancui/koraku-rps` (`main` 分支)
+本專案線上部署網址為：**https://koraku.app/**
+對應 GitHub 倉庫：`imiancui/koraku-rps` (`main` 分支，自訂網域 CNAME: `koraku.app`)
 
 **發布規範**：
-每當完成新功能或修復並通過測試與建置後，必須將 `New-game-project-4` 最新提交同步推送至 GitHub 遠端倉庫 `imiancui/koraku-rps` 的 `main` 分支，確保 GitHub Pages 即時更新為最新版本。
+每當完成新功能或修復並通過測試與建置後，必須將 `New-game-project-4` 最新提交同步推送至 GitHub 遠端倉庫 `imiancui/koraku-rps` 的 `main` 分支，確保 GitHub Pages 與 `https://koraku.app/` 即時更新為最新版本。
