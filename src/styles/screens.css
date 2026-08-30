@@ -1269,7 +1269,7 @@
 .battle-character-wrap {
   position: absolute;
   z-index: 5;
-  left: 54%;
+  left: 50%;
   bottom: clamp(100px, 16vh, 200px);
   width: min(52vw, 760px);
   height: 94%;

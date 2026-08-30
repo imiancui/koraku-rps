@@ -537,7 +537,7 @@
   .battle-character-wrap {
     left: 50% !important;
     right: auto !important;
-    top: 72px !important;
+    top: 52px !important;
     bottom: auto !important;
     transform: translateX(-50%) !important;
     width: min(85vw, 360px) !important;
