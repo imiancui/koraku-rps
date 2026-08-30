@@ -530,6 +530,29 @@ const DICTIONARY = {
       galleryLockedTag: "尚未解鎖",
       resetSave: "重置存檔",
       resetConfirm: "確定要重置所有存檔進度嗎？此操作無法還原。",
+      saveRecord: "💾 存檔紀錄",
+      saveRecordModalTitle: "💾 存檔紀錄與種子碼管理",
+      saveOverviewTitle: "當前存檔狀態概覽",
+      saveOverviewLevel: "冒險等級",
+      saveOverviewCoins: "持有星砂",
+      saveOverviewStage: "最深章節",
+      saveOverviewBattles: "總對局場次",
+      saveOverviewEquipCount: "裝備持有",
+      saveSeedExportTitle: "導出當前存檔種子碼",
+      saveSeedExportDesc: "此字串包含您當前所有的等級、裝備、星砂、配點與戰績紀錄，可用於備份或跨裝置轉移：",
+      btnCopySaveSeed: "📋 複製種子碼",
+      toastSeedCopied: "✅ 存檔種子碼已成功複製到剪貼簿！",
+      saveSeedImportTitle: "輸入種子碼（跨裝置載入）",
+      saveSeedImportDesc: "貼上其他裝置匯出的存檔種子碼，即可將冒險紀錄帶到本裝置：",
+      importSeedPlaceholder: "在此貼上存檔種子碼（如 KORAKU1_...）",
+      btnImportSaveSeed: "📥 載入並套用種子碼",
+      confirmImportSeed: "⚠️ 載入此種子碼將會覆蓋本裝置當前的存檔進度，確定要載入嗎？",
+      toastImportSuccess: "🎉 存檔種子碼已成功載入並套用！",
+      toastImportFailed: "❌ 無效或損毀的存檔種子碼，請檢查是否複製完整。",
+      toastSeedEmpty: "請先輸入或貼上存檔種子碼。",
+      dangerZoneTitle: "存檔重置與刪除管理",
+      dangerZoneDesc: "清除本裝置上的所有遊戲進度（等級、星砂、裝備、技能與戰績），回歸初始狀態：",
+      btnModalResetSave: "🗑️ 重置存檔（清除所有紀錄）",
       // Main menu
       menuStages: "開始對局",
       menuStagesSub: "STORY BATTLE",
@@ -1145,6 +1168,29 @@ const DICTIONARY = {
       galleryLockedTag: "尚未解锁",
       resetSave: "重置存档",
       resetConfirm: "确定要重置所有存档进度吗？此操作无法撤销。",
+      saveRecord: "💾 存档记录",
+      saveRecordModalTitle: "💾 存档记录与种子码管理",
+      saveOverviewTitle: "当前存档状态概览",
+      saveOverviewLevel: "冒险等级",
+      saveOverviewCoins: "持有星砂",
+      saveOverviewStage: "最深章节",
+      saveOverviewBattles: "总对战场次",
+      saveOverviewEquipCount: "装备持有",
+      saveSeedExportTitle: "导出当前存档种子码",
+      saveSeedExportDesc: "此字符串包含您当前所有的等级、装备、星砂、配点与战绩记录，可用于备份或跨设备转移：",
+      btnCopySaveSeed: "📋 复制种子码",
+      toastSeedCopied: "✅ 存档种子码已成功复制到剪贴板！",
+      saveSeedImportTitle: "输入种子码（跨设备加载）",
+      saveSeedImportDesc: "粘贴其他设备导出的存档种子码，即可将冒险记录同步至本设备：",
+      importSeedPlaceholder: "在此粘贴存档种子码（如 KORAKU1_...）",
+      btnImportSaveSeed: "📥 加载并应用种子码",
+      confirmImportSeed: "⚠️ 加载此种子码将会覆盖本设备当前的存档进度，确定要加载吗？",
+      toastImportSuccess: "🎉 存档种子码已成功加载并应用！",
+      toastImportFailed: "❌ 无效或损坏的存档种子码，请检查是否完整复制。",
+      toastSeedEmpty: "请先输入或粘贴存档种子码。",
+      dangerZoneTitle: "存档重置与删除管理",
+      dangerZoneDesc: "清除本设备上的所有游戏进度（等级、星砂、装备、技能与战绩），回归初始状态：",
+      btnModalResetSave: "🗑️ 重置存档（清除所有记录）",
       menuStages: "开始对局",
       menuStagesSub: "STORY BATTLE",
       menuGrowth: "属性成长",
@@ -1580,6 +1626,29 @@ const DICTIONARY = {
       galleryLockedTag: "Locked",
       resetSave: "Reset Save",
       resetConfirm: "Are you sure you want to reset all save data? This cannot be undone.",
+      saveRecord: "💾 Save Records",
+      saveRecordModalTitle: "💾 Save Records & Seed Management",
+      saveOverviewTitle: "Current Save Overview",
+      saveOverviewLevel: "Adventure Level",
+      saveOverviewCoins: "Star Sand",
+      saveOverviewStage: "Deepest Chapter",
+      saveOverviewBattles: "Total Battles",
+      saveOverviewEquipCount: "Equipment Owned",
+      saveSeedExportTitle: "Export Current Save Seed Code",
+      saveSeedExportDesc: "This seed code encapsulates your full level, equipment, star sand, skills, and battle history for backup or cross-device transfer:",
+      btnCopySaveSeed: "📋 Copy Seed Code",
+      toastSeedCopied: "✅ Save seed code copied to clipboard!",
+      saveSeedImportTitle: "Import Seed Code (Cross-Device Transfer)",
+      saveSeedImportDesc: "Paste a save seed code from another device to load and transfer your journey to this device:",
+      importSeedPlaceholder: "Paste save seed code here (e.g. KORAKU1_...)",
+      btnImportSaveSeed: "📥 Load & Apply Seed Code",
+      confirmImportSeed: "⚠️ Loading this seed code will overwrite your current save progress on this device. Do you want to proceed?",
+      toastImportSuccess: "🎉 Save seed code successfully loaded and applied!",
+      toastImportFailed: "❌ Invalid or corrupted save seed code. Please check that you copied the complete text.",
+      toastSeedEmpty: "Please enter or paste a save seed code first.",
+      dangerZoneTitle: "Save Reset & Deletion Management",
+      dangerZoneDesc: "Clear all game progress on this device (level, star sand, equipment, skills, and stats) back to default initial state:",
+      btnModalResetSave: "🗑️ Reset Save (Clear All Progress)",
       menuStages: "Story Battle",
       menuStagesSub: "STORY BATTLE",
       menuGrowth: "Player Growth",
@@ -2016,6 +2085,29 @@ const DICTIONARY = {
       galleryLockedTag: "未解放",
       resetSave: "セーブ初期化",
       resetConfirm: "すべてのセーブデータを初期化しますか？この操作は取り消せません。",
+      saveRecord: "💾 セーブ記録",
+      saveRecordModalTitle: "💾 セーブ記録とシード管理",
+      saveOverviewTitle: "現在のセーブ状況概要",
+      saveOverviewLevel: "冒険レベル",
+      saveOverviewCoins: "所持星砂",
+      saveOverviewStage: "到達章",
+      saveOverviewBattles: "総対局数",
+      saveOverviewEquipCount: "所持装備数",
+      saveSeedExportTitle: "現在のセーブシードを出力",
+      saveSeedExportDesc: "現在のレベル、装備、星砂、スキル配分、戦績記録を含むシードコードです。バックアップや他端末への移行に使用できます：",
+      btnCopySaveSeed: "📋 シードをコピー",
+      toastSeedCopied: "✅ セーブシードをクリップボードにコピーしました！",
+      saveSeedImportTitle: "シードを入力（他端末から引き継ぎ）",
+      saveSeedImportDesc: "他の端末から出力したセーブシードを貼り付けて、本端末に冒険記録を引き継ぎます：",
+      importSeedPlaceholder: "ここにセーブシードを貼り付け（例: KORAKU1_...）",
+      btnImportSaveSeed: "📥 シードを読み込んで適用",
+      confirmImportSeed: "⚠️ このシードを読み込むと現在の端末の進行データが上書きされます。適用しますか？",
+      toastImportSuccess: "🎉 セーブシードが正常に読み込まれ、適用されました！",
+      toastImportFailed: "❌ 無効または破損したセーブシードです。コピー内容を確認してください。",
+      toastSeedEmpty: "セーブシードを入力または貼り付けてください。",
+      dangerZoneTitle: "セーブデータ初期化・削除管理",
+      dangerZoneDesc: "この端末に保存されているすべての進行状況（レベル、星砂、装備、スキル、戦績）を消去して初期状態に戻します：",
+      btnModalResetSave: "🗑️ 全セーブデータを初期化（消去）",
       menuStages: "物語対戦",
       menuStagesSub: "STORY BATTLE",
       menuGrowth: "能力強化",
@@ -2684,6 +2776,56 @@ class TimerRegistry {
 }
 
 // --- src/js/services/Persistence.js ---
+function encodeSaveData(data) {
+  if (!data || typeof data !== "object") return "";
+  try {
+    const json = JSON.stringify(data);
+    if (typeof Buffer !== "undefined") {
+      return "KORAKU1_" + Buffer.from(json, "utf8").toString("base64");
+    }
+    const utf8Bytes = new TextEncoder().encode(json);
+    let binary = "";
+    for (let i = 0; i < utf8Bytes.length; i++) {
+      binary += String.fromCharCode(utf8Bytes[i]);
+    }
+    return "KORAKU1_" + btoa(binary);
+  } catch {
+    return "";
+  }
+}
+
+function decodeSaveData(code) {
+  if (!code || typeof code !== "string") return null;
+  let raw = code.trim();
+  if (raw.startsWith("KORAKU1_")) {
+    raw = raw.substring("KORAKU1_".length).trim();
+  } else if (raw.startsWith("KORAKU_V1_")) {
+    raw = raw.substring("KORAKU_V1_".length).trim();
+  }
+  if (raw.startsWith("{") && raw.endsWith("}")) {
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return null;
+    }
+  }
+  try {
+    if (typeof Buffer !== "undefined") {
+      const json = Buffer.from(raw, "base64").toString("utf8");
+      return JSON.parse(json);
+    }
+    const binary = atob(raw);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    const json = new TextDecoder().decode(bytes);
+    return JSON.parse(json);
+  } catch {
+    return null;
+  }
+}
+
 class Persistence {
   load() {
     try {
@@ -4073,6 +4215,24 @@ class GameStore {
 
   toggleMuted() {
     return this.toggleSfxMuted();
+  }
+
+  exportSaveCode() {
+    return encodeSaveData(this.state);
+  }
+
+  importSaveCode(code) {
+    if (!code || typeof code !== "string" || !code.trim()) {
+      return { ok: false, message: "請輸入有效的種子碼。" };
+    }
+    const decoded = decodeSaveData(code);
+    if (!decoded || typeof decoded !== "object") {
+      return { ok: false, message: "無效或損毀的存檔種子碼。" };
+    }
+    this.state = sanitizeSave(decoded);
+    this.persistence.save(this.state);
+    this.commit("import-save");
+    return { ok: true, message: "存檔已成功載入！" };
   }
 
   reset() {
@@ -6274,6 +6434,13 @@ class AppView {
     this.galleryItemDesc = $("#gallery-item-desc");
     this.galleryVariantButtons = $("#gallery-variant-buttons");
     this.galleryLightboxModal = $("#gallery-lightbox-modal");
+    this.saveRecordModal = $("#save-record-modal");
+    this.saveOverviewLevel = $("#save-overview-level");
+    this.saveOverviewCoins = $("#save-overview-coins");
+    this.saveOverviewStage = $("#save-overview-stage");
+    this.saveOverviewBattles = $("#save-overview-battles");
+    this.saveSeedOutput = $("#save-seed-output");
+    this.saveSeedInput = $("#save-seed-input");
     this.cheatModal = $("#cheat-modal");
     this.cheatAuthModal = $("#cheat-auth-modal");
     this.cheatAuthPassword = $("#cheat-auth-password");
@@ -6894,21 +7061,43 @@ class AppView {
       return;
     }
 
+    if (event.target.closest("#open-save-record-modal")) {
+      this.openSaveRecordModal();
+      return;
+    }
+
+    if (event.target.closest("#close-save-record-modal") || event.target === this.saveRecordModal) {
+      this.closeSaveRecordModal();
+      return;
+    }
+
+    if (event.target.closest("#btn-copy-save-seed")) {
+      this.handleCopySaveSeed();
+      return;
+    }
+
+    if (event.target.closest("#btn-import-save-seed")) {
+      this.handleImportSaveSeed();
+      return;
+    }
+
+    if (event.target.closest("#btn-modal-reset-save, #reset-save")) {
+      this.handleResetSave();
+      return;
+    }
+
     if (event.target.closest("#btn-close-lightbox") || event.target.closest("#gallery-lightbox-backdrop")) {
       this.closeGalleryLightbox();
       return;
     }
-
-    if (event.target.closest("#reset-save")) {
-      const confirmed = window.confirm("要清除等級、星砂、道具與戰績，重新開始嗎？");
-      if (confirmed) {
-        this.store.reset();
-        this.showToast("存檔已重置。");
-      }
-    }
   }
 
   handleKeydown(event) {
+    if (event.key === "Escape" && this.saveRecordModal && !this.saveRecordModal.hidden) {
+      this.closeSaveRecordModal();
+      return;
+    }
+
     if (event.key === "Escape" && this.galleryLightboxModal && !this.galleryLightboxModal.hidden) {
       this.closeGalleryLightbox();
       return;
@@ -8141,6 +8330,114 @@ class AppView {
     this.store.cheatSetValues(updates);
     this.showToast("作弊數值已成功套用！", "success");
     this.closeCheatModal();
+  }
+
+  openSaveRecordModal() {
+    this.populateSaveRecordModal();
+    if (this.saveRecordModal) {
+      this.saveRecordModal.hidden = false;
+      this.saveRecordModal.setAttribute("aria-hidden", "false");
+    }
+  }
+
+  closeSaveRecordModal() {
+    if (this.saveRecordModal) {
+      this.saveRecordModal.hidden = true;
+      this.saveRecordModal.setAttribute("aria-hidden", "true");
+    }
+  }
+
+  populateSaveRecordModal() {
+    const snap = this.store.snapshot();
+    const p = snap.profile;
+    const r = snap.records || {};
+
+    if (this.saveOverviewLevel) {
+      this.saveOverviewLevel.textContent = `Lv. ${p.level}`;
+    }
+    if (this.saveOverviewCoins) {
+      this.saveOverviewCoins.textContent = `✦ ${snap.coins.toLocaleString("zh-TW")}`;
+    }
+    if (this.saveOverviewStage) {
+      const stageObj = STAGES.find((s) => s.id === r.bestStage);
+      this.saveOverviewStage.textContent = stageObj ? I18n.getLocalizedStage(stageObj).chapter : "壹ノ章";
+    }
+    if (this.saveOverviewBattles) {
+      const wins = r.wins || 0;
+      const losses = r.losses || 0;
+      const total = r.totalBattles || (wins + losses);
+      this.saveOverviewBattles.textContent = `${total} 場 (${wins} 勝 / ${losses} 敗)`;
+    }
+
+    if (this.saveSeedOutput) {
+      this.saveSeedOutput.value = this.store.exportSaveCode();
+    }
+    if (this.saveSeedInput) {
+      this.saveSeedInput.value = "";
+    }
+  }
+
+  handleCopySaveSeed() {
+    const seed = this.saveSeedOutput?.value || this.store.exportSaveCode();
+    if (!seed) return;
+
+    if (typeof navigator !== "undefined" && navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(seed).then(() => {
+        this.showToast(I18n.t("ui.toastSeedCopied"), "success");
+      }).catch(() => {
+        if (this.saveSeedOutput) {
+          this.saveSeedOutput.focus();
+          this.saveSeedOutput.select();
+          try {
+            document.execCommand("copy");
+            this.showToast(I18n.t("ui.toastSeedCopied"), "success");
+          } catch {
+            this.showToast(I18n.t("ui.toastSeedCopied"), "success");
+          }
+        }
+      });
+    } else if (this.saveSeedOutput) {
+      this.saveSeedOutput.focus();
+      this.saveSeedOutput.select();
+      try {
+        document.execCommand("copy");
+        this.showToast(I18n.t("ui.toastSeedCopied"), "success");
+      } catch {
+        this.showToast(I18n.t("ui.toastSeedCopied"), "success");
+      }
+    }
+  }
+
+  handleImportSaveSeed() {
+    const rawInput = this.saveSeedInput ? this.saveSeedInput.value.trim() : "";
+    if (!rawInput) {
+      this.showToast(I18n.t("ui.toastSeedEmpty"), "warning");
+      if (this.saveSeedInput) this.saveSeedInput.focus();
+      return;
+    }
+
+    const confirmed = window.confirm(I18n.t("ui.confirmImportSeed"));
+    if (!confirmed) return;
+
+    const result = this.store.importSaveCode(rawInput);
+    if (result.ok) {
+      this.showToast(I18n.t("ui.toastImportSuccess"), "success");
+      this.closeSaveRecordModal();
+      this.renderStore(this.store.snapshot());
+    } else {
+      this.showToast(I18n.t("ui.toastImportFailed"), "danger");
+      if (this.saveSeedInput) this.saveSeedInput.focus();
+    }
+  }
+
+  handleResetSave() {
+    const confirmed = window.confirm(I18n.t("ui.resetConfirm") || "確定要清除所有等級、星砂、道具與戰績，重新開始嗎？");
+    if (confirmed) {
+      this.store.reset();
+      this.showToast((I18n.t("ui.resetSave") || "存檔重置") + " ✓", "success");
+      this.populateSaveRecordModal();
+      this.renderStore(this.store.snapshot());
+    }
   }
 
   showTooltip(itemId, x, y) {

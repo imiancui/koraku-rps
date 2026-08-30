@@ -124,7 +124,7 @@
 
             <div class="home-admin-actions">
               <button id="open-cheat-modal" class="text-button cheat-button" type="button" data-i18n="ui.openCheat">⚙️ 測試調試 / 作弊選單</button>
-              <button id="reset-save" class="text-button reset-button" type="button" data-i18n="ui.resetSave">重置存檔</button>
+              <button id="open-save-record-modal" class="text-button save-record-button" type="button" data-i18n="ui.saveRecord">💾 存檔紀錄</button>
               <footer class="home-footer" aria-label="頁腳資訊">
                 <a href="https://store.steampowered.com/app/1425000" target="_blank" rel="noopener noreferrer" class="footer-plain-link">Endless Alice</a>
                 <span class="footer-plain-sep">/</span>
@@ -1074,6 +1074,71 @@
             <div class="auto-battle-modal-actions">
               <button type="button" class="button-primary" id="btn-start-autobattle-confirm" data-i18n="ui.btnStartAutoBattle">⚡ 開始自動刷關</button>
               <button type="button" class="button-secondary" id="btn-cancel-autobattle" data-i18n="ui.btnCancel">取消</button>
+            </div>
+          </div>
+        </div>
+      <!-- Save Record & Seed Management Modal -->
+      <div id="save-record-modal" class="modal-overlay" hidden aria-hidden="true">
+        <div class="modal-card save-record-card">
+          <header class="modal-header">
+            <h3 data-i18n="ui.saveRecordModalTitle">💾 存檔紀錄與種子碼管理</h3>
+            <button id="close-save-record-modal" class="modal-close-btn" type="button" aria-label="關閉視窗">×</button>
+          </header>
+          <div class="save-record-content">
+            <!-- 1. Current Save Overview -->
+            <div class="save-record-section">
+              <h4 class="save-section-heading" data-i18n="ui.saveOverviewTitle">當前存檔狀態概覽</h4>
+              <div class="save-overview-grid">
+                <div class="save-overview-item">
+                  <small data-i18n="ui.saveOverviewLevel">冒險等級</small>
+                  <strong id="save-overview-level">Lv. 1</strong>
+                </div>
+                <div class="save-overview-item">
+                  <small data-i18n="ui.saveOverviewCoins">持有星砂</small>
+                  <strong id="save-overview-coins">0</strong>
+                </div>
+                <div class="save-overview-item">
+                  <small data-i18n="ui.saveOverviewStage">最深章節</small>
+                  <strong id="save-overview-stage">壹ノ章</strong>
+                </div>
+                <div class="save-overview-item">
+                  <small data-i18n="ui.saveOverviewBattles">總對局場次</small>
+                  <strong id="save-overview-battles">0 場 (0 勝 / 0 敗)</strong>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. Export Save Seed -->
+            <div class="save-record-section">
+              <h4 class="save-section-heading" data-i18n="ui.saveSeedExportTitle">導出當前存檔種子碼</h4>
+              <p class="save-section-desc" data-i18n="ui.saveSeedExportDesc">此字串包含您當前所有的等級、裝備、星砂、配點與戰績紀錄，可用於備份或跨裝置轉移：</p>
+              <div class="save-code-box">
+                <textarea id="save-seed-output" class="save-code-textarea" readonly rows="3" spellcheck="false" title="點擊全選"></textarea>
+                <div class="save-code-actions">
+                  <button type="button" id="btn-copy-save-seed" class="button-primary save-action-btn" data-i18n="ui.btnCopySaveSeed">📋 複製種子碼</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. Import Save Seed -->
+            <div class="save-record-section">
+              <h4 class="save-section-heading" data-i18n="ui.saveSeedImportTitle">輸入種子碼（跨裝置載入）</h4>
+              <p class="save-section-desc" data-i18n="ui.saveSeedImportDesc">貼上其他裝置匯出的存檔種子碼，即可將冒險紀錄帶到本裝置：</p>
+              <div class="save-code-box">
+                <textarea id="save-seed-input" class="save-code-textarea" rows="3" placeholder="在此貼上存檔種子碼（如 KORAKU1_...）" data-i18n-attr="placeholder:ui.importSeedPlaceholder" spellcheck="false"></textarea>
+                <div class="save-code-actions">
+                  <button type="button" id="btn-import-save-seed" class="button-primary save-action-btn" data-i18n="ui.btnImportSaveSeed">📥 載入並套用種子碼</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 4. Danger Zone: Reset Save -->
+            <div class="save-record-section save-danger-section">
+              <h4 class="save-section-heading danger-heading" data-i18n="ui.dangerZoneTitle">存檔重置與刪除管理</h4>
+              <p class="save-section-desc danger-desc" data-i18n="ui.dangerZoneDesc">清除本裝置上的所有遊戲進度（等級、星砂、裝備、技能與戰績），回歸初始狀態：</p>
+              <div class="save-danger-actions">
+                <button type="button" id="btn-modal-reset-save" class="button-danger" data-i18n="ui.btnModalResetSave">🗑️ 重置存檔（清除所有紀錄）</button>
+              </div>
             </div>
           </div>
         </div>

@@ -216,5 +216,28 @@ test("I18n 完整性檢查：繁中、簡中、英文、日文所有關卡、道
     assert.ok(i18n.t("ui.zoomHighRes"));
     assert.ok(i18n.t("ui.clickToZoom"));
     assert.ok(i18n.t("ui.closeLightbox"));
+    assert.ok(i18n.t("ui.saveRecord"));
+    assert.ok(i18n.t("ui.saveRecordModalTitle"));
+    assert.ok(i18n.t("ui.saveOverviewTitle"));
+    assert.ok(i18n.t("ui.saveOverviewLevel"));
+    assert.ok(i18n.t("ui.saveOverviewCoins"));
+    assert.ok(i18n.t("ui.saveOverviewStage"));
+    assert.ok(i18n.t("ui.saveOverviewBattles"));
+    assert.ok(i18n.t("ui.saveOverviewEquipCount"));
+    assert.ok(i18n.t("ui.saveSeedExportTitle"));
+    assert.ok(i18n.t("ui.saveSeedExportDesc"));
+    assert.ok(i18n.t("ui.btnCopySaveSeed"));
+    assert.ok(i18n.t("ui.toastSeedCopied"));
+    assert.ok(i18n.t("ui.saveSeedImportTitle"));
+    assert.ok(i18n.t("ui.saveSeedImportDesc"));
+    assert.ok(i18n.t("ui.importSeedPlaceholder"));
+    assert.ok(i18n.t("ui.btnImportSaveSeed"));
+    assert.ok(i18n.t("ui.confirmImportSeed"));
+    assert.ok(i18n.t("ui.toastImportSuccess"));
+    assert.ok(i18n.t("ui.toastImportFailed"));
+    assert.ok(i18n.t("ui.toastSeedEmpty"));
+    assert.ok(i18n.t("ui.dangerZoneTitle"));
+    assert.ok(i18n.t("ui.dangerZoneDesc"));
+    assert.ok(i18n.t("ui.btnModalResetSave"));
   }
 });

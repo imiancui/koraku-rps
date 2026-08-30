@@ -322,15 +322,19 @@ const extraRows = [
 ];
 sheets.push({ name: "切西瓜與圖鑑", data: extraRows });
 
-// Sheet 8: 作弊與除錯 (Cheats & Debug)
+// Sheet 8: 存檔管理、作弊與除錯 (Saves, Cheats & Debug)
 const cheatRows = [
-  ["功能名稱", "觸發方式", "時間窗口", "支援參數/動作", "功能詳細說明"],
+  ["功能名稱", "觸發/操作方式", "格式/時間窗口", "支援參數/動作", "功能詳細說明"],
+  ["存檔種子碼導出", "點擊首頁【💾 存檔紀錄】彈窗", "KORAKU1_<Base64UTF8JSON>", "一鍵複製種子碼", "將玩家當前等級、經驗、SP、星砂、12格裝備、背包、技能與戰績完整導出為字串"],
+  ["存檔種子碼匯入", "貼上種子碼並點擊【載入並套用】", "驗證格式與合法性", "覆蓋當前存檔進度", "跨設備/瀏覽器轉移遊戲紀錄，自動寫入 localStorage 並刷新全域畫面"],
+  ["重置存檔", "存檔紀錄彈窗底部【危險區域】", "彈出確認對話框", "清除全部資料回歸初始狀態", "清空等級、星砂、裝備、技能與戰績紀錄，回歸 Lv.1 初始角色"],
   ["秘密作弊面板", "連續按下 4 次數字鍵 8", "1000ms 滾動窗口", "主鍵區 8 或小鍵盤 8", "彈出作弊設定面板，可自訂全部存檔資料"],
-  ["自訂屬性數值", "作弊面板輸入數值", "即時套用", "Level, XP, SP, Coins, Potions, Allocations, WatermelonStock", "任意修改玩家等級、金幣、藥水、點數分配與切西瓜庫存"],
+  ["作弊密碼驗證", "首頁點擊【⚙️ 測試調試 / 作弊選單】", "輸入密碼 8989", "解鎖作弊選單", "防止誤觸，驗證成功後開啟作弊面板"],
+  ["自訂屬性數值", "作弊面板輸入數值", "即時套用", "Level, XP, SP, Coins, Potions, Allocations, Skills", "任意修改玩家等級、金幣、藥水、點數分配與技能"],
   ["一鍵解鎖全關卡", "作弊面板點擊按鈕", "即時套用", "clearedStages: [1, 2, 3, 4]", "直接解鎖全 4 大章節關卡與 Boss 規則說明卡"],
-  ["一鍵解鎖全圖鑑", "作弊面板點擊按鈕", "即時套用", "unlockedSwimsuit: true", "立即解鎖全部泳裝與切西瓜立繪圖鑑"]
+  ["一鍵解鎖全圖鑑", "作弊面板點擊按鈕", "即時套用", "unlockedSwimsuit: true, unlockedGalleryAll: true", "立即解鎖全部泳裝與切西瓜立繪圖鑑"]
 ];
-sheets.push({ name: "作弊與除錯", data: cheatRows });
+sheets.push({ name: "存檔與作弊管理", data: cheatRows });
 
 // Sheet 9: 在地化字典摘要 (I18n Localization)
 const i18nRows = [
@@ -341,7 +345,8 @@ const sampleKeys = [
   "hands.rock", "hands.paper", "hands.scissors",
   "dialogue.chant3", "dialogue.chant2", "dialogue.chant1", "dialogue.morphReaction",
   "ui.autoBattle", "ui.autoWatermelonStock", "ui.btnNextWatermelonRound", "ui.floatingWatermelonTitle",
-  "ui.clearAll", "ui.equip", "ui.unequip", "ui.victory", "ui.defeat"
+  "ui.clearAll", "ui.equip", "ui.unequip", "ui.victory", "ui.defeat",
+  "ui.saveRecord", "ui.saveRecordModalTitle", "ui.btnCopySaveSeed", "ui.btnImportSaveSeed", "ui.btnModalResetSave"
 ];
 for (const key of sampleKeys) {
   i18nRows.push([

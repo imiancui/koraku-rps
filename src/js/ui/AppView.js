@@ -70,6 +70,13 @@ export class AppView {
     this.galleryItemDesc = $("#gallery-item-desc");
     this.galleryVariantButtons = $("#gallery-variant-buttons");
     this.galleryLightboxModal = $("#gallery-lightbox-modal");
+    this.saveRecordModal = $("#save-record-modal");
+    this.saveOverviewLevel = $("#save-overview-level");
+    this.saveOverviewCoins = $("#save-overview-coins");
+    this.saveOverviewStage = $("#save-overview-stage");
+    this.saveOverviewBattles = $("#save-overview-battles");
+    this.saveSeedOutput = $("#save-seed-output");
+    this.saveSeedInput = $("#save-seed-input");
     this.cheatModal = $("#cheat-modal");
     this.cheatAuthModal = $("#cheat-auth-modal");
     this.cheatAuthPassword = $("#cheat-auth-password");
@@ -690,21 +697,43 @@ export class AppView {
       return;
     }
 
+    if (event.target.closest("#open-save-record-modal")) {
+      this.openSaveRecordModal();
+      return;
+    }
+
+    if (event.target.closest("#close-save-record-modal") || event.target === this.saveRecordModal) {
+      this.closeSaveRecordModal();
+      return;
+    }
+
+    if (event.target.closest("#btn-copy-save-seed")) {
+      this.handleCopySaveSeed();
+      return;
+    }
+
+    if (event.target.closest("#btn-import-save-seed")) {
+      this.handleImportSaveSeed();
+      return;
+    }
+
+    if (event.target.closest("#btn-modal-reset-save, #reset-save")) {
+      this.handleResetSave();
+      return;
+    }
+
     if (event.target.closest("#btn-close-lightbox") || event.target.closest("#gallery-lightbox-backdrop")) {
       this.closeGalleryLightbox();
       return;
     }
-
-    if (event.target.closest("#reset-save")) {
-      const confirmed = window.confirm("要清除等級、星砂、道具與戰績，重新開始嗎？");
-      if (confirmed) {
-        this.store.reset();
-        this.showToast("存檔已重置。");
-      }
-    }
   }
 
   handleKeydown(event) {
+    if (event.key === "Escape" && this.saveRecordModal && !this.saveRecordModal.hidden) {
+      this.closeSaveRecordModal();
+      return;
+    }
+
     if (event.key === "Escape" && this.galleryLightboxModal && !this.galleryLightboxModal.hidden) {
       this.closeGalleryLightbox();
       return;
@@ -1937,6 +1966,114 @@ export class AppView {
     this.store.cheatSetValues(updates);
     this.showToast("作弊數值已成功套用！", "success");
     this.closeCheatModal();
+  }
+
+  openSaveRecordModal() {
+    this.populateSaveRecordModal();
+    if (this.saveRecordModal) {
+      this.saveRecordModal.hidden = false;
+      this.saveRecordModal.setAttribute("aria-hidden", "false");
+    }
+  }
+
+  closeSaveRecordModal() {
+    if (this.saveRecordModal) {
+      this.saveRecordModal.hidden = true;
+      this.saveRecordModal.setAttribute("aria-hidden", "true");
+    }
+  }
+
+  populateSaveRecordModal() {
+    const snap = this.store.snapshot();
+    const p = snap.profile;
+    const r = snap.records || {};
+
+    if (this.saveOverviewLevel) {
+      this.saveOverviewLevel.textContent = `Lv. ${p.level}`;
+    }
+    if (this.saveOverviewCoins) {
+      this.saveOverviewCoins.textContent = `✦ ${snap.coins.toLocaleString("zh-TW")}`;
+    }
+    if (this.saveOverviewStage) {
+      const stageObj = STAGES.find((s) => s.id === r.bestStage);
+      this.saveOverviewStage.textContent = stageObj ? I18n.getLocalizedStage(stageObj).chapter : "壹ノ章";
+    }
+    if (this.saveOverviewBattles) {
+      const wins = r.wins || 0;
+      const losses = r.losses || 0;
+      const total = r.totalBattles || (wins + losses);
+      this.saveOverviewBattles.textContent = `${total} 場 (${wins} 勝 / ${losses} 敗)`;
+    }
+
+    if (this.saveSeedOutput) {
+      this.saveSeedOutput.value = this.store.exportSaveCode();
+    }
+    if (this.saveSeedInput) {
+      this.saveSeedInput.value = "";
+    }
+  }
+
+  handleCopySaveSeed() {
+    const seed = this.saveSeedOutput?.value || this.store.exportSaveCode();
+    if (!seed) return;
+
+    if (typeof navigator !== "undefined" && navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(seed).then(() => {
+        this.showToast(I18n.t("ui.toastSeedCopied"), "success");
+      }).catch(() => {
+        if (this.saveSeedOutput) {
+          this.saveSeedOutput.focus();
+          this.saveSeedOutput.select();
+          try {
+            document.execCommand("copy");
+            this.showToast(I18n.t("ui.toastSeedCopied"), "success");
+          } catch {
+            this.showToast(I18n.t("ui.toastSeedCopied"), "success");
+          }
+        }
+      });
+    } else if (this.saveSeedOutput) {
+      this.saveSeedOutput.focus();
+      this.saveSeedOutput.select();
+      try {
+        document.execCommand("copy");
+        this.showToast(I18n.t("ui.toastSeedCopied"), "success");
+      } catch {
+        this.showToast(I18n.t("ui.toastSeedCopied"), "success");
+      }
+    }
+  }
+
+  handleImportSaveSeed() {
+    const rawInput = this.saveSeedInput ? this.saveSeedInput.value.trim() : "";
+    if (!rawInput) {
+      this.showToast(I18n.t("ui.toastSeedEmpty"), "warning");
+      if (this.saveSeedInput) this.saveSeedInput.focus();
+      return;
+    }
+
+    const confirmed = window.confirm(I18n.t("ui.confirmImportSeed"));
+    if (!confirmed) return;
+
+    const result = this.store.importSaveCode(rawInput);
+    if (result.ok) {
+      this.showToast(I18n.t("ui.toastImportSuccess"), "success");
+      this.closeSaveRecordModal();
+      this.renderStore(this.store.snapshot());
+    } else {
+      this.showToast(I18n.t("ui.toastImportFailed"), "danger");
+      if (this.saveSeedInput) this.saveSeedInput.focus();
+    }
+  }
+
+  handleResetSave() {
+    const confirmed = window.confirm(I18n.t("ui.resetConfirm") || "確定要清除所有等級、星砂、道具與戰績，重新開始嗎？");
+    if (confirmed) {
+      this.store.reset();
+      this.showToast((I18n.t("ui.resetSave") || "存檔重置") + " ✓", "success");
+      this.populateSaveRecordModal();
+      this.renderStore(this.store.snapshot());
+    }
   }
 
   showTooltip(itemId, x, y) {

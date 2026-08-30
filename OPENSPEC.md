@@ -216,7 +216,35 @@ xpNeededForLevel(level) = 100 + Math.max(0, level - 1) * 75
 - **秘密快速鍵**：在 1000ms 時間窗口內連續按下數字鍵 8 四次可直接呼出。
 - **功能**：自訂等級/經驗/SP/星砂/藥水/配點/技能；一鍵解鎖全 4 關卡；一鍵解鎖全 4 張圖鑑立繪。
 
-### 6.5 行動端體驗與層級規範 (Mobile UX & Layering Specification)
+### 6.5 存檔紀錄、種子碼跨裝置轉移與刪檔管理 (Save Records, Seed Code & Save Management)
+- **規格目的 (Purpose)**：提供安全便捷的跨裝置存檔遷移與備份機制（種子碼功能），讓玩家在更換裝置、更換瀏覽器或無痕模式切換時，能隨時匯出存檔種子碼，並在另一台裝置輸入種子碼完整繼承等級、經驗、星砂、裝備、技能、戰績與圖鑑紀錄。同時將重置存檔與種子碼整合於統一的「存檔紀錄」管理介面，避免首頁誤觸重置存檔。
+- **規格需求 (Requirements)**：
+  1. 首頁原「重置存檔」按鈕位置改為「💾 存檔紀錄」按鈕（`#open-save-record-modal`）。
+  2. 點擊後彈出「存檔紀錄與種子碼管理」視窗（`#save-record-modal`）。
+  3. **當前存檔摘要**：顯示當前等級、經驗、星砂、通關最深關卡、戰鬥總場次等概要。
+  4. **種子碼導出與複製**：自動生成包含當前完整存檔資料之 UTF-8 安全 Base64 種子碼（帶 `KORAKU1_` 前綴），提供「📋 複製種子碼」按鈕，點擊後寫入系統剪貼簿並彈出提示。
+  5. **種子碼匯入與跨裝置載入**：提供輸入框供玩家貼上其他裝置的種子碼，點擊「📥 載入並套用種子碼」按鈕後進行格式驗證與二次確認。確認後覆蓋當前存檔，持久化存入 localStorage，發布 `store:changed` 事件並即時刷新介面。
+  6. **重置存檔整合**：將重置存檔功能移入此管理介面的危險操作區域，點擊「🗑️ 重置存檔」需二次確認，確認後清除所有遊戲紀錄並重置為初始狀態。
+  7. **四國在地化支援**：繁體中文、簡體中文、英文、日文全面支援。
+- **驗收情境 (Scenarios)**：
+  - **Scenario: 查看與複製當前存檔種子碼**
+    - **GIVEN** 玩家在首頁點擊「💾 存檔紀錄」按鈕
+    - **WHEN** 存檔紀錄管理彈窗開啟
+    - **THEN** 畫面顯示當前存檔摘要與完整的種子碼字串，點擊「複製種子碼」成功將字串寫入剪貼簿並彈出 Toast 提示「種子碼已複製到剪貼簿！」
+  - **Scenario: 匯入有效種子碼覆蓋並載入跨裝置存檔**
+    - **GIVEN** 玩家持有其他裝置產生的有效種子碼
+    - **WHEN** 玩家在輸入框貼上種子碼並點擊「載入並套用種子碼」，且於確認對話框點擊確定
+    - **THEN** 系統成功解析並還原等級、裝備、星砂與戰績，保存至 localStorage，提示「存檔已成功載入！」並關閉彈窗刷新首頁
+  - **Scenario: 匯入無效或損毀種子碼時防護**
+    - **GIVEN** 玩家在輸入框輸入空白或隨機亂碼
+    - **WHEN** 玩家點擊「載入並套用種子碼」
+    - **THEN** 系統攔截錯誤，不覆蓋現有存檔，並彈出紅色警告 Toast「無效或損毀的種子碼，請檢查是否複製完整。」
+  - **Scenario: 在存檔管理介面內重置存檔**
+    - **GIVEN** 玩家開啟存檔紀錄彈窗
+    - **WHEN** 玩家點擊「重置存檔」按鈕並確認
+    - **THEN** 清除所有進度，重設為 Lv.1 與初始資源，更新種子碼為初始值並彈出重置成功提示
+
+### 6.6 行動端體驗與層級規範 (Mobile UX & Layering Specification)
 - **防雙擊縮放與手勢保護**：Viewport 設定 `user-scalable=no`，全域與按鍵區域設定 `touch-action: manipulation`，QTE 方向鍵設定 `touch-action: none`，JS 攔截 `gesturestart` 與 300ms 內連續快速雙擊，徹底杜絕 QTE 連按時的畫面放大與跑位。
 - **彈性頂部 Header (Elastic Header, 360px~430px+ Zero Overflow)**：
   - 左側 Brand 按鈕支援最小彈性縮減，窄螢幕截斷副標，<=365px 僅保留優雅紅底「狐」字徽章。
@@ -224,7 +252,7 @@ xpNeededForLevel(level) = 100 + Math.max(0, level - 1) * 75
 - **首頁流暢捲動與安全區墊高 (Fluid Scroll & Safe Area)**：
   - `.home-screen` 支援標準原生平滑滾動（`-webkit-overflow-scrolling: touch; overscroll-behavior-y: contain;`）。
   - 小樂立繪置於背景層（`z-index: 1; opacity: 0.38;`），選單按鈕精緻化（44px 高度），文字對比清晰且毫無遮蔽。
-  - 底部提供充分的安全區墊高（`padding-bottom: calc(max(44px, env(safe-area-inset-bottom)) + 36px)`），確保 Safari / Chrome 浮動網址列完全不阻礙重置存檔與頁腳按鈕操作。
+  - 底部提供充分的安全區墊高（`padding-bottom: calc(max(44px, env(safe-area-inset-bottom)) + 36px)`），確保 Safari / Chrome 浮動網址列完全不阻礙存檔紀錄與頁腳按鈕操作。
 - **結算畫面垂直流式容器 (Scrollable Settlement Overlay)**：
   - 結算與切西瓜時小樂立繪轉為背景氛圍層（`z-index: 1; opacity: 0.22; filter: blur(1px);`），隱藏對話框 `.avg-dialogue`，徹底解決角色立繪遮擋文字、數值、切西瓜時間軸與操作按鈕之問題。
   - `.result-overlay` 改為標準全螢幕滾動容器（`overflow-y: auto;`），操作按鈕（`min-height: 44px`）採全寬縱向排版，在任何視口高度的手機上均能舒適滾動與點擊。
@@ -236,7 +264,7 @@ xpNeededForLevel(level) = 100 + Math.max(0, level - 1) * 75
   - **出拳介面輕量清爽**：手勢按鈕精簡化排版，單手模式按鈕高度 30~32px 具備清晰圖示與字體，雙手模式採用乾淨俐落的 2 列網格排版，隱藏行動端多餘實體鍵盤提示。
   - **神諭結果面板微型化**：`.round-oracle` 縮小尺寸與留白（寬度 84~86vw，max-width 280~310px，緊湊倒數圈與對決手勢字體），不再遮擋 Boss 血條與小樂面容。
 
-### 6.6 和風程序化 BGM 合成引擎與向量設計語彙開關 (Web Audio Japanese BGM & Vector Audio Toggles)
+### 6.7 和風程序化 BGM 合成引擎與向量設計語彙開關 (Web Audio Japanese BGM & Vector Audio Toggles)
 - **非戰鬥和風舒緩 BGM (`lobby` loop)**：
   - 採用日本平調子 (Hirajōshi) / 陰旋律 (In-Sen) D 小調五聲音階（D4, F4, G4, A4, C5, D5, F5, A5）。
   - 合成器架構：古箏撥弦音色（Koto Pluck）、尺八竹笛（Shakuhachi Flute）、神道神社風鈴鈴音（Suzu Bells）與底層和風五度低音 Ambient Drone。
@@ -249,4 +277,5 @@ xpNeededForLevel(level) = 100 + Math.max(0, level - 1) * 75
   - 頂部導航列按鈕（`#music-toggle`、`#sound-toggle`）捨棄彩色系統 Emoji，改採自適應暗金與墨黑的和風純向量 SVG 圖示（音樂音符與音響喇叭）。
   - 靜音時採用優雅斜劃線微暗遮罩 (`is-muted`)，滑鼠懸停觸發金光微暈，與全站神社視覺語彙完美統一。
   - 存檔設定資料結構獨立保存 `settings.musicMuted` 與 `settings.sfxMuted`，支援繁中、簡中、英文、日文在地化通知提示。
+
 

@@ -4,7 +4,7 @@
 > 專案根目錄：`D:\game-dev\New-game-project-4`  
 > 最新更新日期：2026-08-30  
 > 基準規範：`OPENSPEC.md` 與 `AGENTS.md`  
-> 測試狀態：`npm test` 89/89 全部通過
+> 測試狀態：`npm test` 94/94 全部通過
 
 ---
 
@@ -157,13 +157,18 @@ LocalStorage 鍵名：`koraku-rps-save-v1`
 - **精簡對話視窗**：行動端對話框高度縮至 46~50px，為立繪與戰鬥釋放最大視野。
 - **出拳控制介面**：單手模式高度 30~32px，雙手模式 2 列整齊網格，隱藏實體鍵盤提示。
 - **神諭結果面板**：`.round-oracle` 縮小尺寸與留白（寬度 84~86vw，max-width 280~310px）。
-- **戰績每局獎勵統計**：最近 100 場戰鬥日誌每筆均清楚標記獲得星砂與經驗獎勵。
+### 5.5 存檔紀錄與種子碼跨裝置轉移 (Save Records & Seed Code Management)
+- **種子碼編解碼合約**：採用 UTF-8 安全 Base64 格式，帶有 `KORAKU1_` 版本前綴。
+- **匯出**：呼叫 `store.exportSaveCode()`，將完整 Save Data（等級、裝備、星砂、配點、戰績）序列化輸出。
+- **匯入**：呼叫 `store.importSaveCode(code)`，經過格式驗證與 `sanitizeSave` 後覆蓋當前存檔，自動存入 localStorage 並觸發 `store:changed`。
+- **集中管理**：首頁原「重置存檔」按鈕移入「💾 存檔紀錄」彈窗（`#save-record-modal`）內部危險區域，整合存檔狀態概覽、種子碼匯出複製、種子碼貼上載入與刪檔重置。
 
-### 5.5 測試與打包
+### 5.6 測試與打包
 每次變更後必須執行：
 ```bash
 npm test
 node scripts/build.mjs
 npm run specs:excel
 ```
-確保 90 項測試全數通過且 bundle 打包無誤。
+確保 94 項測試全數通過且 bundle 打包無誤。
+

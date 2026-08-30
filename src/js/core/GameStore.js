@@ -1,5 +1,6 @@
 import { BATTLE_RULES, ITEMS, SKILLS, EQUIPMENT_ITEMS, EQUIPMENT_SLOTS } from "../config/gameConfig.js";
 import { applyExperience, computePlayerStats, xpNeededForLevel } from "../systems/progressionRules.js";
+import { encodeSaveData, decodeSaveData } from "../services/Persistence.js";
 
 const DEFAULT_SAVE = Object.freeze({
   version: 1,
@@ -727,6 +728,24 @@ export class GameStore {
 
   toggleMuted() {
     return this.toggleSfxMuted();
+  }
+
+  exportSaveCode() {
+    return encodeSaveData(this.state);
+  }
+
+  importSaveCode(code) {
+    if (!code || typeof code !== "string" || !code.trim()) {
+      return { ok: false, message: "請輸入有效的種子碼。" };
+    }
+    const decoded = decodeSaveData(code);
+    if (!decoded || typeof decoded !== "object") {
+      return { ok: false, message: "無效或損毀的存檔種子碼。" };
+    }
+    this.state = sanitizeSave(decoded);
+    this.persistence.save(this.state);
+    this.commit("import-save");
+    return { ok: true, message: "存檔已成功載入！" };
   }
 
   reset() {
