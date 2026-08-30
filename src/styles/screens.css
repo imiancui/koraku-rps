@@ -2220,13 +2220,15 @@
 .battle-arena.is-settlement .battle-left-cluster,
 .battle-arena.is-settlement .frozen-hand-badge,
 .battle-arena.is-settlement .round-warning-emoji,
+.battle-arena.is-settlement .avg-dialogue,
 .battle-arena:has(.result-overlay.is-active) .chapter-tag,
 .battle-arena:has(.result-overlay.is-active) .battle-exit,
 .battle-arena:has(.result-overlay.is-active) .combatant-hud,
 .battle-arena:has(.result-overlay.is-active) .round-oracle,
 .battle-arena:has(.result-overlay.is-active) .battle-left-cluster,
 .battle-arena:has(.result-overlay.is-active) .frozen-hand-badge,
-.battle-arena:has(.result-overlay.is-active) .round-warning-emoji {
+.battle-arena:has(.result-overlay.is-active) .round-warning-emoji,
+.battle-arena:has(.result-overlay.is-active) .avg-dialogue {
   opacity: 0 !important;
   visibility: hidden !important;
   pointer-events: none !important;

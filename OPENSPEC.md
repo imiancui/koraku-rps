@@ -218,9 +218,18 @@ xpNeededForLevel(level) = 100 + Math.max(0, level - 1) * 75
 
 ### 6.5 行動端體驗與層級規範 (Mobile UX & Layering Specification)
 - **防雙擊縮放與手勢保護**：Viewport 設定 `user-scalable=no`，全域與按鍵區域設定 `touch-action: manipulation`，QTE 方向鍵設定 `touch-action: none`，JS 攔截 `gesturestart` 與 300ms 內連續快速雙擊，徹底杜絕 QTE 連按時的畫面放大與跑位。
-- **首頁立繪層級**：手機版首頁小樂立繪設定 `z-index: 25` 置於選單按鈕 (`z-index: 10~12`) 前方，並維持 `pointer-events: none` 確保所有選單按鈕靈敏點擊。
-- **首頁頁腳與重置存檔**：`.home-admin-actions` 採取標準流式排版 (`position: static`)，排在戰績統計下方並保有舒適底部安全邊距 (`margin-bottom: 28px; padding-bottom: max(32px, env(safe-area-inset-bottom));`)。
-- **戰鬥結算立繪層級**：結算畫面小樂（預設/泳裝/切西瓜）立繪設定 `z-index: 80; pointer-events: none;`，置於結算遮罩與結算面板之上，清晰突出且不阻礙結算按鈕操作。
+- **彈性頂部 Header (Elastic Header, 360px~430px+ Zero Overflow)**：
+  - 左側 Brand 按鈕支援最小彈性縮減，窄螢幕截斷副標，<=365px 僅保留優雅紅底「狐」字徽章。
+  - 右側保留語言下拉選單（緊湊 30px 高度）、等級（`Lv.X`）、星砂（`✦ X`）與音樂/音效向量切換按鈕（30×30px），總寬 <=290px，在 360px Galaxy 至 430px iPhone Pro Max 上 100% 不溢出、不裁切任何按鈕。
+- **首頁流暢捲動與安全區墊高 (Fluid Scroll & Safe Area)**：
+  - `.home-screen` 支援標準原生平滑滾動（`-webkit-overflow-scrolling: touch; overscroll-behavior-y: contain;`）。
+  - 小樂立繪置於背景層（`z-index: 1; opacity: 0.38;`），選單按鈕精緻化（44px 高度），文字對比清晰且毫無遮蔽。
+  - 底部提供充分的安全區墊高（`padding-bottom: calc(max(44px, env(safe-area-inset-bottom)) + 36px)`），確保 Safari / Chrome 浮動網址列完全不阻礙重置存檔與頁腳按鈕操作。
+- **結算畫面垂直流式容器 (Scrollable Settlement Overlay)**：
+  - 結算與切西瓜時小樂立繪轉為背景氛圍層（`z-index: 1; opacity: 0.22; filter: blur(1px);`），隱藏對話框 `.avg-dialogue`，徹底解決角色立繪遮擋文字、數值、切西瓜時間軸與操作按鈕之問題。
+  - `.result-overlay` 改為標準全螢幕滾動容器（`overflow-y: auto;`），操作按鈕（`min-height: 44px`）採全寬縱向排版，在任何視口高度的手機上均能舒適滾動與點擊。
+- **商店橫向滾動分類選單 (Horizontal Scrollable Filter Bar)**：
+  - 商店 12 個裝備與道具分類標籤改為純 CSS 橫向平滑滾動膠囊列，消除手機端分類按鈕多行折行佔據半版之問題。
 - **戰鬥畫面行動端佈局重構**：
   - **玩家血條移至道具下方**：在行動裝置佈局中，`.battle-left-cluster` 依序為：出拳選擇器 (`.hand-selector`, order 1) -> 道具快捷欄 (`.quick-slots`, order 2) -> 玩家 HP/MP 血條 (`.player-hud`, order 3)，徹底解決血條遮擋敵方 Boss 與神諭框之問題。
   - **精簡化對話視窗**：行動端對話框 `.avg-dialogue` 縮減高度（min-height 46~50px, max-height 56~62px, 緊湊 padding），大幅釋放縱向戰場空間供角色立繪與戰鬥特效展示。

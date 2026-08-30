@@ -295,15 +295,23 @@ $$\text{Theoretical DPS} = \frac{(\text{Base DMG} \times \text{Greatsword Mult} 
 
 ---
 
-## 14. 行動端優化與防雙擊縮放 (Mobile UX & Controls)
+## 14. 行動端優化與 2020+ 手機適配 (Mobile UX & Modern Responsive Layout)
 
 - **手勢與防雙擊縮放**：
   - Viewport 鎖定 `user-scalable=no`。
   - 全域與按鈕 `touch-action: manipulation`，QTE 方向鍵 `touch-action: none`。
   - 攔截 `gesturestart` 與 300ms 快速連續點擊，防止 QTE 方向鍵連按時觸發瀏覽器縮放與位移。
-- **立繪層級調整**：
-  - 手機版首頁小樂立繪 (`z-index: 25`) 置於選單按鈕前，搭配 `pointer-events: none` 確保點擊穿透至底層按鈕。
-  - 戰鬥結算小樂立繪 (`z-index: 80; pointer-events: none;`) 置於結算遮罩之上，醒目呈現不被擋住。
+- **彈性頂部 Header (360px~430px+ 零溢出)**：
+  - 左側 Brand 標題動態縮減，窄螢幕截斷副標，<=365px 僅保留優雅紅底「狐」字徽章。
+  - 右側保留語言選單（緊湊 30px 高度）、等級（`Lv.X`）、星砂（`✦ X`）與向量音樂/音效按鈕（30×30px），總寬 <=290px，在 360px Galaxy 至 430px iPhone Pro Max 上 100% 不溢出、不裁切任何按鈕。
+- **首頁流暢捲動與安全區 (Fluid Scroll & Safe Area)**：
+  - 首頁支援標準原生平滑滾動，小樂立繪置於背景層（`z-index: 1; opacity: 0.38`），選單按鈕精緻化（44px 高度），文字對比清晰且毫無遮蔽。
+  - 底部提供充分的安全區墊高，確保 Safari / Chrome 浮動網址列完全不阻礙重置存檔與頁腳按鈕操作。
+- **結算畫面垂直流式容器 (Scrollable Settlement Overlay)**：
+  - 結算與切西瓜時小樂立繪轉為背景氛圍層（`z-index: 1; opacity: 0.22; filter: blur(1px);`），隱藏對話框 `.avg-dialogue`，徹底解決角色立繪遮擋文字、數值、切西瓜時間軸與操作按鈕之問題。
+  - `.result-overlay` 改為標準全螢幕滾動容器（`overflow-y: auto;`），操作按鈕（`min-height: 44px`）採全寬縱向排版，在任何視口高度的手機上均能舒適滾動與點擊。
+- **商店橫向滾動分類選單 (Horizontal Scrollable Filter Bar)**：
+  - 商店 12 個裝備與道具分類標籤改為純 CSS 橫向平滑滾動膠囊列，消除手機端分類按鈕多行折行佔據半版之問題。
 - **戰鬥畫面行動端佈局優化**：
   - **玩家血條移至道具下方**：`.battle-left-cluster` 排序依序為：出拳選擇器 (`.hand-selector`) -> 道具快捷欄 (`.quick-slots`) -> 玩家 HP/MP 血條 (`.player-hud`，置於最下方)，徹底解決遮擋敵方 Boss 與神諭框之問題。
   - **精簡對話視窗**：行動端對話框 `.avg-dialogue` 高度縮至 46~50px，為戰場立繪釋放更多縱向可視空間。

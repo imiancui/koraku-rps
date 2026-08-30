@@ -7905,7 +7905,7 @@ class AppView {
     if (dimsEl) dimsEl.textContent = dimsMap[currentItem.id] || "Ultra HD";
     if (imgEl) {
       imgEl.src = currentItem.src;
-      imgEl.alt = locCurrentItem.name;
+      imgEl.alt = locItem.name;
     }
 
     if (this.galleryLightboxModal) {
