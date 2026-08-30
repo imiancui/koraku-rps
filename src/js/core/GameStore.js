@@ -81,7 +81,11 @@ const DEFAULT_SAVE = Object.freeze({
     },
     recentBattles: []
   },
-  settings: { muted: false }
+  settings: {
+    muted: false,
+    musicMuted: false,
+    sfxMuted: false
+  }
 });
 
 function freshSave() {
@@ -706,10 +710,21 @@ export class GameStore {
     return { ok: true, message: "已解鎖全部圖鑑立繪！" };
   }
 
+  toggleMusicMuted() {
+    this.state.settings.musicMuted = !this.state.settings.musicMuted;
+    this.commit("toggle-music-muted");
+    return this.state.settings.musicMuted;
+  }
+
+  toggleSfxMuted() {
+    this.state.settings.sfxMuted = !this.state.settings.sfxMuted;
+    this.state.settings.muted = this.state.settings.sfxMuted;
+    this.commit("toggle-sfx-muted");
+    return this.state.settings.sfxMuted;
+  }
+
   toggleMuted() {
-    this.state.settings.muted = !this.state.settings.muted;
-    this.commit("toggle-muted");
-    return this.state.settings.muted;
+    return this.toggleSfxMuted();
   }
 
   reset() {

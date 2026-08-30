@@ -16,9 +16,10 @@ const sound = new SoundSystem(store);
 
 bus.on("battle:ended", (result) => postBattle.open(result));
 bus.on("sound", ({ name }) => sound.play(name));
+bus.on("bgm:scene", ({ scene }) => sound.setBgmScene(scene));
 
 new DialogueController(bus);
-const view = new AppView({ bus, store, battle, postBattle });
+const view = new AppView({ bus, store, battle, postBattle, sound });
 view.init();
 
 if (new URLSearchParams(window.location.search).has("debug")) {

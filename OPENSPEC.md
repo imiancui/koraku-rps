@@ -214,4 +214,22 @@ xpNeededForLevel(level) = 100 + Math.max(0, level - 1) * 75
 - **首頁立繪層級**：手機版首頁小樂立繪設定 `z-index: 25` 置於選單按鈕 (`z-index: 10~12`) 前方，並維持 `pointer-events: none` 確保所有選單按鈕靈敏點擊。
 - **首頁頁腳與重置存檔**：`.home-admin-actions` 採取標準流式排版 (`position: static`)，排在戰績統計下方並保有舒適底部安全邊距 (`margin-bottom: 28px; padding-bottom: max(32px, env(safe-area-inset-bottom));`)。
 - **戰鬥結算立繪層級**：結算畫面小樂（預設/泳裝/切西瓜）立繪設定 `z-index: 80; pointer-events: none;`，置於結算遮罩與結算面板之上，清晰突出且不阻礙結算按鈕操作。
+- **戰鬥畫面行動端佈局重構**：
+  - **玩家血條移至道具下方**：在行動裝置佈局中，`.battle-left-cluster` 依序為：出拳選擇器 (`.hand-selector`, order 1) -> 道具快捷欄 (`.quick-slots`, order 2) -> 玩家 HP/MP 血條 (`.player-hud`, order 3)，徹底解決血條遮擋敵方 Boss 與神諭框之問題。
+  - **精簡化對話視窗**：行動端對話框 `.avg-dialogue` 縮減高度（min-height 46~50px, max-height 56~62px, 緊湊 padding），大幅釋放縱向戰場空間供角色立繪與戰鬥特效展示。
+  - **出拳介面輕量清爽**：手勢按鈕精簡化排版，單手模式按鈕高度 30~32px 具備清晰圖示與字體，雙手模式採用乾淨俐落的 2 列網格排版，隱藏行動端多餘實體鍵盤提示。
+  - **神諭結果面板微型化**：`.round-oracle` 縮小尺寸與留白（寬度 84~86vw，max-width 280~310px，緊湊倒數圈與對決手勢字體），不再遮擋 Boss 血條與小樂面容。
+
+### 6.6 和風程序化 BGM 合成引擎與雙音訊獨立開關 (Web Audio Japanese BGM & Split Audio Controls)
+- **非戰鬥和風舒緩 BGM (`lobby` loop)**：
+  - 採用日本平調子 (Hirajōshi) / 陰旋律 (In-Sen) D 小調五聲音階（D4, F4, G4, A4, C5, D5, F5, A5）。
+  - 合成器架構：古箏撥弦音色（Koto Pluck，雙振盪器加瞬態音高微降模擬琴弦張力）、尺八竹笛（Shakuhachi Flute，柔和正弦波加呼吸頻帶與自然顫音）、神道神社風鈴鈴音（Suzu Bells，高頻金屬共鳴諧波）與底層和風五度低音 Ambient Drone。
+  - 16 小節循環舒緩流暢，涵蓋首頁、選關、養成、商店、圖鑑、戰績與指南介面。
+- **局內戰鬥和風激闘 BGM (`battle` loop)**：
+  - 採用 136 BPM 高節奏日本雲井 (Kumoi) / 陰旋律戰鬥音階。
+  - 合成器架構：大太鼓重擊（O-Daiko Kick，快速音高驟降低頻爆破）、附太鼓清脆緣擊（Tsuke-Daiko Rimshot，帶通噪聲衝擊）、三味線疾走琶音（Shamisen Riff，鋸齒波加帶通共振濾波）、律動張力低音（Tension Bass）與拍子木（Hyoshigi，日本傳統木板清脆打擊）。
+  - 8 小節高昂緊湊戰鬥循環，倒數與出拳時激發對決張力。
+- **音樂與音效分立控制**：
+  - 頂部導航列獨立配置 `#music-toggle`（🎵 背景音樂）與 `#sound-toggle`（🔊 遊戲音效）按鈕。
+  - 存檔設定資料結構獨立保存 `settings.musicMuted` 與 `settings.sfxMuted`，支援即時獨立切換、靜音過渡滑順無爆音，並全面支援繁中、簡中、英文、日文在地化通知提示。
 

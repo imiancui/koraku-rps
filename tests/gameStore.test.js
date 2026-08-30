@@ -48,3 +48,27 @@ test("商店扣除 100 星砂並增加指定藥水", () => {
   assert.equal(store.snapshot().coins, 0);
   assert.equal(store.snapshot().inventory.mpPotion, 1);
 });
+
+test("音樂與音效開關獨立切換與持久化儲存", () => {
+  const persistence = new MemoryPersistence();
+  const store = new GameStore(new EventBus(), persistence);
+  
+  assert.equal(store.snapshot().settings.musicMuted, false);
+  assert.equal(store.snapshot().settings.sfxMuted, false);
+
+  const musicMuted = store.toggleMusicMuted();
+  assert.equal(musicMuted, true);
+  assert.equal(store.snapshot().settings.musicMuted, true);
+  assert.equal(store.snapshot().settings.sfxMuted, false);
+
+  const sfxMuted = store.toggleSfxMuted();
+  assert.equal(sfxMuted, true);
+  assert.equal(store.snapshot().settings.musicMuted, true);
+  assert.equal(store.snapshot().settings.sfxMuted, true);
+
+  // 重新載入時狀態正確復原
+  const reloadedStore = new GameStore(new EventBus(), persistence);
+  assert.equal(reloadedStore.snapshot().settings.musicMuted, true);
+  assert.equal(reloadedStore.snapshot().settings.sfxMuted, true);
+});
+

@@ -382,23 +382,58 @@
 
   .round-oracle {
     left: 50%;
-    top: 128px;
-    width: calc(100% - 24px);
-    max-width: 440px;
-    padding: 10px 14px 12px;
+    top: 50px;
+    width: min(84vw, 310px);
+    padding: 5px 10px 6px;
+    border: 1px solid rgba(216, 182, 106, 0.35);
+    background: linear-gradient(135deg, rgba(11, 13, 21, 0.94), rgba(25, 28, 41, 0.88));
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
     transform: translateX(-50%);
   }
 
+  .round-label {
+    margin-bottom: 2px;
+    font-size: 7px;
+    letter-spacing: 0.2em;
+  }
+
+  .round-label b {
+    font-size: 9px;
+  }
+
+  .hand-versus {
+    grid-template-columns: 1fr 22px 1fr;
+    gap: 0 4px;
+  }
+
   .hand-versus strong {
-    font-size: 26px;
+    font-size: 20px;
+  }
+
+  .hand-versus b {
+    font-size: 10px;
+  }
+
+  .hand-versus small {
+    font-size: 6.5px;
+  }
+
+  .hand-versus > span {
+    width: 18px;
+    height: 18px;
+    font-size: 8.5px;
   }
 
   .round-countdown {
-    right: 6px;
+    right: -8px;
     top: 50%;
-    width: 56px;
-    height: 56px;
+    width: 36px;
+    height: 36px;
     transform: translateY(-50%);
+  }
+
+  .round-countdown b {
+    font-size: 13px;
   }
 
   .round-countdown small {
@@ -421,69 +456,125 @@
   }
 
   .battle-left-cluster {
+    display: flex;
+    flex-direction: column;
     left: 10px;
-    bottom: 118px;
-    width: min(54vw, 240px);
-    gap: 8px;
+    bottom: 72px;
+    width: min(52vw, 220px);
+    gap: 6px;
+    z-index: 35;
+  }
+
+  .hand-selector {
+    order: 1;
+    position: static;
+    top: auto;
+    width: 100%;
+  }
+
+  .quick-slots {
+    order: 2;
+    position: static;
+    width: 100%;
+  }
+
+  .player-hud {
+    order: 3;
+    position: static;
+    width: 100%;
+    margin-top: 2px;
   }
 
   .auto-battle-hud-banner {
     right: 10px;
-    bottom: 118px;
+    bottom: 72px;
     padding: 5px 12px;
     gap: 8px;
     font-size: 10px;
   }
 
-  .hand-button {
-    grid-template-columns: 34px 1fr 22px;
-    min-height: 38px;
-    padding: 3px 8px;
-    background: rgba(12, 15, 23, 0.88);
+  .panel-kicker {
+    font-size: 7.5px;
+    margin-bottom: 2px;
+    letter-spacing: 0.12em;
   }
 
-  .hand-selector-dual {
-    grid-template-columns: 1fr 1fr;
+  .hand-selector-group {
     gap: 4px;
   }
 
-  .dual-hand-sub-column .hand-button {
-    grid-template-columns: 24px 1fr 18px;
+  .hand-button {
+    grid-template-columns: 28px 1fr auto;
     min-height: 32px;
-    padding: 2px 4px;
-  }
-
-  .dual-hand-sub-column .hand-button span {
-    font-size: 10px;
-  }
-
-  .dual-hand-sub-column .hand-button i {
-    font-size: 15px;
+    padding: 2px 8px;
+    background: rgba(12, 15, 23, 0.9);
+    border-radius: 4px;
   }
 
   .hand-button i {
-    font-size: 20px;
+    font-size: 18px;
   }
 
   .hand-button span {
     font-size: 11px;
+    letter-spacing: 0.1em;
+  }
+
+  .hand-button kbd {
+    display: none;
+  }
+
+  .hand-selector-dual {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    width: 100%;
+  }
+
+  .dual-hand-sub-column {
+    gap: 3px;
+  }
+
+  .dual-hand-sub-column .hand-button {
+    grid-template-columns: 20px 1fr;
+    min-height: 28px;
+    padding: 2px 4px;
+  }
+
+  .dual-hand-sub-column .hand-button span {
+    font-size: 9.5px;
+  }
+
+  .dual-hand-sub-column .hand-button i {
+    font-size: 14px;
+  }
+
+  .dual-hand-sub-column .hand-button kbd {
+    display: none;
+  }
+
+  .quick-label {
+    font-size: 6.5px;
+    margin-bottom: 2px;
+    letter-spacing: 0.12em;
   }
 
   .slot-grid {
-    grid-template: repeat(3, 44px) / repeat(3, 44px);
+    grid-template: repeat(3, 38px) / repeat(3, 38px);
   }
 
   .soul-slot {
-    width: 38px;
-    height: 38px;
+    width: 34px;
+    height: 34px;
+    margin: 1px;
   }
 
   .slot-content {
-    inset: -12px;
+    inset: -8px;
   }
 
   .slot-content i {
-    font-size: 15px;
+    font-size: 14px;
   }
 
   .slot-content small {
@@ -494,40 +585,76 @@
     font-size: 7px;
   }
 
+  .slot-kbd {
+    display: none;
+  }
+
   .hud-name {
-    gap: 7px;
+    gap: 6px;
+    margin-bottom: 3px;
   }
 
   .hud-name > span {
-    width: 28px;
-    height: 28px;
-    font-size: 13px;
+    width: 24px;
+    height: 24px;
+    font-size: 11px;
   }
 
   .hud-name b {
-    font-size: 13px;
+    font-size: 12px;
   }
 
   .hud-name em {
     font-size: 9px;
   }
 
+  .ornate-meter {
+    height: 11px;
+    padding: 2px;
+  }
+
+  .resource-row {
+    gap: 6px;
+    margin-top: 3px;
+  }
+
+  .resource-row > span {
+    font-size: 8px;
+  }
+
+  .resource-row em {
+    font-size: 9px;
+  }
+
   .avg-dialogue {
-    bottom: 8px;
+    bottom: 6px;
     width: calc(100% - 16px);
-    min-height: 100px;
-    padding: 27px 26px 16px;
+    min-height: 50px;
+    max-height: 62px;
+    padding: 13px 18px 5px 52px;
+    border: 1px solid rgba(216, 182, 106, 0.45);
   }
 
   .avg-dialogue > span {
-    left: 22px;
-    min-width: 94px;
-    padding: 7px 15px;
-    font-size: 11px;
+    left: 10px;
+    top: -9px;
+    min-width: 44px;
+    padding: 2px 8px;
+    font-size: 10px;
+    letter-spacing: 0.08em;
   }
 
   .avg-dialogue p {
-    font-size: 12px;
+    font-size: 11px;
+    line-height: 1.35;
+    max-height: 34px;
+    overflow: hidden;
+  }
+
+  .avg-dialogue .dialogue-next {
+    right: 10px;
+    bottom: 4px;
+    font-size: 9px;
   }
 
   .qte-panel {
@@ -566,35 +693,6 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 8px;
-  }
-
-  .round-oracle {
-    top: 72px;
-    width: min(88vw, 360px);
-    padding: 8px 12px;
-  }
-
-  .round-label {
-    margin-bottom: 5px;
-    font-size: 7.5px;
-  }
-
-  .hand-versus strong {
-    font-size: 26px;
-  }
-
-  .round-countdown {
-    width: 48px;
-    height: 48px;
-    right: -16px;
-  }
-
-  .round-countdown b {
-    font-size: 18px;
-  }
-
-  .round-countdown small {
-    display: none;
   }
 
   .result-overlay {
@@ -689,43 +787,47 @@
   }
 
   .round-oracle {
-    top: 66px;
-    width: min(92vw, 305px);
-    padding: 5px 8px 6px;
+    top: 46px;
+    width: min(86vw, 280px);
+    padding: 3px 6px 4px;
   }
 
   .round-label {
-    margin-bottom: 3px;
-    font-size: 7px;
+    margin-bottom: 1px;
+    font-size: 6.5px;
   }
 
   .hand-versus {
-    grid-template-columns: 1fr 24px 1fr;
-    gap: 0 4px;
+    grid-template-columns: 1fr 18px 1fr;
+    gap: 0 2px;
   }
 
   .hand-versus strong {
-    font-size: 20px;
+    font-size: 16px;
   }
 
   .hand-versus b {
-    font-size: 10px;
+    font-size: 8.5px;
+  }
+
+  .hand-versus small {
+    font-size: 6px;
   }
 
   .hand-versus > span {
-    width: 20px;
-    height: 20px;
-    font-size: 9px;
+    width: 16px;
+    height: 16px;
+    font-size: 8px;
   }
 
   .round-countdown {
-    width: 38px;
-    height: 38px;
-    right: -10px;
+    width: 30px;
+    height: 30px;
+    right: -8px;
   }
 
   .round-countdown b {
-    font-size: 14px;
+    font-size: 11px;
   }
 
   .round-countdown small {
@@ -733,34 +835,47 @@
   }
 
   .battle-left-cluster {
-    left: 8px;
-    bottom: 125px;
-    width: min(48vw, 175px);
-    gap: 8px;
+    display: flex;
+    flex-direction: column;
+    left: 6px;
+    bottom: 66px;
+    width: min(50vw, 175px);
+    gap: 4px;
+    z-index: 35;
   }
 
   .hand-selector {
+    order: 1;
     position: static;
     top: auto;
     width: 100%;
   }
 
+  .quick-slots {
+    order: 2;
+    position: static;
+    width: 100%;
+  }
+
+  .player-hud {
+    order: 3;
+    position: static;
+    width: 100%;
+    margin-top: 1px;
+  }
+
   .battle-character-wrap {
     right: -15%;
     width: 112%;
-    bottom: 75px;
+    bottom: 60px;
   }
 
   .battle-arena.is-settlement .battle-character-wrap,
   .battle-arena:has(.result-overlay.is-active) .battle-character-wrap {
-    bottom: 220px;
+    bottom: 200px;
     right: -8%;
     width: 112%;
     height: 72%;
-  }
-
-  .player-hud {
-    width: 100%;
   }
 
   .player-hud .hud-name > span,
@@ -768,8 +883,36 @@
     display: none;
   }
 
+  .avg-dialogue {
+    bottom: 4px;
+    width: calc(100% - 12px);
+    min-height: 46px;
+    max-height: 56px;
+    padding: 10px 14px 4px 44px;
+  }
+
+  .avg-dialogue > span {
+    left: 8px;
+    top: -8px;
+    min-width: 38px;
+    padding: 2px 6px;
+    font-size: 9px;
+  }
+
+  .avg-dialogue p {
+    font-size: 10.5px;
+    line-height: 1.3;
+    max-height: 28px;
+  }
+
+  .avg-dialogue .dialogue-next {
+    right: 8px;
+    bottom: 3px;
+    font-size: 8px;
+  }
+
   .result-overlay {
-    padding-bottom: 106px;
+    padding-bottom: 100px;
   }
 
   .result-card {

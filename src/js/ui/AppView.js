@@ -12,11 +12,12 @@ const $ = (selector) => document.querySelector(selector);
 const clampPercent = (value, max) => Math.max(0, Math.min(100, max ? (value / max) * 100 : 0));
 
 export class AppView {
-  constructor({ bus, store, battle, postBattle }) {
+  constructor({ bus, store, battle, postBattle, sound }) {
     this.bus = bus;
     this.store = store;
     this.battle = battle;
     this.postBattle = postBattle;
+    this.sound = sound;
     this.currentScreen = "home";
     this.activeGrowthTab = "stats";
     this.activeGuideTab = "basics";
@@ -671,9 +672,15 @@ export class AppView {
       return;
     }
 
+    if (event.target.closest("#music-toggle")) {
+      const muted = this.store.toggleMusicMuted();
+      this.showToast(muted ? I18n.t("ui.musicOffToast") : I18n.t("ui.musicOnToast"));
+      return;
+    }
+
     if (event.target.closest("#sound-toggle")) {
-      const muted = this.store.toggleMuted();
-      this.showToast(muted ? "音效已關閉。" : "音效已開啟。");
+      const muted = this.store.toggleSfxMuted();
+      this.showToast(muted ? I18n.t("ui.sfxOffToast") : I18n.t("ui.sfxOnToast"));
       return;
     }
 
@@ -895,6 +902,11 @@ export class AppView {
   }
 
   navigate(screenName, options = {}) {
+    this.currentScreen = screenName;
+    this.bus.emit("bgm:scene", { scene: screenName === "battle" ? "battle" : "lobby" });
+    if (this.sound) {
+      this.sound.setBgmScene(screenName === "battle" ? "battle" : "lobby");
+    }
     if (screenName !== "battle") {
       this.hideFloatingWatermelon();
       this.postBattle?.closeAutoWatermelon?.();
@@ -1011,8 +1023,27 @@ export class AppView {
     $("#record-wins").textContent = state.records.wins;
     $("#record-losses").textContent = state.records.losses;
     $("#record-stage").textContent = state.records.bestStage ? I18n.getLocalizedStage(STAGES.find(s => s.id === state.records.bestStage) || { chapter: "第 " + state.records.bestStage + " 章" }).chapter : "—";
-    $("#sound-toggle").textContent = state.settings.muted ? "×" : "♪";
-    $("#sound-toggle").setAttribute("aria-label", state.settings.muted ? "開啟音效" : "關閉音效");
+    
+    const isMusicMuted = Boolean(state.settings?.musicMuted);
+    const isSfxMuted = Boolean(state.settings?.sfxMuted ?? state.settings?.muted);
+
+    const musicToggle = $("#music-toggle");
+    if (musicToggle) {
+      musicToggle.textContent = isMusicMuted ? "🔇" : "🎵";
+      musicToggle.setAttribute("aria-label", isMusicMuted ? I18n.t("ui.musicToggle") : I18n.t("ui.musicToggle"));
+      musicToggle.classList.toggle("is-muted", isMusicMuted);
+    }
+
+    const soundToggle = $("#sound-toggle");
+    if (soundToggle) {
+      soundToggle.textContent = isSfxMuted ? "🔇" : "🔊";
+      soundToggle.setAttribute("aria-label", isSfxMuted ? I18n.t("ui.sfxToggle") : I18n.t("ui.sfxToggle"));
+      soundToggle.classList.toggle("is-muted", isSfxMuted);
+    }
+
+    if (this.sound) {
+      this.sound.updateMusicState();
+    }
     this.renderHomeRecords(state);
     this.renderStages(state);
     this.renderShop(state);

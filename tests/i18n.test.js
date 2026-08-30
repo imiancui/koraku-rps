@@ -202,5 +202,11 @@ test("I18n 完整性檢查：繁中、簡中、英文、日文所有關卡、道
     assert.ok(i18n.t("ui.cheatAuthError"));
     assert.ok(i18n.t("ui.cheatAuthSuccess"));
     assert.ok(i18n.t("ui.unlock2PHint"));
+    assert.ok(i18n.t("ui.musicToggle"));
+    assert.ok(i18n.t("ui.musicOnToast"));
+    assert.ok(i18n.t("ui.musicOffToast"));
+    assert.ok(i18n.t("ui.sfxToggle"));
+    assert.ok(i18n.t("ui.sfxOnToast"));
+    assert.ok(i18n.t("ui.sfxOffToast"));
   }
 });

@@ -360,7 +360,8 @@
       <li><a href="#section-watermelon" class="nav-link">🍉 蒙眼切西瓜小遊戲</a></li>
       <li><a href="#section-dps" class="nav-link">📊 歷程紀錄與 DPS 戰力</a></li>
       <li><a href="#section-cheats" class="nav-link">🛠️ 除錯作弊與密碼驗證</a></li>
-      <li><a href="#section-mobile" class="nav-link">📱 行動端體驗與防縮放</a></li>
+      <li><a href="#section-mobile" class="nav-link">📱 行動端體驗與排版優化</a></li>
+      <li><a href="#section-audio" class="nav-link">🎵 和風 BGM 與雙音訊開關</a></li>
       <li><a href="#section-i18n" class="nav-link">🌐 四國語系在地化</a></li>
     </ul>
   </aside>
@@ -704,8 +705,22 @@
 
       <!-- Section 14: Mobile UX -->
       <section id="section-mobile" class="section-card">
-        <h2 class="section-title">📱 行動端體驗與防縮放優化</h2>
+        <h2 class="section-title">📱 行動端體驗與戰鬥排版優化</h2>
         <div class="grid-2">
+          <div class="card">
+            <div class="card-title">
+              <span>戰鬥畫面排版重構</span>
+              <span class="badge badge-emerald">玩家血條置於道具下方</span>
+            </div>
+            <p>手機戰鬥畫面將玩家血條移至道具快捷欄下方，縮減神諭出拳結果框 (round-oracle) 與對話視窗 (avg-dialogue) 佔用高度，大幅釋放縱向戰場視野。</p>
+          </div>
+          <div class="card">
+            <div class="card-title">
+              <span>出拳控制與手勢優化</span>
+              <span class="badge badge-gold">清爽雙手網格 & 緊湊單手</span>
+            </div>
+            <p>單手出拳按鈕高度緊湊化，雙手出拳按鈕整齊雙欄排版，隱藏多餘實體鍵盤標籤；全域鎖定防雙擊放大與手勢防誤觸。</p>
+          </div>
           <div class="card">
             <div class="card-title">
               <span>防雙擊縮放與手勢保護</span>
@@ -723,7 +738,35 @@
         </div>
       </section>
 
-      <!-- Section 15: I18n -->
+      <!-- Section 15: Audio & BGM -->
+      <section id="section-audio" class="section-card">
+        <h2 class="section-title">🎵 和風程序化 BGM 合成與獨立開關</h2>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">
+              <span>非戰鬥舒緩 BGM (Lobby)</span>
+              <span class="badge badge-emerald">平調子五聲音階 (62 BPM)</span>
+            </div>
+            <p>純 Web Audio API 實現古箏撥弦、尺八竹笛、神道風鈴與環境五度和聲 Ambient Drone，營造悠閒日式神社氛圍。</p>
+          </div>
+          <div class="card">
+            <div class="card-title">
+              <span>局內戰鬥激闘 BGM (Battle)</span>
+              <span class="badge badge-crimson">太鼓與三味線 (136 BPM)</span>
+            </div>
+            <p>大太鼓低頻重擊、附太鼓清脆緣擊、三味線疾走琶音、張力 Bass 與拍子木，打造高燃猜拳對決節奏。</p>
+          </div>
+          <div class="card">
+            <div class="card-title">
+              <span>雙音訊獨立開關</span>
+              <span class="badge badge-gold">🎵 BGM / 🔊 SFX 分開控制</span>
+            </div>
+            <p>頂部獨立配置音樂與音效按鈕，存檔分別保存 <code>settings.musicMuted</code> 與 <code>settings.sfxMuted</code>，支援即時靜音與全語系提示。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 16: I18n -->
       <section id="section-i18n" class="section-card">
         <h2 class="section-title">🌐 四國語系在地化</h2>
         <p>全面支援繁體中文 (<code>zh-Hant</code>)、簡體中文 (<code>zh-Hans</code>)、英文 (<code>en</code>)、日文 (<code>ja</code>)。點擊遊戲主畫面語系按鈕可即時循環切換，並自動保存至本地儲存空間。</p>

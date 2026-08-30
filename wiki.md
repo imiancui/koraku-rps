@@ -299,11 +299,32 @@ $$\text{Theoretical DPS} = \frac{(\text{Base DMG} \times \text{Greatsword Mult} 
 - **立繪層級調整**：
   - 手機版首頁小樂立繪 (`z-index: 25`) 置於選單按鈕前，搭配 `pointer-events: none` 確保點擊穿透至底層按鈕。
   - 戰鬥結算小樂立繪 (`z-index: 80; pointer-events: none;`) 置於結算遮罩之上，醒目呈現不被擋住。
+- **戰鬥畫面行動端佈局優化**：
+  - **玩家血條移至道具下方**：`.battle-left-cluster` 排序依序為：出拳選擇器 (`.hand-selector`) -> 道具快捷欄 (`.quick-slots`) -> 玩家 HP/MP 血條 (`.player-hud`，置於最下方)，徹底解決遮擋敵方 Boss 與神諭框之問題。
+  - **精簡對話視窗**：行動端對話框 `.avg-dialogue` 高度縮至 46~50px，為戰場立繪釋放更多縱向可視空間。
+  - **清爽出拳控制**：手勢按鈕高度精簡至 30~32px，雙手模式採用 2 列整齊網格，隱藏實體鍵盤提示。
+  - **神諭結果面板微型化**：`.round-oracle` 縮小尺寸與留白（寬度 84~86vw，max-width 280~310px），不再遮擋 Boss 血條與小樂面容。
 - **版面安全邊距**：重置存檔按鈕與頁腳資訊採取標準流式排版，維持底部舒適間距，不遮擋選單按鈕。
 
 ---
 
-## 15. 在地化翻譯與語系切換
+## 15. 和風程序化 BGM 合成引擎與雙音訊獨立開關 (Web Audio BGM & Split Audio Controls)
+
+- **非戰鬥和風舒緩 BGM (`lobby` loop)**：
+  - 採用日本平調子 (Hirajōshi) / 陰旋律 D 小調五聲音階（D4, F4, G4, A4, C5, D5, F5, A5）。
+  - 合成器架構：古箏撥弦（Koto Pluck）、尺八竹笛（Shakuhachi Flute）、神道神社風鈴鈴音（Suzu Bells）與五度 Ambient Drone。
+  - 16 小節舒緩循環（62 BPM），涵蓋首頁、選關、養成、商店、圖鑑、戰績與指南介面。
+- **局內戰鬥和風激闘 BGM (`battle` loop)**：
+  - 採用 136 BPM 高節奏日本雲井 (Kumoi) / 陰旋律戰鬥音階。
+  - 合成器架構：大太鼓重擊（O-Daiko Kick）、附太鼓緣擊（Tsuke-Daiko Rimshot）、三味線疾走琶音（Shamisen Riff）、律動張力低音（Tension Bass）與拍子木（Hyoshigi）。
+  - 8 小節高昂緊湊戰鬥循環，倒數與出拳時激發對決張力。
+- **音樂與音效分立控制**：
+  - 頂部導航列獨立配置 `#music-toggle`（🎵 背景音樂）與 `#sound-toggle`（🔊 遊戲音效）按鈕。
+  - 存檔設定資料結構獨立保存 `settings.musicMuted` 與 `settings.sfxMuted`，支援即時獨立切換、靜音過渡滑順無爆音。
+
+---
+
+## 16. 在地化翻譯與語系切換
 
 - 全系統字典支援繁體中文 (`zh-Hant`)、簡體中文 (`zh-Hans`)、英文 (`en`)、日文 (`ja`)。
 - 支援自動探測瀏覽器語系與未知語系英文回退。

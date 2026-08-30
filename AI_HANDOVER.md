@@ -126,7 +126,7 @@ LocalStorage 鍵名：`koraku-rps-save-v1`
     "qteStats": { "totalAttempts": 0, "totalSuccesses": 0, "byStage": { "1": {"attempts":0,"successes":0}, "2": {"attempts":0,"successes":0}, "3": {"attempts":0,"successes":0}, "4": {"attempts":0,"successes":0} } }
   },
   "recentBattles": [],
-  "settings": { "muted": false }
+  "settings": { "muted": false, "musicMuted": false, "sfxMuted": false }
 }
 ```
 
@@ -138,32 +138,23 @@ LocalStorage 鍵名：`koraku-rps-save-v1`
 - 所有數值定義集中在 `src/js/config/gameConfig.js`（關卡 HP、裝備屬性與價格、技能消耗、升等公式、基礎攻防）。
 - **嚴禁** 在 `AppView.js` 或 UI DOM 中寫死平衡數值。
 
-### 5.2 新增裝備
-1. 在 `gameConfig.js` 的 `EQUIPMENT_ITEMS` 加入定義（包含 `slotType`, `twoHanded`, `stats`, `effect`, `price`）。
-2. 在 `I18n.js` 的四國語言字典（`zh-Hant`, `zh-Hans`, `en`, `ja`）中的 `equipment` 與 `equipmentDesc` 新增對應翻譯。
-3. 若有新特效類型，在 `BattleSystem.js`（如 `getAllEquipEffects`）與 `GameStore.getTheoreticalDPS` 實作特效邏輯。
-4. 撰寫單元測試覆蓋新裝備之購買、穿戴、互斥與戰鬥特效。
+### 5.2 音樂與音效架構 (Procedural Web Audio BGM & SFX)
+- `SoundSystem.js` 採用純 Web Audio API 實現程序化和風音樂合成（0 外掛音檔，秒速載入）：
+  - **Lobby 和風舒緩 BGM**：D 小調平調子五聲音階、古箏撥弦、尺八呼吸笛音、神道風鈴與五度 Ambient Drone（62 BPM，16 小節舒緩循環）。
+  - **Battle 和風激闘 BGM**：136 BPM 雲井音階、大太鼓重擊、附太鼓緣擊、三味線疾走琶音、張力 Bass 與拍子木（8 小節戰鬥循環）。
+  - **獨立開關**：頂部配置 `#music-toggle`（🎵 / 🔇）與 `#sound-toggle`（🔊 / 🔇），狀態分別持久化於 `settings.musicMuted` 與 `settings.sfxMuted`。
 
-### 5.3 新增技能
-1. 在 `gameConfig.js` 的 `SKILLS` 定義技能參數。
-2. 在 `GameStore.allocateSkill` 加入 SP 消耗與等級前置限制。
-3. 在 `BattleSystem.js` 實作戰鬥邏輯（例如在平手或出拳階段觸發）。
-4. 在 `I18n.js` 四語系字典新增技能名稱與說明。
+### 5.3 行動端佈局與圖層 (Mobile Battle Screen Layout)
+- **玩家血條移至道具下方**：行動端 `.battle-left-cluster` 排序依序為：出拳選擇器 -> 道具快捷欄 -> 玩家 HP/MP 條（放置於最下方），不遮擋 Boss 與神諭。
+- **精簡對話視窗**：行動端對話框高度縮至 46~50px，為立繪與戰鬥釋放最大視野。
+- **出拳控制介面**：單手模式高度 30~32px，雙手模式 2 列整齊網格，隱藏實體鍵盤提示。
+- **神諭結果面板**：`.round-oracle` 縮小尺寸與留白（寬度 84~86vw，max-width 280~310px）。
 
-### 5.4 圖鑑與外觀擴充
-1. 在 `gameConfig.js` 的 `GALLERY_ITEMS` 加入立繪條目（目前包含 `koraku_default`, `koraku_2p`, `swimsuit_default`, `swimsuit_watermelon`）。
-2. 在 `I18n.js` 四語系字典（`zh-Hant`, `zh-Hans`, `en`, `ja`）中的 `gallery` 新增對應立繪名稱、標籤與描述。
-3. 在 `AppView.js` 的 `isGalleryItemUnlocked` 設定對應解鎖判定條件（如 2P 色通關第四關解鎖、預設直接解鎖）。
-
-### 5.5 作弊除錯與密碼保護
-- 點擊首頁「⚙️ 測試調試 / 作弊選單」按鈕，觸發密碼視窗輸入 `8989` 進行驗證，通過後開啟作弊面板。
-- 支援快速鍵（1000ms 內連續按數字鍵 8 四次）。
-
-### 5.6 測試與打包
+### 5.4 測試與打包
 每次變更後必須執行：
 ```bash
 npm test
 node scripts/build.mjs
 npm run specs:excel
 ```
-確保 89 項測試全數通過且 bundle 打包無誤。
+確保 90 項測試全數通過且 bundle 打包無誤。
