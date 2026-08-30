@@ -156,6 +156,20 @@ export const SKILLS = Object.freeze({
 
 export const GALLERY_ITEMS = Object.freeze([
   {
+    id: "koraku_default",
+    name: "巫女社・狐娘小樂",
+    variantName: "預設造型",
+    src: ASSETS.default,
+    description: "守護朱鳥居的狐娘小樂。一身俐落的機甲巫女裝扮，總是帶著自信的微笑迎接挑戰者。"
+  },
+  {
+    id: "koraku_2p",
+    name: "鏡界・白金小樂",
+    variantName: "2P色小樂",
+    src: ASSETS.final,
+    description: "跨越鏡界之後顯現的白金姿態。銀髮與冰藍光芒交織，唯有突破終章試煉者方能得見。"
+  },
+  {
     id: "swimsuit_default",
     name: "夏日祭・清涼泳裝",
     variantName: "預設泳裝",

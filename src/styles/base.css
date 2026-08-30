@@ -13,6 +13,8 @@ body {
   min-height: 100%;
   margin: 0;
   background: var(--ink-950);
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
 }
 
 body {
@@ -21,11 +23,32 @@ body {
   color: var(--paper);
   font-family: var(--sans);
   -webkit-font-smoothing: antialiased;
+  touch-action: manipulation;
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
+  touch-action: manipulation;
+}
+
+button,
+.menu-command,
+.hand-button,
+.action-button,
+.qte-pad button,
+.qte-arrow,
+.dual-qte-touch-controls button {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.qte-pad,
+.dual-qte-touch-controls {
+  touch-action: none;
 }
 
 button {

@@ -701,6 +701,7 @@ export class GameStore {
 
   cheatUnlockGallery() {
     this.state.records.unlockedSwimsuit = true;
+    this.state.records.unlockedGalleryAll = true;
     this.commit("cheat-unlock-gallery");
     return { ok: true, message: "已解鎖全部圖鑑立繪！" };
   }

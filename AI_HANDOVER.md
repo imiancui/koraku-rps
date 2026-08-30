@@ -4,7 +4,7 @@
 > 專案根目錄：`D:\game-dev\New-game-project-4`  
 > 最新更新日期：2026-08-30  
 > 基準規範：`OPENSPEC.md` 與 `AGENTS.md`  
-> 測試狀態：`npm test` 87/87 全部通過
+> 測試狀態：`npm test` 89/89 全部通過
 
 ---
 
@@ -13,8 +13,9 @@
 本專案為純原生（Vanilla ES Modules / HTML5 / CSS3 / Web Audio API）架構的日式 ACGN 猜拳 RPG 對決遊戲。無前端框架、無外部執行期套件相依，可直接於本機或透過 GitHub Pages 部署運行。
 
 ### 1.1 核心命令
-- **執行測試**：`npm test`（Node.js 原生測試執行器，85 項測試）
+- **執行測試**：`npm test`（Node.js 原生測試執行器，89 項測試）
 - **打包發布**：`npm run build` 或 `node scripts/build.mjs`（生成 `src/js/bundle.js`）
+- **產生 Excel 規格表**：`npm run specs:excel`
 - **本地伺服器**：`npm run dev` 或 `npm start`（預設監聽 `http://127.0.0.1:4173/`）
 - **Tailscale 共享**：`npm run start:tailscale`
 
@@ -26,7 +27,7 @@
 src/
 ├── js/
 │   ├── config/
-│   │   └── gameConfig.js       # 全域數值設定（關卡、12格裝備、技能、道具、資產路徑、八方向）
+│   │   └── gameConfig.js       # 全域數值設定（關卡、12格裝備、技能、道具、資產路徑、八方向、圖鑑）
 │   ├── core/
 │   │   ├── EventBus.js         # 發布/訂閱事件中樞
 │   │   ├── GameStore.js        # 存檔、星砂、裝備背包、屬性推導、歷程紀錄、DPS 與作弊
@@ -43,17 +44,17 @@ src/
 │   │   ├── PostBattleSystem.js # 戰後事件、泳裝切換、三刀切西瓜、自動刷關浮層切西瓜
 │   │   └── SoundSystem.js      # Web Audio API 音效合成（拳擊、撫摸、勝利、失敗）
 │   ├── ui/
-│   │   ├── AppView.js          # DOM 渲染、畫面導航、紙娃娃介面、浮動切西瓜、作弊面板
+│   │   ├── AppView.js          # DOM 渲染、畫面導航、紙娃娃介面、浮動切西瓜、作弊面板、手勢防縮放
 │   │   └── DialogueController.js # AVG 逐字打字機台詞與角色說話跳動動態
 │   ├── main.js                 # 系統組裝與進入點
 │   └── bundle.js               # 打包產物
 └── styles/
     ├── tokens.css              # 色彩主題、字型、圓角、陰影
-    ├── base.css                # 重置樣式與排版基底
+    ├── base.css                # 重置樣式、排版基底、touch-action 防雙擊縮放
     ├── components.css          # 按鈕、卡片、模態框、HUD
     ├── screens.css             # 各大主畫面（首頁/關卡/商店/裝備/圖鑑/戰鬥/歷程/浮動切西瓜）
     ├── animations.css          # 受擊震動、說話跳動、QTE 特效、雷擊/燃燒動畫
-    └── responsive.css          # 780px/390px 行動版適配
+    └── responsive.css          # 780px/430px 行動版適配（首頁立繪置前、結算立繪頂層、流式頁腳）
 ```
 
 ---
@@ -112,7 +113,7 @@ LocalStorage 鍵名：`koraku-rps-save-v1`
   },
   "inventoryEquipment": [],
   "records": {
-    "wins": 0, "losses": 0, "bestStage": 0, "unlockedSwimsuit": false,
+    "wins": 0, "losses": 0, "bestStage": 0, "unlockedSwimsuit": false, "unlockedGalleryAll": false,
     "clearedStages": [], "totalCoinsEarned": 0, "totalXpEarned": 0,
     "totalBattles": 0, "manualWins": 0, "manualLosses": 0,
     "autoWins": 0, "autoLosses": 0, "watermelonStock": 0, "watermelonSlices": 0,
@@ -148,10 +149,20 @@ LocalStorage 鍵名：`koraku-rps-save-v1`
 3. 在 `BattleSystem.js` 實作戰鬥邏輯（例如在平手或出拳階段觸發）。
 4. 在 `I18n.js` 四語系字典新增技能名稱與說明。
 
-### 5.4 測試與打包
+### 5.4 圖鑑與外觀擴充
+1. 在 `gameConfig.js` 的 `GALLERY_ITEMS` 加入立繪條目（目前包含 `koraku_default`, `koraku_2p`, `swimsuit_default`, `swimsuit_watermelon`）。
+2. 在 `I18n.js` 四語系字典（`zh-Hant`, `zh-Hans`, `en`, `ja`）中的 `gallery` 新增對應立繪名稱、標籤與描述。
+3. 在 `AppView.js` 的 `isGalleryItemUnlocked` 設定對應解鎖判定條件（如 2P 色通關第四關解鎖、預設直接解鎖）。
+
+### 5.5 作弊除錯與密碼保護
+- 點擊首頁「⚙️ 測試調試 / 作弊選單」按鈕，觸發密碼視窗輸入 `8989` 進行驗證，通過後開啟作弊面板。
+- 支援快速鍵（1000ms 內連續按數字鍵 8 四次）。
+
+### 5.6 測試與打包
 每次變更後必須執行：
 ```bash
 npm test
 node scripts/build.mjs
+npm run specs:excel
 ```
-確保 85 項測試全數通過且 bundle 打包無誤。
+確保 89 項測試全數通過且 bundle 打包無誤。

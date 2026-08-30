@@ -194,5 +194,13 @@ test("I18n 完整性檢查：繁中、簡中、英文、日文所有關卡、道
     assert.ok(i18n.t("ui.menuRecords"));
     assert.ok(i18n.t("ui.menuRecordsSub"));
     assert.ok(i18n.t("ui.morphSelectCaption"));
+    assert.ok(i18n.t("ui.openCheat"));
+    assert.ok(i18n.t("ui.cheatAuthTitle"));
+    assert.ok(i18n.t("ui.cheatAuthPrompt"));
+    assert.ok(i18n.t("ui.cheatAuthConfirm"));
+    assert.ok(i18n.t("ui.cheatAuthCancel"));
+    assert.ok(i18n.t("ui.cheatAuthError"));
+    assert.ok(i18n.t("ui.cheatAuthSuccess"));
+    assert.ok(i18n.t("ui.unlock2PHint"));
   }
 });

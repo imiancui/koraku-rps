@@ -157,12 +157,15 @@
 
   .home-screen {
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .home-copy {
-    z-index: 20;
+    position: relative;
+    z-index: 10;
     width: auto;
-    margin: 25px 18px 120px;
+    margin: 20px 16px 40px;
+    padding-bottom: max(32px, env(safe-area-inset-bottom));
   }
 
   .home-copy h1 span {
@@ -182,40 +185,54 @@
   .main-menu {
     width: 100%;
     margin-top: 24px;
+    position: relative;
+    z-index: 12;
   }
 
   .menu-command {
     min-height: 54px;
-    background: linear-gradient(90deg, rgba(16, 19, 29, 0.96), rgba(16, 19, 29, 0.77));
+    background: linear-gradient(90deg, rgba(16, 19, 29, 0.94), rgba(16, 19, 29, 0.72));
   }
 
   .home-record {
+    position: relative;
+    z-index: 12;
     flex-wrap: wrap;
     padding-bottom: 0;
+    margin-top: 14px;
     margin-bottom: 8px;
   }
 
   .home-admin-actions {
     position: static;
-    margin-top: 10px;
-    margin-bottom: 24px;
+    z-index: 30;
+    margin-top: 16px;
+    margin-bottom: 28px;
+    display: flex;
+    flex-direction: column;
     align-items: flex-start;
+    gap: 8px;
   }
 
   .home-character {
-    right: -33%;
-    bottom: -5%;
+    position: absolute;
+    z-index: 25;
+    right: -28%;
+    bottom: -4%;
     width: 108%;
-    height: 79%;
-    opacity: 0.68;
+    height: 80%;
+    opacity: 0.92;
+    pointer-events: none;
+  }
+
+  .home-character img {
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
   }
 
   .home-character::after {
-    content: "";
-    position: absolute;
-    z-index: 4;
-    inset: 0;
-    background: linear-gradient(90deg, rgba(8, 10, 16, 0.62), transparent 60%);
+    display: none;
   }
 
   .character-seal {
@@ -618,7 +635,10 @@
   }
 
   .home-copy {
-    padding-bottom: 50px;
+    position: relative;
+    z-index: 10;
+    margin: 18px 14px 40px;
+    padding-bottom: max(36px, env(safe-area-inset-bottom));
   }
 
   .home-copy h1 span {
@@ -642,9 +662,13 @@
 
   .home-admin-actions {
     position: static;
-    margin-top: 8px;
-    margin-bottom: 24px;
+    z-index: 30;
+    margin-top: 14px;
+    margin-bottom: 28px;
+    display: flex;
+    flex-direction: column;
     align-items: flex-start;
+    gap: 8px;
   }
 
   .page-heading {

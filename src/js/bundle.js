@@ -162,6 +162,20 @@ const SKILLS = Object.freeze({
 
 const GALLERY_ITEMS = Object.freeze([
   {
+    id: "koraku_default",
+    name: "巫女社・狐娘小樂",
+    variantName: "預設造型",
+    src: ASSETS.default,
+    description: "守護朱鳥居的狐娘小樂。一身俐落的機甲巫女裝扮，總是帶著自信的微笑迎接挑戰者。"
+  },
+  {
+    id: "koraku_2p",
+    name: "鏡界・白金小樂",
+    variantName: "2P色小樂",
+    src: ASSETS.final,
+    description: "跨越鏡界之後顯現的白金姿態。銀髮與冰藍光芒交織，唯有突破終章試煉者方能得見。"
+  },
+  {
     id: "swimsuit_default",
     name: "夏日祭・清涼泳裝",
     variantName: "預設泳裝",
@@ -491,6 +505,15 @@ const DICTIONARY = {
       deepestStage: "最深章節",
       receptionSeal: "對戰<br>受付中",
       openCheat: "⚙️ 測試調試 / 作弊選單",
+      cheatAuthTitle: "作弊驗證",
+      cheatAuthPrompt: "請輸入管理密碼以開啟測試選單：",
+      cheatAuthPlaceholder: "輸入密碼 (8989)",
+      cheatAuthConfirm: "解鎖選單",
+      cheatAuthCancel: "取消",
+      cheatAuthError: "密碼錯誤！無法開啟作弊選單。",
+      cheatAuthSuccess: "⚙️ 密碼正確，作弊選單已解鎖！",
+      galleryUnlockedTag: "已解鎖",
+      galleryLockedTag: "尚未解鎖",
       resetSave: "重置存檔",
       resetConfirm: "確定要重置所有存檔進度嗎？此操作無法還原。",
       // Main menu
@@ -760,6 +783,7 @@ const DICTIONARY = {
       nextLevelRate: "下一級機率: {chance}%",
       notYetUnlocked: "尚未解鎖",
       unlockSwimsuitHint: "於對局勝利後觸發泳裝事件以解鎖",
+      unlock2PHint: "需戰勝終ノ章（第四關）1 次以解鎖",
       btnAskSwimsuitSpace: "請小樂穿泳裝",
       btnPlayWatermelonSpace: "玩蒙眼切西瓜",
       btnNextStrikeSpace: "進行第 {attempt} 刀",
@@ -1015,6 +1039,16 @@ const DICTIONARY = {
       }
     },
     gallery: {
+      koraku_default: {
+        name: "巫女社・狐娘小樂",
+        variantName: "預設造型",
+        description: "守護朱鳥居的狐娘小樂。一身俐落的機甲巫女裝扮，總是帶著自信的微笑迎接挑戰者。"
+      },
+      koraku_2p: {
+        name: "鏡界・白金小樂",
+        variantName: "2P色小樂",
+        description: "跨越鏡界之後顯現的白金姿態。銀髮與冰藍光芒交織，唯有突破終章試煉者方能得見。"
+      },
       swimsuit_default: {
         name: "夏日祭・清涼泳裝",
         variantName: "預設泳裝",
@@ -1072,6 +1106,15 @@ const DICTIONARY = {
       deepestStage: "最深章节",
       receptionSeal: "对战<br>接待中",
       openCheat: "⚙️ 测试调试 / 作弊菜单",
+      cheatAuthTitle: "作弊验证",
+      cheatAuthPrompt: "请输入管理密码以开启测试菜单：",
+      cheatAuthPlaceholder: "输入密码 (8989)",
+      cheatAuthConfirm: "解锁菜单",
+      cheatAuthCancel: "取消",
+      cheatAuthError: "密码错误！无法开启作弊菜单。",
+      cheatAuthSuccess: "⚙️ 密码正确，作弊菜单已解锁！",
+      galleryUnlockedTag: "已解锁",
+      galleryLockedTag: "尚未解锁",
       resetSave: "重置存档",
       resetConfirm: "确定要重置所有存档进度吗？此操作无法撤销。",
       menuStages: "开始对局",
@@ -1214,6 +1257,7 @@ const DICTIONARY = {
       nextLevelRate: "下一级概率: {chance}%",
       notYetUnlocked: "尚未解锁",
       unlockSwimsuitHint: "于对局胜利后触发泳装事件以解锁",
+      unlock2PHint: "需战胜终ノ章（第四关）1 次以解锁",
       btnAskSwimsuitSpace: "请小乐穿泳装",
       btnPlayWatermelonSpace: "玩蒙眼切西瓜",
       btnNextStrikeSpace: "进行第 {attempt} 刀",
@@ -1417,6 +1461,16 @@ const DICTIONARY = {
       }
     },
     gallery: {
+      koraku_default: {
+        name: "巫女社・狐娘小乐",
+        variantName: "默认造型",
+        description: "守护朱鸟居的狐娘小乐。一身利落的机甲巫女装扮，总是带着自信的微笑迎接挑战者。"
+      },
+      koraku_2p: {
+        name: "镜界・白金小乐",
+        variantName: "2P色小乐",
+        description: "跨越镜界之后显现的白金姿态。银发与冰蓝光芒交织，唯有突破终章试炼者方能得见。"
+      },
       swimsuit_default: {
         name: "夏日祭・清凉泳装",
         variantName: "默认泳装",
@@ -1473,8 +1527,17 @@ const DICTIONARY = {
       deepestStage: "Deepest Chapter",
       receptionSeal: "Ready for<br>Battle",
       openCheat: "⚙️ Debug & Cheat Menu",
+      cheatAuthTitle: "Cheat Verification",
+      cheatAuthPrompt: "Enter admin passcode to unlock the debug menu:",
+      cheatAuthPlaceholder: "Passcode (8989)",
+      cheatAuthConfirm: "Unlock",
+      cheatAuthCancel: "Cancel",
+      cheatAuthError: "Incorrect passcode! Debug menu remains locked.",
+      cheatAuthSuccess: "⚙️ Passcode accepted. Debug menu unlocked!",
+      galleryUnlockedTag: "Unlocked",
+      galleryLockedTag: "Locked",
       resetSave: "Reset Save",
-      resetConfirm: "Are you sure you want to reset all game data? This action cannot be undone.",
+      resetConfirm: "Are you sure you want to reset all save data? This cannot be undone.",
       menuStages: "Story Battle",
       menuStagesSub: "STORY BATTLE",
       menuGrowth: "Player Growth",
@@ -1615,6 +1678,7 @@ const DICTIONARY = {
       nextLevelRate: "Next Level Rate: {chance}%",
       notYetUnlocked: "Locked",
       unlockSwimsuitHint: "Defeat Kohaku to trigger swimsuit event and unlock",
+      unlock2PHint: "Defeat Chapter 4 (Final Chapter) 1 time to unlock",
       btnAskSwimsuitSpace: "Ask Kohaku for Swimsuit",
       btnPlayWatermelonSpace: "Blindfolded Watermelon",
       btnNextStrikeSpace: "Strike #{attempt}",
@@ -1818,6 +1882,16 @@ const DICTIONARY = {
       }
     },
     gallery: {
+      koraku_default: {
+        name: "Shrine Maiden: Fox Maiden Kohaku",
+        variantName: "Default Outfit",
+        description: "Kohaku the fox maiden guarding the Vermilion Torii. Dressed in her sleek cyber-miko outfit, she welcomes every challenger with a fearless smile."
+      },
+      koraku_2p: {
+        name: "Mirror Realm: Platinum Kohaku",
+        variantName: "2P Color",
+        description: "The radiant platinum form appearing from beyond the mirror realm. Silver hair gleaming with azure light, unveiled only by champions of the Final Chapter."
+      },
       swimsuit_default: {
         name: "Summer Festival: Breezy Swimsuit",
         variantName: "Default Swimsuit",
@@ -1875,6 +1949,15 @@ const DICTIONARY = {
       deepestStage: "到達章",
       receptionSeal: "対戦<br>受付中",
       openCheat: "⚙️ デバッグ・チート設定",
+      cheatAuthTitle: "チート認証",
+      cheatAuthPrompt: "管理パスワードを入力してデバッグメニューを開放します：",
+      cheatAuthPlaceholder: "パスワード (8989)",
+      cheatAuthConfirm: "解除",
+      cheatAuthCancel: "キャンセル",
+      cheatAuthError: "パスワードが正しくありません。",
+      cheatAuthSuccess: "⚙️ パスワードが一致しました。デバッグメニューを開放しました！",
+      galleryUnlockedTag: "解放済み",
+      galleryLockedTag: "未解放",
       resetSave: "セーブ初期化",
       resetConfirm: "すべてのセーブデータを初期化しますか？この操作は取り消せません。",
       menuStages: "物語対戦",
@@ -2017,6 +2100,7 @@ const DICTIONARY = {
       nextLevelRate: "次レベル発動率: {chance}%",
       notYetUnlocked: "未解放",
       unlockSwimsuitHint: "対局勝利後に水着イベントを発生させて解放",
+      unlock2PHint: "終ノ章（第4章）を1回勝利して解放",
       btnAskSwimsuitSpace: "水着に着替えてもらう",
       btnPlayWatermelonSpace: "目隠しスイカ割り",
       btnNextStrikeSpace: "{attempt}太刀目に挑戦",
@@ -2220,6 +2304,16 @@ const DICTIONARY = {
       }
     },
     gallery: {
+      koraku_default: {
+        name: "神社・狐娘コハク",
+        variantName: "デフォルト",
+        description: "朱鳥居を守護する狐娘コハク。機甲巫女装束をまとい、不敵な笑みで挑戦者を迎え撃つ。"
+      },
+      koraku_2p: {
+        name: "鏡界・白金コハク",
+        variantName: "2Pカラー",
+        description: "鏡界の彼方より現れし白金の姿。銀髪と蒼光をたたえ、終ノ章を制覇した猛者のみが目撃できる。"
+      },
       swimsuit_default: {
         name: "夏祭り・清涼水着",
         variantName: "通常水着",
@@ -3897,6 +3991,7 @@ class GameStore {
 
   cheatUnlockGallery() {
     this.state.records.unlockedSwimsuit = true;
+    this.state.records.unlockedGalleryAll = true;
     this.commit("cheat-unlock-gallery");
     return { ok: true, message: "已解鎖全部圖鑑立繪！" };
   }
@@ -5595,6 +5690,9 @@ class AppView {
     this.galleryItemDesc = $("#gallery-item-desc");
     this.galleryVariantButtons = $("#gallery-variant-buttons");
     this.cheatModal = $("#cheat-modal");
+    this.cheatAuthModal = $("#cheat-auth-modal");
+    this.cheatAuthPassword = $("#cheat-auth-password");
+    this.cheatAuthForm = $("#cheat-auth-form");
     this.equipTooltip = $("#equip-tooltip");
     this.activeShopFilter = "all";
   }
@@ -5603,6 +5701,32 @@ class AppView {
     this.renderI18n();
     const snapshot = this.store.snapshot();
     this.renderStore(snapshot);
+
+    // Mobile Anti-Zoom Protection: Prevent double-tap zoom & gesture pinch zoom on mobile devices
+    if (typeof document !== "undefined") {
+      document.addEventListener("gesturestart", (e) => {
+        e.preventDefault();
+      }, { passive: false });
+      document.addEventListener("gesturechange", (e) => {
+        e.preventDefault();
+      }, { passive: false });
+      document.addEventListener("gestureend", (e) => {
+        e.preventDefault();
+      }, { passive: false });
+
+      let lastTouchEnd = 0;
+      document.addEventListener("touchend", (event) => {
+        const now = performance.now();
+        if (now - lastTouchEnd <= 300) {
+          const target = event.target;
+          if (target && target.tagName !== "INPUT" && target.tagName !== "TEXTAREA" && target.tagName !== "SELECT") {
+            event.preventDefault();
+          }
+        }
+        lastTouchEnd = now;
+      }, { passive: false });
+    }
+
     let targetScreen = "home";
     try {
       const hashScreen = window.location.hash ? window.location.hash.replace(/^#/, "") : null;
@@ -5716,6 +5840,14 @@ class AppView {
           this.renderBattle(this.battleState);
         }
         this.bus.emit("sound", { name: "select" });
+      });
+    }
+
+    const cheatAuthForm = $("#cheat-auth-form");
+    if (cheatAuthForm) {
+      cheatAuthForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        this.handleCheatAuthSubmit();
       });
     }
 
@@ -5967,7 +6099,12 @@ class AppView {
     }
 
     if (event.target.closest("#open-cheat-modal")) {
-      this.openCheatModal();
+      this.openCheatAuthModal();
+      return;
+    }
+
+    if (event.target.closest("#close-cheat-auth-modal") || event.target.closest("#btn-cheat-auth-cancel") || event.target === this.cheatAuthModal) {
+      this.closeCheatAuthModal();
       return;
     }
 
@@ -7025,28 +7162,77 @@ class AppView {
     }
   }
 
+  isGalleryItemUnlocked(item, state) {
+    if (!item) return false;
+    if (item.id === "koraku_default") {
+      return true; // 預設小樂直接解鎖
+    }
+    if (item.id === "koraku_2p") {
+      // 戰勝第四關 1 次解鎖
+      const stage4Wins = (state?.records?.stageStats?.[4]?.manualWins || 0) + (state?.records?.stageStats?.[4]?.autoWins || 0);
+      return Boolean(
+        state?.records?.unlockedGalleryAll ||
+        state?.records?.unlockedSwimsuit ||
+        state?.records?.clearedStages?.includes(4) ||
+        stage4Wins > 0
+      );
+    }
+    if (item.id === "swimsuit_default") {
+      const stage1Wins = (state?.records?.stageStats?.[1]?.manualWins || 0) + (state?.records?.stageStats?.[1]?.autoWins || 0);
+      return Boolean(
+        state?.records?.unlockedGalleryAll ||
+        state?.records?.unlockedSwimsuit ||
+        (state?.records?.bestStage || 0) >= 1 ||
+        stage1Wins > 0 ||
+        (state?.records?.clearedStages?.length || 0) > 0
+      );
+    }
+    if (item.id === "swimsuit_watermelon") {
+      return Boolean(
+        state?.records?.unlockedGalleryAll ||
+        state?.records?.unlockedSwimsuit ||
+        (state?.records?.watermelonSlices || 0) > 0 ||
+        (state?.records?.bestStage || 0) >= 1
+      );
+    }
+    return Boolean(state?.records?.unlockedGalleryAll || state?.records?.unlockedSwimsuit);
+  }
+
   renderGallery(state) {
-    const unlocked = Boolean(state.records.unlockedSwimsuit || state.records.bestStage >= 1);
     const currentItem = GALLERY_ITEMS.find((item) => item.id === this.selectedGalleryItem) || GALLERY_ITEMS[0];
     const locCurrentItem = I18n.getLocalizedGalleryItem(currentItem);
+    const unlocked = this.isGalleryItemUnlocked(currentItem, state);
 
     if (this.galleryArtFrame) {
       this.galleryArtFrame.classList.toggle("is-locked", !unlocked);
     }
     if (this.galleryImage) {
       this.galleryImage.src = currentItem.src;
+      this.galleryImage.alt = locCurrentItem.name;
     }
     if (this.galleryItemTitle) {
-      this.galleryItemTitle.textContent = locCurrentItem.name;
+      this.galleryItemTitle.textContent = unlocked ? locCurrentItem.name : "？？？ (" + I18n.t("ui.galleryLockedTag") + ")";
     }
     if (this.galleryItemDesc) {
-      this.galleryItemDesc.textContent = locCurrentItem.description;
+      if (unlocked) {
+        this.galleryItemDesc.textContent = locCurrentItem.description;
+      } else {
+        if (currentItem.id === "koraku_2p") {
+          this.galleryItemDesc.textContent = I18n.t("ui.unlock2PHint") || "需戰勝終ノ章（第四關）1 次以解鎖";
+        } else {
+          this.galleryItemDesc.textContent = I18n.t("ui.unlockSwimsuitHint") || "於對局勝利後觸發泳裝事件以解鎖";
+        }
+      }
     }
     if (this.galleryVariantButtons) {
       this.galleryVariantButtons.innerHTML = GALLERY_ITEMS.map((item) => {
         const locItem = I18n.getLocalizedGalleryItem(item);
+        const itemUnlocked = this.isGalleryItemUnlocked(item, state);
         const active = item.id === currentItem.id ? " is-active" : "";
-        return '<button type="button" class="gallery-variant-btn' + active + '" data-gallery-variant="' + item.id + '">' + locItem.variantName + "</button>";
+        const lockIcon = itemUnlocked ? "" : " 🔒";
+        return '<button type="button" class="gallery-variant-btn' + active + '" data-gallery-variant="' + item.id + '">' +
+          locItem.variantName + lockIcon +
+          "</button>";
       }).join("");
     }
   }
@@ -7167,6 +7353,41 @@ class AppView {
             </button>
           `;
         }).join("");
+      }
+    }
+  }
+
+  openCheatAuthModal() {
+    if (this.cheatAuthModal) {
+      if (this.cheatAuthPassword) {
+        this.cheatAuthPassword.value = "";
+      }
+      this.cheatAuthModal.hidden = false;
+      this.cheatAuthModal.setAttribute("aria-hidden", "false");
+      setTimeout(() => {
+        this.cheatAuthPassword?.focus();
+      }, 50);
+    }
+  }
+
+  closeCheatAuthModal() {
+    if (this.cheatAuthModal) {
+      this.cheatAuthModal.hidden = true;
+      this.cheatAuthModal.setAttribute("aria-hidden", "true");
+    }
+  }
+
+  handleCheatAuthSubmit() {
+    const pass = this.cheatAuthPassword ? this.cheatAuthPassword.value.trim() : "";
+    if (pass === "8989") {
+      this.closeCheatAuthModal();
+      this.openCheatModal();
+      this.showToast(I18n.t("ui.cheatAuthSuccess") || "⚙️ 密碼正確，作弊選單已解鎖！", "success");
+    } else {
+      this.showToast(I18n.t("ui.cheatAuthError") || "密碼錯誤！無法開啟作弊選單。", "danger");
+      if (this.cheatAuthPassword) {
+        this.cheatAuthPassword.value = "";
+        this.cheatAuthPassword.focus();
       }
     }
   }

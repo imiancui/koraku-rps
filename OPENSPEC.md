@@ -184,12 +184,19 @@ xpNeededForLevel(level) = 100 + Math.max(0, level - 1) * 75
    - 難度逐刀提升：綠色安全範圍每刀縮小 50%（0.13 -> 0.065 -> 0.0325），擺動速度每刀增加 25%（1800ms -> 1440ms -> 1152ms）。
    - 結算獎勵：每成功切中一刀獲得 +100 EXP，三刀結算後若累計次數 > 0，可直接點擊「進行下一輪切西瓜」連續挑戰（每輪消耗 1 次累計）。
 
-### 6.2 圖鑑與 CG 立繪
-- `ASSETS.default` (`koraku/小樂-預設.png`)：主選單與預設小樂。
-- `ASSETS.final` (`koraku/小樂-2P色.png`)：第四關雙生白金小樂。
-- `ASSETS.swimsuit` (`koraku/泳裝小樂.png`)：戰後泳裝事件與圖鑑預設。
-- `ASSETS.watermelon` (`koraku/泳裝小樂_西瓜.png`)：切西瓜成功差分。
-- `ASSETS.defeat` (`koraku/凝視小樂.png`)：敗北結算立繪。
+### 6.2 圖鑑與 CG 立繪 (Gallery & Outfit System)
+- **條目 1：巫女社・狐娘小樂 (`koraku_default`)**
+  - 圖資：`ASSETS.default` (`koraku/小樂-預設.png`)
+  - 解鎖條件：**預設直接解鎖**，無需任何前置關卡。
+- **條目 2：鏡界・白金小樂 (`koraku_2p`)**
+  - 圖資：`ASSETS.final` (`koraku/小樂-2P色.png`)
+  - 解鎖條件：**戰勝終ノ章（第 4 關）1 次**（或使用圖鑑全解鎖作弊）。
+- **條目 3：夏日祭・清涼泳裝 (`swimsuit_default`)**
+  - 圖資：`ASSETS.swimsuit` (`koraku/泳裝小樂.png`)
+  - 解鎖條件：通關第 1 關以上或戰勝後觸發泳裝換穿事件。
+- **條目 4：海風・切西瓜 (`swimsuit_watermelon`)**
+  - 圖資：`ASSETS.watermelon` (`koraku/泳裝小樂_西瓜.png`)
+  - 解鎖條件：切中西瓜 1 次以上或戰勝後觸發換裝。
 
 ### 6.3 DPS 與冒險歷程記錄
 - **理論 DPS (Theoretical DPS)**：
@@ -197,6 +204,14 @@ xpNeededForLevel(level) = 100 + Math.max(0, level - 1) * 75
 - **實戰 DPS (Combat DPS)**：$\text{單場造成總傷害} / \max(1, \text{戰鬥秒數})$。
 - **歷程紀錄**：保存最近 100 場戰鬥詳情（超過 100 筆自動滾動移除最舊紀錄）。
 
-### 6.4 作弊除錯系統
-- **秘密呼出快速鍵**：在 1000ms 時間窗口內連續按下數字鍵 8 四次。
-- **功能**：自訂等級/經驗/SP/星砂/藥水/配點/技能；一鍵解鎖全 4 關卡；一鍵解鎖全圖鑑。
+### 6.4 作弊除錯系統與密碼驗證 (Password-Protected Cheat Access)
+- **管理按鈕與密碼驗證**：首頁管理區域提供「⚙️ 測試調試 / 作弊選單」按鈕，點擊後彈出密碼驗證視窗，輸入密碼 `8989` 驗證通過方可解鎖開啟作弊選單。
+- **秘密快速鍵**：在 1000ms 時間窗口內連續按下數字鍵 8 四次可直接呼出。
+- **功能**：自訂等級/經驗/SP/星砂/藥水/配點/技能；一鍵解鎖全 4 關卡；一鍵解鎖全 4 張圖鑑立繪。
+
+### 6.5 行動端體驗與層級規範 (Mobile UX & Layering Specification)
+- **防雙擊縮放與手勢保護**：Viewport 設定 `user-scalable=no`，全域與按鍵區域設定 `touch-action: manipulation`，QTE 方向鍵設定 `touch-action: none`，JS 攔截 `gesturestart` 與 300ms 內連續快速雙擊，徹底杜絕 QTE 連按時的畫面放大與跑位。
+- **首頁立繪層級**：手機版首頁小樂立繪設定 `z-index: 25` 置於選單按鈕 (`z-index: 10~12`) 前方，並維持 `pointer-events: none` 確保所有選單按鈕靈敏點擊。
+- **首頁頁腳與重置存檔**：`.home-admin-actions` 採取標準流式排版 (`position: static`)，排在戰績統計下方並保有舒適底部安全邊距 (`margin-bottom: 28px; padding-bottom: max(32px, env(safe-area-inset-bottom));`)。
+- **戰鬥結算立繪層級**：結算畫面小樂（預設/泳裝/切西瓜）立繪設定 `z-index: 80; pointer-events: none;`，置於結算遮罩與結算面板之上，清晰突出且不阻礙結算按鈕操作。
+

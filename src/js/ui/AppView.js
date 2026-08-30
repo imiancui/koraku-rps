@@ -69,6 +69,9 @@ export class AppView {
     this.galleryItemDesc = $("#gallery-item-desc");
     this.galleryVariantButtons = $("#gallery-variant-buttons");
     this.cheatModal = $("#cheat-modal");
+    this.cheatAuthModal = $("#cheat-auth-modal");
+    this.cheatAuthPassword = $("#cheat-auth-password");
+    this.cheatAuthForm = $("#cheat-auth-form");
     this.equipTooltip = $("#equip-tooltip");
     this.activeShopFilter = "all";
   }
@@ -77,6 +80,32 @@ export class AppView {
     this.renderI18n();
     const snapshot = this.store.snapshot();
     this.renderStore(snapshot);
+
+    // Mobile Anti-Zoom Protection: Prevent double-tap zoom & gesture pinch zoom on mobile devices
+    if (typeof document !== "undefined") {
+      document.addEventListener("gesturestart", (e) => {
+        e.preventDefault();
+      }, { passive: false });
+      document.addEventListener("gesturechange", (e) => {
+        e.preventDefault();
+      }, { passive: false });
+      document.addEventListener("gestureend", (e) => {
+        e.preventDefault();
+      }, { passive: false });
+
+      let lastTouchEnd = 0;
+      document.addEventListener("touchend", (event) => {
+        const now = performance.now();
+        if (now - lastTouchEnd <= 300) {
+          const target = event.target;
+          if (target && target.tagName !== "INPUT" && target.tagName !== "TEXTAREA" && target.tagName !== "SELECT") {
+            event.preventDefault();
+          }
+        }
+        lastTouchEnd = now;
+      }, { passive: false });
+    }
+
     let targetScreen = "home";
     try {
       const hashScreen = window.location.hash ? window.location.hash.replace(/^#/, "") : null;
@@ -190,6 +219,14 @@ export class AppView {
           this.renderBattle(this.battleState);
         }
         this.bus.emit("sound", { name: "select" });
+      });
+    }
+
+    const cheatAuthForm = $("#cheat-auth-form");
+    if (cheatAuthForm) {
+      cheatAuthForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        this.handleCheatAuthSubmit();
       });
     }
 
@@ -441,7 +478,12 @@ export class AppView {
     }
 
     if (event.target.closest("#open-cheat-modal")) {
-      this.openCheatModal();
+      this.openCheatAuthModal();
+      return;
+    }
+
+    if (event.target.closest("#close-cheat-auth-modal") || event.target.closest("#btn-cheat-auth-cancel") || event.target === this.cheatAuthModal) {
+      this.closeCheatAuthModal();
       return;
     }
 
@@ -1499,28 +1541,77 @@ export class AppView {
     }
   }
 
+  isGalleryItemUnlocked(item, state) {
+    if (!item) return false;
+    if (item.id === "koraku_default") {
+      return true; // 預設小樂直接解鎖
+    }
+    if (item.id === "koraku_2p") {
+      // 戰勝第四關 1 次解鎖
+      const stage4Wins = (state?.records?.stageStats?.[4]?.manualWins || 0) + (state?.records?.stageStats?.[4]?.autoWins || 0);
+      return Boolean(
+        state?.records?.unlockedGalleryAll ||
+        state?.records?.unlockedSwimsuit ||
+        state?.records?.clearedStages?.includes(4) ||
+        stage4Wins > 0
+      );
+    }
+    if (item.id === "swimsuit_default") {
+      const stage1Wins = (state?.records?.stageStats?.[1]?.manualWins || 0) + (state?.records?.stageStats?.[1]?.autoWins || 0);
+      return Boolean(
+        state?.records?.unlockedGalleryAll ||
+        state?.records?.unlockedSwimsuit ||
+        (state?.records?.bestStage || 0) >= 1 ||
+        stage1Wins > 0 ||
+        (state?.records?.clearedStages?.length || 0) > 0
+      );
+    }
+    if (item.id === "swimsuit_watermelon") {
+      return Boolean(
+        state?.records?.unlockedGalleryAll ||
+        state?.records?.unlockedSwimsuit ||
+        (state?.records?.watermelonSlices || 0) > 0 ||
+        (state?.records?.bestStage || 0) >= 1
+      );
+    }
+    return Boolean(state?.records?.unlockedGalleryAll || state?.records?.unlockedSwimsuit);
+  }
+
   renderGallery(state) {
-    const unlocked = Boolean(state.records.unlockedSwimsuit || state.records.bestStage >= 1);
     const currentItem = GALLERY_ITEMS.find((item) => item.id === this.selectedGalleryItem) || GALLERY_ITEMS[0];
     const locCurrentItem = I18n.getLocalizedGalleryItem(currentItem);
+    const unlocked = this.isGalleryItemUnlocked(currentItem, state);
 
     if (this.galleryArtFrame) {
       this.galleryArtFrame.classList.toggle("is-locked", !unlocked);
     }
     if (this.galleryImage) {
       this.galleryImage.src = currentItem.src;
+      this.galleryImage.alt = locCurrentItem.name;
     }
     if (this.galleryItemTitle) {
-      this.galleryItemTitle.textContent = locCurrentItem.name;
+      this.galleryItemTitle.textContent = unlocked ? locCurrentItem.name : "？？？ (" + I18n.t("ui.galleryLockedTag") + ")";
     }
     if (this.galleryItemDesc) {
-      this.galleryItemDesc.textContent = locCurrentItem.description;
+      if (unlocked) {
+        this.galleryItemDesc.textContent = locCurrentItem.description;
+      } else {
+        if (currentItem.id === "koraku_2p") {
+          this.galleryItemDesc.textContent = I18n.t("ui.unlock2PHint") || "需戰勝終ノ章（第四關）1 次以解鎖";
+        } else {
+          this.galleryItemDesc.textContent = I18n.t("ui.unlockSwimsuitHint") || "於對局勝利後觸發泳裝事件以解鎖";
+        }
+      }
     }
     if (this.galleryVariantButtons) {
       this.galleryVariantButtons.innerHTML = GALLERY_ITEMS.map((item) => {
         const locItem = I18n.getLocalizedGalleryItem(item);
+        const itemUnlocked = this.isGalleryItemUnlocked(item, state);
         const active = item.id === currentItem.id ? " is-active" : "";
-        return '<button type="button" class="gallery-variant-btn' + active + '" data-gallery-variant="' + item.id + '">' + locItem.variantName + "</button>";
+        const lockIcon = itemUnlocked ? "" : " 🔒";
+        return '<button type="button" class="gallery-variant-btn' + active + '" data-gallery-variant="' + item.id + '">' +
+          locItem.variantName + lockIcon +
+          "</button>";
       }).join("");
     }
   }
@@ -1641,6 +1732,41 @@ export class AppView {
             </button>
           `;
         }).join("");
+      }
+    }
+  }
+
+  openCheatAuthModal() {
+    if (this.cheatAuthModal) {
+      if (this.cheatAuthPassword) {
+        this.cheatAuthPassword.value = "";
+      }
+      this.cheatAuthModal.hidden = false;
+      this.cheatAuthModal.setAttribute("aria-hidden", "false");
+      setTimeout(() => {
+        this.cheatAuthPassword?.focus();
+      }, 50);
+    }
+  }
+
+  closeCheatAuthModal() {
+    if (this.cheatAuthModal) {
+      this.cheatAuthModal.hidden = true;
+      this.cheatAuthModal.setAttribute("aria-hidden", "true");
+    }
+  }
+
+  handleCheatAuthSubmit() {
+    const pass = this.cheatAuthPassword ? this.cheatAuthPassword.value.trim() : "";
+    if (pass === "8989") {
+      this.closeCheatAuthModal();
+      this.openCheatModal();
+      this.showToast(I18n.t("ui.cheatAuthSuccess") || "⚙️ 密碼正確，作弊選單已解鎖！", "success");
+    } else {
+      this.showToast(I18n.t("ui.cheatAuthError") || "密碼錯誤！無法開啟作弊選單。", "danger");
+      if (this.cheatAuthPassword) {
+        this.cheatAuthPassword.value = "";
+        this.cheatAuthPassword.focus();
       }
     }
   }

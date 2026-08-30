@@ -56,4 +56,18 @@ test("一鍵解鎖全關卡與一鍵解鎖全圖鑑", () => {
   const unlockGalRes = store.cheatUnlockGallery();
   assert.equal(unlockGalRes.ok, true);
   assert.equal(store.state.records.unlockedSwimsuit, true);
+  assert.equal(store.state.records.unlockedGalleryAll, true);
 });
+
+test("作弊密碼驗證：輸入 8989 才能解鎖作弊選單", () => {
+  function verifyPasscode(input) {
+    return String(input).trim() === "8989";
+  }
+
+  assert.equal(verifyPasscode("1234"), false, "錯誤密碼應驗證失敗");
+  assert.equal(verifyPasscode(""), false, "空密碼應驗證失敗");
+  assert.equal(verifyPasscode("8988"), false, "近似密碼應驗證失敗");
+  assert.equal(verifyPasscode("8989"), true, "正確密碼 8989 應驗證成功");
+  assert.equal(verifyPasscode("  8989  "), true, "帶空白之 8989 經 trim 後應驗證成功");
+});
+

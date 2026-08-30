@@ -359,8 +359,8 @@
       <li><a href="#section-economy" class="nav-link">🪙 藥水道具與星砂經濟</a></li>
       <li><a href="#section-watermelon" class="nav-link">🍉 蒙眼切西瓜小遊戲</a></li>
       <li><a href="#section-dps" class="nav-link">📊 歷程紀錄與 DPS 戰力</a></li>
-      <li><a href="#section-calculator" class="nav-link">🧮 互動式公式計算器</a></li>
-      <li><a href="#section-cheats" class="nav-link">🛠️ 除錯作弊與秘密指令</a></li>
+      <li><a href="#section-cheats" class="nav-link">🛠️ 除錯作弊與密碼驗證</a></li>
+      <li><a href="#section-mobile" class="nav-link">📱 行動端體驗與防縮放</a></li>
       <li><a href="#section-i18n" class="nav-link">🌐 四國語系在地化</a></li>
     </ul>
   </aside>
@@ -682,17 +682,48 @@
 
       <!-- Section 13: Cheats -->
       <section id="section-cheats" class="section-card">
-        <h2 class="section-title">🛠️ 除錯作弊與秘密指令</h2>
-        <div class="card">
-          <div class="card-title">
-            <span>秘密觸發快速鍵</span>
-            <span class="badge badge-crimson">1000ms 內連按 4 次數字鍵 8</span>
+        <h2 class="section-title">🛠️ 除錯作弊與密碼驗證</h2>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">
+              <span>首頁按鈕與密碼驗證</span>
+              <span class="badge badge-gold">密碼：8989</span>
+            </div>
+            <p>點擊大廳管理區之「⚙️ 測試調試 / 作弊選單」按鈕，彈出密碼視窗輸入 <code>8989</code> 即可解鎖開啟作弊面板。</p>
           </div>
-          <p>在任意畫面於 1000ms 內連續按下 4 次數字鍵 <code>8</code>（或小鍵盤 Numpad 8），即可喚出作弊面板，自由設定等級、SP、星砂、藥水、解鎖全關卡與全圖鑑。</p>
+          <div class="card">
+            <div class="card-title">
+              <span>秘密觸發快速鍵</span>
+              <span class="badge badge-crimson">1000ms 內連按 4 次數字鍵 8</span>
+            </div>
+            <p>在任意畫面於 1000ms 內連續按下 4 次數字鍵 <code>8</code>（或小鍵盤 Numpad 8），可直接喚出作弊面板。</p>
+          </div>
+        </div>
+        <p style="margin-top:12px;color:var(--text-muted);">作弊面板功能包含自由設定等級、SP、星砂、藥水、配點、技能等級，以及一鍵解鎖全關卡與一鍵解鎖全 4 張圖鑑立繪。</p>
+      </section>
+
+      <!-- Section 14: Mobile UX -->
+      <section id="section-mobile" class="section-card">
+        <h2 class="section-title">📱 行動端體驗與防縮放優化</h2>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">
+              <span>防雙擊縮放與手勢保護</span>
+              <span class="badge badge-azure">touch-action: none / manipulation</span>
+            </div>
+            <p>全面禁用雙擊放大與手勢縮放，解決玩家在手機上連續敲擊 QTE 方向鍵時導致的畫面縮放與視圖位移。</p>
+          </div>
+          <div class="card">
+            <div class="card-title">
+              <span>立繪與結算層級</span>
+              <span class="badge badge-purple">z-index 層級優化</span>
+            </div>
+            <p>首頁小樂立繪置於選單按鈕前方且支援點擊穿透；戰鬥結算小樂（預設/泳裝/切西瓜）立繪置於頂層不被遮擋；頁腳與重置按鈕流式排版確保舒適間距。</p>
+          </div>
         </div>
       </section>
 
-      <!-- Section 14: I18n -->
+      <!-- Section 15: I18n -->
       <section id="section-i18n" class="section-card">
         <h2 class="section-title">🌐 四國語系在地化</h2>
         <p>全面支援繁體中文 (<code>zh-Hant</code>)、簡體中文 (<code>zh-Hans</code>)、英文 (<code>en</code>)、日文 (<code>ja</code>)。點擊遊戲主畫面語系按鈕可即時循環切換，並自動保存至本地儲存空間。</p>

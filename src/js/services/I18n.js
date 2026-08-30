@@ -42,6 +42,15 @@ const DICTIONARY = {
       deepestStage: "最深章節",
       receptionSeal: "對戰<br>受付中",
       openCheat: "⚙️ 測試調試 / 作弊選單",
+      cheatAuthTitle: "作弊驗證",
+      cheatAuthPrompt: "請輸入管理密碼以開啟測試選單：",
+      cheatAuthPlaceholder: "輸入密碼 (8989)",
+      cheatAuthConfirm: "解鎖選單",
+      cheatAuthCancel: "取消",
+      cheatAuthError: "密碼錯誤！無法開啟作弊選單。",
+      cheatAuthSuccess: "⚙️ 密碼正確，作弊選單已解鎖！",
+      galleryUnlockedTag: "已解鎖",
+      galleryLockedTag: "尚未解鎖",
       resetSave: "重置存檔",
       resetConfirm: "確定要重置所有存檔進度嗎？此操作無法還原。",
       // Main menu
@@ -311,6 +320,7 @@ const DICTIONARY = {
       nextLevelRate: "下一級機率: {chance}%",
       notYetUnlocked: "尚未解鎖",
       unlockSwimsuitHint: "於對局勝利後觸發泳裝事件以解鎖",
+      unlock2PHint: "需戰勝終ノ章（第四關）1 次以解鎖",
       btnAskSwimsuitSpace: "請小樂穿泳裝",
       btnPlayWatermelonSpace: "玩蒙眼切西瓜",
       btnNextStrikeSpace: "進行第 {attempt} 刀",
@@ -566,6 +576,16 @@ const DICTIONARY = {
       }
     },
     gallery: {
+      koraku_default: {
+        name: "巫女社・狐娘小樂",
+        variantName: "預設造型",
+        description: "守護朱鳥居的狐娘小樂。一身俐落的機甲巫女裝扮，總是帶著自信的微笑迎接挑戰者。"
+      },
+      koraku_2p: {
+        name: "鏡界・白金小樂",
+        variantName: "2P色小樂",
+        description: "跨越鏡界之後顯現的白金姿態。銀髮與冰藍光芒交織，唯有突破終章試煉者方能得見。"
+      },
       swimsuit_default: {
         name: "夏日祭・清涼泳裝",
         variantName: "預設泳裝",
@@ -623,6 +643,15 @@ const DICTIONARY = {
       deepestStage: "最深章节",
       receptionSeal: "对战<br>接待中",
       openCheat: "⚙️ 测试调试 / 作弊菜单",
+      cheatAuthTitle: "作弊验证",
+      cheatAuthPrompt: "请输入管理密码以开启测试菜单：",
+      cheatAuthPlaceholder: "输入密码 (8989)",
+      cheatAuthConfirm: "解锁菜单",
+      cheatAuthCancel: "取消",
+      cheatAuthError: "密码错误！无法开启作弊菜单。",
+      cheatAuthSuccess: "⚙️ 密码正确，作弊菜单已解锁！",
+      galleryUnlockedTag: "已解锁",
+      galleryLockedTag: "尚未解锁",
       resetSave: "重置存档",
       resetConfirm: "确定要重置所有存档进度吗？此操作无法撤销。",
       menuStages: "开始对局",
@@ -765,6 +794,7 @@ const DICTIONARY = {
       nextLevelRate: "下一级概率: {chance}%",
       notYetUnlocked: "尚未解锁",
       unlockSwimsuitHint: "于对局胜利后触发泳装事件以解锁",
+      unlock2PHint: "需战胜终ノ章（第四关）1 次以解锁",
       btnAskSwimsuitSpace: "请小乐穿泳装",
       btnPlayWatermelonSpace: "玩蒙眼切西瓜",
       btnNextStrikeSpace: "进行第 {attempt} 刀",
@@ -968,6 +998,16 @@ const DICTIONARY = {
       }
     },
     gallery: {
+      koraku_default: {
+        name: "巫女社・狐娘小乐",
+        variantName: "默认造型",
+        description: "守护朱鸟居的狐娘小乐。一身利落的机甲巫女装扮，总是带着自信的微笑迎接挑战者。"
+      },
+      koraku_2p: {
+        name: "镜界・白金小乐",
+        variantName: "2P色小乐",
+        description: "跨越镜界之后显现的白金姿态。银发与冰蓝光芒交织，唯有突破终章试炼者方能得见。"
+      },
       swimsuit_default: {
         name: "夏日祭・清凉泳装",
         variantName: "默认泳装",
@@ -1024,8 +1064,17 @@ const DICTIONARY = {
       deepestStage: "Deepest Chapter",
       receptionSeal: "Ready for<br>Battle",
       openCheat: "⚙️ Debug & Cheat Menu",
+      cheatAuthTitle: "Cheat Verification",
+      cheatAuthPrompt: "Enter admin passcode to unlock the debug menu:",
+      cheatAuthPlaceholder: "Passcode (8989)",
+      cheatAuthConfirm: "Unlock",
+      cheatAuthCancel: "Cancel",
+      cheatAuthError: "Incorrect passcode! Debug menu remains locked.",
+      cheatAuthSuccess: "⚙️ Passcode accepted. Debug menu unlocked!",
+      galleryUnlockedTag: "Unlocked",
+      galleryLockedTag: "Locked",
       resetSave: "Reset Save",
-      resetConfirm: "Are you sure you want to reset all game data? This action cannot be undone.",
+      resetConfirm: "Are you sure you want to reset all save data? This cannot be undone.",
       menuStages: "Story Battle",
       menuStagesSub: "STORY BATTLE",
       menuGrowth: "Player Growth",
@@ -1166,6 +1215,7 @@ const DICTIONARY = {
       nextLevelRate: "Next Level Rate: {chance}%",
       notYetUnlocked: "Locked",
       unlockSwimsuitHint: "Defeat Kohaku to trigger swimsuit event and unlock",
+      unlock2PHint: "Defeat Chapter 4 (Final Chapter) 1 time to unlock",
       btnAskSwimsuitSpace: "Ask Kohaku for Swimsuit",
       btnPlayWatermelonSpace: "Blindfolded Watermelon",
       btnNextStrikeSpace: "Strike #{attempt}",
@@ -1369,6 +1419,16 @@ const DICTIONARY = {
       }
     },
     gallery: {
+      koraku_default: {
+        name: "Shrine Maiden: Fox Maiden Kohaku",
+        variantName: "Default Outfit",
+        description: "Kohaku the fox maiden guarding the Vermilion Torii. Dressed in her sleek cyber-miko outfit, she welcomes every challenger with a fearless smile."
+      },
+      koraku_2p: {
+        name: "Mirror Realm: Platinum Kohaku",
+        variantName: "2P Color",
+        description: "The radiant platinum form appearing from beyond the mirror realm. Silver hair gleaming with azure light, unveiled only by champions of the Final Chapter."
+      },
       swimsuit_default: {
         name: "Summer Festival: Breezy Swimsuit",
         variantName: "Default Swimsuit",
@@ -1426,6 +1486,15 @@ const DICTIONARY = {
       deepestStage: "到達章",
       receptionSeal: "対戦<br>受付中",
       openCheat: "⚙️ デバッグ・チート設定",
+      cheatAuthTitle: "チート認証",
+      cheatAuthPrompt: "管理パスワードを入力してデバッグメニューを開放します：",
+      cheatAuthPlaceholder: "パスワード (8989)",
+      cheatAuthConfirm: "解除",
+      cheatAuthCancel: "キャンセル",
+      cheatAuthError: "パスワードが正しくありません。",
+      cheatAuthSuccess: "⚙️ パスワードが一致しました。デバッグメニューを開放しました！",
+      galleryUnlockedTag: "解放済み",
+      galleryLockedTag: "未解放",
       resetSave: "セーブ初期化",
       resetConfirm: "すべてのセーブデータを初期化しますか？この操作は取り消せません。",
       menuStages: "物語対戦",
@@ -1568,6 +1637,7 @@ const DICTIONARY = {
       nextLevelRate: "次レベル発動率: {chance}%",
       notYetUnlocked: "未解放",
       unlockSwimsuitHint: "対局勝利後に水着イベントを発生させて解放",
+      unlock2PHint: "終ノ章（第4章）を1回勝利して解放",
       btnAskSwimsuitSpace: "水着に着替えてもらう",
       btnPlayWatermelonSpace: "目隠しスイカ割り",
       btnNextStrikeSpace: "{attempt}太刀目に挑戦",
@@ -1771,6 +1841,16 @@ const DICTIONARY = {
       }
     },
     gallery: {
+      koraku_default: {
+        name: "神社・狐娘コハク",
+        variantName: "デフォルト",
+        description: "朱鳥居を守護する狐娘コハク。機甲巫女装束をまとい、不敵な笑みで挑戦者を迎え撃つ。"
+      },
+      koraku_2p: {
+        name: "鏡界・白金コハク",
+        variantName: "2Pカラー",
+        description: "鏡界の彼方より現れし白金の姿。銀髪と蒼光をたたえ、終ノ章を制覇した猛者のみが目撃できる。"
+      },
       swimsuit_default: {
         name: "夏祭り・清涼水着",
         variantName: "通常水着",

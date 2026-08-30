@@ -4,7 +4,7 @@
 > 專案根目錄：`D:\game-dev\New-game-project-4`  
 > 最新更新日期：2026-08-30  
 > 基準規範：`OPENSPEC.md` 與 `AGENTS.md`  
-> 測試狀態：`npm test` 87/87 全部通過
+> 測試狀態：`npm test` 89/89 全部通過
 
 ---
 
@@ -148,10 +148,20 @@ LocalStorage 鍵名：`koraku-rps-save-v1`
 3. 在 `BattleSystem.js` 實作戰鬥邏輯（例如在平手或出拳階段觸發）。
 4. 在 `I18n.js` 四語系字典新增技能名稱與說明。
 
-### 5.4 測試與打包
+### 5.4 圖鑑與外觀擴充
+1. 在 `gameConfig.js` 的 `GALLERY_ITEMS` 加入立繪條目（目前包含 `koraku_default`, `koraku_2p`, `swimsuit_default`, `swimsuit_watermelon`）。
+2. 在 `I18n.js` 四語系字典（`zh-Hant`, `zh-Hans`, `en`, `ja`）中的 `gallery` 新增對應立繪名稱、標籤與描述。
+3. 在 `AppView.js` 的 `isGalleryItemUnlocked` 設定對應解鎖判定條件（如 2P 色通關第四關解鎖、預設直接解鎖）。
+
+### 5.5 作弊除錯與密碼保護
+- 點擊首頁「⚙️ 測試調試 / 作弊選單」按鈕，觸發密碼視窗輸入 `8989` 進行驗證，通過後開啟作弊面板。
+- 支援快速鍵（1000ms 內連續按數字鍵 8 四次）。
+
+### 5.6 測試與打包
 每次變更後必須執行：
 ```bash
 npm test
 node scripts/build.mjs
+npm run specs:excel
 ```
-確保 85 項測試全數通過且 bundle 打包無誤。
+確保 89 項測試全數通過且 bundle 打包無誤。
