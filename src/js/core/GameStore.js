@@ -40,6 +40,7 @@ const DEFAULT_SAVE = Object.freeze({
     manualLosses: 0,
     autoWins: 0,
     autoLosses: 0,
+    watermelonStock: 0,
     watermelonSlices: 0,
     consumablesUsed: { hpPotion: 0, mpPotion: 0 },
     morphUses: 0,
@@ -136,6 +137,7 @@ function sanitizeSave(candidate) {
       manualLosses: candidate.records?.manualLosses ?? candidate.records?.losses ?? 0,
       autoWins: candidate.records?.autoWins ?? 0,
       autoLosses: candidate.records?.autoLosses ?? 0,
+      watermelonStock: Math.max(0, Math.min(999, candidate.records?.watermelonStock ?? 0)),
       watermelonSlices: candidate.records?.watermelonSlices ?? 0,
       consumablesUsed: {
         hpPotion: candidate.records?.consumablesUsed?.hpPotion || 0,
@@ -470,6 +472,30 @@ export class GameStore {
     this.commit("record-watermelon-cut");
   }
 
+  addWatermelonStock(amount = 1) {
+    if (!this.state.records) this.state.records = {};
+    const current = Number(this.state.records.watermelonStock) || 0;
+    this.state.records.watermelonStock = Math.min(999, Math.max(0, current + amount));
+    this.commit("add-watermelon-stock");
+    return this.state.records.watermelonStock;
+  }
+
+  consumeWatermelonStock(amount = 1) {
+    if (!this.state.records) this.state.records = {};
+    const current = Number(this.state.records.watermelonStock) || 0;
+    if (current < amount) return false;
+    this.state.records.watermelonStock = Math.max(0, current - amount);
+    this.commit("consume-watermelon-stock");
+    return true;
+  }
+
+  setWatermelonStock(value) {
+    if (!this.state.records) this.state.records = {};
+    this.state.records.watermelonStock = Math.min(999, Math.max(0, Number(value) || 0));
+    this.commit("set-watermelon-stock");
+    return this.state.records.watermelonStock;
+  }
+
   recordQteAttempt(stageId, success) {
     if (!this.state.records.qteStats) {
       this.state.records.qteStats = { totalAttempts: 0, totalSuccesses: 0, byStage: {} };
@@ -514,8 +540,12 @@ export class GameStore {
     this.state.records.totalXpEarned = (this.state.records.totalXpEarned || 0) + reward.xp;
 
     if (won) {
-      if (isAuto) this.state.records.autoWins = (this.state.records.autoWins || 0) + 1;
-      else this.state.records.manualWins = (this.state.records.manualWins || 0) + 1;
+      if (isAuto) {
+        this.state.records.autoWins = (this.state.records.autoWins || 0) + 1;
+        this.addWatermelonStock(1);
+      } else {
+        this.state.records.manualWins = (this.state.records.manualWins || 0) + 1;
+      }
 
       if (stage?.id) {
         this.state.records.bestStage = Math.max(this.state.records.bestStage || 0, stage.id);
@@ -644,6 +674,10 @@ export class GameStore {
     }
     if (typeof updates.mpPotion === "number" && updates.mpPotion >= 0) {
       this.state.inventory.mpPotion = Math.floor(updates.mpPotion);
+    }
+    if (typeof updates.watermelonStock === "number" && updates.watermelonStock >= 0) {
+      if (!this.state.records) this.state.records = {};
+      this.state.records.watermelonStock = Math.max(0, Math.min(999, Math.floor(updates.watermelonStock)));
     }
     if (updates.allocations) {
       if (typeof updates.allocations.hp === "number") this.state.profile.allocations.hp = Math.max(0, updates.allocations.hp);

@@ -32,6 +32,8 @@ export class AppView {
     this.toastTimer = null;
     this.damageTimer = null;
     this.watermelonFrame = 0;
+    this.floatingWatermelonFrame = 0;
+    this.isWatermelonZoomed = false;
     this.cacheElements();
     this.bindEvents();
   }
@@ -40,6 +42,7 @@ export class AppView {
     this.app = $("#app");
     this.screenStack = $(".screen-stack");
     this.battleArena = $("#battle-arena");
+    this.floatingWatermelon = $("#floating-autobattle-watermelon");
     this.battleCharacterWrap = $("#battle-character-wrap");
     this.battleCharacterSingle = $("#battle-character-single");
     this.battleCharactersDual = $("#battle-characters-dual");
@@ -74,7 +77,33 @@ export class AppView {
     this.renderI18n();
     const snapshot = this.store.snapshot();
     this.renderStore(snapshot);
-    this.navigate("home");
+    let targetScreen = "home";
+    try {
+      const hashScreen = window.location.hash ? window.location.hash.replace(/^#/, "") : null;
+      targetScreen = hashScreen || sessionStorage.getItem("koraku_active_screen") || "home";
+    } catch (_) {}
+
+    let activeBattle = null;
+    try {
+      const savedBattle = sessionStorage.getItem("koraku_active_battle");
+      if (savedBattle) activeBattle = JSON.parse(savedBattle);
+    } catch (_) {}
+
+    if (targetScreen === "battle" && activeBattle?.stageId) {
+      if (typeof window !== "undefined" && window.history) {
+        window.history.replaceState({ screen: "battle" }, "", "#battle");
+      }
+      if (activeBattle.isAuto) {
+        this.startAutoBattle(activeBattle.stageId, activeBattle.remainingRounds || 10);
+      } else {
+        this.startStage(activeBattle.stageId);
+      }
+    } else {
+      if (typeof window !== "undefined" && window.history) {
+        window.history.replaceState({ screen: targetScreen }, "", "#" + targetScreen);
+      }
+      this.navigate(targetScreen, { pushHistory: false });
+    }
   }
 
   renderI18n() {
@@ -121,6 +150,36 @@ export class AppView {
       this.renderHeldQteDirections();
     });
 
+    // Browser Popstate (History Back / Forward & Mobile Back Gesture)
+    window.addEventListener("popstate", (event) => {
+      const targetScreen = event.state?.screen || (window.location.hash ? window.location.hash.replace(/^#/, "") : "home");
+      if (this.currentScreen === targetScreen) return;
+
+      if (this.currentScreen === "battle") {
+        this.hideFloatingWatermelon();
+        this.postBattle?.closeAutoWatermelon?.();
+        this.battleArena?.classList.remove("is-settlement");
+        if (this.battleState?.active) {
+          this.battle.stopAutoBattle();
+          this.battle.abandon();
+        } else if (this.battle.autoBattle?.active) {
+          this.battle.stopAutoBattle();
+        }
+      }
+      this.navigate(targetScreen, { pushHistory: false });
+    });
+
+    // Mouse Navigation Buttons (Back: button 3, Forward: button 4)
+    window.addEventListener("mouseup", (event) => {
+      if (event.button === 3) {
+        event.preventDefault();
+        window.history.back();
+      } else if (event.button === 4) {
+        event.preventDefault();
+        window.history.forward();
+      }
+    });
+
     const langSelect = $("#lang-select");
     if (langSelect) {
       langSelect.addEventListener("change", (e) => {
@@ -158,25 +217,50 @@ export class AppView {
     this.bus.on("qte:update", (state) => this.renderQte(state));
     this.bus.on("qte:wrong", (data) => this.flashQteWrong(data?.slot));
     this.bus.on("postbattle:state", (state) => this.renderPostBattle(state));
+    this.bus.on("postbattle:auto-watermelon", (state) => this.renderFloatingWatermelon(state));
     this.bus.on("toast", (toast) => this.showToast(toast.message, toast.tone));
     this.bus.on("auto-battle:update", (info) => {
+      try {
+        const activeBattleStr = sessionStorage.getItem("koraku_active_battle");
+        if (activeBattleStr) {
+          const activeBattle = JSON.parse(activeBattleStr);
+          activeBattle.remainingRounds = info.remainingRounds;
+          sessionStorage.setItem("koraku_active_battle", JSON.stringify(activeBattle));
+        }
+      } catch (_) {}
       const msg = info.won
         ? I18n.t("ui.autoBattleToastUpdateWin", { remaining: info.remainingRounds })
         : I18n.t("ui.autoBattleToastUpdateLoss", { remaining: info.remainingRounds });
       this.showToast(msg, info.won ? "success" : "danger");
+      if (this.battle?.autoBattle?.active && !this.battle?.autoBattle?.isPaused && this.postBattle?.getWatermelonStock() > 0) {
+        this.postBattle.emitAutoWatermelon();
+      }
     });
     this.bus.on("auto-battle:finished", (info) => {
+      try {
+        sessionStorage.removeItem("koraku_active_battle");
+      } catch (_) {}
+      this.hideFloatingWatermelon();
+      this.postBattle?.closeAutoWatermelon?.();
       this.showToast(I18n.t("ui.autoBattleToastFinished", { total: info.totalRounds, wins: info.wins, losses: info.losses }), "success");
       this.requestNavigation("stages");
     });
     this.bus.on("auto-battle:paused", (info) => {
       this.updateAutoBattleButton(true, info);
+      this.hideFloatingWatermelon();
     });
     this.bus.on("auto-battle:resumed", (info) => {
       this.updateAutoBattleButton(false, info);
+      if (this.postBattle?.getWatermelonStock() > 0) {
+        this.postBattle.emitAutoWatermelon();
+      }
     });
     this.bus.on("auto-battle:stopped", () => {
-      // Toast shown by button handler, no duplicate needed
+      try {
+        sessionStorage.removeItem("koraku_active_battle");
+      } catch (_) {}
+      this.hideFloatingWatermelon();
+      this.postBattle?.closeAutoWatermelon?.();
     });
   }
 
@@ -257,8 +341,12 @@ export class AppView {
         if (this.battle.autoBattle.isPaused) {
           this.battle.resumeAutoBattle();
           this.showToast(I18n.t("ui.autoBattleToastResumed"), "success");
+          if (this.postBattle?.getWatermelonStock() > 0) {
+            this.postBattle.emitAutoWatermelon();
+          }
         } else {
           this.battle.pauseAutoBattle();
+          this.hideFloatingWatermelon();
           this.showToast(I18n.t("ui.autoBattleToastPaused"), "warning");
         }
       }
@@ -508,6 +596,34 @@ export class AppView {
       return;
     }
 
+    if (event.target.closest("#btn-auto-watermelon-strike")) {
+      this.postBattle.autoWatermelonStrike();
+      return;
+    }
+
+    if (event.target.closest("#btn-auto-watermelon-next-strike, #btn-auto-watermelon-next-round, #btn-auto-watermelon-start")) {
+      this.postBattle.startAutoWatermelonRound();
+      return;
+    }
+
+    if (event.target.closest("#btn-toggle-watermelon-zoom")) {
+      this.isWatermelonZoomed = !this.isWatermelonZoomed;
+      const floating = $("#floating-autobattle-watermelon");
+      if (floating) {
+        floating.classList.toggle("is-zoomed", this.isWatermelonZoomed);
+      }
+      const zoomBtn = $("#btn-toggle-watermelon-zoom");
+      if (zoomBtn) {
+        zoomBtn.textContent = this.isWatermelonZoomed ? "🔍 1x" : "🔍 2.5x";
+      }
+      return;
+    }
+
+    if (event.target.closest("#btn-close-floating-watermelon")) {
+      this.postBattle.closeAutoWatermelon();
+      return;
+    }
+
     if (event.target.closest("#abandon-battle")) {
       this.requestNavigation("stages");
       return;
@@ -529,6 +645,12 @@ export class AppView {
   }
 
   handleKeydown(event) {
+    if (event.altKey && event.key === "ArrowLeft") {
+      event.preventDefault();
+      window.history.back();
+      return;
+    }
+
     const key = event.key.toLowerCase();
 
     // Secret Cheat Trigger: Numpad 8 (or 8 key) pressed 4 times within 1000ms
@@ -542,6 +664,25 @@ export class AppView {
         this.cheatKeypressTimestamps = [];
         this.openCheatModal();
         this.showToast("⚙️ 作弊選單已喚起！", "success");
+        return;
+      }
+    }
+
+    const floatingEl = $("#floating-autobattle-watermelon");
+    const isAutoWatermelonActive = Boolean(this.postBattle?.autoWatermelonState?.active) &&
+      Boolean(this.battle?.autoBattle?.active) &&
+      !this.battle?.autoBattle?.isPaused &&
+      Boolean(floatingEl && !floatingEl.hidden);
+
+    if (isAutoWatermelonActive && (event.code === "Space" || key === " ")) {
+      event.preventDefault();
+      const scene = this.postBattle.autoWatermelonState.scene;
+      if (scene === "watermelonAim") {
+        this.postBattle.autoWatermelonStrike();
+        return;
+      }
+      if (["watermelonResult", "watermelonComplete", "idle"].includes(scene)) {
+        this.postBattle.startAutoWatermelonRound();
         return;
       }
     }
@@ -696,6 +837,8 @@ export class AppView {
 
   requestNavigation(screenName) {
     if (screenName !== "battle") {
+      this.hideFloatingWatermelon();
+      this.postBattle?.closeAutoWatermelon?.();
       this.battleArena?.classList.remove("is-settlement");
       if (this.battleState?.active) {
         const confirmed = window.confirm("現在撤退將不會得到星砂或經驗，確定離開嗎？");
@@ -709,7 +852,27 @@ export class AppView {
     this.navigate(screenName);
   }
 
-  navigate(screenName) {
+  navigate(screenName, options = {}) {
+    if (screenName !== "battle") {
+      this.hideFloatingWatermelon();
+      this.postBattle?.closeAutoWatermelon?.();
+      try {
+        sessionStorage.removeItem("koraku_active_battle");
+      } catch (_) {}
+    }
+    try {
+      sessionStorage.setItem("koraku_active_screen", screenName);
+    } catch (_) {}
+
+    if (options.pushHistory !== false && typeof window !== "undefined" && window.history) {
+      const targetHash = "#" + screenName;
+      if (window.location.hash !== targetHash) {
+        window.history.pushState({ screen: screenName }, "", targetHash);
+      } else if (window.history.state?.screen !== screenName) {
+        window.history.replaceState({ screen: screenName }, "", targetHash);
+      }
+    }
+
     const next = $("#screen-" + screenName);
     if (!next) return;
     document.querySelectorAll(".screen").forEach((screen) => {
@@ -727,6 +890,8 @@ export class AppView {
   }
 
   startStage(stageId) {
+    this.hideFloatingWatermelon();
+    this.postBattle?.closeAutoWatermelon?.();
     this.battle.stopAutoBattle();
     if (!this.battle.start(stageId)) return;
     this.postState = null;
@@ -2112,13 +2277,13 @@ export class AppView {
       $("#result-title").textContent = I18n.t("ui.postBattleVictoryTitle");
       $("#result-message").textContent = I18n.t("ui.postBattleVictoryDesc");
       actions =
-        '<button type="button" class="button-primary" data-post-action="swimsuit">' + I18n.t("ui.btnAskSwimsuitSpace") + '</button>' +
+        '<button type="button" class="button-primary" data-post-action="swimsuit">' + I18n.t("ui.btnAskSwimsuitSpace") + ' <kbd>SPACE</kbd></button>' +
         this.postButtons(false);
     } else if (state.scene === "swimsuit") {
       $("#result-title").textContent = I18n.t("ui.postBattleVictoryTitle");
       $("#result-message").textContent = I18n.t("dialogue.askSwimsuitLine");
       actions =
-        '<button type="button" class="button-primary" data-post-action="watermelon">' + I18n.t("ui.btnPlayWatermelonSpace") + '</button>' +
+        '<button type="button" class="button-primary" data-post-action="watermelon">' + I18n.t("ui.btnPlayWatermelonSpace") + ' <kbd>SPACE</kbd></button>' +
         this.postButtons(false);
     } else if (state.scene === "watermelonAim") {
       $("#result-title").textContent = I18n.t("ui.watermelonTitle");
@@ -2129,7 +2294,7 @@ export class AppView {
       $("#result-title").textContent = watermelon.lastCutSuccess ? "Hit!" : "Miss!";
       $("#result-message").textContent = (watermelon.lastCutSuccess ? I18n.t("dialogue.watermelonHit", { remaining }) : I18n.t("dialogue.watermelonMiss", { remaining }));
       actions =
-        '<button type="button" class="button-primary" data-post-action="watermelon">' + I18n.t("ui.btnNextStrikeSpace", { attempt: watermelon.attempts + 1 }) + '</button>' +
+        '<button type="button" class="button-primary" data-post-action="watermelon">' + I18n.t("ui.btnNextStrikeSpace", { attempt: watermelon.attempts + 1 }) + ' <kbd>SPACE</kbd></button>' +
         this.postButtons(false);
     } else if (state.scene === "watermelonComplete") {
       $("#result-title").textContent = I18n.t("ui.postBattleVictoryTitle");
@@ -2151,11 +2316,163 @@ export class AppView {
     update();
   }
 
+  renderFloatingWatermelon(state) {
+    const floating = $("#floating-autobattle-watermelon");
+    if (!floating) return;
+    const stock = state?.stock ?? this.postBattle?.getWatermelonStock() ?? 0;
+    const stockCountEl = $("#auto-watermelon-stock-count");
+    if (stockCountEl) stockCountEl.textContent = stock;
+
+    if (!this.battle?.autoBattle?.active || this.battle?.autoBattle?.isPaused) {
+      floating.hidden = true;
+      floating.setAttribute("aria-hidden", "true");
+      this.setFloatingWatermelonTicker(false);
+      return;
+    }
+
+    if (state.scene === "idle" && stock <= 0) {
+      floating.hidden = true;
+      floating.setAttribute("aria-hidden", "true");
+      this.setFloatingWatermelonTicker(false);
+      return;
+    }
+
+    floating.hidden = false;
+    floating.setAttribute("aria-hidden", "false");
+    floating.classList.toggle("is-zoomed", Boolean(this.isWatermelonZoomed));
+
+    const zoomBtn = $("#btn-toggle-watermelon-zoom");
+    if (zoomBtn) {
+      zoomBtn.textContent = this.isWatermelonZoomed ? "🔍 1x" : "🔍 2.5x";
+    }
+
+    const avatarImg = $("#floating-watermelon-kohaku");
+    if (avatarImg && state.appearance) {
+      avatarImg.setAttribute("src", state.appearance);
+    }
+
+    const watermelon = state.watermelon || { attempts: 0, maxAttempts: 3, successes: 0 };
+    const attemptEl = $("#auto-watermelon-attempt");
+    const successesEl = $("#auto-watermelon-successes");
+    if (attemptEl) attemptEl.textContent = "第 " + Math.min(3, watermelon.attempts + 1) + " 刀 / 3";
+    if (successesEl) successesEl.textContent = I18n.t("ui.watermelonScore") + " " + watermelon.successes;
+
+    const targetEl = $("#auto-watermelon-target");
+    const tolerance = state.tolerance ?? (0.13 * (0.5 ** (watermelon.attempts || 0)));
+    if (targetEl) {
+      targetEl.style.left = ((state.target || 0.5) * 100) + "%";
+      targetEl.style.width = (tolerance * 2 * 100) + "%";
+    }
+
+    const hintEl = $("#auto-watermelon-hint");
+    const trackEl = $("#auto-watermelon-track");
+    const strikeBtn = $("#btn-auto-watermelon-strike");
+    const nextStrikeBtn = $("#btn-auto-watermelon-next-strike");
+    const nextRoundBtn = $("#btn-auto-watermelon-next-round");
+    const startBtn = $("#btn-auto-watermelon-start");
+    const statusEl = $("#auto-watermelon-status");
+
+    this.setFloatingWatermelonTicker(state.scene === "watermelonAim");
+
+    if (state.scene === "watermelonAim") {
+      if (hintEl) hintEl.textContent = I18n.t("ui.floatingWatermelonAimDesc");
+      if (trackEl) trackEl.hidden = false;
+      if (strikeBtn) strikeBtn.hidden = false;
+      if (nextStrikeBtn) nextStrikeBtn.hidden = true;
+      if (nextRoundBtn) nextRoundBtn.hidden = true;
+      if (startBtn) startBtn.hidden = true;
+      if (statusEl) statusEl.hidden = true;
+    } else if (state.scene === "watermelonResult") {
+      const remaining = 3 - watermelon.attempts;
+      const hitText = watermelon.lastCutSuccess
+        ? I18n.t("dialogue.watermelonHit", { remaining })
+        : I18n.t("dialogue.watermelonMiss", { remaining });
+      if (hintEl) hintEl.textContent = hitText;
+      if (trackEl) trackEl.hidden = false;
+      if (strikeBtn) strikeBtn.hidden = true;
+      if (nextStrikeBtn) {
+        nextStrikeBtn.hidden = false;
+        nextStrikeBtn.textContent = I18n.t("ui.btnNextStrikeSpace", { attempt: watermelon.attempts + 1 });
+      }
+      if (nextRoundBtn) nextRoundBtn.hidden = true;
+      if (startBtn) startBtn.hidden = true;
+      if (statusEl) {
+        statusEl.hidden = false;
+        statusEl.textContent = watermelon.lastCutSuccess ? "🎯 " + I18n.t("dialogue.watermelonHit", { remaining }) : "💨 " + I18n.t("dialogue.watermelonMiss", { remaining });
+      }
+    } else if (state.scene === "watermelonComplete") {
+      const finishText = watermelon.successes > 0
+        ? I18n.t("dialogue.watermelonAllHit", { successes: watermelon.successes })
+        : I18n.t("dialogue.watermelonDone");
+      if (hintEl) hintEl.textContent = finishText;
+      if (trackEl) trackEl.hidden = true;
+      if (strikeBtn) strikeBtn.hidden = true;
+      if (nextStrikeBtn) nextStrikeBtn.hidden = true;
+      if (statusEl) {
+        statusEl.hidden = false;
+        statusEl.textContent = "🎉 +" + (watermelon.rewardXp || (watermelon.successes * 100)) + " EXP！";
+      }
+      if (stock > 0) {
+        if (nextRoundBtn) {
+          nextRoundBtn.hidden = false;
+          nextRoundBtn.textContent = I18n.t("ui.btnNextWatermelonRound", { count: stock });
+        }
+        if (startBtn) startBtn.hidden = true;
+      } else {
+        if (nextRoundBtn) nextRoundBtn.hidden = true;
+        if (startBtn) startBtn.hidden = true;
+        if (statusEl) {
+          statusEl.textContent += "\n" + I18n.t("ui.floatingWatermelonNoStock");
+        }
+      }
+    } else { // idle
+      if (trackEl) trackEl.hidden = true;
+      if (strikeBtn) strikeBtn.hidden = true;
+      if (nextStrikeBtn) nextStrikeBtn.hidden = true;
+      if (stock > 0) {
+        if (startBtn) {
+          startBtn.hidden = false;
+          startBtn.textContent = I18n.t("ui.btnStartWatermelonRound") + " (" + stock + ")";
+        }
+        if (nextRoundBtn) nextRoundBtn.hidden = true;
+        if (hintEl) hintEl.textContent = I18n.t("ui.autoWatermelonStock", { count: stock });
+      } else {
+        if (startBtn) startBtn.hidden = true;
+        if (nextRoundBtn) nextRoundBtn.hidden = true;
+        if (hintEl) hintEl.textContent = I18n.t("ui.floatingWatermelonNoStock");
+      }
+      if (statusEl) statusEl.hidden = true;
+    }
+  }
+
+  setFloatingWatermelonTicker(active) {
+    window.cancelAnimationFrame(this.floatingWatermelonFrame);
+    if (!active) return;
+    const marker = $("#auto-watermelon-marker");
+    if (!marker) return;
+    const update = () => {
+      if (marker && this.postBattle) {
+        marker.style.left = (this.postBattle.getAutoMarkerPosition() * 100) + "%";
+      }
+      this.floatingWatermelonFrame = window.requestAnimationFrame(update);
+    };
+    update();
+  }
+
+  hideFloatingWatermelon() {
+    this.setFloatingWatermelonTicker(false);
+    const floating = $("#floating-autobattle-watermelon");
+    if (floating) {
+      floating.hidden = true;
+      floating.setAttribute("aria-hidden", "true");
+    }
+  }
+
   postButtons(rematchPrimary) {
     const rematchClass = rematchPrimary ? "button-primary" : "button-secondary";
-    return '<button type="button" class="' + rematchClass + '" data-post-action="rematch">' + I18n.t("ui.btnRematch") + '</button>' +
-      '<button type="button" class="button-secondary" data-post-action="stages">' + I18n.t("ui.btnSelectStages") + '</button>' +
-      '<button type="button" class="button-secondary" data-post-action="home">' + I18n.t("ui.btnReturnHome") + '</button>';
+    return '<button type="button" class="' + rematchClass + '" data-post-action="rematch">' + I18n.t("ui.btnRematch") + ' <kbd>E</kbd></button>' +
+      '<button type="button" class="button-secondary" data-post-action="stages">' + I18n.t("ui.btnSelectStages") + ' <kbd>C</kbd></button>' +
+      '<button type="button" class="button-secondary" data-post-action="home">' + I18n.t("ui.btnReturnHome") + ' <kbd>Q</kbd></button>';
   }
 
   handlePostAction(action) {

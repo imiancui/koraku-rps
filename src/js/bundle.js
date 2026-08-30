@@ -694,6 +694,13 @@ const DICTIONARY = {
       watermelonDesc: "當指針進入綠色完美區域時按下按鈕，考驗你的直覺與時機！",
       btnSliceWatermelon: "就是現在！切！",
       watermelonScore: "切中次數：",
+      autoWatermelonStock: "累計切西瓜次數：{count} / 999",
+      btnNextWatermelonRound: "進行下一輪切西瓜 (剩餘 {count})",
+      btnStartWatermelonRound: "開始切西瓜",
+      floatingWatermelonTitle: "🍉 蒙眼切西瓜 (自動刷關累積)",
+      floatingWatermelonAimDesc: "白色指針進入綠色區域時按下揮刀！",
+      floatingWatermelonFinished: "本輪三刀結束！累計剩餘：{count} 次",
+      floatingWatermelonNoStock: "切西瓜次數已用盡，等待自動刷關勝場累積中...",
       // Guide
       guideRpsTitle: "基礎猜拳規則",
       guideRpsDesc: "剪刀剋布、布剋石頭、石頭剋剪刀。猜贏對小樂造成傷害，平手可能觸發摸摸，猜輸進入 QTE 反制階段。",
@@ -753,12 +760,12 @@ const DICTIONARY = {
       nextLevelRate: "下一級機率: {chance}%",
       notYetUnlocked: "尚未解鎖",
       unlockSwimsuitHint: "於對局勝利後觸發泳裝事件以解鎖",
-      btnAskSwimsuitSpace: "請小樂穿泳裝 <kbd>SPACE</kbd>",
-      btnPlayWatermelonSpace: "玩蒙眼切西瓜 <kbd>SPACE</kbd>",
-      btnNextStrikeSpace: "進行第 {attempt} 刀 <kbd>SPACE</kbd>",
-      btnRematch: "再次挑戰 <kbd>E</kbd>",
-      btnSelectStages: "選擇章節 <kbd>C</kbd>",
-      btnReturnHome: "回大廳 <kbd>Q</kbd>",
+      btnAskSwimsuitSpace: "請小樂穿泳裝",
+      btnPlayWatermelonSpace: "玩蒙眼切西瓜",
+      btnNextStrikeSpace: "進行第 {attempt} 刀",
+      btnRematch: "再次挑戰",
+      btnSelectStages: "選擇章節",
+      btnReturnHome: "回大廳",
       unrevealed: "未揭曉",
       preparing: "準備中",
       countdownCaption: "出拳倒數",
@@ -1144,6 +1151,13 @@ const DICTIONARY = {
       watermelonDesc: "当指针进入绿色完美区域时按下按钮，考验你的直觉与时机！",
       btnSliceWatermelon: "就是现在！切！",
       watermelonScore: "切中次数：",
+      autoWatermelonStock: "累计切西瓜次数：{count} / 999",
+      btnNextWatermelonRound: "进行下一轮切西瓜 (剩余 {count})",
+      btnStartWatermelonRound: "开始切西瓜",
+      floatingWatermelonTitle: "🍉 蒙眼切西瓜 (自动刷关累积)",
+      floatingWatermelonAimDesc: "白色指针进入绿色区域时按下挥刀！",
+      floatingWatermelonFinished: "本轮三刀结束！累计剩余：{count} 次",
+      floatingWatermelonNoStock: "切西瓜次数已用尽，等待自动刷关胜场累积中...",
       guideRpsTitle: "基础猜拳规则",
       guideRpsDesc: "剪刀克布、布克石头、石头克剪刀。猜赢对小乐造成伤害，平手可能触发摸摸，猜输进入 QTE 反制阶段。",
       guideQteTitle: "QTE 绝地反制",
@@ -1200,12 +1214,12 @@ const DICTIONARY = {
       nextLevelRate: "下一级概率: {chance}%",
       notYetUnlocked: "尚未解锁",
       unlockSwimsuitHint: "于对局胜利后触发泳装事件以解锁",
-      btnAskSwimsuitSpace: "请小乐穿泳装 <kbd>SPACE</kbd>",
-      btnPlayWatermelonSpace: "玩蒙眼切西瓜 <kbd>SPACE</kbd>",
-      btnNextStrikeSpace: "进行第 {attempt} 刀 <kbd>SPACE</kbd>",
-      btnRematch: "再次挑战 <kbd>E</kbd>",
-      btnSelectStages: "选择章节 <kbd>C</kbd>",
-      btnReturnHome: "回大厅 <kbd>Q</kbd>",
+      btnAskSwimsuitSpace: "请小乐穿泳装",
+      btnPlayWatermelonSpace: "玩蒙眼切西瓜",
+      btnNextStrikeSpace: "进行第 {attempt} 刀",
+      btnRematch: "再次挑战",
+      btnSelectStages: "选择章节",
+      btnReturnHome: "回大厅",
       unrevealed: "未揭晓",
       preparing: "准备中",
       countdownCaption: "出拳倒计时",
@@ -1538,6 +1552,13 @@ const DICTIONARY = {
       watermelonDesc: "Press the strike button when the indicator enters the green sweet spot!",
       btnSliceWatermelon: "Strike Now!",
       watermelonScore: "Clean Hits:",
+      autoWatermelonStock: "Watermelon Slices Stored: {count} / 999",
+      btnNextWatermelonRound: "Next Watermelon Round ({count} left)",
+      btnStartWatermelonRound: "Start Watermelon Slicing",
+      floatingWatermelonTitle: "🍉 Blindfolded Watermelon Slicing (Auto Stored)",
+      floatingWatermelonAimDesc: "Strike when the white indicator is in the green zone!",
+      floatingWatermelonFinished: "Round finished! Stored remaining: {count}",
+      floatingWatermelonNoStock: "No stored watermelon slices left. Stacking with auto-battle wins...",
       guideRpsTitle: "Basic RPS Rules",
       guideRpsDesc: "Scissors beat Paper, Paper beats Rock, Rock beats Scissors. Winning deals damage, draws can trigger Petting, and losing triggers QTE Counter phase.",
       guideQteTitle: "Clutch QTE Counter",
@@ -1594,12 +1615,12 @@ const DICTIONARY = {
       nextLevelRate: "Next Level Rate: {chance}%",
       notYetUnlocked: "Locked",
       unlockSwimsuitHint: "Defeat Kohaku to trigger swimsuit event and unlock",
-      btnAskSwimsuitSpace: "Ask Kohaku for Swimsuit <kbd>SPACE</kbd>",
-      btnPlayWatermelonSpace: "Blindfolded Watermelon <kbd>SPACE</kbd>",
-      btnNextStrikeSpace: "Strike #{attempt} <kbd>SPACE</kbd>",
-      btnRematch: "Rematch <kbd>E</kbd>",
-      btnSelectStages: "Select Chapter <kbd>C</kbd>",
-      btnReturnHome: "Home Lobby <kbd>Q</kbd>",
+      btnAskSwimsuitSpace: "Ask Kohaku for Swimsuit",
+      btnPlayWatermelonSpace: "Blindfolded Watermelon",
+      btnNextStrikeSpace: "Strike #{attempt}",
+      btnRematch: "Rematch",
+      btnSelectStages: "Select Chapter",
+      btnReturnHome: "Home Lobby",
       unrevealed: "Unrevealed",
       preparing: "Readying",
       countdownCaption: "RPS Countdown",
@@ -1933,6 +1954,13 @@ const DICTIONARY = {
       watermelonDesc: "白い針が緑のゾーンに入ったらボタンを押そう。直感とタイミングの勝負！",
       btnSliceWatermelon: "今だ！一刀両断！",
       watermelonScore: "命中回数：",
+      autoWatermelonStock: "スイカ割り蓄積回数：{count} / 999",
+      btnNextWatermelonRound: "次のスイカ割りを開始 (残り {count})",
+      btnStartWatermelonRound: "スイカ割りを開始",
+      floatingWatermelonTitle: "🍉 目隠しスイカ割り（自動周回蓄積）",
+      floatingWatermelonAimDesc: "白い針が緑のゾーンに入ったらボタンを押そう！",
+      floatingWatermelonFinished: "3太刀終了！蓄積残り：{count} 回",
+      floatingWatermelonNoStock: "スイカ割り回数を使い切りました。自動周回で勝利すると蓄積されます...",
       guideRpsTitle: "基本じゃんけんルール",
       guideRpsDesc: "チョキはパーに勝ち、パーはグーに勝ち、グーはチョキに勝つ。勝ちでダメージ、あいこでナデナデ、負けで QTE 反撃へ突入。",
       guideQteTitle: "起死回生の QTE 反撃",
@@ -1989,12 +2017,12 @@ const DICTIONARY = {
       nextLevelRate: "次レベル発動率: {chance}%",
       notYetUnlocked: "未解放",
       unlockSwimsuitHint: "対局勝利後に水着イベントを発生させて解放",
-      btnAskSwimsuitSpace: "水着に着替えてもらう <kbd>SPACE</kbd>",
-      btnPlayWatermelonSpace: "目隠しスイカ割り <kbd>SPACE</kbd>",
-      btnNextStrikeSpace: "{attempt}太刀目に挑戦 <kbd>SPACE</kbd>",
-      btnRematch: "再挑戦 <kbd>E</kbd>",
-      btnSelectStages: "章選択 <kbd>C</kbd>",
-      btnReturnHome: "ロビーへ <kbd>Q</kbd>",
+      btnAskSwimsuitSpace: "水着に着替えてもらう",
+      btnPlayWatermelonSpace: "目隠しスイカ割り",
+      btnNextStrikeSpace: "{attempt}太刀目に挑戦",
+      btnRematch: "再挑戦",
+      btnSelectStages: "章選択",
+      btnReturnHome: "ロビーへ",
       unrevealed: "未公開",
       preparing: "構え中",
       countdownCaption: "じゃんけん秒読",
@@ -3208,6 +3236,7 @@ const DEFAULT_SAVE = Object.freeze({
     manualLosses: 0,
     autoWins: 0,
     autoLosses: 0,
+    watermelonStock: 0,
     watermelonSlices: 0,
     consumablesUsed: { hpPotion: 0, mpPotion: 0 },
     morphUses: 0,
@@ -3304,6 +3333,7 @@ function sanitizeSave(candidate) {
       manualLosses: candidate.records?.manualLosses ?? candidate.records?.losses ?? 0,
       autoWins: candidate.records?.autoWins ?? 0,
       autoLosses: candidate.records?.autoLosses ?? 0,
+      watermelonStock: Math.max(0, Math.min(999, candidate.records?.watermelonStock ?? 0)),
       watermelonSlices: candidate.records?.watermelonSlices ?? 0,
       consumablesUsed: {
         hpPotion: candidate.records?.consumablesUsed?.hpPotion || 0,
@@ -3638,6 +3668,30 @@ class GameStore {
     this.commit("record-watermelon-cut");
   }
 
+  addWatermelonStock(amount = 1) {
+    if (!this.state.records) this.state.records = {};
+    const current = Number(this.state.records.watermelonStock) || 0;
+    this.state.records.watermelonStock = Math.min(999, Math.max(0, current + amount));
+    this.commit("add-watermelon-stock");
+    return this.state.records.watermelonStock;
+  }
+
+  consumeWatermelonStock(amount = 1) {
+    if (!this.state.records) this.state.records = {};
+    const current = Number(this.state.records.watermelonStock) || 0;
+    if (current < amount) return false;
+    this.state.records.watermelonStock = Math.max(0, current - amount);
+    this.commit("consume-watermelon-stock");
+    return true;
+  }
+
+  setWatermelonStock(value) {
+    if (!this.state.records) this.state.records = {};
+    this.state.records.watermelonStock = Math.min(999, Math.max(0, Number(value) || 0));
+    this.commit("set-watermelon-stock");
+    return this.state.records.watermelonStock;
+  }
+
   recordQteAttempt(stageId, success) {
     if (!this.state.records.qteStats) {
       this.state.records.qteStats = { totalAttempts: 0, totalSuccesses: 0, byStage: {} };
@@ -3682,8 +3736,12 @@ class GameStore {
     this.state.records.totalXpEarned = (this.state.records.totalXpEarned || 0) + reward.xp;
 
     if (won) {
-      if (isAuto) this.state.records.autoWins = (this.state.records.autoWins || 0) + 1;
-      else this.state.records.manualWins = (this.state.records.manualWins || 0) + 1;
+      if (isAuto) {
+        this.state.records.autoWins = (this.state.records.autoWins || 0) + 1;
+        this.addWatermelonStock(1);
+      } else {
+        this.state.records.manualWins = (this.state.records.manualWins || 0) + 1;
+      }
 
       if (stage?.id) {
         this.state.records.bestStage = Math.max(this.state.records.bestStage || 0, stage.id);
@@ -3812,6 +3870,10 @@ class GameStore {
     }
     if (typeof updates.mpPotion === "number" && updates.mpPotion >= 0) {
       this.state.inventory.mpPotion = Math.floor(updates.mpPotion);
+    }
+    if (typeof updates.watermelonStock === "number" && updates.watermelonStock >= 0) {
+      if (!this.state.records) this.state.records = {};
+      this.state.records.watermelonStock = Math.max(0, Math.min(999, Math.floor(updates.watermelonStock)));
     }
     if (updates.allocations) {
       if (typeof updates.allocations.hp === "number") this.state.profile.allocations.hp = Math.max(0, updates.allocations.hp);
@@ -4905,7 +4967,8 @@ class BattleSystem {
       damageTaken: this.battleDamageTaken || 0,
       durationSec,
       battle: this.snapshot(),
-      autoBattle: { ...this.autoBattle }
+      autoBattle: { ...this.autoBattle },
+      isAuto: Boolean(this.autoBattle?.active)
     });
     this.bus.emit("sound", { name: won ? "victory" : "defeat" });
 
@@ -4996,14 +5059,49 @@ class PostBattleSystem {
     this.store = store;
     this.random = random;
     this.state = null;
+    this.autoWatermelonState = {
+      active: false,
+      scene: "idle",
+      appearance: ASSETS.swimsuit,
+      target: 0,
+      tolerance: 0.13,
+      strikeStartedAt: 0,
+      strikeDuration: 1800,
+      watermelon: {
+        attempts: 0,
+        maxAttempts: 3,
+        successes: 0,
+        lastCutSuccess: null,
+        rewardXp: 0,
+        levelsGained: 0
+      }
+    };
+  }
+
+  getWatermelonStock() {
+    return this.store?.snapshot?.()?.records?.watermelonStock ?? (this.store?.state?.records?.watermelonStock ?? 0);
+  }
+
+  addWatermelonStock(count = 1) {
+    const newStock = this.store?.addWatermelonStock?.(count) ?? 0;
+    this.emitAutoWatermelon();
+    return newStock;
   }
 
   open(result) {
+    if (result.isAuto) {
+      if (result.won) {
+        this.store?.unlockSwimsuit?.();
+      }
+      this.emitAutoWatermelon();
+      return;
+    }
+
     this.state = {
       ...result,
       scene: result.won ? "victory" : "defeat",
       appearance: result.won
-        ? (result.stage.final ? ASSETS.final : ASSETS.default)
+        ? (result.stage?.final ? ASSETS.final : ASSETS.default)
         : ASSETS.defeat,
       target: 0,
       tolerance: 0.13,
@@ -5087,7 +5185,7 @@ class PostBattleSystem {
 
   settleWatermelon() {
     const watermelon = this.state.watermelon;
-    const earned = this.store.grantExperience(watermelon.successes * 100, "watermelon-reward");
+    const earned = this.store?.grantExperience?.(watermelon.successes * 100, "watermelon-reward") || { xp: watermelon.successes * 100, levelsGained: 0 };
     watermelon.rewardXp = earned.xp;
     watermelon.levelsGained = earned.levelsGained;
     this.state.scene = "watermelonComplete";
@@ -5107,12 +5205,124 @@ class PostBattleSystem {
     return normalized <= 0.5 ? normalized * 2 : (1 - normalized) * 2;
   }
 
+  // --- Auto-Battle Floating Watermelon API ---
+
+  startAutoWatermelonRound() {
+    const isFresh = !this.autoWatermelonState || ["idle", "watermelonComplete"].includes(this.autoWatermelonState.scene);
+    if (isFresh) {
+      if (this.getWatermelonStock() <= 0) return false;
+      this.store?.consumeWatermelonStock?.(1);
+      this.store?.unlockSwimsuit?.();
+      this.autoWatermelonState = {
+        active: true,
+        scene: "watermelonAim",
+        appearance: ASSETS.swimsuit,
+        target: 0,
+        tolerance: 0.13,
+        strikeStartedAt: performance.now(),
+        strikeDuration: 1800,
+        watermelon: {
+          attempts: 0,
+          maxAttempts: 3,
+          successes: 0,
+          lastCutSuccess: null,
+          rewardXp: 0,
+          levelsGained: 0
+        }
+      };
+    } else if (this.autoWatermelonState.scene === "watermelonResult") {
+      const attempts = this.autoWatermelonState.watermelon.attempts;
+      this.autoWatermelonState.tolerance = 0.13 * (0.5 ** attempts);
+      this.autoWatermelonState.strikeDuration = 1800 / (1.25 ** attempts);
+      this.autoWatermelonState.scene = "watermelonAim";
+      this.autoWatermelonState.appearance = ASSETS.swimsuit;
+      this.autoWatermelonState.strikeStartedAt = performance.now();
+    }
+
+    const minTarget = this.autoWatermelonState.tolerance + 0.05;
+    const maxTarget = 1 - this.autoWatermelonState.tolerance - 0.05;
+    this.autoWatermelonState.target = minTarget + this.random() * Math.max(0.1, maxTarget - minTarget);
+    this.autoWatermelonState.active = true;
+    this.emitAutoWatermelon();
+    const nextAttempt = this.autoWatermelonState.watermelon.attempts + 1;
+    this.say(I18n.t("dialogue.watermelonAttempt", { nextAttempt }));
+    return true;
+  }
+
+  autoWatermelonStrike() {
+    if (!this.autoWatermelonState || this.autoWatermelonState.scene !== "watermelonAim") return;
+    const marker = this.getAutoMarkerPosition();
+    const distance = Math.abs(marker - this.autoWatermelonState.target);
+    const tolerance = this.autoWatermelonState.tolerance ?? (0.13 * (0.5 ** this.autoWatermelonState.watermelon.attempts));
+    const success = distance <= tolerance;
+    this.autoWatermelonState.watermelon.attempts += 1;
+    this.autoWatermelonState.watermelon.lastCutSuccess = success;
+    if (success) {
+      this.autoWatermelonState.watermelon.successes += 1;
+    }
+    this.store?.recordWatermelonStageCut?.(this.autoWatermelonState.watermelon.attempts, success);
+    this.autoWatermelonState.appearance = success ? ASSETS.watermelon : ASSETS.swimsuit;
+
+    if (this.autoWatermelonState.watermelon.attempts >= this.autoWatermelonState.watermelon.maxAttempts) {
+      this.settleAutoWatermelon();
+      return;
+    }
+
+    this.autoWatermelonState.scene = "watermelonResult";
+    this.emitAutoWatermelon();
+    this.bus.emit("sound", { name: success ? "victory" : "hurt" });
+    const remaining = this.autoWatermelonState.watermelon.maxAttempts - this.autoWatermelonState.watermelon.attempts;
+    if (success) {
+      this.say(I18n.t("dialogue.watermelonHit", { remaining }));
+    } else {
+      this.say(I18n.t("dialogue.watermelonMiss", { remaining }));
+    }
+  }
+
+  settleAutoWatermelon() {
+    if (!this.autoWatermelonState) return;
+    const watermelon = this.autoWatermelonState.watermelon;
+    const earned = this.store?.grantExperience?.(watermelon.successes * 100, "watermelon-reward") || { xp: watermelon.successes * 100, levelsGained: 0 };
+    watermelon.rewardXp = earned.xp;
+    watermelon.levelsGained = earned.levelsGained;
+    this.autoWatermelonState.scene = "watermelonComplete";
+    this.emitAutoWatermelon();
+    this.bus.emit("sound", { name: watermelon.successes ? "victory" : "defeat" });
+    if (watermelon.successes > 0) {
+      this.say(I18n.t("dialogue.watermelonAllHit", { successes: watermelon.successes }));
+    } else {
+      this.say(I18n.t("dialogue.watermelonDone"));
+    }
+  }
+
+  getAutoMarkerPosition(now = performance.now()) {
+    if (!this.autoWatermelonState?.strikeStartedAt) return 0;
+    const elapsed = (now - this.autoWatermelonState.strikeStartedAt) % this.autoWatermelonState.strikeDuration;
+    const normalized = elapsed / this.autoWatermelonState.strikeDuration;
+    return normalized <= 0.5 ? normalized * 2 : (1 - normalized) * 2;
+  }
+
+  closeAutoWatermelon() {
+    if (this.autoWatermelonState) {
+      this.autoWatermelonState.active = false;
+      this.autoWatermelonState.scene = "idle";
+    }
+    this.emitAutoWatermelon();
+  }
+
   say(text) {
     this.bus.emit("dialogue", { speaker: I18n.t("dialogue.speakerKohaku"), text });
   }
 
   emit() {
     this.bus.emit("postbattle:state", structuredClone(this.state));
+  }
+
+  emitAutoWatermelon() {
+    this.bus.emit("postbattle:auto-watermelon", {
+      ...(this.autoWatermelonState ? structuredClone(this.autoWatermelonState) : { active: false, scene: "idle" }),
+      stock: this.getWatermelonStock()
+    });
   }
 }
 
@@ -5348,6 +5558,8 @@ class AppView {
     this.toastTimer = null;
     this.damageTimer = null;
     this.watermelonFrame = 0;
+    this.floatingWatermelonFrame = 0;
+    this.isWatermelonZoomed = false;
     this.cacheElements();
     this.bindEvents();
   }
@@ -5356,6 +5568,7 @@ class AppView {
     this.app = $("#app");
     this.screenStack = $(".screen-stack");
     this.battleArena = $("#battle-arena");
+    this.floatingWatermelon = $("#floating-autobattle-watermelon");
     this.battleCharacterWrap = $("#battle-character-wrap");
     this.battleCharacterSingle = $("#battle-character-single");
     this.battleCharactersDual = $("#battle-characters-dual");
@@ -5390,7 +5603,33 @@ class AppView {
     this.renderI18n();
     const snapshot = this.store.snapshot();
     this.renderStore(snapshot);
-    this.navigate("home");
+    let targetScreen = "home";
+    try {
+      const hashScreen = window.location.hash ? window.location.hash.replace(/^#/, "") : null;
+      targetScreen = hashScreen || sessionStorage.getItem("koraku_active_screen") || "home";
+    } catch (_) {}
+
+    let activeBattle = null;
+    try {
+      const savedBattle = sessionStorage.getItem("koraku_active_battle");
+      if (savedBattle) activeBattle = JSON.parse(savedBattle);
+    } catch (_) {}
+
+    if (targetScreen === "battle" && activeBattle?.stageId) {
+      if (typeof window !== "undefined" && window.history) {
+        window.history.replaceState({ screen: "battle" }, "", "#battle");
+      }
+      if (activeBattle.isAuto) {
+        this.startAutoBattle(activeBattle.stageId, activeBattle.remainingRounds || 10);
+      } else {
+        this.startStage(activeBattle.stageId);
+      }
+    } else {
+      if (typeof window !== "undefined" && window.history) {
+        window.history.replaceState({ screen: targetScreen }, "", "#" + targetScreen);
+      }
+      this.navigate(targetScreen, { pushHistory: false });
+    }
   }
 
   renderI18n() {
@@ -5437,6 +5676,36 @@ class AppView {
       this.renderHeldQteDirections();
     });
 
+    // Browser Popstate (History Back / Forward & Mobile Back Gesture)
+    window.addEventListener("popstate", (event) => {
+      const targetScreen = event.state?.screen || (window.location.hash ? window.location.hash.replace(/^#/, "") : "home");
+      if (this.currentScreen === targetScreen) return;
+
+      if (this.currentScreen === "battle") {
+        this.hideFloatingWatermelon();
+        this.postBattle?.closeAutoWatermelon?.();
+        this.battleArena?.classList.remove("is-settlement");
+        if (this.battleState?.active) {
+          this.battle.stopAutoBattle();
+          this.battle.abandon();
+        } else if (this.battle.autoBattle?.active) {
+          this.battle.stopAutoBattle();
+        }
+      }
+      this.navigate(targetScreen, { pushHistory: false });
+    });
+
+    // Mouse Navigation Buttons (Back: button 3, Forward: button 4)
+    window.addEventListener("mouseup", (event) => {
+      if (event.button === 3) {
+        event.preventDefault();
+        window.history.back();
+      } else if (event.button === 4) {
+        event.preventDefault();
+        window.history.forward();
+      }
+    });
+
     const langSelect = $("#lang-select");
     if (langSelect) {
       langSelect.addEventListener("change", (e) => {
@@ -5474,25 +5743,50 @@ class AppView {
     this.bus.on("qte:update", (state) => this.renderQte(state));
     this.bus.on("qte:wrong", (data) => this.flashQteWrong(data?.slot));
     this.bus.on("postbattle:state", (state) => this.renderPostBattle(state));
+    this.bus.on("postbattle:auto-watermelon", (state) => this.renderFloatingWatermelon(state));
     this.bus.on("toast", (toast) => this.showToast(toast.message, toast.tone));
     this.bus.on("auto-battle:update", (info) => {
+      try {
+        const activeBattleStr = sessionStorage.getItem("koraku_active_battle");
+        if (activeBattleStr) {
+          const activeBattle = JSON.parse(activeBattleStr);
+          activeBattle.remainingRounds = info.remainingRounds;
+          sessionStorage.setItem("koraku_active_battle", JSON.stringify(activeBattle));
+        }
+      } catch (_) {}
       const msg = info.won
         ? I18n.t("ui.autoBattleToastUpdateWin", { remaining: info.remainingRounds })
         : I18n.t("ui.autoBattleToastUpdateLoss", { remaining: info.remainingRounds });
       this.showToast(msg, info.won ? "success" : "danger");
+      if (this.battle?.autoBattle?.active && !this.battle?.autoBattle?.isPaused && this.postBattle?.getWatermelonStock() > 0) {
+        this.postBattle.emitAutoWatermelon();
+      }
     });
     this.bus.on("auto-battle:finished", (info) => {
+      try {
+        sessionStorage.removeItem("koraku_active_battle");
+      } catch (_) {}
+      this.hideFloatingWatermelon();
+      this.postBattle?.closeAutoWatermelon?.();
       this.showToast(I18n.t("ui.autoBattleToastFinished", { total: info.totalRounds, wins: info.wins, losses: info.losses }), "success");
       this.requestNavigation("stages");
     });
     this.bus.on("auto-battle:paused", (info) => {
       this.updateAutoBattleButton(true, info);
+      this.hideFloatingWatermelon();
     });
     this.bus.on("auto-battle:resumed", (info) => {
       this.updateAutoBattleButton(false, info);
+      if (this.postBattle?.getWatermelonStock() > 0) {
+        this.postBattle.emitAutoWatermelon();
+      }
     });
     this.bus.on("auto-battle:stopped", () => {
-      // Toast shown by button handler, no duplicate needed
+      try {
+        sessionStorage.removeItem("koraku_active_battle");
+      } catch (_) {}
+      this.hideFloatingWatermelon();
+      this.postBattle?.closeAutoWatermelon?.();
     });
   }
 
@@ -5573,8 +5867,12 @@ class AppView {
         if (this.battle.autoBattle.isPaused) {
           this.battle.resumeAutoBattle();
           this.showToast(I18n.t("ui.autoBattleToastResumed"), "success");
+          if (this.postBattle?.getWatermelonStock() > 0) {
+            this.postBattle.emitAutoWatermelon();
+          }
         } else {
           this.battle.pauseAutoBattle();
+          this.hideFloatingWatermelon();
           this.showToast(I18n.t("ui.autoBattleToastPaused"), "warning");
         }
       }
@@ -5824,6 +6122,34 @@ class AppView {
       return;
     }
 
+    if (event.target.closest("#btn-auto-watermelon-strike")) {
+      this.postBattle.autoWatermelonStrike();
+      return;
+    }
+
+    if (event.target.closest("#btn-auto-watermelon-next-strike, #btn-auto-watermelon-next-round, #btn-auto-watermelon-start")) {
+      this.postBattle.startAutoWatermelonRound();
+      return;
+    }
+
+    if (event.target.closest("#btn-toggle-watermelon-zoom")) {
+      this.isWatermelonZoomed = !this.isWatermelonZoomed;
+      const floating = $("#floating-autobattle-watermelon");
+      if (floating) {
+        floating.classList.toggle("is-zoomed", this.isWatermelonZoomed);
+      }
+      const zoomBtn = $("#btn-toggle-watermelon-zoom");
+      if (zoomBtn) {
+        zoomBtn.textContent = this.isWatermelonZoomed ? "🔍 1x" : "🔍 2.5x";
+      }
+      return;
+    }
+
+    if (event.target.closest("#btn-close-floating-watermelon")) {
+      this.postBattle.closeAutoWatermelon();
+      return;
+    }
+
     if (event.target.closest("#abandon-battle")) {
       this.requestNavigation("stages");
       return;
@@ -5845,6 +6171,12 @@ class AppView {
   }
 
   handleKeydown(event) {
+    if (event.altKey && event.key === "ArrowLeft") {
+      event.preventDefault();
+      window.history.back();
+      return;
+    }
+
     const key = event.key.toLowerCase();
 
     // Secret Cheat Trigger: Numpad 8 (or 8 key) pressed 4 times within 1000ms
@@ -5858,6 +6190,25 @@ class AppView {
         this.cheatKeypressTimestamps = [];
         this.openCheatModal();
         this.showToast("⚙️ 作弊選單已喚起！", "success");
+        return;
+      }
+    }
+
+    const floatingEl = $("#floating-autobattle-watermelon");
+    const isAutoWatermelonActive = Boolean(this.postBattle?.autoWatermelonState?.active) &&
+      Boolean(this.battle?.autoBattle?.active) &&
+      !this.battle?.autoBattle?.isPaused &&
+      Boolean(floatingEl && !floatingEl.hidden);
+
+    if (isAutoWatermelonActive && (event.code === "Space" || key === " ")) {
+      event.preventDefault();
+      const scene = this.postBattle.autoWatermelonState.scene;
+      if (scene === "watermelonAim") {
+        this.postBattle.autoWatermelonStrike();
+        return;
+      }
+      if (["watermelonResult", "watermelonComplete", "idle"].includes(scene)) {
+        this.postBattle.startAutoWatermelonRound();
         return;
       }
     }
@@ -6012,6 +6363,8 @@ class AppView {
 
   requestNavigation(screenName) {
     if (screenName !== "battle") {
+      this.hideFloatingWatermelon();
+      this.postBattle?.closeAutoWatermelon?.();
       this.battleArena?.classList.remove("is-settlement");
       if (this.battleState?.active) {
         const confirmed = window.confirm("現在撤退將不會得到星砂或經驗，確定離開嗎？");
@@ -6025,7 +6378,27 @@ class AppView {
     this.navigate(screenName);
   }
 
-  navigate(screenName) {
+  navigate(screenName, options = {}) {
+    if (screenName !== "battle") {
+      this.hideFloatingWatermelon();
+      this.postBattle?.closeAutoWatermelon?.();
+      try {
+        sessionStorage.removeItem("koraku_active_battle");
+      } catch (_) {}
+    }
+    try {
+      sessionStorage.setItem("koraku_active_screen", screenName);
+    } catch (_) {}
+
+    if (options.pushHistory !== false && typeof window !== "undefined" && window.history) {
+      const targetHash = "#" + screenName;
+      if (window.location.hash !== targetHash) {
+        window.history.pushState({ screen: screenName }, "", targetHash);
+      } else if (window.history.state?.screen !== screenName) {
+        window.history.replaceState({ screen: screenName }, "", targetHash);
+      }
+    }
+
     const next = $("#screen-" + screenName);
     if (!next) return;
     document.querySelectorAll(".screen").forEach((screen) => {
@@ -6043,6 +6416,8 @@ class AppView {
   }
 
   startStage(stageId) {
+    this.hideFloatingWatermelon();
+    this.postBattle?.closeAutoWatermelon?.();
     this.battle.stopAutoBattle();
     if (!this.battle.start(stageId)) return;
     this.postState = null;
@@ -7428,13 +7803,13 @@ class AppView {
       $("#result-title").textContent = I18n.t("ui.postBattleVictoryTitle");
       $("#result-message").textContent = I18n.t("ui.postBattleVictoryDesc");
       actions =
-        '<button type="button" class="button-primary" data-post-action="swimsuit">' + I18n.t("ui.btnAskSwimsuitSpace") + '</button>' +
+        '<button type="button" class="button-primary" data-post-action="swimsuit">' + I18n.t("ui.btnAskSwimsuitSpace") + ' <kbd>SPACE</kbd></button>' +
         this.postButtons(false);
     } else if (state.scene === "swimsuit") {
       $("#result-title").textContent = I18n.t("ui.postBattleVictoryTitle");
       $("#result-message").textContent = I18n.t("dialogue.askSwimsuitLine");
       actions =
-        '<button type="button" class="button-primary" data-post-action="watermelon">' + I18n.t("ui.btnPlayWatermelonSpace") + '</button>' +
+        '<button type="button" class="button-primary" data-post-action="watermelon">' + I18n.t("ui.btnPlayWatermelonSpace") + ' <kbd>SPACE</kbd></button>' +
         this.postButtons(false);
     } else if (state.scene === "watermelonAim") {
       $("#result-title").textContent = I18n.t("ui.watermelonTitle");
@@ -7445,7 +7820,7 @@ class AppView {
       $("#result-title").textContent = watermelon.lastCutSuccess ? "Hit!" : "Miss!";
       $("#result-message").textContent = (watermelon.lastCutSuccess ? I18n.t("dialogue.watermelonHit", { remaining }) : I18n.t("dialogue.watermelonMiss", { remaining }));
       actions =
-        '<button type="button" class="button-primary" data-post-action="watermelon">' + I18n.t("ui.btnNextStrikeSpace", { attempt: watermelon.attempts + 1 }) + '</button>' +
+        '<button type="button" class="button-primary" data-post-action="watermelon">' + I18n.t("ui.btnNextStrikeSpace", { attempt: watermelon.attempts + 1 }) + ' <kbd>SPACE</kbd></button>' +
         this.postButtons(false);
     } else if (state.scene === "watermelonComplete") {
       $("#result-title").textContent = I18n.t("ui.postBattleVictoryTitle");
@@ -7467,11 +7842,163 @@ class AppView {
     update();
   }
 
+  renderFloatingWatermelon(state) {
+    const floating = $("#floating-autobattle-watermelon");
+    if (!floating) return;
+    const stock = state?.stock ?? this.postBattle?.getWatermelonStock() ?? 0;
+    const stockCountEl = $("#auto-watermelon-stock-count");
+    if (stockCountEl) stockCountEl.textContent = stock;
+
+    if (!this.battle?.autoBattle?.active || this.battle?.autoBattle?.isPaused) {
+      floating.hidden = true;
+      floating.setAttribute("aria-hidden", "true");
+      this.setFloatingWatermelonTicker(false);
+      return;
+    }
+
+    if (state.scene === "idle" && stock <= 0) {
+      floating.hidden = true;
+      floating.setAttribute("aria-hidden", "true");
+      this.setFloatingWatermelonTicker(false);
+      return;
+    }
+
+    floating.hidden = false;
+    floating.setAttribute("aria-hidden", "false");
+    floating.classList.toggle("is-zoomed", Boolean(this.isWatermelonZoomed));
+
+    const zoomBtn = $("#btn-toggle-watermelon-zoom");
+    if (zoomBtn) {
+      zoomBtn.textContent = this.isWatermelonZoomed ? "🔍 1x" : "🔍 2.5x";
+    }
+
+    const avatarImg = $("#floating-watermelon-kohaku");
+    if (avatarImg && state.appearance) {
+      avatarImg.setAttribute("src", state.appearance);
+    }
+
+    const watermelon = state.watermelon || { attempts: 0, maxAttempts: 3, successes: 0 };
+    const attemptEl = $("#auto-watermelon-attempt");
+    const successesEl = $("#auto-watermelon-successes");
+    if (attemptEl) attemptEl.textContent = "第 " + Math.min(3, watermelon.attempts + 1) + " 刀 / 3";
+    if (successesEl) successesEl.textContent = I18n.t("ui.watermelonScore") + " " + watermelon.successes;
+
+    const targetEl = $("#auto-watermelon-target");
+    const tolerance = state.tolerance ?? (0.13 * (0.5 ** (watermelon.attempts || 0)));
+    if (targetEl) {
+      targetEl.style.left = ((state.target || 0.5) * 100) + "%";
+      targetEl.style.width = (tolerance * 2 * 100) + "%";
+    }
+
+    const hintEl = $("#auto-watermelon-hint");
+    const trackEl = $("#auto-watermelon-track");
+    const strikeBtn = $("#btn-auto-watermelon-strike");
+    const nextStrikeBtn = $("#btn-auto-watermelon-next-strike");
+    const nextRoundBtn = $("#btn-auto-watermelon-next-round");
+    const startBtn = $("#btn-auto-watermelon-start");
+    const statusEl = $("#auto-watermelon-status");
+
+    this.setFloatingWatermelonTicker(state.scene === "watermelonAim");
+
+    if (state.scene === "watermelonAim") {
+      if (hintEl) hintEl.textContent = I18n.t("ui.floatingWatermelonAimDesc");
+      if (trackEl) trackEl.hidden = false;
+      if (strikeBtn) strikeBtn.hidden = false;
+      if (nextStrikeBtn) nextStrikeBtn.hidden = true;
+      if (nextRoundBtn) nextRoundBtn.hidden = true;
+      if (startBtn) startBtn.hidden = true;
+      if (statusEl) statusEl.hidden = true;
+    } else if (state.scene === "watermelonResult") {
+      const remaining = 3 - watermelon.attempts;
+      const hitText = watermelon.lastCutSuccess
+        ? I18n.t("dialogue.watermelonHit", { remaining })
+        : I18n.t("dialogue.watermelonMiss", { remaining });
+      if (hintEl) hintEl.textContent = hitText;
+      if (trackEl) trackEl.hidden = false;
+      if (strikeBtn) strikeBtn.hidden = true;
+      if (nextStrikeBtn) {
+        nextStrikeBtn.hidden = false;
+        nextStrikeBtn.textContent = I18n.t("ui.btnNextStrikeSpace", { attempt: watermelon.attempts + 1 });
+      }
+      if (nextRoundBtn) nextRoundBtn.hidden = true;
+      if (startBtn) startBtn.hidden = true;
+      if (statusEl) {
+        statusEl.hidden = false;
+        statusEl.textContent = watermelon.lastCutSuccess ? "🎯 " + I18n.t("dialogue.watermelonHit", { remaining }) : "💨 " + I18n.t("dialogue.watermelonMiss", { remaining });
+      }
+    } else if (state.scene === "watermelonComplete") {
+      const finishText = watermelon.successes > 0
+        ? I18n.t("dialogue.watermelonAllHit", { successes: watermelon.successes })
+        : I18n.t("dialogue.watermelonDone");
+      if (hintEl) hintEl.textContent = finishText;
+      if (trackEl) trackEl.hidden = true;
+      if (strikeBtn) strikeBtn.hidden = true;
+      if (nextStrikeBtn) nextStrikeBtn.hidden = true;
+      if (statusEl) {
+        statusEl.hidden = false;
+        statusEl.textContent = "🎉 +" + (watermelon.rewardXp || (watermelon.successes * 100)) + " EXP！";
+      }
+      if (stock > 0) {
+        if (nextRoundBtn) {
+          nextRoundBtn.hidden = false;
+          nextRoundBtn.textContent = I18n.t("ui.btnNextWatermelonRound", { count: stock });
+        }
+        if (startBtn) startBtn.hidden = true;
+      } else {
+        if (nextRoundBtn) nextRoundBtn.hidden = true;
+        if (startBtn) startBtn.hidden = true;
+        if (statusEl) {
+          statusEl.textContent += "\n" + I18n.t("ui.floatingWatermelonNoStock");
+        }
+      }
+    } else { // idle
+      if (trackEl) trackEl.hidden = true;
+      if (strikeBtn) strikeBtn.hidden = true;
+      if (nextStrikeBtn) nextStrikeBtn.hidden = true;
+      if (stock > 0) {
+        if (startBtn) {
+          startBtn.hidden = false;
+          startBtn.textContent = I18n.t("ui.btnStartWatermelonRound") + " (" + stock + ")";
+        }
+        if (nextRoundBtn) nextRoundBtn.hidden = true;
+        if (hintEl) hintEl.textContent = I18n.t("ui.autoWatermelonStock", { count: stock });
+      } else {
+        if (startBtn) startBtn.hidden = true;
+        if (nextRoundBtn) nextRoundBtn.hidden = true;
+        if (hintEl) hintEl.textContent = I18n.t("ui.floatingWatermelonNoStock");
+      }
+      if (statusEl) statusEl.hidden = true;
+    }
+  }
+
+  setFloatingWatermelonTicker(active) {
+    window.cancelAnimationFrame(this.floatingWatermelonFrame);
+    if (!active) return;
+    const marker = $("#auto-watermelon-marker");
+    if (!marker) return;
+    const update = () => {
+      if (marker && this.postBattle) {
+        marker.style.left = (this.postBattle.getAutoMarkerPosition() * 100) + "%";
+      }
+      this.floatingWatermelonFrame = window.requestAnimationFrame(update);
+    };
+    update();
+  }
+
+  hideFloatingWatermelon() {
+    this.setFloatingWatermelonTicker(false);
+    const floating = $("#floating-autobattle-watermelon");
+    if (floating) {
+      floating.hidden = true;
+      floating.setAttribute("aria-hidden", "true");
+    }
+  }
+
   postButtons(rematchPrimary) {
     const rematchClass = rematchPrimary ? "button-primary" : "button-secondary";
-    return '<button type="button" class="' + rematchClass + '" data-post-action="rematch">' + I18n.t("ui.btnRematch") + '</button>' +
-      '<button type="button" class="button-secondary" data-post-action="stages">' + I18n.t("ui.btnSelectStages") + '</button>' +
-      '<button type="button" class="button-secondary" data-post-action="home">' + I18n.t("ui.btnReturnHome") + '</button>';
+    return '<button type="button" class="' + rematchClass + '" data-post-action="rematch">' + I18n.t("ui.btnRematch") + ' <kbd>E</kbd></button>' +
+      '<button type="button" class="button-secondary" data-post-action="stages">' + I18n.t("ui.btnSelectStages") + ' <kbd>C</kbd></button>' +
+      '<button type="button" class="button-secondary" data-post-action="home">' + I18n.t("ui.btnReturnHome") + ' <kbd>Q</kbd></button>';
   }
 
   handlePostAction(action) {

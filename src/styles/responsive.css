@@ -191,7 +191,15 @@
 
   .home-record {
     flex-wrap: wrap;
-    padding-bottom: 100px;
+    padding-bottom: 0;
+    margin-bottom: 8px;
+  }
+
+  .home-admin-actions {
+    position: static;
+    margin-top: 10px;
+    margin-bottom: 24px;
+    align-items: flex-start;
   }
 
   .home-character {
@@ -215,8 +223,9 @@
   }
 
   .reset-button {
-    left: 18px;
-    bottom: 14px;
+    position: static;
+    left: auto;
+    bottom: auto;
   }
 
   .page-screen {
@@ -542,7 +551,32 @@
     gap: 8px;
   }
 
-  .qte-panel > small {
+  .round-oracle {
+    top: 72px;
+    width: min(88vw, 360px);
+    padding: 8px 12px;
+  }
+
+  .round-label {
+    margin-bottom: 5px;
+    font-size: 7.5px;
+  }
+
+  .hand-versus strong {
+    font-size: 26px;
+  }
+
+  .round-countdown {
+    width: 48px;
+    height: 48px;
+    right: -16px;
+  }
+
+  .round-countdown b {
+    font-size: 18px;
+  }
+
+  .round-countdown small {
     display: none;
   }
 
@@ -564,6 +598,14 @@
   .reward-row {
     margin: 16px 0;
   }
+
+  .battle-arena.is-settlement .battle-character-wrap,
+  .battle-arena:has(.result-overlay.is-active) .battle-character-wrap {
+    bottom: 180px;
+    right: -10%;
+    width: 110%;
+    height: 75%;
+  }
 }
 
 @media (max-width: 430px) {
@@ -573,6 +615,10 @@
 
   .profile-chip:first-child {
     display: none;
+  }
+
+  .home-copy {
+    padding-bottom: 50px;
   }
 
   .home-copy h1 span {
@@ -589,6 +635,16 @@
 
   .home-record {
     font-size: 9px;
+    margin-top: 14px;
+    margin-bottom: 6px;
+    padding-bottom: 0;
+  }
+
+  .home-admin-actions {
+    position: static;
+    margin-top: 8px;
+    margin-bottom: 24px;
+    align-items: flex-start;
   }
 
   .page-heading {
@@ -609,21 +665,78 @@
   }
 
   .round-oracle {
-    top: 126px;
+    top: 66px;
+    width: min(92vw, 305px);
+    padding: 5px 8px 6px;
+  }
+
+  .round-label {
+    margin-bottom: 3px;
+    font-size: 7px;
+  }
+
+  .hand-versus {
+    grid-template-columns: 1fr 24px 1fr;
+    gap: 0 4px;
+  }
+
+  .hand-versus strong {
+    font-size: 20px;
+  }
+
+  .hand-versus b {
+    font-size: 10px;
+  }
+
+  .hand-versus > span {
+    width: 20px;
+    height: 20px;
+    font-size: 9px;
+  }
+
+  .round-countdown {
+    width: 38px;
+    height: 38px;
+    right: -10px;
+  }
+
+  .round-countdown b {
+    font-size: 14px;
+  }
+
+  .round-countdown small {
+    display: none;
+  }
+
+  .battle-left-cluster {
+    left: 8px;
+    bottom: 125px;
+    width: min(48vw, 175px);
+    gap: 8px;
   }
 
   .hand-selector {
-    top: 248px;
-    width: 48%;
+    position: static;
+    top: auto;
+    width: 100%;
   }
 
   .battle-character-wrap {
-    right: -29%;
-    width: 118%;
+    right: -15%;
+    width: 112%;
+    bottom: 75px;
+  }
+
+  .battle-arena.is-settlement .battle-character-wrap,
+  .battle-arena:has(.result-overlay.is-active) .battle-character-wrap {
+    bottom: 220px;
+    right: -8%;
+    width: 112%;
+    height: 72%;
   }
 
   .player-hud {
-    width: 55%;
+    width: 100%;
   }
 
   .player-hud .hud-name > span,
@@ -650,5 +763,22 @@
 
   .result-actions button:first-child {
     grid-column: 1 / -1;
+  }
+
+  .floating-autobattle-watermelon {
+    right: 8px;
+    left: auto;
+    width: min(285px, calc(100% - 16px));
+    top: 54px;
+  }
+
+  .floating-autobattle-watermelon.is-zoomed {
+    width: min(360px, calc(100% - 16px));
+    top: 44px;
+  }
+
+  .floating-watermelon-avatar {
+    width: 54px;
+    height: 74px;
   }
 }

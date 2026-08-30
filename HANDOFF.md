@@ -4,7 +4,7 @@
 > 專案根目錄：`D:\game-dev\New-game-project-4`  
 > 最新更新日期：2026-08-30  
 > 基準規範：`OPENSPEC.md` 與 `AGENTS.md`  
-> 測試狀態：`npm test` 80/80 全部通過
+> 測試狀態：`npm test` 87/87 全部通過
 
 ---
 
@@ -13,7 +13,7 @@
 本專案為純原生（Vanilla ES Modules / HTML5 / CSS3 / Web Audio API）架構的日式 ACGN 猜拳 RPG 對決遊戲。無前端框架、無外部執行期套件相依，可直接於本機或透過 GitHub Pages 部署運行。
 
 ### 1.1 核心命令
-- **執行測試**：`npm test`（Node.js 原生測試執行器，80 項測試）
+- **執行測試**：`npm test`（Node.js 原生測試執行器，85 項測試）
 - **打包發布**：`npm run build` 或 `node scripts/build.mjs`（生成 `src/js/bundle.js`）
 - **本地伺服器**：`npm run dev` 或 `npm start`（預設監聽 `http://127.0.0.1:4173/`）
 - **Tailscale 共享**：`npm run start:tailscale`
@@ -40,10 +40,10 @@ src/
 │   │   ├── QTEInputSystem.js   # WASD/方向鍵/數字鍵盤對應與雙正方向斜向合成
 │   │   ├── rpsRules.js         # 猜拳勝負判定、雙手勝負判定、剋制反制手勢與敘事
 │   │   ├── progressionRules.js # 等級經驗公式、屬性推導 (Base + Allocation + Gear)
-│   │   ├── PostBattleSystem.js # 戰後事件、泳裝切換、三刀切西瓜小遊戲
+│   │   ├── PostBattleSystem.js # 戰後事件、泳裝切換、三刀切西瓜、自動刷關浮層切西瓜
 │   │   └── SoundSystem.js      # Web Audio API 音效合成（拳擊、撫摸、勝利、失敗）
 │   ├── ui/
-│   │   ├── AppView.js          # DOM 渲染、畫面導航、紙娃娃介面、作弊面板、事件監聽
+│   │   ├── AppView.js          # DOM 渲染、畫面導航、紙娃娃介面、浮動切西瓜、作弊面板
 │   │   └── DialogueController.js # AVG 逐字打字機台詞與角色說話跳動動態
 │   ├── main.js                 # 系統組裝與進入點
 │   └── bundle.js               # 打包產物
@@ -51,7 +51,7 @@ src/
     ├── tokens.css              # 色彩主題、字型、圓角、陰影
     ├── base.css                # 重置樣式與排版基底
     ├── components.css          # 按鈕、卡片、模態框、HUD
-    ├── screens.css             # 各大主畫面（首頁/關卡/商店/裝備/圖鑑/戰鬥/歷程）
+    ├── screens.css             # 各大主畫面（首頁/關卡/商店/裝備/圖鑑/戰鬥/歷程/浮動切西瓜）
     ├── animations.css          # 受擊震動、說話跳動、QTE 特效、雷擊/燃燒動畫
     └── responsive.css          # 780px/390px 行動版適配
 ```
@@ -79,7 +79,10 @@ src/
 | `qte:update` | `QTESystem` / `DualQTESystem` | `AppView` | 序列、當前索引、剩餘毫秒數、進度比例 |
 | `qte:slot-success` | `DualQTESystem` | `BattleSystem` | `{ slot: "left"|"right", enemyId }` |
 | `qte:finished` | `QTESystem` / `DualQTESystem` | `BattleSystem` | `{ success: boolean, ... }` |
-| `postbattle:state` | `PostBattleSystem` | `AppView` | 勝敗/泳裝/切西瓜各階段狀態 |
+| `postbattle:state` | `PostBattleSystem` | `AppView` | 手動勝敗/泳裝/切西瓜全螢幕結算狀態 |
+| `postbattle:auto-watermelon` | `PostBattleSystem` | `AppView` | 自動刷關浮動切西瓜狀態與累計次數 `{ scene, watermelon, stock, ... }` |
+| `auto-battle:update` | `BattleSystem` | `AppView` | 自動刷關進度更新 `{ wins, losses, remainingRounds, won }` |
+| `auto-battle:paused` / `resumed` | `BattleSystem` | `AppView` | 自動刷關暫停/繼續狀態與浮層連動 |
 | `dialogue` | 各系統 | `DialogueController` | `{ speaker, text }` |
 | `sound` | 各系統 | `SoundSystem` | `{ name: "punch"|"counterRub"|"skill"|... }` |
 | `toast` | 各系統 | `AppView` | `{ message, tone: "success"|"danger"|"info" }` |
@@ -112,7 +115,7 @@ LocalStorage 鍵名：`koraku-rps-save-v1`
     "wins": 0, "losses": 0, "bestStage": 0, "unlockedSwimsuit": false,
     "clearedStages": [], "totalCoinsEarned": 0, "totalXpEarned": 0,
     "totalBattles": 0, "manualWins": 0, "manualLosses": 0,
-    "autoWins": 0, "autoLosses": 0, "watermelonSlices": 0,
+    "autoWins": 0, "autoLosses": 0, "watermelonStock": 0, "watermelonSlices": 0,
     "consumablesUsed": { "hpPotion": 0, "mpPotion": 0 },
     "morphUses": 0,
     "watermelonStageStats": { "1": {"attempts":0,"successes":0}, "2": {"attempts":0,"successes":0}, "3": {"attempts":0,"successes":0} },
@@ -151,4 +154,4 @@ LocalStorage 鍵名：`koraku-rps-save-v1`
 npm test
 node scripts/build.mjs
 ```
-確保 77 項測試全數通過且 bundle 打包無誤。
+確保 85 項測試全數通過且 bundle 打包無誤。

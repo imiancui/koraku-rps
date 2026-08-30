@@ -316,6 +316,7 @@ const extraRows = [
   ["切西瓜", "strike_1", "第 1 刀", "安全區 26.0% (容錯 0.13), 週期 1800ms", "命中結算 +100 EXP", "初始刀速與最大綠色判定區"],
   ["切西瓜", "strike_2", "第 2 刀", "安全區 13.0% (容錯 0.065), 週期 1440ms", "命中結算 +100 EXP", "難度提升，判定區縮小 50%，速度提升 25%"],
   ["切西瓜", "strike_3", "第 3 刀", "安全區 6.5% (容錯 0.0325), 週期 1152ms", "命中結算 +100 EXP", "極限挑戰，判定區再縮小 50%，速度再提升 25%"],
+  ["切西瓜", "stock_accumulate", "自動刷關切西瓜累計", "勝場自動累積 +1 (上限 999 次)", "多輪連續挑戰", "自動刷關開啟獨立浮動面板，無全屏遮罩，隨時暫停/繼續，三階段重複挑戰"],
   ["圖鑑CG", "swimsuit_default", "夏日祭・清涼泳裝", "預設泳裝立繪", "通關第 1 關或觸發泳裝事件", "小樂難得換上的清涼泳裝"],
   ["圖鑑CG", "swimsuit_watermelon", "海風・切西瓜", "切西瓜差分立繪", "完成蒙眼切西瓜大挑戰", "蒙眼切西瓜大獲全勝後，小樂得意洋洋展示成果的模樣"]
 ];
@@ -325,7 +326,7 @@ sheets.push({ name: "切西瓜與圖鑑", data: extraRows });
 const cheatRows = [
   ["功能名稱", "觸發方式", "時間窗口", "支援參數/動作", "功能詳細說明"],
   ["秘密作弊面板", "連續按下 4 次數字鍵 8", "1000ms 滾動窗口", "主鍵區 8 或小鍵盤 8", "彈出作弊設定面板，可自訂全部存檔資料"],
-  ["自訂屬性數值", "作弊面板輸入數值", "即時套用", "Level, XP, SP, Coins, Potions, Allocations", "任意修改玩家等級、金幣、藥水與點數分配"],
+  ["自訂屬性數值", "作弊面板輸入數值", "即時套用", "Level, XP, SP, Coins, Potions, Allocations, WatermelonStock", "任意修改玩家等級、金幣、藥水、點數分配與切西瓜庫存"],
   ["一鍵解鎖全關卡", "作弊面板點擊按鈕", "即時套用", "clearedStages: [1, 2, 3, 4]", "直接解鎖全 4 大章節關卡與 Boss 規則說明卡"],
   ["一鍵解鎖全圖鑑", "作弊面板點擊按鈕", "即時套用", "unlockedSwimsuit: true", "立即解鎖全部泳裝與切西瓜立繪圖鑑"]
 ];
@@ -339,15 +340,16 @@ const sampleKeys = [
   "nav.home", "nav.stages", "nav.shop", "nav.paperdoll", "nav.growth", "nav.gallery", "nav.records", "nav.guide",
   "hands.rock", "hands.paper", "hands.scissors",
   "dialogue.chant3", "dialogue.chant2", "dialogue.chant1", "dialogue.morphReaction",
-  "ui.autoBattle", "ui.clearAll", "ui.equip", "ui.unequip", "ui.victory", "ui.defeat"
+  "ui.autoBattle", "ui.autoWatermelonStock", "ui.btnNextWatermelonRound", "ui.floatingWatermelonTitle",
+  "ui.clearAll", "ui.equip", "ui.unequip", "ui.victory", "ui.defeat"
 ];
 for (const key of sampleKeys) {
   i18nRows.push([
     key,
-    I18n.t(key, {}, "zh-Hant"),
-    I18n.t(key, {}, "zh-Hans"),
-    I18n.t(key, {}, "en"),
-    I18n.t(key, {}, "ja")
+    I18n.t(key, { count: 5 }, "zh-Hant"),
+    I18n.t(key, { count: 5 }, "zh-Hans"),
+    I18n.t(key, { count: 5 }, "en"),
+    I18n.t(key, { count: 5 }, "ja")
   ]);
 }
 sheets.push({ name: "在地化字典", data: i18nRows });

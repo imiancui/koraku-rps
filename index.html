@@ -109,6 +109,15 @@
               <i></i>
               <span><small data-i18n="ui.deepestStage">最深章節</small><b id="record-stage">—</b></span>
             </div>
+
+            <div class="home-admin-actions">
+              <button id="reset-save" class="text-button reset-button" type="button" data-i18n="ui.resetSave">重置存檔</button>
+              <footer class="home-footer" aria-label="頁腳資訊">
+                <a href="https://store.steampowered.com/app/1425000" target="_blank" rel="noopener noreferrer" class="footer-plain-link">Endless Alice</a>
+                <span class="footer-plain-sep">/</span>
+                <a href="https://discord.gg/fJFXdPPT5y" target="_blank" rel="noopener noreferrer" class="footer-plain-link">Discord</a>
+              </footer>
+            </div>
           </div>
 
           <div class="home-character character-speaker" data-character-speaker>
@@ -120,14 +129,6 @@
           <div class="home-dialogue">
             <span data-i18n="dialogue.speakerKohaku">小樂</span>
             <p data-i18n="dialogue.homeGreeting">準備好了嗎？這次可別把視線移開喔。</p>
-          </div>
-          <div class="home-admin-actions">
-            <button id="reset-save" class="text-button reset-button" type="button" data-i18n="ui.resetSave">重置存檔</button>
-            <footer class="home-footer" aria-label="頁腳資訊">
-              <a href="https://store.steampowered.com/app/1425000" target="_blank" rel="noopener noreferrer" class="footer-plain-link">Endless Alice</a>
-              <span class="footer-plain-sep">/</span>
-              <a href="https://discord.gg/fJFXdPPT5y" target="_blank" rel="noopener noreferrer" class="footer-plain-link">Discord</a>
-            </footer>
           </div>
         </section>
 
@@ -956,6 +957,61 @@
                   <button id="watermelon-strike" class="button-primary" type="button">就是現在！<kbd>SPACE</kbd></button>
                 </div>
                 <p id="watermelon-status" class="watermelon-status" hidden></p>
+              </div>
+            </section>
+
+            <!-- Floating Auto-Battle Watermelon Widget (Separated, No Dark Mask) -->
+            <section id="floating-autobattle-watermelon" class="floating-autobattle-watermelon" hidden aria-hidden="true">
+              <div class="floating-watermelon-card">
+                <div class="floating-watermelon-header">
+                  <span class="floating-watermelon-title" data-i18n="ui.floatingWatermelonTitle">🍉 蒙眼切西瓜 (自動刷關累積)</span>
+                  <div class="floating-header-actions">
+                    <button type="button" id="btn-toggle-watermelon-zoom" class="floating-zoom-btn" title="放大/縮小面板" aria-label="放大或縮小面板">🔍 2.5x</button>
+                    <button type="button" id="btn-close-floating-watermelon" class="floating-close-btn" aria-label="收起浮層">×</button>
+                  </div>
+                </div>
+                
+                <div class="floating-watermelon-stock-badge">
+                  <span class="stock-icon">🍉</span>
+                  <span id="floating-watermelon-stock-label">累計切西瓜次數：<b id="auto-watermelon-stock-count">0</b> / 999</span>
+                </div>
+
+                <div class="floating-watermelon-body">
+                  <div class="floating-watermelon-avatar">
+                    <img id="floating-watermelon-kohaku" src="./koraku/泳裝小樂.png" alt="泳裝小樂">
+                  </div>
+                  
+                  <div class="floating-watermelon-controls">
+                    <div class="floating-watermelon-score">
+                      <span id="auto-watermelon-attempt">第 1 刀 / 3</span>
+                      <span id="auto-watermelon-successes">切中 0 次</span>
+                    </div>
+
+                    <p id="auto-watermelon-hint" class="floating-watermelon-hint" data-i18n="ui.floatingWatermelonAimDesc">白色指針進入綠色區域時按下揮刀！</p>
+
+                    <div class="timing-track floating-timing-track" id="auto-watermelon-track">
+                      <i id="auto-watermelon-target"></i>
+                      <b id="auto-watermelon-marker"></b>
+                    </div>
+
+                    <div class="floating-watermelon-actions">
+                      <button id="btn-auto-watermelon-strike" class="button-primary btn-auto-watermelon-strike" type="button">
+                        <span data-i18n="ui.btnSliceWatermelon">就是現在！切！</span> <kbd>SPACE</kbd>
+                      </button>
+                      <button id="btn-auto-watermelon-next-strike" class="button-primary btn-auto-watermelon-next-strike" type="button" hidden>
+                        <span>下一刀</span>
+                      </button>
+                      <button id="btn-auto-watermelon-next-round" class="button-primary btn-auto-watermelon-next-round" type="button" hidden>
+                        <span data-i18n="ui.btnNextWatermelonRound">進行下一輪切西瓜</span>
+                      </button>
+                      <button id="btn-auto-watermelon-start" class="button-primary btn-auto-watermelon-start" type="button" hidden>
+                        <span data-i18n="ui.btnStartWatermelonRound">開始切西瓜</span>
+                      </button>
+                    </div>
+
+                    <div id="auto-watermelon-status" class="floating-watermelon-status" hidden></div>
+                  </div>
+                </div>
               </div>
             </section>
           </div>

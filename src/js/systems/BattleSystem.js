@@ -1062,7 +1062,8 @@ export class BattleSystem {
       damageTaken: this.battleDamageTaken || 0,
       durationSec,
       battle: this.snapshot(),
-      autoBattle: { ...this.autoBattle }
+      autoBattle: { ...this.autoBattle },
+      isAuto: Boolean(this.autoBattle?.active)
     });
     this.bus.emit("sound", { name: won ? "victory" : "defeat" });
 
