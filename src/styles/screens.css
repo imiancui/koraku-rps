@@ -784,22 +784,32 @@
   user-select: none;
 }
 
-/* Swimsuit watermelon (5425px) vs Swimsuit default (4993px):
-   86% * (5425 / 4993) = 93.44% perfectly matches character model pixel size & alignment! */
+/* Swimsuit default (3970x4993): reference anchor */
+.gallery-art-frame[data-variant="swimsuit_default"] img,
+.gallery-art-frame img.gallery-img-swimsuit_default {
+  height: 86%;
+  max-height: 86%;
+  transform: none;
+}
+
+/* Swimsuit watermelon (4007x5425) vs Swimsuit default (4993px):
+   86% * (5425 / 4993) = 93.44% perfectly matches character model pixel size & vertical alignment!
+   Horizontal alignment: +1.6px compensation for 4007w vs 3970w canvas centering */
 .gallery-art-frame[data-variant="swimsuit_watermelon"] img,
 .gallery-art-frame img.gallery-img-swimsuit_watermelon {
   height: 93.44%;
   max-height: 93.44%;
+  transform: translateX(1.6px);
 }
 
-/* Default & 2P (4000x4000 square) */
+/* Default & 2P (4000x4000 square): head offset compensation */
 .gallery-art-frame[data-variant="koraku_default"] img,
 .gallery-art-frame[data-variant="koraku_2p"] img,
 .gallery-art-frame img.gallery-img-koraku_default,
 .gallery-art-frame img.gallery-img-koraku_2p {
   height: 88%;
   max-height: 88%;
-  transform: translateY(8px);
+  transform: translateY(-8px);
 }
 
 .gallery-art-frame.is-locked {

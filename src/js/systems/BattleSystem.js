@@ -62,7 +62,8 @@ export class BattleSystem {
   start(stageId, options = {}) {
     const stage = STAGES.find((item) => item.id === Number(stageId));
     const profile = this.store.snapshot();
-    if (!stage || profile.profile.level < stage.requiredLevel) {
+    const isStageUnlocked = (profile.records?.clearedStages || []).includes(Number(stageId)) || profile.profile.level >= stage?.requiredLevel;
+    if (!stage || !isStageUnlocked) {
       this.bus.emit("toast", { message: "等級尚未達到這一章的挑戰條件。", tone: "danger" });
       return false;
     }

@@ -1007,10 +1007,11 @@ export class AppView {
     const snapshot = this.store.snapshot();
     const stage = STAGES.find((s) => s.id === stageId);
     if (!stage) return;
-    const locked = snapshot.profile.level < stage.requiredLevel;
+    const isCleared = (snapshot.records?.clearedStages || []).includes(stageId);
+    const locked = !isCleared && snapshot.profile.level < stage.requiredLevel;
     const stageStat = snapshot.records?.stageStats?.[stageId] || { totalAttempts: 0, manualWins: 0, manualLosses: 0, autoWins: 0, autoLosses: 0 };
-    const hasWins = ((stageStat.manualWins || 0) + (stageStat.autoWins || 0)) > 0 || (stageId === 1 && ((snapshot.records?.wins || 0) > 0 || (snapshot.records?.manualWins || 0) > 0));
-    const cleared = (snapshot.records?.clearedStages || []).includes(stageId) && hasWins;
+    const hasWins = isCleared || ((stageStat.manualWins || 0) + (stageStat.autoWins || 0)) > 0 || (stageId === 1 && ((snapshot.records?.wins || 0) > 0 || (snapshot.records?.manualWins || 0) > 0));
+    const cleared = isCleared && hasWins;
     if (locked || !cleared) {
       this.showToast(I18n.t("ui.mustClearOnceForAuto"), "danger");
       return;
@@ -1369,10 +1370,11 @@ export class AppView {
     const kanji = ["朱", "夕", "月", "鏡"];
     $("#stage-grid").innerHTML = STAGES.map((stage, index) => {
       const locStage = I18n.getLocalizedStage(stage);
-      const locked = state.profile.level < stage.requiredLevel;
+      const isCleared = (state.records?.clearedStages || []).includes(stage.id);
+      const locked = !isCleared && state.profile.level < stage.requiredLevel;
       const stageStat = state.records?.stageStats?.[stage.id] || { totalAttempts: 0, manualWins: 0, manualLosses: 0, autoWins: 0, autoLosses: 0 };
-      const hasWins = ((stageStat.manualWins || 0) + (stageStat.autoWins || 0)) > 0 || (stage.id === 1 && ((state.records?.wins || 0) > 0 || (state.records?.manualWins || 0) > 0));
-      const cleared = (state.records.clearedStages || []).includes(stage.id) && hasWins;
+      const hasWins = isCleared || ((stageStat.manualWins || 0) + (stageStat.autoWins || 0)) > 0 || (stage.id === 1 && ((state.records?.wins || 0) > 0 || (state.records?.manualWins || 0) > 0));
+      const cleared = isCleared && hasWins;
       const attemptsText = I18n.t("ui.stageAttempts", { total: stageStat.totalAttempts || 0 });
 
       const classes = [

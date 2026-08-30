@@ -779,6 +779,7 @@ const DICTIONARY = {
       cheatAddSp: "增加技能點 (+50)",
       cheatUnlockAllStages: "解鎖所有關卡",
       cheatUnlockAllGallery: "解鎖所有圖鑑",
+      cheatMaxAll: "滿級 + 99999 星砂 + 100 SP",
       cheatAddPotions: "獲得各 10 瓶藥水",
       cheatAddAllEquip: "獲得全套神威裝備",
       cheatClose: "關閉",
@@ -1293,6 +1294,7 @@ const DICTIONARY = {
       cheatAddSp: "增加技能点 (+50)",
       cheatUnlockAllStages: "解锁所有关卡",
       cheatUnlockAllGallery: "解锁所有图鉴",
+      cheatMaxAll: "满级 + 99999 星砂 + 100 SP",
       cheatAddPotions: "获得各 10 瓶药水",
       cheatAddAllEquip: "获得全套神威装备",
       cheatClose: "关闭",
@@ -1753,7 +1755,8 @@ const DICTIONARY = {
       cheatAddSp: "+50 SP Points",
       cheatUnlockAllStages: "Unlock All Stages",
       cheatUnlockAllGallery: "Unlock All Gallery",
-      cheatAddPotions: "+10 of Each Potion",
+      cheatMaxAll: "Max Lv. + 99999 Coins + 100 SP",
+      cheatAddPotions: "Get 10x Potions",
       cheatAddAllEquip: "Grant All Divine Gear",
       cheatClose: "Close",
       statDamage: "Attack",
@@ -2212,9 +2215,10 @@ const DICTIONARY = {
       cheatSetLevel: "レベル変更",
       cheatAddCoins: "星砂追加 (+1000)",
       cheatAddSp: "SP追加 (+50)",
-      cheatUnlockAllStages: "全ステージ解放",
-      cheatUnlockAllGallery: "全図鑑解放",
-      cheatAddPotions: "各ポーション+10個",
+      cheatUnlockAllStages: "全ステージ開放",
+      cheatUnlockAllGallery: "全図鑑開放",
+      cheatMaxAll: "最大Lv + 99999 星砂 + 100 SP",
+      cheatAddPotions: "各ポーション10個獲得",
       cheatAddAllEquip: "全神威装備を獲得",
       cheatClose: "閉じる",
       statDamage: "攻撃",
@@ -3602,9 +3606,12 @@ function sanitizeSave(candidate) {
   const rawCleared = candidate.records?.clearedStages;
   let clearedStages = Array.isArray(rawCleared) ? [...rawCleared] : [];
   clearedStages = clearedStages.filter((stageId) => {
-    const s = stageStats[stageId];
-    if (s && ((s.manualWins || 0) + (s.autoWins || 0) > 0)) return true;
-    if (stageId === 1 && ((candidate.records?.wins || 0) > 0 || (candidate.records?.manualWins || 0) > 0)) return true;
+    if (stageId >= 1 && stageId <= 4) {
+      const s = stageStats[stageId];
+      if (s && ((s.manualWins || 0) + (s.autoWins || 0) > 0)) return true;
+      if (stageId === 1 && ((candidate.records?.wins || 0) > 0 || (candidate.records?.manualWins || 0) > 0)) return true;
+      if (candidate.records?.bestStage && candidate.records.bestStage >= stageId) return true;
+    }
     return false;
   });
 
@@ -4197,6 +4204,15 @@ class GameStore {
   cheatUnlockAll() {
     this.state.records.bestStage = 4;
     this.state.records.clearedStages = [1, 2, 3, 4];
+    if (!this.state.records.stageStats) this.state.records.stageStats = {};
+    for (let s = 1; s <= 4; s++) {
+      if (!this.state.records.stageStats[s]) {
+        this.state.records.stageStats[s] = { totalAttempts: 1, manualWins: 1, manualLosses: 0, autoWins: 0, autoLosses: 0 };
+      } else {
+        this.state.records.stageStats[s].manualWins = Math.max(1, this.state.records.stageStats[s].manualWins || 1);
+        this.state.records.stageStats[s].totalAttempts = Math.max(1, this.state.records.stageStats[s].totalAttempts || 1);
+      }
+    }
     this.commit("cheat-unlock-all");
     return { ok: true, message: "已解鎖全部 4 個關卡與 BOSS 說明！" };
   }
@@ -4303,7 +4319,8 @@ class BattleSystem {
   start(stageId, options = {}) {
     const stage = STAGES.find((item) => item.id === Number(stageId));
     const profile = this.store.snapshot();
-    if (!stage || profile.profile.level < stage.requiredLevel) {
+    const isStageUnlocked = (profile.records?.clearedStages || []).includes(Number(stageId)) || profile.profile.level >= stage?.requiredLevel;
+    if (!stage || !isStageUnlocked) {
       this.bus.emit("toast", { message: "等級尚未達到這一章的挑戰條件。", tone: "danger" });
       return false;
     }
@@ -7379,10 +7396,11 @@ class AppView {
     const snapshot = this.store.snapshot();
     const stage = STAGES.find((s) => s.id === stageId);
     if (!stage) return;
-    const locked = snapshot.profile.level < stage.requiredLevel;
+    const isCleared = (snapshot.records?.clearedStages || []).includes(stageId);
+    const locked = !isCleared && snapshot.profile.level < stage.requiredLevel;
     const stageStat = snapshot.records?.stageStats?.[stageId] || { totalAttempts: 0, manualWins: 0, manualLosses: 0, autoWins: 0, autoLosses: 0 };
-    const hasWins = ((stageStat.manualWins || 0) + (stageStat.autoWins || 0)) > 0 || (stageId === 1 && ((snapshot.records?.wins || 0) > 0 || (snapshot.records?.manualWins || 0) > 0));
-    const cleared = (snapshot.records?.clearedStages || []).includes(stageId) && hasWins;
+    const hasWins = isCleared || ((stageStat.manualWins || 0) + (stageStat.autoWins || 0)) > 0 || (stageId === 1 && ((snapshot.records?.wins || 0) > 0 || (snapshot.records?.manualWins || 0) > 0));
+    const cleared = isCleared && hasWins;
     if (locked || !cleared) {
       this.showToast(I18n.t("ui.mustClearOnceForAuto"), "danger");
       return;
@@ -7741,10 +7759,11 @@ class AppView {
     const kanji = ["朱", "夕", "月", "鏡"];
     $("#stage-grid").innerHTML = STAGES.map((stage, index) => {
       const locStage = I18n.getLocalizedStage(stage);
-      const locked = state.profile.level < stage.requiredLevel;
+      const isCleared = (state.records?.clearedStages || []).includes(stage.id);
+      const locked = !isCleared && state.profile.level < stage.requiredLevel;
       const stageStat = state.records?.stageStats?.[stage.id] || { totalAttempts: 0, manualWins: 0, manualLosses: 0, autoWins: 0, autoLosses: 0 };
-      const hasWins = ((stageStat.manualWins || 0) + (stageStat.autoWins || 0)) > 0 || (stage.id === 1 && ((state.records?.wins || 0) > 0 || (state.records?.manualWins || 0) > 0));
-      const cleared = (state.records.clearedStages || []).includes(stage.id) && hasWins;
+      const hasWins = isCleared || ((stageStat.manualWins || 0) + (stageStat.autoWins || 0)) > 0 || (stage.id === 1 && ((state.records?.wins || 0) > 0 || (state.records?.manualWins || 0) > 0));
+      const cleared = isCleared && hasWins;
       const attemptsText = I18n.t("ui.stageAttempts", { total: stageStat.totalAttempts || 0 });
 
       const classes = [

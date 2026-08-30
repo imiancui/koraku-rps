@@ -51,6 +51,12 @@ test("一鍵解鎖全關卡與一鍵解鎖全圖鑑", () => {
   const unlockStageRes = store.cheatUnlockAll();
   assert.equal(unlockStageRes.ok, true);
   assert.equal(store.state.records.bestStage, 4);
+  assert.deepEqual(store.state.records.clearedStages, [1, 2, 3, 4]);
+  assert.equal(store.state.records.stageStats[4].manualWins >= 1, true);
+
+  // Snapshot and re-instantiate store from persistence
+  const storeReloaded = new GameStore(bus, persistence);
+  assert.deepEqual(storeReloaded.state.records.clearedStages, [1, 2, 3, 4]);
 
   // Unlock all gallery
   const unlockGalRes = store.cheatUnlockGallery();

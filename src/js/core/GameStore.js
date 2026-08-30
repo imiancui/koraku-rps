@@ -107,9 +107,12 @@ function sanitizeSave(candidate) {
   const rawCleared = candidate.records?.clearedStages;
   let clearedStages = Array.isArray(rawCleared) ? [...rawCleared] : [];
   clearedStages = clearedStages.filter((stageId) => {
-    const s = stageStats[stageId];
-    if (s && ((s.manualWins || 0) + (s.autoWins || 0) > 0)) return true;
-    if (stageId === 1 && ((candidate.records?.wins || 0) > 0 || (candidate.records?.manualWins || 0) > 0)) return true;
+    if (stageId >= 1 && stageId <= 4) {
+      const s = stageStats[stageId];
+      if (s && ((s.manualWins || 0) + (s.autoWins || 0) > 0)) return true;
+      if (stageId === 1 && ((candidate.records?.wins || 0) > 0 || (candidate.records?.manualWins || 0) > 0)) return true;
+      if (candidate.records?.bestStage && candidate.records.bestStage >= stageId) return true;
+    }
     return false;
   });
 
@@ -702,6 +705,15 @@ export class GameStore {
   cheatUnlockAll() {
     this.state.records.bestStage = 4;
     this.state.records.clearedStages = [1, 2, 3, 4];
+    if (!this.state.records.stageStats) this.state.records.stageStats = {};
+    for (let s = 1; s <= 4; s++) {
+      if (!this.state.records.stageStats[s]) {
+        this.state.records.stageStats[s] = { totalAttempts: 1, manualWins: 1, manualLosses: 0, autoWins: 0, autoLosses: 0 };
+      } else {
+        this.state.records.stageStats[s].manualWins = Math.max(1, this.state.records.stageStats[s].manualWins || 1);
+        this.state.records.stageStats[s].totalAttempts = Math.max(1, this.state.records.stageStats[s].totalAttempts || 1);
+      }
+    }
     this.commit("cheat-unlock-all");
     return { ok: true, message: "已解鎖全部 4 個關卡與 BOSS 說明！" };
   }
