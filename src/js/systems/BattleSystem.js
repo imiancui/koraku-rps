@@ -800,7 +800,11 @@ export class BattleSystem {
       } else {
         const counter = getQteCounterNarration(this.state.selectedHand);
         this.state.selectedHand = counter.changedHand;
-        this.finishRound("win", "雙重反制成功！完美化解了雙生攻勢！");
+        this.timers.timeout(() => {
+          if (this.state?.active && this.state.phase === "qte") {
+            this.finishRound("win", "雙重反制成功！完美化解了雙生攻勢！");
+          }
+        }, 500);
       }
       return;
     }
@@ -811,7 +815,11 @@ export class BattleSystem {
       this.store.recordQteAttempt(this.state?.stage?.id, true);
       const counter = getQteCounterNarration(this.state.selectedHand);
       this.state.selectedHand = counter.changedHand;
-      this.damageEnemy(counter.text, true);
+      this.timers.timeout(() => {
+        if (this.state?.active && this.state.phase === "qte") {
+          this.damageEnemy(counter.text, true);
+        }
+      }, 500);
     } else {
       this.store.recordQteAttempt(this.state?.stage?.id, false);
       this.damagePlayer("節奏慢了一拍，小樂的攻勢命中了你。");

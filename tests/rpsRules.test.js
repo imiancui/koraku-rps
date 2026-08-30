@@ -174,6 +174,7 @@ test("小樂被反制時觸發 counterRub 音效與 countered enemy-hit 效果",
   battle.state.phase = "qte";
 
   battle.resolveQte({ success: true });
+  await new Promise((r) => setTimeout(r, 550));
 
   const hitEffect = effects.find((e) => e.type === "enemy-hit");
   assert.ok(hitEffect, "應發送 enemy-hit 事件");

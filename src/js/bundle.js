@@ -3038,18 +3038,62 @@ const ARROW_KEY_MAP = Object.freeze({
   "3": "downRight"
 });
 
-function wasdDirectionFromKey(key) {
-  const normalized = String(key).toLowerCase();
+const WASD_CODE_MAP = Object.freeze({
+  KeyW: "up",
+  KeyA: "left",
+  KeyS: "down",
+  KeyD: "right",
+  KeyQ: "upLeft",
+  KeyE: "upRight",
+  KeyZ: "downLeft",
+  KeyC: "downRight"
+});
+
+const ARROW_CODE_MAP = Object.freeze({
+  ArrowUp: "up",
+  ArrowDown: "down",
+  ArrowLeft: "left",
+  ArrowRight: "right",
+  Numpad8: "up",
+  Numpad2: "down",
+  Numpad4: "left",
+  Numpad6: "right",
+  Numpad7: "upLeft",
+  Numpad9: "upRight",
+  Numpad1: "downLeft",
+  Numpad3: "downRight",
+  Digit8: "up",
+  Digit2: "down",
+  Digit4: "left",
+  Digit6: "right",
+  Digit7: "upLeft",
+  Digit9: "upRight",
+  Digit1: "downLeft",
+  Digit3: "downRight"
+});
+
+const ALL_CODE_MAP = Object.freeze({
+  ...WASD_CODE_MAP,
+  ...ARROW_CODE_MAP
+});
+
+function wasdDirectionFromKey(key, code = null) {
+  if (code && WASD_CODE_MAP[code]) return WASD_CODE_MAP[code];
+  const normalized = String(key || "").toLowerCase();
   return WASD_KEY_MAP[normalized] || null;
 }
 
-function arrowDirectionFromKey(key) {
-  const normalized = String(key).toLowerCase();
+function arrowDirectionFromKey(key, code = null) {
+  if (code && ARROW_CODE_MAP[code]) return ARROW_CODE_MAP[code];
+  const normalized = String(key || "").toLowerCase();
   return ARROW_KEY_MAP[normalized] || null;
 }
 
-function directionFromKey(key) {
-  const normalized = String(key).toLowerCase();
+function directionFromKey(key, code = null) {
+  if (code && ALL_CODE_MAP[code]) return ALL_CODE_MAP[code];
+  const normalized = String(key || "").toLowerCase();
+  if (WASD_KEY_MAP[normalized]) return WASD_KEY_MAP[normalized];
+  if (ARROW_KEY_MAP[normalized]) return ARROW_KEY_MAP[normalized];
   return DIRECTIONS.find((direction) => direction.keys.includes(normalized))?.id || null;
 }
 
@@ -3074,10 +3118,9 @@ class QTEKeyboardInput {
     this.held = new Set();
   }
 
-  keyDown(key, expectedDirection, repeat = false) {
-    const direction = this.mapper(key);
+  keyDown(key, expectedDirection, repeat = false, code = null) {
+    const direction = this.mapper(key, code);
     if (!direction) return { handled: false, direction: null };
-    if (repeat) return { handled: true, direction: null };
 
     if (isDiagonalDirection(direction)) {
       return { handled: true, direction };
@@ -3100,8 +3143,8 @@ class QTEKeyboardInput {
     return { handled: true, direction };
   }
 
-  keyUp(key) {
-    const direction = this.mapper(key);
+  keyUp(key, code = null) {
+    const direction = this.mapper(key, code);
     if (!direction || !CARDINAL_DIRECTIONS.has(direction)) return false;
     this.held.delete(direction);
     return true;
@@ -3433,6 +3476,23 @@ class DualQTESystem {
     }
     this.emit();
     return true;
+  }
+
+  input(directionOrSlot, slotOrDirection = null) {
+    if (!this.active) return false;
+    let slot = "left";
+    let direction = directionOrSlot;
+    if (directionOrSlot === "left" || directionOrSlot === "right") {
+      slot = directionOrSlot;
+      direction = slotOrDirection;
+    } else if (slotOrDirection === "left" || slotOrDirection === "right") {
+      slot = slotOrDirection;
+      direction = directionOrSlot;
+    } else if (!slotOrDirection) {
+      if (!this.left.completed) slot = "left";
+      else if (!this.right.completed) slot = "right";
+    }
+    return this.inputSlot(slot, direction);
   }
 
   inputLeft(directionId) {
@@ -5170,7 +5230,11 @@ class BattleSystem {
       } else {
         const counter = getQteCounterNarration(this.state.selectedHand);
         this.state.selectedHand = counter.changedHand;
-        this.finishRound("win", "雙重反制成功！完美化解了雙生攻勢！");
+        this.timers.timeout(() => {
+          if (this.state?.active && this.state.phase === "qte") {
+            this.finishRound("win", "雙重反制成功！完美化解了雙生攻勢！");
+          }
+        }, 500);
       }
       return;
     }
@@ -5181,7 +5245,11 @@ class BattleSystem {
       this.store.recordQteAttempt(this.state?.stage?.id, true);
       const counter = getQteCounterNarration(this.state.selectedHand);
       this.state.selectedHand = counter.changedHand;
-      this.damageEnemy(counter.text, true);
+      this.timers.timeout(() => {
+        if (this.state?.active && this.state.phase === "qte") {
+          this.damageEnemy(counter.text, true);
+        }
+      }, 500);
     } else {
       this.store.recordQteAttempt(this.state?.stage?.id, false);
       this.damagePlayer("節奏慢了一拍，小樂的攻勢命中了你。");
@@ -7266,7 +7334,12 @@ class AppView {
 
     const dualDirectionBtn = event.target.closest("[data-dual-slot][data-direction]");
     if (dualDirectionBtn) {
-      this.battle.inputQte(dualDirectionBtn.dataset.direction, dualDirectionBtn.dataset.dualSlot);
+      const dir = dualDirectionBtn.dataset.direction;
+      const slot = dualDirectionBtn.dataset.dualSlot;
+      this.leftQteKeyboard.reset();
+      this.rightQteKeyboard.reset();
+      this.renderHeldQteDirections();
+      this.battle.inputQte(dir, slot);
       return;
     }
 
@@ -7475,23 +7548,23 @@ class AppView {
         const leftExpected = this.qteState.left?.sequence[this.qteState.left?.index];
         const rightExpected = this.qteState.right?.sequence[this.qteState.right?.index];
 
-        const leftInput = this.leftQteKeyboard.keyDown(event.key, leftExpected, event.repeat);
+        const leftInput = this.leftQteKeyboard.keyDown(event.key, leftExpected, event.repeat, event.code);
         if (leftInput.handled) {
           event.preventDefault();
           if (leftInput.direction) {
-            const accepted = this.battle.inputQte(leftInput.direction, "left");
-            if (!accepted) this.leftQteKeyboard.reset();
+            this.battle.inputQte(leftInput.direction, "left");
+            this.leftQteKeyboard.reset();
           }
           this.renderHeldQteDirections();
           return;
         }
 
-        const rightInput = this.rightQteKeyboard.keyDown(event.key, rightExpected, event.repeat);
+        const rightInput = this.rightQteKeyboard.keyDown(event.key, rightExpected, event.repeat, event.code);
         if (rightInput.handled) {
           event.preventDefault();
           if (rightInput.direction) {
-            const accepted = this.battle.inputQte(rightInput.direction, "right");
-            if (!accepted) this.rightQteKeyboard.reset();
+            this.battle.inputQte(rightInput.direction, "right");
+            this.rightQteKeyboard.reset();
           }
           this.renderHeldQteDirections();
           return;
@@ -7501,12 +7574,12 @@ class AppView {
 
       // Single QTE mode
       const expected = this.qteState?.sequence[this.qteState.index];
-      const input = this.qteKeyboard.keyDown(event.key, expected, event.repeat);
+      const input = this.qteKeyboard.keyDown(event.key, expected, event.repeat, event.code);
       if (input.handled) {
         event.preventDefault();
         if (input.direction) {
-          const accepted = this.battle.inputQte(input.direction);
-          if (!accepted) this.qteKeyboard.reset();
+          this.battle.inputQte(input.direction);
+          this.qteKeyboard.reset();
         }
         this.renderHeldQteDirections();
       }
@@ -7559,13 +7632,13 @@ class AppView {
   handleKeyup(event) {
     if (!this.qteState?.active) return;
     if (this.qteState?.mode === "dual") {
-      const leftUp = this.leftQteKeyboard.keyUp(event.key);
-      const rightUp = this.rightQteKeyboard.keyUp(event.key);
+      const leftUp = this.leftQteKeyboard.keyUp(event.key, event.code);
+      const rightUp = this.rightQteKeyboard.keyUp(event.key, event.code);
       if (leftUp || rightUp) {
         this.renderHeldQteDirections();
       }
     } else {
-      if (this.qteKeyboard.keyUp(event.key)) {
+      if (this.qteKeyboard.keyUp(event.key, event.code)) {
         this.renderHeldQteDirections();
       }
     }
@@ -9086,10 +9159,23 @@ class AppView {
       this.leftQteKeyboard.reset();
       this.rightQteKeyboard.reset();
       this.renderHeldQteDirections();
-      this.qteOverlay.classList.remove("is-active");
-      this.qteOverlay.setAttribute("aria-hidden", "true");
+
+      const delay = Math.max(0, (this.qteSuccessHoldUntil || 0) - performance.now());
+      if (delay > 0) {
+        clearTimeout(this.qteCloseTimer);
+        this.qteCloseTimer = setTimeout(() => {
+          this.qteOverlay.classList.remove("is-active");
+          this.qteOverlay.setAttribute("aria-hidden", "true");
+        }, delay);
+      } else {
+        clearTimeout(this.qteCloseTimer);
+        this.qteOverlay.classList.remove("is-active");
+        this.qteOverlay.setAttribute("aria-hidden", "true");
+      }
       return;
     }
+
+    clearTimeout(this.qteCloseTimer);
     if (!wasActive) {
       this.qteKeyboard.reset();
       this.leftQteKeyboard.reset();
@@ -9342,7 +9428,10 @@ class AppView {
   handleQteFinished(result) {
     if (!result) return;
     const isSuccess = result.mode === "dual" ? (result.left?.success || result.right?.success) : result.success;
-    if (!isSuccess) {
+    if (isSuccess) {
+      this.qteSuccessHoldUntil = performance.now() + 500;
+    } else {
+      this.qteSuccessHoldUntil = 0;
       if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function") {
         try { navigator.vibrate([80]); } catch (_) {}
       }

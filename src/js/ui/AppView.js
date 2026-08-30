@@ -632,7 +632,12 @@ export class AppView {
 
     const dualDirectionBtn = event.target.closest("[data-dual-slot][data-direction]");
     if (dualDirectionBtn) {
-      this.battle.inputQte(dualDirectionBtn.dataset.direction, dualDirectionBtn.dataset.dualSlot);
+      const dir = dualDirectionBtn.dataset.direction;
+      const slot = dualDirectionBtn.dataset.dualSlot;
+      this.leftQteKeyboard.reset();
+      this.rightQteKeyboard.reset();
+      this.renderHeldQteDirections();
+      this.battle.inputQte(dir, slot);
       return;
     }
 
@@ -841,23 +846,23 @@ export class AppView {
         const leftExpected = this.qteState.left?.sequence[this.qteState.left?.index];
         const rightExpected = this.qteState.right?.sequence[this.qteState.right?.index];
 
-        const leftInput = this.leftQteKeyboard.keyDown(event.key, leftExpected, event.repeat);
+        const leftInput = this.leftQteKeyboard.keyDown(event.key, leftExpected, event.repeat, event.code);
         if (leftInput.handled) {
           event.preventDefault();
           if (leftInput.direction) {
-            const accepted = this.battle.inputQte(leftInput.direction, "left");
-            if (!accepted) this.leftQteKeyboard.reset();
+            this.battle.inputQte(leftInput.direction, "left");
+            this.leftQteKeyboard.reset();
           }
           this.renderHeldQteDirections();
           return;
         }
 
-        const rightInput = this.rightQteKeyboard.keyDown(event.key, rightExpected, event.repeat);
+        const rightInput = this.rightQteKeyboard.keyDown(event.key, rightExpected, event.repeat, event.code);
         if (rightInput.handled) {
           event.preventDefault();
           if (rightInput.direction) {
-            const accepted = this.battle.inputQte(rightInput.direction, "right");
-            if (!accepted) this.rightQteKeyboard.reset();
+            this.battle.inputQte(rightInput.direction, "right");
+            this.rightQteKeyboard.reset();
           }
           this.renderHeldQteDirections();
           return;
@@ -867,12 +872,12 @@ export class AppView {
 
       // Single QTE mode
       const expected = this.qteState?.sequence[this.qteState.index];
-      const input = this.qteKeyboard.keyDown(event.key, expected, event.repeat);
+      const input = this.qteKeyboard.keyDown(event.key, expected, event.repeat, event.code);
       if (input.handled) {
         event.preventDefault();
         if (input.direction) {
-          const accepted = this.battle.inputQte(input.direction);
-          if (!accepted) this.qteKeyboard.reset();
+          this.battle.inputQte(input.direction);
+          this.qteKeyboard.reset();
         }
         this.renderHeldQteDirections();
       }
@@ -925,13 +930,13 @@ export class AppView {
   handleKeyup(event) {
     if (!this.qteState?.active) return;
     if (this.qteState?.mode === "dual") {
-      const leftUp = this.leftQteKeyboard.keyUp(event.key);
-      const rightUp = this.rightQteKeyboard.keyUp(event.key);
+      const leftUp = this.leftQteKeyboard.keyUp(event.key, event.code);
+      const rightUp = this.rightQteKeyboard.keyUp(event.key, event.code);
       if (leftUp || rightUp) {
         this.renderHeldQteDirections();
       }
     } else {
-      if (this.qteKeyboard.keyUp(event.key)) {
+      if (this.qteKeyboard.keyUp(event.key, event.code)) {
         this.renderHeldQteDirections();
       }
     }
@@ -2452,10 +2457,23 @@ export class AppView {
       this.leftQteKeyboard.reset();
       this.rightQteKeyboard.reset();
       this.renderHeldQteDirections();
-      this.qteOverlay.classList.remove("is-active");
-      this.qteOverlay.setAttribute("aria-hidden", "true");
+
+      const delay = Math.max(0, (this.qteSuccessHoldUntil || 0) - performance.now());
+      if (delay > 0) {
+        clearTimeout(this.qteCloseTimer);
+        this.qteCloseTimer = setTimeout(() => {
+          this.qteOverlay.classList.remove("is-active");
+          this.qteOverlay.setAttribute("aria-hidden", "true");
+        }, delay);
+      } else {
+        clearTimeout(this.qteCloseTimer);
+        this.qteOverlay.classList.remove("is-active");
+        this.qteOverlay.setAttribute("aria-hidden", "true");
+      }
       return;
     }
+
+    clearTimeout(this.qteCloseTimer);
     if (!wasActive) {
       this.qteKeyboard.reset();
       this.leftQteKeyboard.reset();
@@ -2708,7 +2726,10 @@ export class AppView {
   handleQteFinished(result) {
     if (!result) return;
     const isSuccess = result.mode === "dual" ? (result.left?.success || result.right?.success) : result.success;
-    if (!isSuccess) {
+    if (isSuccess) {
+      this.qteSuccessHoldUntil = performance.now() + 500;
+    } else {
+      this.qteSuccessHoldUntil = 0;
       if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function") {
         try { navigator.vibrate([80]); } catch (_) {}
       }

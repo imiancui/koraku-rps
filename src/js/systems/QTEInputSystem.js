@@ -40,18 +40,62 @@ export const ARROW_KEY_MAP = Object.freeze({
   "3": "downRight"
 });
 
-export function wasdDirectionFromKey(key) {
-  const normalized = String(key).toLowerCase();
+export const WASD_CODE_MAP = Object.freeze({
+  KeyW: "up",
+  KeyA: "left",
+  KeyS: "down",
+  KeyD: "right",
+  KeyQ: "upLeft",
+  KeyE: "upRight",
+  KeyZ: "downLeft",
+  KeyC: "downRight"
+});
+
+export const ARROW_CODE_MAP = Object.freeze({
+  ArrowUp: "up",
+  ArrowDown: "down",
+  ArrowLeft: "left",
+  ArrowRight: "right",
+  Numpad8: "up",
+  Numpad2: "down",
+  Numpad4: "left",
+  Numpad6: "right",
+  Numpad7: "upLeft",
+  Numpad9: "upRight",
+  Numpad1: "downLeft",
+  Numpad3: "downRight",
+  Digit8: "up",
+  Digit2: "down",
+  Digit4: "left",
+  Digit6: "right",
+  Digit7: "upLeft",
+  Digit9: "upRight",
+  Digit1: "downLeft",
+  Digit3: "downRight"
+});
+
+export const ALL_CODE_MAP = Object.freeze({
+  ...WASD_CODE_MAP,
+  ...ARROW_CODE_MAP
+});
+
+export function wasdDirectionFromKey(key, code = null) {
+  if (code && WASD_CODE_MAP[code]) return WASD_CODE_MAP[code];
+  const normalized = String(key || "").toLowerCase();
   return WASD_KEY_MAP[normalized] || null;
 }
 
-export function arrowDirectionFromKey(key) {
-  const normalized = String(key).toLowerCase();
+export function arrowDirectionFromKey(key, code = null) {
+  if (code && ARROW_CODE_MAP[code]) return ARROW_CODE_MAP[code];
+  const normalized = String(key || "").toLowerCase();
   return ARROW_KEY_MAP[normalized] || null;
 }
 
-export function directionFromKey(key) {
-  const normalized = String(key).toLowerCase();
+export function directionFromKey(key, code = null) {
+  if (code && ALL_CODE_MAP[code]) return ALL_CODE_MAP[code];
+  const normalized = String(key || "").toLowerCase();
+  if (WASD_KEY_MAP[normalized]) return WASD_KEY_MAP[normalized];
+  if (ARROW_KEY_MAP[normalized]) return ARROW_KEY_MAP[normalized];
   return DIRECTIONS.find((direction) => direction.keys.includes(normalized))?.id || null;
 }
 
@@ -76,10 +120,9 @@ export class QTEKeyboardInput {
     this.held = new Set();
   }
 
-  keyDown(key, expectedDirection, repeat = false) {
-    const direction = this.mapper(key);
+  keyDown(key, expectedDirection, repeat = false, code = null) {
+    const direction = this.mapper(key, code);
     if (!direction) return { handled: false, direction: null };
-    if (repeat) return { handled: true, direction: null };
 
     if (isDiagonalDirection(direction)) {
       return { handled: true, direction };
@@ -102,8 +145,8 @@ export class QTEKeyboardInput {
     return { handled: true, direction };
   }
 
-  keyUp(key) {
-    const direction = this.mapper(key);
+  keyUp(key, code = null) {
+    const direction = this.mapper(key, code);
     if (!direction || !CARDINAL_DIRECTIONS.has(direction)) return false;
     this.held.delete(direction);
     return true;
