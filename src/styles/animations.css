@@ -199,9 +199,79 @@
 
 @keyframes qte-wrong {
   0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-10px); }
-  50% { transform: translateX(9px); }
-  75% { transform: translateX(-5px); }
+  20% { transform: translateX(-10px); }
+  40% { transform: translateX(9px); }
+  60% { transform: translateX(-6px); }
+  80% { transform: translateX(4px); }
+}
+
+@keyframes qte-correct-flash {
+  0% {
+    background: rgba(255, 230, 138, 0.75) !important;
+    border-color: #fff6d1 !important;
+    box-shadow: 0 0 24px rgba(255, 223, 133, 0.95), inset 0 0 12px rgba(255, 255, 255, 0.85) !important;
+    transform: scale(1.14);
+    filter: brightness(1.4);
+  }
+  40% {
+    background: rgba(216, 182, 106, 0.55) !important;
+    border-color: var(--gold-bright) !important;
+    box-shadow: 0 0 16px rgba(216, 182, 106, 0.7), inset 0 0 8px rgba(255, 255, 255, 0.5) !important;
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes qte-wrong-vibrate {
+  0%, 100% {
+    transform: translateX(0);
+    border-color: var(--crimson) !important;
+    box-shadow: 0 0 18px rgba(239, 83, 101, 0.85) !important;
+  }
+  20% {
+    transform: translateX(-9px) scale(0.95);
+    background: rgba(181, 37, 55, 0.55) !important;
+  }
+  40% {
+    transform: translateX(8px) scale(0.95);
+  }
+  60% {
+    transform: translateX(-5px);
+  }
+  80% {
+    transform: translateX(4px);
+  }
+}
+
+@keyframes qte-fail-monotone {
+  0% {
+    filter: brightness(0.4) saturate(1.8) drop-shadow(0 0 24px rgba(181, 37, 55, 0.85));
+    transform: translateY(5px) scale(0.97);
+  }
+  40% {
+    filter: brightness(0.7) saturate(1.2);
+    transform: translateY(-2px);
+  }
+  100% {
+    filter: brightness(1) saturate(1);
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes qte-arrow-hit-pop {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.22);
+    filter: drop-shadow(0 0 14px var(--gold-bright));
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 @keyframes warning-emoji-pulse {

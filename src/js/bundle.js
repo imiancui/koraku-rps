@@ -3218,13 +3218,17 @@ class QTESystem {
         errors: this.errors,
         maxErrors: this.maxErrors
       });
+      this.bus.emit("sound", { name: "qteWrong" });
       if (this.errors >= this.maxErrors) {
         this.finish(false);
       }
       return false;
     }
 
+    const prevIndex = this.index;
     this.index += 1;
+    this.bus.emit("qte:step", { directionId, index: prevIndex, total: this.sequence.length });
+    this.bus.emit("sound", { name: "qteSuccess" });
     this.emit();
     if (this.index >= this.sequence.length) {
       this.finish(true);
@@ -3283,6 +3287,9 @@ class QTESystem {
     if (this.tickId !== null) {
       this.timers.clearInterval(this.tickId);
       this.tickId = null;
+    }
+    if (!success) {
+      this.bus.emit("sound", { name: "qteFail" });
     }
     this.bus.emit("qte:update", this.snapshot());
     this.bus.emit("qte:finished", result);
@@ -3398,6 +3405,7 @@ class DualQTESystem {
         errors: slot.errors,
         maxErrors: slot.maxErrors
       });
+      this.bus.emit("sound", { name: "qteWrong" });
       if (slot.errors >= slot.maxErrors) {
         slot.completed = true;
         slot.success = false;
@@ -3410,7 +3418,10 @@ class DualQTESystem {
       return false;
     }
 
+    const prevIndex = slot.index;
     slot.index += 1;
+    this.bus.emit("qte:step", { slot: slotKey, directionId, index: prevIndex, total: slot.sequence.length });
+    this.bus.emit("sound", { name: "qteSuccess" });
     if (slot.index >= slot.sequence.length) {
       slot.completed = true;
       slot.success = true;
@@ -3485,6 +3496,10 @@ class DualQTESystem {
 
     const leftSuccess = this.left.success || (this.left.index >= this.left.sequence.length && this.left.errors < this.left.maxErrors);
     const rightSuccess = this.right.success || (this.right.index >= this.right.sequence.length && this.right.errors < this.right.maxErrors);
+
+    if (!leftSuccess && !rightSuccess) {
+      this.bus.emit("sound", { name: "qteFail" });
+    }
 
     const result = {
       mode: "dual",
@@ -6358,6 +6373,18 @@ class SoundSystem {
         this.playCounterRub();
         return;
       }
+      if (name === "qteSuccess" || name === "qteStep") {
+        this.playQteSuccess();
+        return;
+      }
+      if (name === "qteWrong") {
+        this.playQteWrong();
+        return;
+      }
+      if (name === "qteFail" || name === "qteDefeat") {
+        this.playQteFail();
+        return;
+      }
 
       if (!NOTES[name]) return;
       let cursor = this.context.currentTime;
@@ -6375,6 +6402,93 @@ class SoundSystem {
         cursor += duration;
       });
     } catch {}
+  }
+
+  playQteSuccess() {
+    const ctx = this.context;
+    if (!ctx) return;
+    const now = ctx.currentTime;
+    const sfxDest = this.masterSfxGain || ctx.destination;
+
+    // High pitched crisp bell
+    const osc1 = ctx.createOscillator();
+    const gain1 = ctx.createGain();
+    osc1.type = "sine";
+    osc1.frequency.setValueAtTime(1174.66, now); // D6
+    osc1.frequency.exponentialRampToValueAtTime(1760.00, now + 0.08); // A6
+    gain1.gain.setValueAtTime(0.0001, now);
+    gain1.gain.linearRampToValueAtTime(0.18, now + 0.006);
+    gain1.gain.exponentialRampToValueAtTime(0.0001, now + 0.16);
+
+    osc1.connect(gain1).connect(sfxDest);
+    osc1.start(now);
+    osc1.stop(now + 0.18);
+
+    // Harmonic sparkle
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+    osc2.type = "triangle";
+    osc2.frequency.setValueAtTime(2349.32, now); // D7
+    gain2.gain.setValueAtTime(0.0001, now);
+    gain2.gain.linearRampToValueAtTime(0.10, now + 0.004);
+    gain2.gain.exponentialRampToValueAtTime(0.0001, now + 0.12);
+
+    osc2.connect(gain2).connect(sfxDest);
+    osc2.start(now);
+    osc2.stop(now + 0.14);
+  }
+
+  playQteWrong() {
+    const ctx = this.context;
+    if (!ctx) return;
+    const now = ctx.currentTime;
+    const sfxDest = this.masterSfxGain || ctx.destination;
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const filter = ctx.createBiquadFilter();
+
+    osc.type = "sawtooth";
+    osc.frequency.setValueAtTime(220, now);
+    osc.frequency.setValueAtTime(180, now + 0.04);
+
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(650, now);
+
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.linearRampToValueAtTime(0.16, now + 0.005);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.09);
+
+    osc.connect(filter).connect(gain).connect(sfxDest);
+    osc.start(now);
+    osc.stop(now + 0.10);
+  }
+
+  playQteFail() {
+    const ctx = this.context;
+    if (!ctx) return;
+    const now = ctx.currentTime;
+    const sfxDest = this.masterSfxGain || ctx.destination;
+
+    // Deep low monotone boom
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const filter = ctx.createBiquadFilter();
+
+    osc.type = "triangle";
+    osc.frequency.setValueAtTime(92, now);
+    osc.frequency.exponentialRampToValueAtTime(75, now + 0.35);
+
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(320, now);
+
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.linearRampToValueAtTime(0.32, now + 0.015);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.42);
+
+    osc.connect(filter).connect(gain).connect(sfxDest);
+    osc.start(now);
+    osc.stop(now + 0.45);
   }
 
   playFistPunch() {
@@ -6784,7 +6898,9 @@ class AppView {
     this.bus.on("battle:countdown-beat", (beat) => this.handleCountdownBeat(beat));
     this.bus.on("battle:effect", (effect) => this.playBattleEffect(effect));
     this.bus.on("qte:update", (state) => this.renderQte(state));
-    this.bus.on("qte:wrong", (data) => this.flashQteWrong(data?.slot));
+    this.bus.on("qte:step", (data) => this.flashQteCorrect(data));
+    this.bus.on("qte:wrong", (data) => this.flashQteWrong(data?.slot, data?.received));
+    this.bus.on("qte:finished", (result) => this.handleQteFinished(result));
     this.bus.on("postbattle:state", (state) => this.renderPostBattle(state));
     this.bus.on("postbattle:auto-watermelon", (state) => this.renderFloatingWatermelon(state));
     this.bus.on("toast", (toast) => this.showToast(toast.message, toast.tone));
@@ -9150,7 +9266,51 @@ class AppView {
     }
   }
 
-  flashQteWrong(slot = null) {
+  flashQteCorrect(data) {
+    if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function") {
+      try { navigator.vibrate(18); } catch (_) {}
+    }
+
+    const directionId = data?.directionId;
+    const slot = data?.slot;
+    const index = data?.index;
+
+    // Highlight buttons with golden glow flash
+    let buttons = [];
+    if (slot === "left") {
+      buttons = Array.from(document.querySelectorAll(`#touch-pad-left [data-direction="${directionId}"]`));
+    } else if (slot === "right") {
+      buttons = Array.from(document.querySelectorAll(`#touch-pad-right [data-direction="${directionId}"]`));
+    } else {
+      buttons = Array.from(document.querySelectorAll(`[data-direction="${directionId}"]`));
+    }
+
+    buttons.forEach((btn) => {
+      btn.classList.remove("is-correct-flash");
+      void btn.offsetWidth;
+      btn.classList.add("is-correct-flash");
+      setTimeout(() => btn.classList.remove("is-correct-flash"), 320);
+    });
+
+    // Highlight hit arrow in sequence
+    let seqEl = $("#qte-sequence");
+    if (slot === "left") seqEl = $("#dual-qte-sequence-left");
+    if (slot === "right") seqEl = $("#dual-qte-sequence-right");
+    if (seqEl && typeof index === "number") {
+      const arrows = seqEl.querySelectorAll(".qte-arrow");
+      if (arrows[index]) {
+        arrows[index].classList.remove("is-hit-flash");
+        void arrows[index].offsetWidth;
+        arrows[index].classList.add("is-hit-flash");
+      }
+    }
+  }
+
+  flashQteWrong(slot = null, received = null) {
+    if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function") {
+      try { navigator.vibrate([45]); } catch (_) {}
+    }
+
     let sequence = $("#qte-sequence");
     if (slot === "left") sequence = $("#dual-qte-sequence-left");
     if (slot === "right") sequence = $("#dual-qte-sequence-right");
@@ -9160,7 +9320,43 @@ class AppView {
       void sequence.offsetWidth;
       sequence.classList.add("is-wrong");
     }
-    this.bus.emit("sound", { name: "danger" });
+
+    if (received) {
+      let buttons = [];
+      if (slot === "left") {
+        buttons = Array.from(document.querySelectorAll(`#touch-pad-left [data-direction="${received}"]`));
+      } else if (slot === "right") {
+        buttons = Array.from(document.querySelectorAll(`#touch-pad-right [data-direction="${received}"]`));
+      } else {
+        buttons = Array.from(document.querySelectorAll(`[data-direction="${received}"]`));
+      }
+      buttons.forEach((btn) => {
+        btn.classList.remove("is-wrong-flash");
+        void btn.offsetWidth;
+        btn.classList.add("is-wrong-flash");
+        setTimeout(() => btn.classList.remove("is-wrong-flash"), 340);
+      });
+    }
+  }
+
+  handleQteFinished(result) {
+    if (!result) return;
+    const isSuccess = result.mode === "dual" ? (result.left?.success || result.right?.success) : result.success;
+    if (!isSuccess) {
+      if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function") {
+        try { navigator.vibrate([80]); } catch (_) {}
+      }
+      const singlePanel = $("#qte-panel");
+      const dualPanel = $("#qte-panel-dual");
+      [singlePanel, dualPanel].forEach((panel) => {
+        if (panel) {
+          panel.classList.remove("is-qte-failed");
+          void panel.offsetWidth;
+          panel.classList.add("is-qte-failed");
+          setTimeout(() => panel.classList.remove("is-qte-failed"), 500);
+        }
+      });
+    }
   }
 
   playBattleEffect(effect) {

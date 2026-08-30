@@ -2003,8 +2003,29 @@
   transform: scale(0.88);
 }
 
-.qte-sequence.is-wrong {
-  animation: qte-wrong 220ms ease;
+.qte-arrow.is-hit-flash {
+  animation: qte-arrow-hit-pop 240ms ease-out forwards;
+}
+
+.qte-pad button.is-correct-flash,
+.is-dual-touch-pad button.is-correct-flash {
+  animation: qte-correct-flash 320ms ease-out forwards !important;
+  color: #fff !important;
+}
+
+.qte-pad button.is-wrong-flash,
+.is-dual-touch-pad button.is-wrong-flash {
+  animation: qte-wrong-vibrate 340ms ease-in-out forwards !important;
+}
+
+.qte-sequence.is-wrong,
+.dual-qte-slot .qte-sequence.is-wrong {
+  animation: qte-wrong-vibrate 340ms ease-in-out !important;
+}
+
+.qte-panel.is-qte-failed,
+.qte-panel-dual.is-qte-failed {
+  animation: qte-fail-monotone 480ms ease-out !important;
 }
 
 .qte-input-hint {

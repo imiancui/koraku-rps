@@ -100,13 +100,17 @@ export class QTESystem {
         errors: this.errors,
         maxErrors: this.maxErrors
       });
+      this.bus.emit("sound", { name: "qteWrong" });
       if (this.errors >= this.maxErrors) {
         this.finish(false);
       }
       return false;
     }
 
+    const prevIndex = this.index;
     this.index += 1;
+    this.bus.emit("qte:step", { directionId, index: prevIndex, total: this.sequence.length });
+    this.bus.emit("sound", { name: "qteSuccess" });
     this.emit();
     if (this.index >= this.sequence.length) {
       this.finish(true);
@@ -165,6 +169,9 @@ export class QTESystem {
     if (this.tickId !== null) {
       this.timers.clearInterval(this.tickId);
       this.tickId = null;
+    }
+    if (!success) {
+      this.bus.emit("sound", { name: "qteFail" });
     }
     this.bus.emit("qte:update", this.snapshot());
     this.bus.emit("qte:finished", result);
@@ -280,6 +287,7 @@ export class DualQTESystem {
         errors: slot.errors,
         maxErrors: slot.maxErrors
       });
+      this.bus.emit("sound", { name: "qteWrong" });
       if (slot.errors >= slot.maxErrors) {
         slot.completed = true;
         slot.success = false;
@@ -292,7 +300,10 @@ export class DualQTESystem {
       return false;
     }
 
+    const prevIndex = slot.index;
     slot.index += 1;
+    this.bus.emit("qte:step", { slot: slotKey, directionId, index: prevIndex, total: slot.sequence.length });
+    this.bus.emit("sound", { name: "qteSuccess" });
     if (slot.index >= slot.sequence.length) {
       slot.completed = true;
       slot.success = true;
@@ -367,6 +378,10 @@ export class DualQTESystem {
 
     const leftSuccess = this.left.success || (this.left.index >= this.left.sequence.length && this.left.errors < this.left.maxErrors);
     const rightSuccess = this.right.success || (this.right.index >= this.right.sequence.length && this.right.errors < this.right.maxErrors);
+
+    if (!leftSuccess && !rightSuccess) {
+      this.bus.emit("sound", { name: "qteFail" });
+    }
 
     const result = {
       mode: "dual",

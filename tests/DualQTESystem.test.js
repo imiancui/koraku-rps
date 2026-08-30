@@ -171,3 +171,42 @@ test("第四關雙小樂同時猜拳：雙敗觸發雙 QTE、單敗觸發單 QTE
   battle.abandon();
 });
 
+test("QTE 與 DualQTESystem 成功輸入發送 qte:step 與 qteSuccess 音效，按錯發送 qteWrong，失敗發送 qteFail", () => {
+  const bus = new EventBus();
+  const timers = new TimerRegistry();
+  const dualQte = new DualQTESystem(bus, timers);
+
+  const sounds = [];
+  const steps = [];
+  const wrongs = [];
+
+  bus.on("sound", (s) => sounds.push(s.name));
+  bus.on("qte:step", (st) => steps.push(st));
+  bus.on("qte:wrong", (w) => wrongs.push(w));
+
+  dualQte.start({ length: 2, durationMs: 5000, maxErrors: 1 });
+  dualQte.left.sequence = ["up", "down"];
+  dualQte.right.sequence = ["left", "right"];
+
+  // 1. 正確輸入
+  dualQte.inputLeft("up");
+  assert.equal(steps.length, 1);
+  assert.equal(steps[0].directionId, "up");
+  assert.equal(steps[0].slot, "left");
+  assert.equal(sounds.includes("qteSuccess"), true);
+
+  // 2. 按錯鍵
+  dualQte.inputRight("up"); // expected "left"
+  assert.equal(wrongs.length, 1);
+  assert.equal(wrongs[0].slot, "right");
+  assert.equal(wrongs[0].received, "up");
+  assert.equal(sounds.includes("qteWrong"), true);
+
+  // 3. 失敗結算
+  dualQte.finish();
+  assert.equal(sounds.includes("qteFail"), true);
+
+  dualQte.stop();
+  timers.clearAll();
+});
+

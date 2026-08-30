@@ -264,7 +264,9 @@ export class AppView {
     this.bus.on("battle:countdown-beat", (beat) => this.handleCountdownBeat(beat));
     this.bus.on("battle:effect", (effect) => this.playBattleEffect(effect));
     this.bus.on("qte:update", (state) => this.renderQte(state));
-    this.bus.on("qte:wrong", (data) => this.flashQteWrong(data?.slot));
+    this.bus.on("qte:step", (data) => this.flashQteCorrect(data));
+    this.bus.on("qte:wrong", (data) => this.flashQteWrong(data?.slot, data?.received));
+    this.bus.on("qte:finished", (result) => this.handleQteFinished(result));
     this.bus.on("postbattle:state", (state) => this.renderPostBattle(state));
     this.bus.on("postbattle:auto-watermelon", (state) => this.renderFloatingWatermelon(state));
     this.bus.on("toast", (toast) => this.showToast(toast.message, toast.tone));
@@ -2630,7 +2632,51 @@ export class AppView {
     }
   }
 
-  flashQteWrong(slot = null) {
+  flashQteCorrect(data) {
+    if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function") {
+      try { navigator.vibrate(18); } catch (_) {}
+    }
+
+    const directionId = data?.directionId;
+    const slot = data?.slot;
+    const index = data?.index;
+
+    // Highlight buttons with golden glow flash
+    let buttons = [];
+    if (slot === "left") {
+      buttons = Array.from(document.querySelectorAll(`#touch-pad-left [data-direction="${directionId}"]`));
+    } else if (slot === "right") {
+      buttons = Array.from(document.querySelectorAll(`#touch-pad-right [data-direction="${directionId}"]`));
+    } else {
+      buttons = Array.from(document.querySelectorAll(`[data-direction="${directionId}"]`));
+    }
+
+    buttons.forEach((btn) => {
+      btn.classList.remove("is-correct-flash");
+      void btn.offsetWidth;
+      btn.classList.add("is-correct-flash");
+      setTimeout(() => btn.classList.remove("is-correct-flash"), 320);
+    });
+
+    // Highlight hit arrow in sequence
+    let seqEl = $("#qte-sequence");
+    if (slot === "left") seqEl = $("#dual-qte-sequence-left");
+    if (slot === "right") seqEl = $("#dual-qte-sequence-right");
+    if (seqEl && typeof index === "number") {
+      const arrows = seqEl.querySelectorAll(".qte-arrow");
+      if (arrows[index]) {
+        arrows[index].classList.remove("is-hit-flash");
+        void arrows[index].offsetWidth;
+        arrows[index].classList.add("is-hit-flash");
+      }
+    }
+  }
+
+  flashQteWrong(slot = null, received = null) {
+    if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function") {
+      try { navigator.vibrate([45]); } catch (_) {}
+    }
+
     let sequence = $("#qte-sequence");
     if (slot === "left") sequence = $("#dual-qte-sequence-left");
     if (slot === "right") sequence = $("#dual-qte-sequence-right");
@@ -2640,7 +2686,43 @@ export class AppView {
       void sequence.offsetWidth;
       sequence.classList.add("is-wrong");
     }
-    this.bus.emit("sound", { name: "danger" });
+
+    if (received) {
+      let buttons = [];
+      if (slot === "left") {
+        buttons = Array.from(document.querySelectorAll(`#touch-pad-left [data-direction="${received}"]`));
+      } else if (slot === "right") {
+        buttons = Array.from(document.querySelectorAll(`#touch-pad-right [data-direction="${received}"]`));
+      } else {
+        buttons = Array.from(document.querySelectorAll(`[data-direction="${received}"]`));
+      }
+      buttons.forEach((btn) => {
+        btn.classList.remove("is-wrong-flash");
+        void btn.offsetWidth;
+        btn.classList.add("is-wrong-flash");
+        setTimeout(() => btn.classList.remove("is-wrong-flash"), 340);
+      });
+    }
+  }
+
+  handleQteFinished(result) {
+    if (!result) return;
+    const isSuccess = result.mode === "dual" ? (result.left?.success || result.right?.success) : result.success;
+    if (!isSuccess) {
+      if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function") {
+        try { navigator.vibrate([80]); } catch (_) {}
+      }
+      const singlePanel = $("#qte-panel");
+      const dualPanel = $("#qte-panel-dual");
+      [singlePanel, dualPanel].forEach((panel) => {
+        if (panel) {
+          panel.classList.remove("is-qte-failed");
+          void panel.offsetWidth;
+          panel.classList.add("is-qte-failed");
+          setTimeout(() => panel.classList.remove("is-qte-failed"), 500);
+        }
+      });
+    }
   }
 
   playBattleEffect(effect) {

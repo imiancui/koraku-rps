@@ -4,7 +4,7 @@
 > 專案根目錄：`D:\game-dev\New-game-project-4`  
 > 最新更新日期：2026-08-31  
 > 基準規範：`OPENSPEC.md` 與 `AGENTS.md`  
-> 測試狀態：`npm test` 94/94 全部通過 (100% Pass)
+> 測試狀態：`npm test` 95/95 全部通過 (100% Pass)
 
 ---
 
