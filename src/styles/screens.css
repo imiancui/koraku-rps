@@ -2240,8 +2240,8 @@
   z-index: 80;
   pointer-events: none;
   opacity: 1 !important;
-  bottom: clamp(90px, 14vh, 160px);
-  height: 94%;
+  bottom: clamp(140px, 22vh, 260px);
+  height: 96%;
 }
 
 .battle-arena.is-settlement .battle-character-wrap::after,
