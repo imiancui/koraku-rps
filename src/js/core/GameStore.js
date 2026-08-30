@@ -626,6 +626,8 @@ export class GameStore {
       damageDealt,
       damageTaken,
       dps,
+      rewardCoins: reward.coins,
+      rewardXp: reward.xp,
       timestamp: Date.now()
     });
     if (this.state.records.recentBattles.length > 100) {

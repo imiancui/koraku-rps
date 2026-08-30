@@ -761,26 +761,86 @@
 .gallery-art-frame {
   position: relative;
   width: 100%;
-  height: min(54vh, 480px);
+  height: min(56vh, 500px);
   overflow: hidden;
   border: 1px solid rgba(216, 182, 106, 0.35);
   background: radial-gradient(circle at 50% 35%, rgba(216, 182, 106, 0.08), rgba(6, 8, 13, 0.96));
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
+  padding-top: 14px;
+  cursor: pointer;
 }
 
 .gallery-art-frame img {
+  height: 86%;
+  max-height: 86%;
+  width: auto;
   max-width: 95%;
-  max-height: 95%;
   object-fit: contain;
+  object-position: center top;
   filter: drop-shadow(0 12px 28px rgba(0, 0, 0, 0.65));
-  transition: filter 300ms ease, opacity 300ms ease;
+  transition: opacity 180ms ease, filter 300ms ease;
+  user-select: none;
+}
+
+/* Swimsuit watermelon (5425px) vs Swimsuit default (4993px):
+   86% * (5425 / 4993) = 93.44% perfectly matches character model pixel size & alignment! */
+.gallery-art-frame[data-variant="swimsuit_watermelon"] img,
+.gallery-art-frame img.gallery-img-swimsuit_watermelon {
+  height: 93.44%;
+  max-height: 93.44%;
+}
+
+/* Default & 2P (4000x4000 square) */
+.gallery-art-frame[data-variant="koraku_default"] img,
+.gallery-art-frame[data-variant="koraku_2p"] img,
+.gallery-art-frame img.gallery-img-koraku_default,
+.gallery-art-frame img.gallery-img-koraku_2p {
+  height: 88%;
+  max-height: 88%;
+  transform: translateY(8px);
+}
+
+.gallery-art-frame.is-locked {
+  cursor: not-allowed;
 }
 
 .gallery-art-frame.is-locked img {
   filter: brightness(0) contrast(2) blur(1px);
   opacity: 0.94;
+}
+
+.gallery-zoom-badge {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(10, 14, 22, 0.85);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(216, 182, 106, 0.4);
+  color: var(--gold-bright);
+  font: 500 11px/1 var(--serif);
+  letter-spacing: 0.12em;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 160ms ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.gallery-zoom-badge:hover {
+  border-color: var(--gold);
+  background: rgba(181, 37, 55, 0.8);
+  color: #fff;
+  transform: scale(1.04);
+}
+
+.gallery-art-frame.is-locked .gallery-zoom-badge {
+  display: none;
 }
 
 .gallery-lock-overlay {
@@ -4280,6 +4340,239 @@
 .floating-autobattle-watermelon.is-zoomed .floating-watermelon-status {
   font-size: 13px;
   padding: 6px 12px;
+}
+
+/* ==========================================================================
+   Battle Log Card in Journey Records
+   ========================================================================== */
+.battle-log-card {
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: all 160ms ease;
+}
+
+.battle-log-card:hover {
+  background: rgba(216, 182, 106, 0.04);
+  border-color: rgba(216, 182, 106, 0.25);
+}
+
+.battle-log-card.outcome-win {
+  border-left: 3px solid #52c41a;
+}
+
+.battle-log-card.outcome-loss {
+  border-left: 3px solid #f5222d;
+}
+
+.battle-log-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.battle-log-index {
+  color: var(--paper-dim);
+  font: 700 11px/1 var(--sans);
+  opacity: 0.6;
+}
+
+.battle-log-stage {
+  color: var(--paper);
+  font-weight: 500;
+}
+
+.battle-log-mode {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: 500;
+}
+
+.battle-log-mode.is-auto {
+  background: rgba(24, 144, 255, 0.15);
+  color: #69c0ff;
+  border: 1px solid rgba(24, 144, 255, 0.3);
+}
+
+.battle-log-mode.is-manual {
+  background: rgba(216, 182, 106, 0.15);
+  color: var(--gold-bright);
+  border: 1px solid rgba(216, 182, 106, 0.3);
+}
+
+.battle-log-outcome {
+  margin-left: auto;
+  font-weight: bold;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+}
+
+.battle-log-outcome.outcome-win {
+  background: rgba(82, 196, 26, 0.2);
+  color: #95de64;
+  border: 1px solid rgba(82, 196, 26, 0.4);
+}
+
+.battle-log-outcome.outcome-loss {
+  background: rgba(245, 34, 45, 0.2);
+  color: #ff7875;
+  border: 1px solid rgba(245, 34, 45, 0.4);
+}
+
+.battle-log-body {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 8px 12px;
+  padding-top: 6px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.05);
+}
+
+.battle-log-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.battle-log-stat small {
+  color: var(--paper-dim);
+  font-size: 10.5px;
+}
+
+.battle-log-stat strong,
+.battle-log-stat span {
+  font-size: 12px;
+  color: var(--paper);
+}
+
+/* ==========================================================================
+   Gallery High-Res Lightbox Modal
+   ========================================================================== */
+.gallery-lightbox-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 220ms ease;
+}
+
+.gallery-lightbox-modal.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.gallery-lightbox-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(4, 6, 10, 0.92);
+  backdrop-filter: blur(10px);
+}
+
+.gallery-lightbox-content {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  max-width: min(94vw, 1300px);
+  max-height: 94vh;
+  background: rgba(16, 20, 30, 0.88);
+  border: 1px solid rgba(216, 182, 106, 0.35);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85);
+  border-radius: 6px;
+  overflow: hidden;
+  animation: lightboxPop 240ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes lightboxPop {
+  0% { transform: scale(0.94); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.gallery-lightbox-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: rgba(8, 11, 18, 0.95);
+  border-bottom: 1px solid var(--line);
+}
+
+.gallery-lightbox-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.gallery-lightbox-badge {
+  padding: 2px 8px;
+  background: var(--crimson);
+  color: #fff;
+  font: 700 10px/1.4 var(--sans);
+  letter-spacing: 0.14em;
+  border-radius: 3px;
+}
+
+.gallery-lightbox-header h3 {
+  font: 500 18px/1.2 var(--serif);
+  color: var(--gold-bright);
+  letter-spacing: 0.1em;
+  margin: 0;
+}
+
+.gallery-lightbox-dims {
+  font: 400 12px/1 var(--sans);
+  color: var(--paper-dim);
+}
+
+.gallery-lightbox-close {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--paper-soft);
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 160ms ease;
+}
+
+.gallery-lightbox-close:hover {
+  border-color: var(--crimson-bright);
+  background: var(--crimson);
+  color: #fff;
+}
+
+.gallery-lightbox-body {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow: auto;
+  max-height: calc(94vh - 60px);
+  background: radial-gradient(circle at 50% 50%, rgba(216, 182, 106, 0.04), transparent 60%);
+}
+
+.gallery-lightbox-body img {
+  max-width: 100%;
+  max-height: calc(88vh - 70px);
+  object-fit: contain;
+  filter: drop-shadow(0 16px 40px rgba(0, 0, 0, 0.75));
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: high-quality;
 }
 
 

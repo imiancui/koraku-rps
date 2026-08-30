@@ -186,23 +186,30 @@ xpNeededForLevel(level) = 100 + Math.max(0, level - 1) * 75
 
 ### 6.2 圖鑑與 CG 立繪 (Gallery & Outfit System)
 - **條目 1：巫女社・狐娘小樂 (`koraku_default`)**
-  - 圖資：`ASSETS.default` (`koraku/小樂-預設.png`)
+  - 圖資：`ASSETS.default` (`koraku/小樂-預設.png`, 4000 × 4000 px)
   - 解鎖條件：**預設直接解鎖**，無需任何前置關卡。
 - **條目 2：鏡界・白金小樂 (`koraku_2p`)**
-  - 圖資：`ASSETS.final` (`koraku/小樂-2P色.png`)
+  - 圖資：`ASSETS.final` (`koraku/小樂-2P色.png`, 4000 × 4000 px)
   - 解鎖條件：**戰勝終ノ章（第 4 關）1 次**（或使用圖鑑全解鎖作弊）。
 - **條目 3：夏日祭・清涼泳裝 (`swimsuit_default`)**
-  - 圖資：`ASSETS.swimsuit` (`koraku/泳裝小樂.png`)
+  - 圖資：`ASSETS.swimsuit` (`koraku/泳裝小樂.png`, 3970 × 4993 px, minY: 24)
   - 解鎖條件：通關第 1 關以上或戰勝後觸發泳裝換穿事件。
 - **條目 4：海風・切西瓜 (`swimsuit_watermelon`)**
-  - 圖資：`ASSETS.watermelon` (`koraku/泳裝小樂_西瓜.png`)
+  - 圖資：`ASSETS.watermelon` (`koraku/泳裝小樂_西瓜.png`, 4007 × 5425 px, minY: 24)
   - 解鎖條件：切中西瓜 1 次以上或戰勝後觸發換裝。
+- **立繪尺寸與對齊無縫規格 (Zero Jump & Normalized Scale)**：
+  - `泳裝小樂` 與 `泳裝小樂_西瓜` 頭頂像素基準點完全一致（`minY: 24`），切西瓜立繪因底部西瓜畫布延伸至 5425px。
+  - 圖鑑展示框架採用頂部對齊，並針對切西瓜立繪套用精確縮放比率（$86\% \times 5425 / 4993 = 93.44\%$），使切換泳裝與切西瓜立繪時**小樂人物本體尺寸與位置 100% 相同、毫無跳動與縮放感**。
+- **全螢幕高解析度鑑賞 (High-Res Lightbox Viewer)**：
+  - 點擊圖鑑立繪或「🔍 放大鑑賞」標籤可呼出全螢幕高畫質燈箱 (`#gallery-lightbox-modal`)，以 4K 原生超高解析度欣賞立繪細節，支援 ESC 鍵與點擊遮罩關閉。
 
 ### 6.3 DPS 與冒險歷程記錄
 - **理論 DPS (Theoretical DPS)**：
   $$\text{Theoretical DPS} = \frac{(\text{Base DMG} \times \text{Greatsword Mult} \times \text{Dual Hand Mult}) + \text{Passive DOT} + \text{Momo Expected}}{3.5\text{s}}$$
 - **實戰 DPS (Combat DPS)**：$\text{單場造成總傷害} / \max(1, \text{戰鬥秒數})$。
-- **歷程紀錄**：保存最近 100 場戰鬥詳情（超過 100 筆自動滾動移除最舊紀錄）。
+- **每局獎勵統計 (Per-Battle Rewards in Recent Battles)**：
+  - 保存最近 100 場戰鬥詳情（超過 100 筆自動滾動移除最舊紀錄）。
+  - 每筆戰鬥卡片清楚標示該局獲得之獎勵（例如 `+100 星砂 / +100 EXP` 或敗北 `+50 星砂`），結合實戰 DPS、造成傷害、承受傷害與戰鬥耗時。
 
 ### 6.4 作弊除錯系統與密碼驗證 (Password-Protected Cheat Access)
 - **管理按鈕與密碼驗證**：首頁管理區域提供「⚙️ 測試調試 / 作弊選單」按鈕，點擊後彈出密碼驗證視窗，輸入密碼 `8989` 驗證通過方可解鎖開啟作弊選單。
@@ -220,16 +227,17 @@ xpNeededForLevel(level) = 100 + Math.max(0, level - 1) * 75
   - **出拳介面輕量清爽**：手勢按鈕精簡化排版，單手模式按鈕高度 30~32px 具備清晰圖示與字體，雙手模式採用乾淨俐落的 2 列網格排版，隱藏行動端多餘實體鍵盤提示。
   - **神諭結果面板微型化**：`.round-oracle` 縮小尺寸與留白（寬度 84~86vw，max-width 280~310px，緊湊倒數圈與對決手勢字體），不再遮擋 Boss 血條與小樂面容。
 
-### 6.6 和風程序化 BGM 合成引擎與雙音訊獨立開關 (Web Audio Japanese BGM & Split Audio Controls)
+### 6.6 和風程序化 BGM 合成引擎與向量設計語彙開關 (Web Audio Japanese BGM & Vector Audio Toggles)
 - **非戰鬥和風舒緩 BGM (`lobby` loop)**：
   - 採用日本平調子 (Hirajōshi) / 陰旋律 (In-Sen) D 小調五聲音階（D4, F4, G4, A4, C5, D5, F5, A5）。
-  - 合成器架構：古箏撥弦音色（Koto Pluck，雙振盪器加瞬態音高微降模擬琴弦張力）、尺八竹笛（Shakuhachi Flute，柔和正弦波加呼吸頻帶與自然顫音）、神道神社風鈴鈴音（Suzu Bells，高頻金屬共鳴諧波）與底層和風五度低音 Ambient Drone。
+  - 合成器架構：古箏撥弦音色（Koto Pluck）、尺八竹笛（Shakuhachi Flute）、神道神社風鈴鈴音（Suzu Bells）與底層和風五度低音 Ambient Drone。
   - 16 小節循環舒緩流暢，涵蓋首頁、選關、養成、商店、圖鑑、戰績與指南介面。
 - **局內戰鬥和風激闘 BGM (`battle` loop)**：
   - 採用 136 BPM 高節奏日本雲井 (Kumoi) / 陰旋律戰鬥音階。
-  - 合成器架構：大太鼓重擊（O-Daiko Kick，快速音高驟降低頻爆破）、附太鼓清脆緣擊（Tsuke-Daiko Rimshot，帶通噪聲衝擊）、三味線疾走琶音（Shamisen Riff，鋸齒波加帶通共振濾波）、律動張力低音（Tension Bass）與拍子木（Hyoshigi，日本傳統木板清脆打擊）。
+  - 合成器架構：大太鼓重擊（O-Daiko Kick）、附太鼓清脆緣擊（Tsuke-Daiko Rimshot）、三味線疾走琶音（Shamisen Riff）、律動張力低音（Tension Bass）與拍子木（Hyoshigi）。
   - 8 小節高昂緊湊戰鬥循環，倒數與出拳時激發對決張力。
-- **音樂與音效分立控制**：
-  - 頂部導航列獨立配置 `#music-toggle`（🎵 背景音樂）與 `#sound-toggle`（🔊 遊戲音效）按鈕。
-  - 存檔設定資料結構獨立保存 `settings.musicMuted` 與 `settings.sfxMuted`，支援即時獨立切換、靜音過渡滑順無爆音，並全面支援繁中、簡中、英文、日文在地化通知提示。
+- **統一暗黑和風設計語彙按鈕 (No Colored Emojis)**：
+  - 頂部導航列按鈕（`#music-toggle`、`#sound-toggle`）捨棄彩色系統 Emoji，改採自適應暗金與墨黑的和風純向量 SVG 圖示（音樂音符與音響喇叭）。
+  - 靜音時採用優雅斜劃線微暗遮罩 (`is-muted`)，滑鼠懸停觸發金光微暈，與全站神社視覺語彙完美統一。
+  - 存檔設定資料結構獨立保存 `settings.musicMuted` 與 `settings.sfxMuted`，支援繁中、簡中、英文、日文在地化通知提示。
 

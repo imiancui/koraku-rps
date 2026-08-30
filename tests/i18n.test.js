@@ -203,10 +203,18 @@ test("I18n 完整性檢查：繁中、簡中、英文、日文所有關卡、道
     assert.ok(i18n.t("ui.cheatAuthSuccess"));
     assert.ok(i18n.t("ui.unlock2PHint"));
     assert.ok(i18n.t("ui.musicToggle"));
+    assert.ok(i18n.t("ui.musicToggleOn"));
+    assert.ok(i18n.t("ui.musicToggleOff"));
+    assert.ok(i18n.t("ui.sfxToggle"));
+    assert.ok(i18n.t("ui.sfxToggleOn"));
+    assert.ok(i18n.t("ui.sfxToggleOff"));
     assert.ok(i18n.t("ui.musicOnToast"));
     assert.ok(i18n.t("ui.musicOffToast"));
-    assert.ok(i18n.t("ui.sfxToggle"));
     assert.ok(i18n.t("ui.sfxOnToast"));
     assert.ok(i18n.t("ui.sfxOffToast"));
+    assert.ok(i18n.t("ui.rewardEarned"));
+    assert.ok(i18n.t("ui.zoomHighRes"));
+    assert.ok(i18n.t("ui.clickToZoom"));
+    assert.ok(i18n.t("ui.closeLightbox"));
   }
 });

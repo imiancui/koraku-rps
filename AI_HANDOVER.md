@@ -138,19 +138,24 @@ LocalStorage 鍵名：`koraku-rps-save-v1`
 - 所有數值定義集中在 `src/js/config/gameConfig.js`（關卡 HP、裝備屬性與價格、技能消耗、升等公式、基礎攻防）。
 - **嚴禁** 在 `AppView.js` 或 UI DOM 中寫死平衡數值。
 
-### 5.2 音樂與音效架構 (Procedural Web Audio BGM & SFX)
+### 5.2 音樂與音效架構 (Procedural Web Audio BGM & Vector Toggles)
 - `SoundSystem.js` 採用純 Web Audio API 實現程序化和風音樂合成（0 外掛音檔，秒速載入）：
   - **Lobby 和風舒緩 BGM**：D 小調平調子五聲音階、古箏撥弦、尺八呼吸笛音、神道風鈴與五度 Ambient Drone（62 BPM，16 小節舒緩循環）。
   - **Battle 和風激闘 BGM**：136 BPM 雲井音階、大太鼓重擊、附太鼓緣擊、三味線疾走琶音、張力 Bass 與拍子木（8 小節戰鬥循環）。
-  - **獨立開關**：頂部配置 `#music-toggle`（🎵 / 🔇）與 `#sound-toggle`（🔊 / 🔇），狀態分別持久化於 `settings.musicMuted` 與 `settings.sfxMuted`。
+  - **獨立開關**：頂部配置 `#music-toggle` 與 `#sound-toggle`，採用純向量 SVG 和風暗黑圖示（摒棄彩色 Emoji），狀態分別持久化於 `settings.musicMuted` 與 `settings.sfxMuted`。
 
-### 5.3 行動端佈局與圖層 (Mobile Battle Screen Layout)
+### 5.3 圖鑑與立繪放大 (Gallery Normalization & Lightbox Viewer)
+- **零跳動人物比例對齊**：`泳裝小樂_西瓜`（5425px）與 `泳裝小樂`（4993px）採等比高解析度縮放對齊（$86\% \times 5425/4993 = 93.44\%$），切換時人物本體位置與頭部座標完全無縫不跳動。
+- **全螢幕 4K 燈箱鑑賞**：支援點擊立繪或「放大鑑賞」按鈕開啟 `#gallery-lightbox-modal`，支援 ESC 鍵與點擊遮罩關閉。
+
+### 5.4 行動端佈局與圖層 (Mobile Battle Screen Layout)
 - **玩家血條移至道具下方**：行動端 `.battle-left-cluster` 排序依序為：出拳選擇器 -> 道具快捷欄 -> 玩家 HP/MP 條（放置於最下方），不遮擋 Boss 與神諭。
 - **精簡對話視窗**：行動端對話框高度縮至 46~50px，為立繪與戰鬥釋放最大視野。
 - **出拳控制介面**：單手模式高度 30~32px，雙手模式 2 列整齊網格，隱藏實體鍵盤提示。
 - **神諭結果面板**：`.round-oracle` 縮小尺寸與留白（寬度 84~86vw，max-width 280~310px）。
+- **戰績每局獎勵統計**：最近 100 場戰鬥日誌每筆均清楚標記獲得星砂與經驗獎勵。
 
-### 5.4 測試與打包
+### 5.5 測試與打包
 每次變更後必須執行：
 ```bash
 npm test

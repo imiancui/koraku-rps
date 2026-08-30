@@ -69,6 +69,7 @@ export class AppView {
     this.galleryItemTitle = $("#gallery-item-title");
     this.galleryItemDesc = $("#gallery-item-desc");
     this.galleryVariantButtons = $("#gallery-variant-buttons");
+    this.galleryLightboxModal = $("#gallery-lightbox-modal");
     this.cheatModal = $("#cheat-modal");
     this.cheatAuthModal = $("#cheat-auth-modal");
     this.cheatAuthPassword = $("#cheat-auth-password");
@@ -684,6 +685,16 @@ export class AppView {
       return;
     }
 
+    if (event.target.closest("#btn-gallery-zoom") || (event.target.closest("#gallery-image") && !this.galleryArtFrame?.classList.contains("is-locked"))) {
+      this.openGalleryLightbox();
+      return;
+    }
+
+    if (event.target.closest("#btn-close-lightbox") || event.target.closest("#gallery-lightbox-backdrop")) {
+      this.closeGalleryLightbox();
+      return;
+    }
+
     if (event.target.closest("#reset-save")) {
       const confirmed = window.confirm("要清除等級、星砂、道具與戰績，重新開始嗎？");
       if (confirmed) {
@@ -694,6 +705,11 @@ export class AppView {
   }
 
   handleKeydown(event) {
+    if (event.key === "Escape" && this.galleryLightboxModal && !this.galleryLightboxModal.hidden) {
+      this.closeGalleryLightbox();
+      return;
+    }
+
     if (event.altKey && event.key === "ArrowLeft") {
       event.preventDefault();
       window.history.back();
@@ -1029,15 +1045,17 @@ export class AppView {
 
     const musicToggle = $("#music-toggle");
     if (musicToggle) {
-      musicToggle.textContent = isMusicMuted ? "🔇" : "🎵";
-      musicToggle.setAttribute("aria-label", isMusicMuted ? I18n.t("ui.musicToggle") : I18n.t("ui.musicToggle"));
+      const label = isMusicMuted ? I18n.t("ui.musicToggleOn") : I18n.t("ui.musicToggleOff");
+      musicToggle.setAttribute("aria-label", label);
+      musicToggle.setAttribute("title", label);
       musicToggle.classList.toggle("is-muted", isMusicMuted);
     }
 
     const soundToggle = $("#sound-toggle");
     if (soundToggle) {
-      soundToggle.textContent = isSfxMuted ? "🔇" : "🔊";
-      soundToggle.setAttribute("aria-label", isSfxMuted ? I18n.t("ui.sfxToggle") : I18n.t("ui.sfxToggle"));
+      const label = isSfxMuted ? I18n.t("ui.sfxToggleOn") : I18n.t("ui.sfxToggleOff");
+      soundToggle.setAttribute("aria-label", label);
+      soundToggle.setAttribute("title", label);
       soundToggle.classList.toggle("is-muted", isSfxMuted);
     }
 
@@ -1269,6 +1287,15 @@ export class AppView {
           const outcomeClass = b.won ? "outcome-win" : "outcome-loss";
           const outcomeText = b.won ? I18n.t("ui.battleWon") : I18n.t("ui.battleLost");
           const modeBadge = b.isAuto ? '<span class="battle-log-mode is-auto">⚡ 自動</span>' : '<span class="battle-log-mode is-manual">🎮 手動</span>';
+          
+          const stageObj = STAGES.find(s => s.id === b.stageId);
+          const stageMult = stageObj?.rewardMultiplier ?? (b.stageId === 4 ? 8 : (b.stageId === 3 ? 2 : (b.stageId === 2 ? 1.25 : 1)));
+          const rewardCoins = b.rewardCoins !== undefined ? b.rewardCoins : (b.won ? Math.round(100 * stageMult) : Math.round(50 * stageMult));
+          const rewardXp = b.rewardXp !== undefined ? b.rewardXp : (b.won ? (stageObj?.reward?.xp ?? 100) : 0);
+          const rewardText = b.won 
+            ? `+${rewardCoins} ${I18n.t("ui.coins")} / +${rewardXp} EXP` 
+            : `+${rewardCoins} ${I18n.t("ui.coins")}`;
+
           return `
             <div class="battle-log-card ${outcomeClass}">
               <div class="battle-log-header">
@@ -1279,8 +1306,12 @@ export class AppView {
               </div>
               <div class="battle-log-body">
                 <div class="battle-log-stat">
+                  <small>${I18n.t("ui.rewardEarned")}</small>
+                  <strong style="color:var(--gold-bright);">${rewardText}</strong>
+                </div>
+                <div class="battle-log-stat">
                   <small>實戰 DPS</small>
-                  <strong style="color:var(--gold-bright);">${b.dps ?? 0}</strong>
+                  <strong style="color:var(--gold);">${b.dps ?? 0}</strong>
                 </div>
                 <div class="battle-log-stat">
                   <small>造成傷害</small>
@@ -1615,10 +1646,12 @@ export class AppView {
 
     if (this.galleryArtFrame) {
       this.galleryArtFrame.classList.toggle("is-locked", !unlocked);
+      this.galleryArtFrame.dataset.variant = currentItem.id;
     }
     if (this.galleryImage) {
       this.galleryImage.src = currentItem.src;
       this.galleryImage.alt = locCurrentItem.name;
+      this.galleryImage.className = "gallery-img-" + currentItem.id;
     }
     if (this.galleryItemTitle) {
       this.galleryItemTitle.textContent = unlocked ? locCurrentItem.name : "？？？ (" + I18n.t("ui.galleryLockedTag") + ")";
@@ -1644,6 +1677,45 @@ export class AppView {
           locItem.variantName + lockIcon +
           "</button>";
       }).join("");
+    }
+  }
+
+  openGalleryLightbox() {
+    const currentItem = GALLERY_ITEMS.find((item) => item.id === this.selectedGalleryItem) || GALLERY_ITEMS[0];
+    const unlocked = this.isGalleryItemUnlocked(currentItem, this.store.snapshot());
+    if (!unlocked) return;
+
+    const locItem = I18n.getLocalizedGalleryItem(currentItem);
+    const dimsMap = {
+      "koraku_default": "4000 × 4000 px (Original)",
+      "koraku_2p": "4000 × 4000 px (Original)",
+      "swimsuit_default": "3970 × 4993 px (Ultra HD)",
+      "swimsuit_watermelon": "4007 × 5425 px (Ultra HD)"
+    };
+
+    const titleEl = $("#gallery-lightbox-title");
+    const dimsEl = $("#gallery-lightbox-dims");
+    const imgEl = $("#gallery-lightbox-image");
+
+    if (titleEl) titleEl.textContent = locItem.name;
+    if (dimsEl) dimsEl.textContent = dimsMap[currentItem.id] || "Ultra HD";
+    if (imgEl) {
+      imgEl.src = currentItem.src;
+      imgEl.alt = locCurrentItem.name;
+    }
+
+    if (this.galleryLightboxModal) {
+      this.galleryLightboxModal.removeAttribute("hidden");
+      this.galleryLightboxModal.setAttribute("aria-hidden", "false");
+      this.galleryLightboxModal.classList.add("is-open");
+    }
+  }
+
+  closeGalleryLightbox() {
+    if (this.galleryLightboxModal) {
+      this.galleryLightboxModal.classList.remove("is-open");
+      this.galleryLightboxModal.setAttribute("aria-hidden", "true");
+      this.galleryLightboxModal.setAttribute("hidden", "");
     }
   }
 

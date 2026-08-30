@@ -80,6 +80,8 @@ test("GameStore: records battle details, damage dealt/taken, duration, combat DP
   assert.equal(store.state.records.damageTaken.byStage[1], 30);
   assert.equal(store.state.records.recentBattles.length, 1);
   assert.equal(store.state.records.recentBattles[0].dps, 30.0);
+  assert.equal(store.state.records.recentBattles[0].rewardCoins, reward.coins);
+  assert.equal(store.state.records.recentBattles[0].rewardXp, reward.xp);
 
   // Test 100 battle cap
   for (let i = 0; i < 110; i++) {

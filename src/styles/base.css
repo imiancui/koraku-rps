@@ -290,6 +290,64 @@ select.profile-chip.lang-select option {
   background: rgba(216, 182, 106, 0.1);
 }
 
+.audio-toggle-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 4px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--gold);
+  cursor: pointer;
+  transition: all 160ms ease;
+}
+
+.audio-toggle-btn:hover {
+  border-color: var(--gold);
+  color: var(--gold-bright);
+  background: rgba(216, 182, 106, 0.12);
+  box-shadow: 0 0 10px rgba(216, 182, 106, 0.25);
+}
+
+.audio-toggle-btn .audio-icon {
+  width: 17px;
+  height: 17px;
+  fill: currentColor;
+  transition: transform 160ms ease, opacity 160ms ease;
+}
+
+.audio-toggle-btn .icon-music-off,
+.audio-toggle-btn .icon-sound-off {
+  display: none;
+}
+
+.audio-toggle-btn.is-muted {
+  color: var(--paper-dim);
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.25);
+  opacity: 0.75;
+}
+
+.audio-toggle-btn.is-muted:hover {
+  color: var(--paper);
+  border-color: var(--line);
+  opacity: 1;
+  box-shadow: none;
+}
+
+.audio-toggle-btn.is-muted .icon-music-on,
+.audio-toggle-btn.is-muted .icon-sound-on {
+  display: none;
+}
+
+.audio-toggle-btn.is-muted .icon-music-off,
+.audio-toggle-btn.is-muted .icon-sound-off {
+  display: inline-block;
+}
+
 .screen-stack {
   position: relative;
   height: calc(100svh - var(--header-height));

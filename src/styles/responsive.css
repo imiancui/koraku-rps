@@ -330,7 +330,47 @@
   }
 
   .gallery-art-frame {
-    height: 340px;
+    height: min(52vh, 380px);
+    padding-top: 10px;
+  }
+
+  .gallery-lightbox-modal {
+    padding: 8px;
+  }
+
+  .gallery-lightbox-content {
+    max-width: 98vw;
+    max-height: 98vh;
+  }
+
+  .gallery-lightbox-header {
+    padding: 10px 14px;
+  }
+
+  .gallery-lightbox-title-wrap {
+    gap: 8px;
+  }
+
+  .gallery-lightbox-header h3 {
+    font-size: 15px;
+  }
+
+  .gallery-lightbox-dims {
+    font-size: 11px;
+  }
+
+  .gallery-lightbox-body {
+    padding: 8px;
+    max-height: calc(96vh - 52px);
+  }
+
+  .gallery-lightbox-body img {
+    max-height: calc(90vh - 58px);
+  }
+
+  .battle-log-body {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 10px;
   }
 
   /* Mobile battle */

@@ -500,10 +500,18 @@ const DICTIONARY = {
       soundToggle: "切換遊戲音效",
       sfxToggle: "切換遊戲音效",
       musicToggle: "切換背景音樂",
-      musicOnToast: "🎵 背景音樂已開啟。",
-      musicOffToast: "🔇 背景音樂已關閉。",
-      sfxOnToast: "🔊 遊戲音效已開啟。",
-      sfxOffToast: "🔇 遊戲音效已關閉。",
+      musicToggleOn: "開啟背景音樂",
+      musicToggleOff: "靜音背景音樂",
+      sfxToggleOn: "開啟遊戲音效",
+      sfxToggleOff: "靜音遊戲音效",
+      musicOnToast: "背景音樂已開啟。",
+      musicOffToast: "背景音樂已關閉。",
+      sfxOnToast: "遊戲音效已開啟。",
+      sfxOffToast: "遊戲音效已關閉。",
+      rewardEarned: "獲得獎勵",
+      zoomHighRes: "放大鑑賞",
+      clickToZoom: "點擊全螢幕放大查看",
+      closeLightbox: "關閉視圖",
       langToggle: "語系",
       back: "返回",
       wins: "勝",
@@ -1107,10 +1115,18 @@ const DICTIONARY = {
       soundToggle: "切换游戏音效",
       sfxToggle: "切换游戏音效",
       musicToggle: "切换背景音乐",
-      musicOnToast: "🎵 背景音乐已开启。",
-      musicOffToast: "🔇 背景音乐已关闭。",
-      sfxOnToast: "🔊 游戏音效已开启。",
-      sfxOffToast: "🔇 游戏音效已关闭。",
+      musicToggleOn: "开启背景音乐",
+      musicToggleOff: "静音背景音乐",
+      sfxToggleOn: "开启游戏音效",
+      sfxToggleOff: "静音游戏音效",
+      musicOnToast: "背景音乐已开启。",
+      musicOffToast: "背景音乐已关闭。",
+      sfxOnToast: "游戏音效已开启。",
+      sfxOffToast: "游戏音效已关闭。",
+      rewardEarned: "获得奖励",
+      zoomHighRes: "放大鉴赏",
+      clickToZoom: "点击全屏放大查看",
+      closeLightbox: "关闭视图",
       langToggle: "语言",
       back: "返回",
       wins: "胜",
@@ -1534,10 +1550,18 @@ const DICTIONARY = {
       soundToggle: "Toggle SFX",
       sfxToggle: "Toggle SFX",
       musicToggle: "Toggle Music",
-      musicOnToast: "🎵 Background music enabled.",
-      musicOffToast: "🔇 Background music disabled.",
-      sfxOnToast: "🔊 Sound effects enabled.",
-      sfxOffToast: "🔇 Sound effects disabled.",
+      musicToggleOn: "Unmute Music",
+      musicToggleOff: "Mute Music",
+      sfxToggleOn: "Unmute SFX",
+      sfxToggleOff: "Mute SFX",
+      musicOnToast: "Background music enabled.",
+      musicOffToast: "Background music disabled.",
+      sfxOnToast: "Sound effects enabled.",
+      sfxOffToast: "Sound effects disabled.",
+      rewardEarned: "Rewards Earned",
+      zoomHighRes: "Zoom HD",
+      clickToZoom: "Click to view full resolution",
+      closeLightbox: "Close",
       langToggle: "Language",
       back: "Back",
       wins: "Wins",
@@ -1962,10 +1986,18 @@ const DICTIONARY = {
       soundToggle: "効果音切替",
       sfxToggle: "効果音切替",
       musicToggle: "BGM切替",
-      musicOnToast: "🎵 BGMを有効にしました。",
-      musicOffToast: "🔇 BGMを無効にしました。",
-      sfxOnToast: "🔊 効果音を有効にしました。",
-      sfxOffToast: "🔇 効果音を無効にしました。",
+      musicToggleOn: "BGMを再生",
+      musicToggleOff: "BGMを消音",
+      sfxToggleOn: "効果音を再生",
+      sfxToggleOff: "効果音を消音",
+      musicOnToast: "BGMを有効にしました。",
+      musicOffToast: "BGMを無効にしました。",
+      sfxOnToast: "効果音を有効にしました。",
+      sfxOffToast: "効果音を無効にしました。",
+      rewardEarned: "獲得報酬",
+      zoomHighRes: "拡大鑑賞",
+      clickToZoom: "クリックで高画質全画面拡大",
+      closeLightbox: "閉じる",
       langToggle: "言語",
       back: "戻る",
       wins: "勝利",
@@ -3940,6 +3972,8 @@ class GameStore {
       damageDealt,
       damageTaken,
       dps,
+      rewardCoins: reward.coins,
+      rewardXp: reward.xp,
       timestamp: Date.now()
     });
     if (this.state.records.recentBattles.length > 100) {
@@ -6239,6 +6273,7 @@ class AppView {
     this.galleryItemTitle = $("#gallery-item-title");
     this.galleryItemDesc = $("#gallery-item-desc");
     this.galleryVariantButtons = $("#gallery-variant-buttons");
+    this.galleryLightboxModal = $("#gallery-lightbox-modal");
     this.cheatModal = $("#cheat-modal");
     this.cheatAuthModal = $("#cheat-auth-modal");
     this.cheatAuthPassword = $("#cheat-auth-password");
@@ -6854,6 +6889,16 @@ class AppView {
       return;
     }
 
+    if (event.target.closest("#btn-gallery-zoom") || (event.target.closest("#gallery-image") && !this.galleryArtFrame?.classList.contains("is-locked"))) {
+      this.openGalleryLightbox();
+      return;
+    }
+
+    if (event.target.closest("#btn-close-lightbox") || event.target.closest("#gallery-lightbox-backdrop")) {
+      this.closeGalleryLightbox();
+      return;
+    }
+
     if (event.target.closest("#reset-save")) {
       const confirmed = window.confirm("要清除等級、星砂、道具與戰績，重新開始嗎？");
       if (confirmed) {
@@ -6864,6 +6909,11 @@ class AppView {
   }
 
   handleKeydown(event) {
+    if (event.key === "Escape" && this.galleryLightboxModal && !this.galleryLightboxModal.hidden) {
+      this.closeGalleryLightbox();
+      return;
+    }
+
     if (event.altKey && event.key === "ArrowLeft") {
       event.preventDefault();
       window.history.back();
@@ -7199,15 +7249,17 @@ class AppView {
 
     const musicToggle = $("#music-toggle");
     if (musicToggle) {
-      musicToggle.textContent = isMusicMuted ? "🔇" : "🎵";
-      musicToggle.setAttribute("aria-label", isMusicMuted ? I18n.t("ui.musicToggle") : I18n.t("ui.musicToggle"));
+      const label = isMusicMuted ? I18n.t("ui.musicToggleOn") : I18n.t("ui.musicToggleOff");
+      musicToggle.setAttribute("aria-label", label);
+      musicToggle.setAttribute("title", label);
       musicToggle.classList.toggle("is-muted", isMusicMuted);
     }
 
     const soundToggle = $("#sound-toggle");
     if (soundToggle) {
-      soundToggle.textContent = isSfxMuted ? "🔇" : "🔊";
-      soundToggle.setAttribute("aria-label", isSfxMuted ? I18n.t("ui.sfxToggle") : I18n.t("ui.sfxToggle"));
+      const label = isSfxMuted ? I18n.t("ui.sfxToggleOn") : I18n.t("ui.sfxToggleOff");
+      soundToggle.setAttribute("aria-label", label);
+      soundToggle.setAttribute("title", label);
       soundToggle.classList.toggle("is-muted", isSfxMuted);
     }
 
@@ -7439,6 +7491,15 @@ class AppView {
           const outcomeClass = b.won ? "outcome-win" : "outcome-loss";
           const outcomeText = b.won ? I18n.t("ui.battleWon") : I18n.t("ui.battleLost");
           const modeBadge = b.isAuto ? '<span class="battle-log-mode is-auto">⚡ 自動</span>' : '<span class="battle-log-mode is-manual">🎮 手動</span>';
+          
+          const stageObj = STAGES.find(s => s.id === b.stageId);
+          const stageMult = stageObj?.rewardMultiplier ?? (b.stageId === 4 ? 8 : (b.stageId === 3 ? 2 : (b.stageId === 2 ? 1.25 : 1)));
+          const rewardCoins = b.rewardCoins !== undefined ? b.rewardCoins : (b.won ? Math.round(100 * stageMult) : Math.round(50 * stageMult));
+          const rewardXp = b.rewardXp !== undefined ? b.rewardXp : (b.won ? (stageObj?.reward?.xp ?? 100) : 0);
+          const rewardText = b.won 
+            ? `+${rewardCoins} ${I18n.t("ui.coins")} / +${rewardXp} EXP` 
+            : `+${rewardCoins} ${I18n.t("ui.coins")}`;
+
           return `
             <div class="battle-log-card ${outcomeClass}">
               <div class="battle-log-header">
@@ -7449,8 +7510,12 @@ class AppView {
               </div>
               <div class="battle-log-body">
                 <div class="battle-log-stat">
+                  <small>${I18n.t("ui.rewardEarned")}</small>
+                  <strong style="color:var(--gold-bright);">${rewardText}</strong>
+                </div>
+                <div class="battle-log-stat">
                   <small>實戰 DPS</small>
-                  <strong style="color:var(--gold-bright);">${b.dps ?? 0}</strong>
+                  <strong style="color:var(--gold);">${b.dps ?? 0}</strong>
                 </div>
                 <div class="battle-log-stat">
                   <small>造成傷害</small>
@@ -7785,10 +7850,12 @@ class AppView {
 
     if (this.galleryArtFrame) {
       this.galleryArtFrame.classList.toggle("is-locked", !unlocked);
+      this.galleryArtFrame.dataset.variant = currentItem.id;
     }
     if (this.galleryImage) {
       this.galleryImage.src = currentItem.src;
       this.galleryImage.alt = locCurrentItem.name;
+      this.galleryImage.className = "gallery-img-" + currentItem.id;
     }
     if (this.galleryItemTitle) {
       this.galleryItemTitle.textContent = unlocked ? locCurrentItem.name : "？？？ (" + I18n.t("ui.galleryLockedTag") + ")";
@@ -7814,6 +7881,45 @@ class AppView {
           locItem.variantName + lockIcon +
           "</button>";
       }).join("");
+    }
+  }
+
+  openGalleryLightbox() {
+    const currentItem = GALLERY_ITEMS.find((item) => item.id === this.selectedGalleryItem) || GALLERY_ITEMS[0];
+    const unlocked = this.isGalleryItemUnlocked(currentItem, this.store.snapshot());
+    if (!unlocked) return;
+
+    const locItem = I18n.getLocalizedGalleryItem(currentItem);
+    const dimsMap = {
+      "koraku_default": "4000 × 4000 px (Original)",
+      "koraku_2p": "4000 × 4000 px (Original)",
+      "swimsuit_default": "3970 × 4993 px (Ultra HD)",
+      "swimsuit_watermelon": "4007 × 5425 px (Ultra HD)"
+    };
+
+    const titleEl = $("#gallery-lightbox-title");
+    const dimsEl = $("#gallery-lightbox-dims");
+    const imgEl = $("#gallery-lightbox-image");
+
+    if (titleEl) titleEl.textContent = locItem.name;
+    if (dimsEl) dimsEl.textContent = dimsMap[currentItem.id] || "Ultra HD";
+    if (imgEl) {
+      imgEl.src = currentItem.src;
+      imgEl.alt = locCurrentItem.name;
+    }
+
+    if (this.galleryLightboxModal) {
+      this.galleryLightboxModal.removeAttribute("hidden");
+      this.galleryLightboxModal.setAttribute("aria-hidden", "false");
+      this.galleryLightboxModal.classList.add("is-open");
+    }
+  }
+
+  closeGalleryLightbox() {
+    if (this.galleryLightboxModal) {
+      this.galleryLightboxModal.classList.remove("is-open");
+      this.galleryLightboxModal.setAttribute("aria-hidden", "true");
+      this.galleryLightboxModal.setAttribute("hidden", "");
     }
   }
 

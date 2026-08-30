@@ -254,7 +254,7 @@ $$\text{Theoretical DPS} = \frac{(\text{Base DMG} \times \text{Greatsword Mult} 
 
 ### 11.2 實測 DPS 與歷史記錄
 - **實戰 DPS**：$\text{單場戰鬥造成的總傷害} / \max(1, \text{戰鬥秒數})$。
-- **最近戰鬥記錄 (`recentBattles`)**：保存最近 100 場詳細數據（超過 100 筆自動滾動移除最舊記錄）。
+- **最近戰鬥記錄 (`recentBattles`)**：保存最近 100 場詳細數據（超過 100 筆自動滾動移除最舊記錄），每筆日誌清楚記載該局獲得之星砂與經驗值獎勵（如 `+100 星砂 / +100 EXP`）。
 
 ---
 
@@ -263,17 +263,22 @@ $$\text{Theoretical DPS} = \frac{(\text{Base DMG} \times \text{Greatsword Mult} 
 遊戲圖鑑收錄 4 款精美動漫立繪與解鎖條件：
 
 1. **巫女社・狐娘小樂 (`koraku_default`)**
-   - 檔案：`./koraku/小樂-預設.png`
+   - 檔案：`./koraku/小樂-預設.png` (4000 × 4000 px)
    - 解鎖條件：**預設直接解鎖**，開局即可欣賞。
 2. **鏡界・白金小樂 (`koraku_2p`)**
-   - 檔案：`./koraku/小樂-2P色.png`
+   - 檔案：`./koraku/小樂-2P色.png` (4000 × 4000 px)
    - 解鎖條件：**戰勝終ノ章（第 4 關）1 次**，挑戰鏡界雙生白金小樂獲勝後解鎖。
 3. **夏日祭・清涼泳裝 (`swimsuit_default`)**
-   - 檔案：`./koraku/泳裝小樂.png`
+   - 檔案：`./koraku/泳裝小樂.png` (3970 × 4993 px, minY: 24)
    - 解鎖條件：通關第 1 關以上或戰勝後點擊「請小樂穿泳裝」觸發事件解鎖。
 4. **海風・切西瓜 (`swimsuit_watermelon`)**
-   - 檔案：`./koraku/泳裝小樂_西瓜.png`
+   - 檔案：`./koraku/泳裝小樂_西瓜.png` (4007 × 5425 px, minY: 24)
    - 解鎖條件：切中西瓜 1 次以上或戰勝後觸發換裝解鎖。
+
+- **人物無縫對齊與零跳動 (Zero Jump Normalization)**：
+  - 泳裝小樂與切西瓜立繪因底部切西瓜延伸畫布，透過高精準度縮放（$86\% \times 5425/4993 = 93.44\%$）與頂部對齊，切換時人物本體尺寸與位置 100% 相同、毫無跳動與縮放感。
+- **全螢幕 4K 超高解析度燈箱 (High-Res Lightbox Viewer)**：
+  - 點擊立繪或「放大鑑賞」按鈕可開啟全螢幕高解析度檢視器 (`#gallery-lightbox-modal`)，以 4K 原生超高解析度鑑賞小樂細節，支援 ESC 鍵與點擊遮罩關閉。
 
 ---
 
