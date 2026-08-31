@@ -22,6 +22,33 @@ export const LOCALE_STORAGE_KEY = "koraku-rps-locale";
 
 export const CHANGELOG_DATA = [
   {
+    version: "0.0.12",
+    date: "2026-08-31",
+    tag: "Full State Persistence Across Page Refresh & Auto-Battle Continuity",
+    changes: {
+      "zh-Hant": [
+        "【全頁面重新整理狀態保留】任何頁面（能力成長、緣側商店、狐娘圖鑑、修練道場、戰績紀錄等）在重新整理（F5 / 重新載入）後，100% 保持在最後停留位置，不產生畫面跳轉。",
+        "【子頁籤與篩選器持久化】能力成長的配點/技能樹頁籤、緣側商店的裝備/道具分類篩選、圖鑑立繪差分等設定即時儲存，重載後完美還原。",
+        "【戰鬥中與自動掛機無縫接續】手動戰鬥或自動刷關中重新整理時，精確保留玩家與 Boss 當前血量、魔力、回合數、自動掛機輪次勝負紀錄與切西瓜庫存累計亮燈，無縫接續戰鬥。"
+      ],
+      "zh-Hans": [
+        "【全页面重新整理状态保留】任何页面（能力成长、缘侧商店、狐娘图鉴、修炼道场、战绩纪录等）在重新整理（F5 / 重新载入）后，100% 保持在最后停留位置，不产生画面跳转。",
+        "【子标签与筛选器持久化】能力成长的配点/技能树标签、缘侧商店的装备/道具分类筛选、图鉴立绘差分等设定实时储存，重载后完美还原。",
+        "【战斗中与自动挂机无缝接续】手动战斗或自动刷关中重新整理时，精确保留玩家与 Boss 当前血量、魔力、回合数、自动挂机轮次胜负纪录与切西瓜库存累计亮灯，无缝接续战斗。"
+      ],
+      "en": [
+        "【Full Page State Persistence on Refresh】Refreshing the page (F5 / reload) from any screen (Growth, Shop, Gallery, Dojo, Records, etc.) preserves your exact location with zero disruptive screen jumps.",
+        "【Subtab & Filter Continuity】Growth tabs (Stats vs Skills), Shop category filters (Potions, Weapons, Armor, Accessories), and Gallery variant selections are automatically saved and restored.",
+        "【Seamless Battle & Auto-Battle Continuity】Refreshing during manual or auto-battles perfectly preserves player and boss HP/MP, current round, auto-battle progress/win-loss stats, and accumulated watermelon slices."
+      ],
+      "ja": [
+        "【リロード時の全画面状態維持】どの画面（能力成長、ショップ、図鑑、道場、戦績など）でページを再読み込み（F5）しても、画面遷移を起こさず最後にいた場所を100%保持。",
+        "【タブ・フィルター状態の永続化】能力成長のステータス/スキルタブ、ショップのカテゴリ絞り込み、図鑑の差分選択などが即座に保存され、リロード後も正確に復元。",
+        "【戦闘中・自動周回のシームレス再開】手動戦闘や自動周回中にリロードしても、プレイヤーとBossの現在HP/MP、ラウンド数、自動周回勝敗数、スイカ割りストック点灯数を完全保持して戦闘を続行。"
+      ]
+    }
+  },
+  {
     version: "0.0.11",
     date: "2026-08-31",
     tag: "Tablet Landscape Desktop-Like Spacious Layout & Overlap Fix",

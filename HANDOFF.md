@@ -2,10 +2,10 @@
 
 > 文件用途：AI 代理人與開發者快速上手、架構交接與開發合約指引  
 > 專案根目錄：`D:\game-dev\New-game-project-4`  
-> 當前版本：`v0.0.11`（顯示於首頁頁腳最左側 `0.0.11`，自最後一位遞增，每 100 個版本進一位：`0.0.100` -> `0.1.0`）  
+> 當前版本：`v0.0.12`（顯示於首頁頁腳最左側 `0.0.12`，自最後一位遞增，每 100 個版本進一位：`0.0.100` -> `0.1.0`）  
 > 最新更新日期：2026-08-31  
 > 基準規範：`OPENSPEC.md` 與 `AGENTS.md`  
-> 測試狀態：`npm test` 104/104 全部通過 (100% Pass)
+> 測試狀態：`npm test` 107/107 全部通過 (100% Pass)
 
 ---
 
@@ -218,6 +218,14 @@ npm run specs:excel
 - **戰鬥場景元素重疊徹底修復**：
   - 徹底移除舊版 `@media (max-height: 780px)` 殘留的破壞性絕對定位（`top: 75px` / `top: 220px` / `bottom: 119px`）。
   - 將頂部 Boss 血條（`.enemy-hud`）、回合儀表板（`.round-oracle`）、小樂面部立繪、左側玩家控制欄（`.battle-left-cluster`）與底部對白框重新校準為獨立層次，視野如同電腦桌機版般開闊寬敞。
+
+### 5.12 全頁面重新整理狀態保留與戰鬥/自動掛機連續性 (v0.0.12 Updates)
+- **全頁面、子頁籤與篩選器持久化**：
+  - 玩家停留之頁面（`koraku_active_screen`）、能力成長頁籤（`koraku_growth_tab`: `stats`/`skills`）、商店篩選類別（`koraku_shop_filter`: `all`/`potions`/`weapon`/`chest`/`accessory`）、圖鑑立繪差分與道場模式於操作時即時寫入 `localStorage`，重載時 100% 恢復，消除畫面突兀跳轉。
+- **戰鬥與自動掛機無縫接續核心 (`BattleSystem.prototype.restore`)**：
+  - 手動戰鬥或自動刷關時，即時將包含玩家 HP/MP、Boss HP、雙小樂存活狀態、當前回合、自動刷關輪次與勝負場次的快照寫入持久化快照。
+  - 重新整理時由 `BattleSystem.prototype.restore` 精準還原數據並接續當前進度，切西瓜庫存累計亮燈與浮動小遊戲無縫同步。
+
 
 
 

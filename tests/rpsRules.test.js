@@ -334,3 +334,128 @@ test("戰鬥中可正常使用 HP/MP 藥水與變拳技能", async () => {
   assert.equal(battle.state.playerMp, 25, "MP 應扣除 25");
   battle.abandon();
 });
+
+test("BattleSystem restore: 正確還原單體戰鬥血量、魔力、回合數與狀態", async () => {
+  const { EventBus } = await import("../src/js/core/EventBus.js");
+  const { GameStore } = await import("../src/js/core/GameStore.js");
+  const { BattleSystem } = await import("../src/js/systems/BattleSystem.js");
+
+  class MemoryPersistence {
+    constructor(data = null) { this.data = data; }
+    load() { return this.data; }
+    save(data) { this.data = structuredClone(data); }
+    clear() { this.data = null; }
+  }
+
+  const bus = new EventBus();
+  const persistence = new MemoryPersistence();
+  const store = new GameStore(bus, persistence);
+  const battle = new BattleSystem(bus, store);
+
+  const savedSnapshot = {
+    stageId: 2,
+    round: 4,
+    playerHp: 65,
+    playerMp: 30,
+    enemyHp: 800,
+    enemies: [{ id: "main", name: "小樂", hp: 800, maxHp: 2000, alive: true }],
+    selectedHand: "scissors",
+    isEnemyFrozen: true,
+    frozenEnemyHand: "rock",
+    battleDamageDealt: 1200,
+    battleDamageTaken: 35
+  };
+
+  const restored = battle.restore(savedSnapshot);
+  assert.equal(restored, true, "restore 應回傳 true");
+  assert.equal(battle.state.active, true, "戰鬥應處於 active 狀態");
+  assert.equal(battle.state.stage.id, 2, "關卡 ID 應為 2");
+  assert.equal(battle.state.playerHp, 65, "玩家 HP 應還原為 65");
+  assert.equal(battle.state.playerMp, 30, "玩家 MP 應還原為 30");
+  assert.equal(battle.state.enemyHp, 800, "Boss HP 應還原為 800");
+  assert.equal(battle.state.isEnemyFrozen, true, "冰結狀態應還原");
+  assert.equal(battle.state.frozenEnemyHand, "rock", "冰結手勢應還原為 rock");
+  assert.equal(battle.battleDamageDealt, 1200, "已造成傷害應還原");
+  assert.equal(battle.battleDamageTaken, 35, "已受傷害應還原");
+  battle.abandon();
+});
+
+test("BattleSystem restore: 正確還原第 4 關雙生 Boss 血條與各自存活狀態", async () => {
+  const { EventBus } = await import("../src/js/core/EventBus.js");
+  const { GameStore } = await import("../src/js/core/GameStore.js");
+  const { BattleSystem } = await import("../src/js/systems/BattleSystem.js");
+
+  class MemoryPersistence {
+    constructor(data = null) { this.data = data; }
+    load() { return this.data; }
+    save(data) { this.data = structuredClone(data); }
+    clear() { this.data = null; }
+  }
+
+  const bus = new EventBus();
+  const persistence = new MemoryPersistence();
+  const store = new GameStore(bus, persistence);
+  const battle = new BattleSystem(bus, store);
+
+  const savedDualSnapshot = {
+    stageId: 4,
+    round: 6,
+    playerHp: 90,
+    playerMp: 50,
+    enemies: [
+      { id: "left", name: "白金小樂・左", hp: 0, maxHp: 5000, alive: false },
+      { id: "right", name: "白金小樂・右", hp: 2400, maxHp: 5000, alive: true }
+    ],
+    targetEnemyId: "right",
+    selectedHands: { left: "rock", right: "paper" }
+  };
+
+  battle.restore(savedDualSnapshot);
+  assert.equal(battle.state.enemies[0].alive, false, "左側 Boss 應已擊敗");
+  assert.equal(battle.state.enemies[1].hp, 2400, "右側 Boss HP 應為 2400");
+  assert.equal(battle.state.targetEnemyId, "right", "目標應選中存活的右側 Boss");
+  assert.equal(battle.state.enemyHp, 2400, "Boss 總剩餘 HP 應為 2400");
+  battle.abandon();
+});
+
+test("BattleSystem restore: 正確還原自動刷關勝負統計與剩餘輪次", async () => {
+  const { EventBus } = await import("../src/js/core/EventBus.js");
+  const { GameStore } = await import("../src/js/core/GameStore.js");
+  const { BattleSystem } = await import("../src/js/systems/BattleSystem.js");
+
+  class MemoryPersistence {
+    constructor(data = null) { this.data = data; }
+    load() { return this.data; }
+    save(data) { this.data = structuredClone(data); }
+    clear() { this.data = null; }
+  }
+
+  const bus = new EventBus();
+  const persistence = new MemoryPersistence();
+  const store = new GameStore(bus, persistence);
+  const battle = new BattleSystem(bus, store);
+
+  const savedAutoSnapshot = {
+    stageId: 1,
+    round: 2,
+    playerHp: 100,
+    playerMp: 50,
+    enemyHp: 400,
+    autoBattle: {
+      active: true,
+      isPaused: false,
+      stageId: 1,
+      totalRounds: 10,
+      remainingRounds: 6,
+      wins: 4,
+      losses: 0
+    }
+  };
+
+  battle.restore(savedAutoSnapshot);
+  assert.equal(battle.autoBattle.active, true, "自動刷關應處於 active 狀態");
+  assert.equal(battle.autoBattle.remainingRounds, 6, "剩餘次數應還原為 6");
+  assert.equal(battle.autoBattle.wins, 4, "勝場應還原為 4");
+  assert.equal(battle.autoBattle.losses, 0, "敗場應還原為 0");
+  battle.abandon();
+});

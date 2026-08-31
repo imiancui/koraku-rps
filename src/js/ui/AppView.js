@@ -26,6 +26,7 @@ export class AppView {
     this.activeGrowthTab = "stats";
     this.activeGuideTab = "basics";
     this.activeShopTab = "potions";
+    this.activeShopFilter = "all";
     this.selectedGalleryItem = GALLERY_ITEMS[0].id;
     this.battleState = null;
     this.postState = null;
@@ -54,6 +55,19 @@ export class AppView {
     this.watermelonFrame = 0;
     this.floatingWatermelonFrame = 0;
     this.isWatermelonZoomed = false;
+
+    try {
+      if (typeof window !== "undefined" && window.localStorage) {
+        this.activeGrowthTab = window.localStorage.getItem("koraku_growth_tab") || "stats";
+        this.activeShopFilter = window.localStorage.getItem("koraku_shop_filter") || "all";
+        this.activeGuideTab = window.localStorage.getItem("koraku_guide_tab") || "basics";
+        this.activeShopTab = window.localStorage.getItem("koraku_shop_tab") || "potions";
+        this.selectedGalleryItem = window.localStorage.getItem("koraku_gallery_item") || GALLERY_ITEMS[0].id;
+        this.dojoQteStyle = window.localStorage.getItem("koraku_dojo_style") || "single";
+        this.dojoMode = window.localStorage.getItem("koraku_dojo_mode") || "1";
+        this.isWatermelonZoomed = window.localStorage.getItem("koraku_watermelon_zoomed") === "true";
+      }
+    } catch (_) {}
 
     // 裝置觸控能力探測（支援手機、平板 iPad/Android、觸控螢幕筆電）
     if (typeof window !== "undefined" && typeof document !== "undefined") {
@@ -165,26 +179,35 @@ export class AppView {
     let targetScreen = "home";
     try {
       const hashScreen = window.location.hash ? window.location.hash.replace(/^#/, "") : null;
-      targetScreen = hashScreen || sessionStorage.getItem("koraku_active_screen") || "home";
+      targetScreen = hashScreen || window.localStorage?.getItem("koraku_active_screen") || sessionStorage.getItem("koraku_active_screen") || "home";
     } catch (_) {}
 
     let activeBattle = null;
     let savedStageId = 1;
     try {
-      const savedBattle = sessionStorage.getItem("koraku_active_battle");
-      if (savedBattle) activeBattle = JSON.parse(savedBattle);
-      savedStageId = Number(sessionStorage.getItem("koraku_active_stage")) || activeBattle?.stageId || this.store.snapshot().records?.bestStage || 1;
+      const rawBattle = window.localStorage?.getItem("koraku_active_battle_state") || sessionStorage.getItem("koraku_active_battle_state") || sessionStorage.getItem("koraku_active_battle");
+      if (rawBattle) activeBattle = JSON.parse(rawBattle);
+      savedStageId = Number(window.localStorage?.getItem("koraku_active_stage") || sessionStorage.getItem("koraku_active_stage")) || activeBattle?.stage?.id || activeBattle?.stageId || this.store.snapshot().records?.bestStage || 1;
     } catch (_) {}
 
     if (targetScreen === "battle") {
-      const stageToRun = activeBattle?.stageId || savedStageId || 1;
       if (typeof window !== "undefined" && window.history) {
         window.history.replaceState({ screen: "battle" }, "", "#battle");
       }
-      if (activeBattle?.isAuto) {
-        this.startAutoBattle(stageToRun, activeBattle.remainingRounds || 10);
+      this.navigate("battle", { pushHistory: false });
+
+      if (activeBattle && activeBattle.active && (activeBattle.playerHp > 0) && (activeBattle.enemyHp > 0)) {
+        this.battle.restore(activeBattle);
       } else {
-        this.startStage(stageToRun);
+        const stageToRun = activeBattle?.stage?.id || activeBattle?.stageId || savedStageId || 1;
+        if (activeBattle?.isAuto || activeBattle?.autoBattle?.active) {
+          this.startAutoBattle(stageToRun, activeBattle?.autoBattle?.remainingRounds || activeBattle?.remainingRounds || 10);
+        } else {
+          this.startStage(stageToRun);
+        }
+      }
+      if (this.postBattle?.getWatermelonStock() > 0) {
+        this.postBattle.emitAutoWatermelon();
       }
     } else {
       if (typeof window !== "undefined" && window.history) {
@@ -530,11 +553,17 @@ export class AppView {
     this.bus.on("toast", (toast) => this.showToast(toast.message, toast.tone));
     this.bus.on("auto-battle:update", (info) => {
       try {
-        const activeBattleStr = sessionStorage.getItem("koraku_active_battle");
-        if (activeBattleStr) {
-          const activeBattle = JSON.parse(activeBattleStr);
-          activeBattle.remainingRounds = info.remainingRounds;
-          sessionStorage.setItem("koraku_active_battle", JSON.stringify(activeBattle));
+        const raw = window.localStorage?.getItem("koraku_active_battle_state") || sessionStorage.getItem("koraku_active_battle_state");
+        if (raw) {
+          const snapshot = JSON.parse(raw);
+          if (snapshot.autoBattle) {
+            snapshot.autoBattle.remainingRounds = info.remainingRounds;
+            snapshot.autoBattle.wins = info.wins;
+            snapshot.autoBattle.losses = info.losses;
+            snapshot.autoBattle.isPaused = Boolean(info.isPaused);
+            window.localStorage?.setItem("koraku_active_battle_state", JSON.stringify(snapshot));
+            sessionStorage.setItem("koraku_active_battle_state", JSON.stringify(snapshot));
+          }
         }
       } catch (_) {}
       const msg = info.won
@@ -547,6 +576,8 @@ export class AppView {
     });
     this.bus.on("auto-battle:finished", (info) => {
       try {
+        window.localStorage?.removeItem("koraku_active_battle_state");
+        sessionStorage.removeItem("koraku_active_battle_state");
         sessionStorage.removeItem("koraku_active_battle");
       } catch (_) {}
       this.hideFloatingWatermelon();
@@ -566,6 +597,8 @@ export class AppView {
     });
     this.bus.on("auto-battle:stopped", () => {
       try {
+        window.localStorage?.removeItem("koraku_active_battle_state");
+        sessionStorage.removeItem("koraku_active_battle_state");
         sessionStorage.removeItem("koraku_active_battle");
       } catch (_) {}
       this.hideFloatingWatermelon();
@@ -641,6 +674,9 @@ export class AppView {
     const dojoTabBtn = event.target.closest(".dojo-tab-btn[data-dojo-mode]");
     if (dojoTabBtn) {
       this.dojoMode = dojoTabBtn.dataset.dojoMode;
+      try {
+        window.localStorage?.setItem("koraku_dojo_mode", this.dojoMode);
+      } catch (_) {}
       document.querySelectorAll(".dojo-tab-btn[data-dojo-mode]").forEach((btn) => {
         btn.classList.toggle("is-active", btn.dataset.dojoMode === this.dojoMode);
       });
@@ -891,6 +927,9 @@ export class AppView {
     const growthTabBtn = event.target.closest("[data-growth-tab]");
     if (growthTabBtn) {
       this.activeGrowthTab = growthTabBtn.dataset.growthTab;
+      try {
+        window.localStorage?.setItem("koraku_growth_tab", this.activeGrowthTab);
+      } catch (_) {}
       document.querySelectorAll("[data-growth-tab]").forEach((btn) => {
         btn.classList.toggle("is-active", btn.dataset.growthTab === this.activeGrowthTab);
       });
@@ -902,6 +941,9 @@ export class AppView {
     const shopFilterBtn = event.target.closest("[data-shop-filter], [data-shop-tab]");
     if (shopFilterBtn) {
       this.activeShopFilter = shopFilterBtn.dataset.shopFilter || shopFilterBtn.dataset.shopTab;
+      try {
+        window.localStorage?.setItem("koraku_shop_filter", this.activeShopFilter);
+      } catch (_) {}
       document.querySelectorAll("[data-shop-filter], [data-shop-tab]").forEach((btn) => {
         const btnFilter = btn.dataset.shopFilter || btn.dataset.shopTab;
         btn.classList.toggle("is-active", btnFilter === this.activeShopFilter);
@@ -913,6 +955,9 @@ export class AppView {
     const guideTabBtn = event.target.closest("[data-guide-tab]");
     if (guideTabBtn) {
       this.activeGuideTab = guideTabBtn.dataset.guideTab;
+      try {
+        window.localStorage?.setItem("koraku_guide_tab", this.activeGuideTab);
+      } catch (_) {}
       document.querySelectorAll("[data-guide-tab]").forEach((btn) => {
         btn.classList.toggle("is-active", btn.dataset.guideTab === this.activeGuideTab);
       });
@@ -945,6 +990,9 @@ export class AppView {
     const galleryVariantBtn = event.target.closest("[data-gallery-variant]");
     if (galleryVariantBtn) {
       this.selectedGalleryItem = galleryVariantBtn.dataset.galleryVariant;
+      try {
+        window.localStorage?.setItem("koraku_gallery_item", this.selectedGalleryItem);
+      } catch (_) {}
       this.renderGallery(this.store.snapshot());
       return;
     }
@@ -2715,6 +2763,48 @@ export class AppView {
 
   renderBattle(state) {
     if (!state) return;
+    if (state.active && state.phase !== "ended" && state.phase !== "abandoned") {
+      try {
+        const battleSnapshot = {
+          stageId: state.stage?.id,
+          stage: state.stage,
+          active: state.active,
+          phase: state.phase,
+          round: state.round,
+          playerHp: state.playerHp,
+          playerMaxHp: state.playerMaxHp,
+          playerMp: state.playerMp,
+          playerMaxMp: state.playerMaxMp,
+          enemies: state.enemies,
+          targetEnemyId: state.targetEnemyId,
+          enemyHp: state.enemyHp,
+          enemyMaxHp: state.enemyMaxHp,
+          selectedHand: state.selectedHand,
+          selectedHands: state.selectedHands,
+          isEnemyFrozen: state.isEnemyFrozen,
+          frozenEnemyHand: state.frozenEnemyHand,
+          autoBattle: { ...(this.battle?.autoBattle || state.autoBattle) },
+          isAuto: Boolean((this.battle?.autoBattle || state.autoBattle)?.active),
+          battleStartTime: this.battle?.battleStartTime,
+          battleDamageDealt: this.battle?.battleDamageDealt,
+          battleDamageTaken: this.battle?.battleDamageTaken,
+          battleHpPotionUsed: this.battle?.battleHpPotionUsed,
+          battleMpPotionUsed: this.battle?.battleMpPotionUsed,
+          battleHpRestored: this.battle?.battleHpRestored,
+          battleMpRestored: this.battle?.battleMpRestored,
+          recentDamageLog: this.recentDamageLog
+        };
+        window.localStorage?.setItem("koraku_active_battle_state", JSON.stringify(battleSnapshot));
+        sessionStorage.setItem("koraku_active_battle_state", JSON.stringify(battleSnapshot));
+      } catch (_) {}
+    } else if (!state.active) {
+      try {
+        window.localStorage?.removeItem("koraku_active_battle_state");
+        sessionStorage.removeItem("koraku_active_battle_state");
+        sessionStorage.removeItem("koraku_active_battle");
+      } catch (_) {}
+    }
+
     const justRevealed = this.previousBattlePhase === "countdown" && state.phase === "reaction";
     this.previousBattlePhase = state.phase;
     this.battleState = state;

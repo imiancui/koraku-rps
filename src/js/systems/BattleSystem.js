@@ -223,6 +223,106 @@ export class BattleSystem {
     return this.start(stageId, { autoBattle: true, autoBattleRounds: rounds });
   }
 
+  restore(savedState) {
+    if (!savedState) return false;
+    const profile = this.store.snapshot();
+    const stageId = savedState.stage?.id || savedState.stageId || 1;
+    let stage = savedState.stage;
+    if (!stage || !stage.name) {
+      stage = STAGES.find((item) => item.id === Number(stageId)) || STAGES[0];
+    }
+
+    this.stopClocks();
+
+    if (savedState.autoBattle?.active) {
+      this.autoBattle = {
+        active: true,
+        isPaused: Boolean(savedState.autoBattle.isPaused),
+        stageId: Number(savedState.autoBattle.stageId || stageId),
+        totalRounds: Number(savedState.autoBattle.totalRounds || 10),
+        remainingRounds: Number(savedState.autoBattle.remainingRounds || 10),
+        wins: Number(savedState.autoBattle.wins || 0),
+        losses: Number(savedState.autoBattle.losses || 0)
+      };
+    } else {
+      this.autoBattle.active = false;
+      this.autoBattle.isPaused = false;
+      this.autoBattle.remainingRounds = 0;
+    }
+
+    this.battleStartTime = savedState.battleStartTime || Date.now();
+    this.battleDamageDealt = savedState.battleDamageDealt || 0;
+    this.battleDamageTaken = savedState.battleDamageTaken || 0;
+    this.battleHpPotionUsed = savedState.battleHpPotionUsed || 0;
+    this.battleMpPotionUsed = savedState.battleMpPotionUsed || 0;
+    this.battleHpRestored = savedState.battleHpRestored || 0;
+    this.battleMpRestored = savedState.battleMpRestored || 0;
+    this.battleMomoAttempts = savedState.battleMomoAttempts || 0;
+    this.battleMomoSuccesses = savedState.battleMomoSuccesses || 0;
+    this.battleMomoDamage = savedState.battleMomoDamage || 0;
+    this.battleMorphCount = savedState.battleMorphCount || 0;
+    this.battleMorphDamage = savedState.battleMorphDamage || 0;
+    this.battleQteHits = savedState.battleQteHits || 0;
+    this.battleQteTotal = savedState.battleQteTotal || 0;
+
+    const stats = profile.playerStats;
+    const hasDualHandSkill = Boolean(profile.profile?.skills?.dualHand > 0);
+
+    const enemies = savedState.enemies && savedState.enemies.length > 0
+      ? savedState.enemies.map((e) => ({
+          id: e.id,
+          name: e.name,
+          hp: Math.max(0, Number(e.hp ?? (stage.final ? 5000 : stage.enemyHp))),
+          maxHp: Number(e.maxHp ?? (stage.final ? 5000 : stage.enemyHp)),
+          alive: Number(e.hp ?? (stage.final ? 5000 : stage.enemyHp)) > 0
+        }))
+      : [{
+          id: "main",
+          name: stage.final ? "白金小樂" : "小樂",
+          hp: Math.max(0, Number(savedState.enemyHp ?? stage.enemyHp)),
+          maxHp: stage.enemyHp,
+          alive: Math.max(0, Number(savedState.enemyHp ?? stage.enemyHp)) > 0
+        }];
+
+    const totalEnemyHp = enemies.reduce((sum, e) => sum + (e.alive ? e.hp : 0), 0);
+    const totalEnemyMaxHp = enemies.reduce((sum, e) => sum + e.maxHp, 0);
+
+    const currentRound = Math.max(0, Number(savedState.round || 1) - 1);
+
+    this.state = {
+      active: true,
+      stage,
+      phase: "countdown",
+      round: currentRound,
+      playerHp: Math.min(stats.maxHp, Math.max(1, Number(savedState.playerHp ?? stats.maxHp))),
+      playerMaxHp: stats.maxHp,
+      playerMp: Math.min(stats.maxMp, Math.max(0, Number(savedState.playerMp ?? stats.maxMp))),
+      playerMaxMp: stats.maxMp,
+      playerDamage: stats.damage,
+      hasDualHandSkill,
+      enemies,
+      targetEnemyId: savedState.targetEnemyId || enemies.find((e) => e.alive)?.id || enemies[0]?.id || "main",
+      enemyHp: Math.max(1, totalEnemyHp),
+      enemyMaxHp: totalEnemyMaxHp,
+      selectedHand: savedState.selectedHand || "rock",
+      selectedHands: savedState.selectedHands || { left: "rock", right: "rock" },
+      opponentHand: null,
+      enemyWinningEmoji: null,
+      countdown: stage.roundSeconds || BATTLE_RULES.roundSeconds,
+      reactionRemaining: 0,
+      morphUsed: false,
+      morphActive: false,
+      isEnemyFrozen: Boolean(savedState.isEnemyFrozen),
+      frozenEnemyHand: savedState.frozenEnemyHand || null,
+      isPaused: Boolean(this.autoBattle.isPaused),
+      appearance: stage.final ? ASSETS.final : ASSETS.default
+    };
+
+    this.emitState();
+    this.scheduleRound();
+    return true;
+  }
+
   pauseAutoBattle() {
     if (!this.autoBattle.active || this.autoBattle.isPaused) return;
     this.autoBattle.isPaused = true;

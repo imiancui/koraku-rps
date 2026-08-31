@@ -4,7 +4,7 @@
   "use strict";
 
 // --- src/js/config/gameConfig.js ---
-const APP_VERSION = "0.0.11";
+const APP_VERSION = "0.0.12";
 
 const DOJO_CONFIG = Object.freeze({
   defaultHp: 10000,
@@ -508,6 +508,33 @@ const DEFAULT_LOCALE = "en";
 const LOCALE_STORAGE_KEY = "koraku-rps-locale";
 
 const CHANGELOG_DATA = [
+  {
+    version: "0.0.12",
+    date: "2026-08-31",
+    tag: "Full State Persistence Across Page Refresh & Auto-Battle Continuity",
+    changes: {
+      "zh-Hant": [
+        "【全頁面重新整理狀態保留】任何頁面（能力成長、緣側商店、狐娘圖鑑、修練道場、戰績紀錄等）在重新整理（F5 / 重新載入）後，100% 保持在最後停留位置，不產生畫面跳轉。",
+        "【子頁籤與篩選器持久化】能力成長的配點/技能樹頁籤、緣側商店的裝備/道具分類篩選、圖鑑立繪差分等設定即時儲存，重載後完美還原。",
+        "【戰鬥中與自動掛機無縫接續】手動戰鬥或自動刷關中重新整理時，精確保留玩家與 Boss 當前血量、魔力、回合數、自動掛機輪次勝負紀錄與切西瓜庫存累計亮燈，無縫接續戰鬥。"
+      ],
+      "zh-Hans": [
+        "【全页面重新整理状态保留】任何页面（能力成长、缘侧商店、狐娘图鉴、修炼道场、战绩纪录等）在重新整理（F5 / 重新载入）后，100% 保持在最后停留位置，不产生画面跳转。",
+        "【子标签与筛选器持久化】能力成长的配点/技能树标签、缘侧商店的装备/道具分类筛选、图鉴立绘差分等设定实时储存，重载后完美还原。",
+        "【战斗中与自动挂机无缝接续】手动战斗或自动刷关中重新整理时，精确保留玩家与 Boss 当前血量、魔力、回合数、自动挂机轮次胜负纪录与切西瓜库存累计亮灯，无缝接续战斗。"
+      ],
+      "en": [
+        "【Full Page State Persistence on Refresh】Refreshing the page (F5 / reload) from any screen (Growth, Shop, Gallery, Dojo, Records, etc.) preserves your exact location with zero disruptive screen jumps.",
+        "【Subtab & Filter Continuity】Growth tabs (Stats vs Skills), Shop category filters (Potions, Weapons, Armor, Accessories), and Gallery variant selections are automatically saved and restored.",
+        "【Seamless Battle & Auto-Battle Continuity】Refreshing during manual or auto-battles perfectly preserves player and boss HP/MP, current round, auto-battle progress/win-loss stats, and accumulated watermelon slices."
+      ],
+      "ja": [
+        "【リロード時の全画面状態維持】どの画面（能力成長、ショップ、図鑑、道場、戦績など）でページを再読み込み（F5）しても、画面遷移を起こさず最後にいた場所を100%保持。",
+        "【タブ・フィルター状態の永続化】能力成長のステータス/スキルタブ、ショップのカテゴリ絞り込み、図鑑の差分選択などが即座に保存され、リロード後も正確に復元。",
+        "【戦闘中・自動周回のシームレス再開】手動戦闘や自動周回中にリロードしても、プレイヤーとBossの現在HP/MP、ラウンド数、自動周回勝敗数、スイカ割りストック点灯数を完全保持して戦闘を続行。"
+      ]
+    }
+  },
   {
     version: "0.0.11",
     date: "2026-08-31",
@@ -5241,6 +5268,106 @@ class BattleSystem {
     return this.start(stageId, { autoBattle: true, autoBattleRounds: rounds });
   }
 
+  restore(savedState) {
+    if (!savedState) return false;
+    const profile = this.store.snapshot();
+    const stageId = savedState.stage?.id || savedState.stageId || 1;
+    let stage = savedState.stage;
+    if (!stage || !stage.name) {
+      stage = STAGES.find((item) => item.id === Number(stageId)) || STAGES[0];
+    }
+
+    this.stopClocks();
+
+    if (savedState.autoBattle?.active) {
+      this.autoBattle = {
+        active: true,
+        isPaused: Boolean(savedState.autoBattle.isPaused),
+        stageId: Number(savedState.autoBattle.stageId || stageId),
+        totalRounds: Number(savedState.autoBattle.totalRounds || 10),
+        remainingRounds: Number(savedState.autoBattle.remainingRounds || 10),
+        wins: Number(savedState.autoBattle.wins || 0),
+        losses: Number(savedState.autoBattle.losses || 0)
+      };
+    } else {
+      this.autoBattle.active = false;
+      this.autoBattle.isPaused = false;
+      this.autoBattle.remainingRounds = 0;
+    }
+
+    this.battleStartTime = savedState.battleStartTime || Date.now();
+    this.battleDamageDealt = savedState.battleDamageDealt || 0;
+    this.battleDamageTaken = savedState.battleDamageTaken || 0;
+    this.battleHpPotionUsed = savedState.battleHpPotionUsed || 0;
+    this.battleMpPotionUsed = savedState.battleMpPotionUsed || 0;
+    this.battleHpRestored = savedState.battleHpRestored || 0;
+    this.battleMpRestored = savedState.battleMpRestored || 0;
+    this.battleMomoAttempts = savedState.battleMomoAttempts || 0;
+    this.battleMomoSuccesses = savedState.battleMomoSuccesses || 0;
+    this.battleMomoDamage = savedState.battleMomoDamage || 0;
+    this.battleMorphCount = savedState.battleMorphCount || 0;
+    this.battleMorphDamage = savedState.battleMorphDamage || 0;
+    this.battleQteHits = savedState.battleQteHits || 0;
+    this.battleQteTotal = savedState.battleQteTotal || 0;
+
+    const stats = profile.playerStats;
+    const hasDualHandSkill = Boolean(profile.profile?.skills?.dualHand > 0);
+
+    const enemies = savedState.enemies && savedState.enemies.length > 0
+      ? savedState.enemies.map((e) => ({
+          id: e.id,
+          name: e.name,
+          hp: Math.max(0, Number(e.hp ?? (stage.final ? 5000 : stage.enemyHp))),
+          maxHp: Number(e.maxHp ?? (stage.final ? 5000 : stage.enemyHp)),
+          alive: Number(e.hp ?? (stage.final ? 5000 : stage.enemyHp)) > 0
+        }))
+      : [{
+          id: "main",
+          name: stage.final ? "白金小樂" : "小樂",
+          hp: Math.max(0, Number(savedState.enemyHp ?? stage.enemyHp)),
+          maxHp: stage.enemyHp,
+          alive: Math.max(0, Number(savedState.enemyHp ?? stage.enemyHp)) > 0
+        }];
+
+    const totalEnemyHp = enemies.reduce((sum, e) => sum + (e.alive ? e.hp : 0), 0);
+    const totalEnemyMaxHp = enemies.reduce((sum, e) => sum + e.maxHp, 0);
+
+    const currentRound = Math.max(0, Number(savedState.round || 1) - 1);
+
+    this.state = {
+      active: true,
+      stage,
+      phase: "countdown",
+      round: currentRound,
+      playerHp: Math.min(stats.maxHp, Math.max(1, Number(savedState.playerHp ?? stats.maxHp))),
+      playerMaxHp: stats.maxHp,
+      playerMp: Math.min(stats.maxMp, Math.max(0, Number(savedState.playerMp ?? stats.maxMp))),
+      playerMaxMp: stats.maxMp,
+      playerDamage: stats.damage,
+      hasDualHandSkill,
+      enemies,
+      targetEnemyId: savedState.targetEnemyId || enemies.find((e) => e.alive)?.id || enemies[0]?.id || "main",
+      enemyHp: Math.max(1, totalEnemyHp),
+      enemyMaxHp: totalEnemyMaxHp,
+      selectedHand: savedState.selectedHand || "rock",
+      selectedHands: savedState.selectedHands || { left: "rock", right: "rock" },
+      opponentHand: null,
+      enemyWinningEmoji: null,
+      countdown: stage.roundSeconds || BATTLE_RULES.roundSeconds,
+      reactionRemaining: 0,
+      morphUsed: false,
+      morphActive: false,
+      isEnemyFrozen: Boolean(savedState.isEnemyFrozen),
+      frozenEnemyHand: savedState.frozenEnemyHand || null,
+      isPaused: Boolean(this.autoBattle.isPaused),
+      appearance: stage.final ? ASSETS.final : ASSETS.default
+    };
+
+    this.emitState();
+    this.scheduleRound();
+    return true;
+  }
+
   pauseAutoBattle() {
     if (!this.autoBattle.active || this.autoBattle.isPaused) return;
     this.autoBattle.isPaused = true;
@@ -7517,6 +7644,7 @@ class AppView {
     this.activeGrowthTab = "stats";
     this.activeGuideTab = "basics";
     this.activeShopTab = "potions";
+    this.activeShopFilter = "all";
     this.selectedGalleryItem = GALLERY_ITEMS[0].id;
     this.battleState = null;
     this.postState = null;
@@ -7545,6 +7673,19 @@ class AppView {
     this.watermelonFrame = 0;
     this.floatingWatermelonFrame = 0;
     this.isWatermelonZoomed = false;
+
+    try {
+      if (typeof window !== "undefined" && window.localStorage) {
+        this.activeGrowthTab = window.localStorage.getItem("koraku_growth_tab") || "stats";
+        this.activeShopFilter = window.localStorage.getItem("koraku_shop_filter") || "all";
+        this.activeGuideTab = window.localStorage.getItem("koraku_guide_tab") || "basics";
+        this.activeShopTab = window.localStorage.getItem("koraku_shop_tab") || "potions";
+        this.selectedGalleryItem = window.localStorage.getItem("koraku_gallery_item") || GALLERY_ITEMS[0].id;
+        this.dojoQteStyle = window.localStorage.getItem("koraku_dojo_style") || "single";
+        this.dojoMode = window.localStorage.getItem("koraku_dojo_mode") || "1";
+        this.isWatermelonZoomed = window.localStorage.getItem("koraku_watermelon_zoomed") === "true";
+      }
+    } catch (_) {}
 
     // 裝置觸控能力探測（支援手機、平板 iPad/Android、觸控螢幕筆電）
     if (typeof window !== "undefined" && typeof document !== "undefined") {
@@ -7656,26 +7797,35 @@ class AppView {
     let targetScreen = "home";
     try {
       const hashScreen = window.location.hash ? window.location.hash.replace(/^#/, "") : null;
-      targetScreen = hashScreen || sessionStorage.getItem("koraku_active_screen") || "home";
+      targetScreen = hashScreen || window.localStorage?.getItem("koraku_active_screen") || sessionStorage.getItem("koraku_active_screen") || "home";
     } catch (_) {}
 
     let activeBattle = null;
     let savedStageId = 1;
     try {
-      const savedBattle = sessionStorage.getItem("koraku_active_battle");
-      if (savedBattle) activeBattle = JSON.parse(savedBattle);
-      savedStageId = Number(sessionStorage.getItem("koraku_active_stage")) || activeBattle?.stageId || this.store.snapshot().records?.bestStage || 1;
+      const rawBattle = window.localStorage?.getItem("koraku_active_battle_state") || sessionStorage.getItem("koraku_active_battle_state") || sessionStorage.getItem("koraku_active_battle");
+      if (rawBattle) activeBattle = JSON.parse(rawBattle);
+      savedStageId = Number(window.localStorage?.getItem("koraku_active_stage") || sessionStorage.getItem("koraku_active_stage")) || activeBattle?.stage?.id || activeBattle?.stageId || this.store.snapshot().records?.bestStage || 1;
     } catch (_) {}
 
     if (targetScreen === "battle") {
-      const stageToRun = activeBattle?.stageId || savedStageId || 1;
       if (typeof window !== "undefined" && window.history) {
         window.history.replaceState({ screen: "battle" }, "", "#battle");
       }
-      if (activeBattle?.isAuto) {
-        this.startAutoBattle(stageToRun, activeBattle.remainingRounds || 10);
+      this.navigate("battle", { pushHistory: false });
+
+      if (activeBattle && activeBattle.active && (activeBattle.playerHp > 0) && (activeBattle.enemyHp > 0)) {
+        this.battle.restore(activeBattle);
       } else {
-        this.startStage(stageToRun);
+        const stageToRun = activeBattle?.stage?.id || activeBattle?.stageId || savedStageId || 1;
+        if (activeBattle?.isAuto || activeBattle?.autoBattle?.active) {
+          this.startAutoBattle(stageToRun, activeBattle?.autoBattle?.remainingRounds || activeBattle?.remainingRounds || 10);
+        } else {
+          this.startStage(stageToRun);
+        }
+      }
+      if (this.postBattle?.getWatermelonStock() > 0) {
+        this.postBattle.emitAutoWatermelon();
       }
     } else {
       if (typeof window !== "undefined" && window.history) {
@@ -8021,11 +8171,17 @@ class AppView {
     this.bus.on("toast", (toast) => this.showToast(toast.message, toast.tone));
     this.bus.on("auto-battle:update", (info) => {
       try {
-        const activeBattleStr = sessionStorage.getItem("koraku_active_battle");
-        if (activeBattleStr) {
-          const activeBattle = JSON.parse(activeBattleStr);
-          activeBattle.remainingRounds = info.remainingRounds;
-          sessionStorage.setItem("koraku_active_battle", JSON.stringify(activeBattle));
+        const raw = window.localStorage?.getItem("koraku_active_battle_state") || sessionStorage.getItem("koraku_active_battle_state");
+        if (raw) {
+          const snapshot = JSON.parse(raw);
+          if (snapshot.autoBattle) {
+            snapshot.autoBattle.remainingRounds = info.remainingRounds;
+            snapshot.autoBattle.wins = info.wins;
+            snapshot.autoBattle.losses = info.losses;
+            snapshot.autoBattle.isPaused = Boolean(info.isPaused);
+            window.localStorage?.setItem("koraku_active_battle_state", JSON.stringify(snapshot));
+            sessionStorage.setItem("koraku_active_battle_state", JSON.stringify(snapshot));
+          }
         }
       } catch (_) {}
       const msg = info.won
@@ -8038,6 +8194,8 @@ class AppView {
     });
     this.bus.on("auto-battle:finished", (info) => {
       try {
+        window.localStorage?.removeItem("koraku_active_battle_state");
+        sessionStorage.removeItem("koraku_active_battle_state");
         sessionStorage.removeItem("koraku_active_battle");
       } catch (_) {}
       this.hideFloatingWatermelon();
@@ -8057,6 +8215,8 @@ class AppView {
     });
     this.bus.on("auto-battle:stopped", () => {
       try {
+        window.localStorage?.removeItem("koraku_active_battle_state");
+        sessionStorage.removeItem("koraku_active_battle_state");
         sessionStorage.removeItem("koraku_active_battle");
       } catch (_) {}
       this.hideFloatingWatermelon();
@@ -8132,6 +8292,9 @@ class AppView {
     const dojoTabBtn = event.target.closest(".dojo-tab-btn[data-dojo-mode]");
     if (dojoTabBtn) {
       this.dojoMode = dojoTabBtn.dataset.dojoMode;
+      try {
+        window.localStorage?.setItem("koraku_dojo_mode", this.dojoMode);
+      } catch (_) {}
       document.querySelectorAll(".dojo-tab-btn[data-dojo-mode]").forEach((btn) => {
         btn.classList.toggle("is-active", btn.dataset.dojoMode === this.dojoMode);
       });
@@ -8382,6 +8545,9 @@ class AppView {
     const growthTabBtn = event.target.closest("[data-growth-tab]");
     if (growthTabBtn) {
       this.activeGrowthTab = growthTabBtn.dataset.growthTab;
+      try {
+        window.localStorage?.setItem("koraku_growth_tab", this.activeGrowthTab);
+      } catch (_) {}
       document.querySelectorAll("[data-growth-tab]").forEach((btn) => {
         btn.classList.toggle("is-active", btn.dataset.growthTab === this.activeGrowthTab);
       });
@@ -8393,6 +8559,9 @@ class AppView {
     const shopFilterBtn = event.target.closest("[data-shop-filter], [data-shop-tab]");
     if (shopFilterBtn) {
       this.activeShopFilter = shopFilterBtn.dataset.shopFilter || shopFilterBtn.dataset.shopTab;
+      try {
+        window.localStorage?.setItem("koraku_shop_filter", this.activeShopFilter);
+      } catch (_) {}
       document.querySelectorAll("[data-shop-filter], [data-shop-tab]").forEach((btn) => {
         const btnFilter = btn.dataset.shopFilter || btn.dataset.shopTab;
         btn.classList.toggle("is-active", btnFilter === this.activeShopFilter);
@@ -8404,6 +8573,9 @@ class AppView {
     const guideTabBtn = event.target.closest("[data-guide-tab]");
     if (guideTabBtn) {
       this.activeGuideTab = guideTabBtn.dataset.guideTab;
+      try {
+        window.localStorage?.setItem("koraku_guide_tab", this.activeGuideTab);
+      } catch (_) {}
       document.querySelectorAll("[data-guide-tab]").forEach((btn) => {
         btn.classList.toggle("is-active", btn.dataset.guideTab === this.activeGuideTab);
       });
@@ -8436,6 +8608,9 @@ class AppView {
     const galleryVariantBtn = event.target.closest("[data-gallery-variant]");
     if (galleryVariantBtn) {
       this.selectedGalleryItem = galleryVariantBtn.dataset.galleryVariant;
+      try {
+        window.localStorage?.setItem("koraku_gallery_item", this.selectedGalleryItem);
+      } catch (_) {}
       this.renderGallery(this.store.snapshot());
       return;
     }
@@ -10206,6 +10381,48 @@ class AppView {
 
   renderBattle(state) {
     if (!state) return;
+    if (state.active && state.phase !== "ended" && state.phase !== "abandoned") {
+      try {
+        const battleSnapshot = {
+          stageId: state.stage?.id,
+          stage: state.stage,
+          active: state.active,
+          phase: state.phase,
+          round: state.round,
+          playerHp: state.playerHp,
+          playerMaxHp: state.playerMaxHp,
+          playerMp: state.playerMp,
+          playerMaxMp: state.playerMaxMp,
+          enemies: state.enemies,
+          targetEnemyId: state.targetEnemyId,
+          enemyHp: state.enemyHp,
+          enemyMaxHp: state.enemyMaxHp,
+          selectedHand: state.selectedHand,
+          selectedHands: state.selectedHands,
+          isEnemyFrozen: state.isEnemyFrozen,
+          frozenEnemyHand: state.frozenEnemyHand,
+          autoBattle: { ...(this.battle?.autoBattle || state.autoBattle) },
+          isAuto: Boolean((this.battle?.autoBattle || state.autoBattle)?.active),
+          battleStartTime: this.battle?.battleStartTime,
+          battleDamageDealt: this.battle?.battleDamageDealt,
+          battleDamageTaken: this.battle?.battleDamageTaken,
+          battleHpPotionUsed: this.battle?.battleHpPotionUsed,
+          battleMpPotionUsed: this.battle?.battleMpPotionUsed,
+          battleHpRestored: this.battle?.battleHpRestored,
+          battleMpRestored: this.battle?.battleMpRestored,
+          recentDamageLog: this.recentDamageLog
+        };
+        window.localStorage?.setItem("koraku_active_battle_state", JSON.stringify(battleSnapshot));
+        sessionStorage.setItem("koraku_active_battle_state", JSON.stringify(battleSnapshot));
+      } catch (_) {}
+    } else if (!state.active) {
+      try {
+        window.localStorage?.removeItem("koraku_active_battle_state");
+        sessionStorage.removeItem("koraku_active_battle_state");
+        sessionStorage.removeItem("koraku_active_battle");
+      } catch (_) {}
+    }
+
     const justRevealed = this.previousBattlePhase === "countdown" && state.phase === "reaction";
     this.previousBattlePhase = state.phase;
     this.battleState = state;
