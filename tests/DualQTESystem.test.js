@@ -210,3 +210,44 @@ test("QTE 與 DualQTESystem 成功輸入發送 qte:step 與 qteSuccess 音效，
   timers.clearAll();
 });
 
+test("DualQTESystem 在 maxErrors=1 時按錯單鍵立即標記該側 slot 失敗", () => {
+  const bus = new EventBus();
+  const timers = new TimerRegistry();
+  const dualQte = new DualQTESystem(bus, timers);
+
+  const slotFailures = [];
+  bus.on("qte:slot-failed", (data) => slotFailures.push(data));
+
+  dualQte.start({ length: 3, durationMs: 5000, maxErrors: 1 });
+  dualQte.left.sequence = ["up", "down", "left"];
+  dualQte.right.sequence = ["right", "up", "down"];
+
+  // Left inputs wrong key
+  const leftRes = dualQte.inputLeft("down"); // expected "up"
+  assert.equal(leftRes, false);
+  assert.equal(dualQte.left.errors, 1);
+  assert.equal(dualQte.left.completed, true);
+  assert.equal(dualQte.left.success, false);
+  assert.equal(slotFailures.length, 1);
+  assert.equal(slotFailures[0].slot, "left");
+
+  // QTE is still active for right slot
+  assert.equal(dualQte.active, true);
+
+  // Right inputs wrong key too
+  const rightRes = dualQte.inputRight("left"); // expected "right"
+  assert.equal(rightRes, false);
+  assert.equal(dualQte.right.errors, 1);
+  assert.equal(dualQte.right.completed, true);
+  assert.equal(dualQte.right.success, false);
+  assert.equal(slotFailures.length, 2);
+  assert.equal(slotFailures[1].slot, "right");
+
+  // Both failed, dual QTE should finish automatically
+  assert.equal(dualQte.active, false);
+
+  dualQte.stop();
+  timers.clearAll();
+});
+
+

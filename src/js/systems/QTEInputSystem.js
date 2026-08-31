@@ -142,15 +142,28 @@ export class QTEKeyboardInput {
       return { handled: true, direction: null };
     }
 
+    if (isDiagonalDirection(expectedDirection)) {
+      const chord = DIRECTION_CHORDS[expectedDirection];
+      if (!chord || !chord.includes(direction)) {
+        this.held.clear();
+        return { handled: true, direction };
+      }
+
+      this.held.delete(OPPOSITES[direction]);
+      this.held.add(direction);
+
+      const combined = combineCardinalDirections(this.held);
+      if (combined) {
+        return {
+          handled: true,
+          direction: combined
+        };
+      }
+      return { handled: true, direction: null };
+    }
+
     this.held.delete(OPPOSITES[direction]);
     this.held.add(direction);
-
-    if (isDiagonalDirection(expectedDirection)) {
-      return {
-        handled: true,
-        direction: combineCardinalDirections(this.held)
-      };
-    }
 
     return { handled: true, direction };
   }

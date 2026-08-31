@@ -112,6 +112,35 @@ test("右上 QTE 可由上與右依序按住完成", () => {
   assert.equal(keyboard.keyDown("d", "upRight").direction, "upRight");
 });
 
+test("斜向 QTE 目標按下無效正方向鍵時立即回傳錯誤方向供失敗判定", () => {
+  const keyboard = new QTEKeyboardInput();
+  // Target is upRight (needs up + right), pressing down or left should immediately return the wrong direction
+  assert.deepEqual(keyboard.keyDown("ArrowDown", "upRight"), {
+    handled: true,
+    direction: "down"
+  });
+  keyboard.reset();
+  assert.deepEqual(keyboard.keyDown("a", "upRight"), {
+    handled: true,
+    direction: "left"
+  });
+  keyboard.reset();
+  assert.deepEqual(keyboard.keyDown("s", "upRight"), {
+    handled: true,
+    direction: "down"
+  });
+  // Pressing first key correctly then pressing invalid second key
+  keyboard.reset();
+  assert.deepEqual(keyboard.keyDown("w", "upRight"), {
+    handled: true,
+    direction: null
+  });
+  assert.deepEqual(keyboard.keyDown("s", "upRight"), {
+    handled: true,
+    direction: "down"
+  });
+});
+
 test("猜拳猜輸時觸發 punch 音效與 player-rps-loss 效果", async () => {
   const { EventBus } = await import("../src/js/core/EventBus.js");
   const { GameStore } = await import("../src/js/core/GameStore.js");

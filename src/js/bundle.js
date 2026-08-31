@@ -4,7 +4,7 @@
   "use strict";
 
 // --- src/js/config/gameConfig.js ---
-const APP_VERSION = "0.0.8";
+const APP_VERSION = "0.0.9";
 
 const DOJO_CONFIG = Object.freeze({
   defaultHp: 10000,
@@ -508,6 +508,29 @@ const DEFAULT_LOCALE = "en";
 const LOCALE_STORAGE_KEY = "koraku-rps-locale";
 
 const CHANGELOG_DATA = [
+  {
+    version: "0.0.9",
+    date: "2026-08-31",
+    tag: "Dual QTE Desktop Layout & Input Failure Fix",
+    changes: {
+      "zh-Hant": [
+        "【桌面版雙 QTE 邊框自適應修復】修正第 4 關雙生破綻與修練場雙軌模式在桌面版寬螢幕下，7 鍵序列因方塊過大而超出卡片邊框的問題，全面實裝響應式等比縮放與邊界保護。",
+        "【QTE 斜向按錯判定失敗修復】修復目標為斜向方向時輸入無效正方向（如面對 ↗ 按下 ↓ 或 ←）被靜默忽略的漏洞，按錯立即扣減容錯次數並在達到上限時判定失敗。"
+      ],
+      "zh-Hans": [
+        "【桌面版双 QTE 边框自适应修复】修正第 4 关双生破绽与修练场双轨模式在桌面版宽屏幕下，7 键序列因方块过大而超出卡片边框的问题，全面实装响应式等比缩放与边界保护。",
+        "【QTE 斜向按错判定失败修复】修复目标为斜向方向时输入无效正方向（如面对 ↗ 按下 ↓ 或 ←）被静默忽略的漏洞，按错立即扣减容错次数并在达到上限时判定失败。"
+      ],
+      "en": [
+        "【Dual QTE Desktop Layout Fix】Resolved the 7-arrow sequence overflowing the dual-track card boundaries on desktop screens in Stage 4 and Dojo mode with adaptive responsive scaling and boundary containment.",
+        "【QTE Diagonal Input Failure Fix】Fixed a flaw where pressing invalid cardinal keys (e.g. pressing ↓ or ← on ↗) during diagonal QTE prompts was silently ignored; wrong inputs now correctly decrement error allowance and trigger failure when reaching max errors."
+      ],
+      "ja": [
+        "【PC版デュアルQTE枠外はみ出し修正】第4章の双生破綻および道場双軌モードにおいて、7キー連続入力時にアイコンがカード枠外へはみ出す問題を解消し、レスポンシブ縮小と境界保護を適用。",
+        "【QTE斜め入力時のミス判定修正】斜め入力（↗など）に対して無効な正方向キー（↓や←など）を押した際に判定が無視されていた不具合を修正し、ミス回数の加算および上限到達時の失敗判定を厳格化。"
+      ]
+    }
+  },
   {
     version: "0.0.8",
     date: "2026-08-31",
@@ -3613,15 +3636,28 @@ class QTEKeyboardInput {
       return { handled: true, direction: null };
     }
 
+    if (isDiagonalDirection(expectedDirection)) {
+      const chord = DIRECTION_CHORDS[expectedDirection];
+      if (!chord || !chord.includes(direction)) {
+        this.held.clear();
+        return { handled: true, direction };
+      }
+
+      this.held.delete(OPPOSITES[direction]);
+      this.held.add(direction);
+
+      const combined = combineCardinalDirections(this.held);
+      if (combined) {
+        return {
+          handled: true,
+          direction: combined
+        };
+      }
+      return { handled: true, direction: null };
+    }
+
     this.held.delete(OPPOSITES[direction]);
     this.held.add(direction);
-
-    if (isDiagonalDirection(expectedDirection)) {
-      return {
-        handled: true,
-        direction: combineCardinalDirections(this.held)
-      };
-    }
 
     return { handled: true, direction };
   }
