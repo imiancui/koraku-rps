@@ -4,7 +4,7 @@
   "use strict";
 
 // --- src/js/config/gameConfig.js ---
-const APP_VERSION = "0.0.3";
+const APP_VERSION = "0.0.4";
 
 const DOJO_CONFIG = Object.freeze({
   defaultHp: 10000,
@@ -1175,6 +1175,7 @@ const DICTIONARY = {
       }
     },
     dialogue: {
+      speakerPlayer: "旅人",
       speakerKohaku: "小樂",
       speakerPlatinumKohaku: "白金小樂",
       speakerNarrator: "旁白",
@@ -1683,6 +1684,7 @@ const DICTIONARY = {
       }
     },
     dialogue: {
+      speakerPlayer: "旅人",
       speakerKohaku: "小乐",
       speakerPlatinumKohaku: "白金小乐",
       speakerNarrator: "旁白",
@@ -2190,6 +2192,7 @@ const DICTIONARY = {
       }
     },
     dialogue: {
+      speakerPlayer: "Traveler",
       speakerKohaku: "Kohaku",
       speakerPlatinumKohaku: "Platinum Kohaku",
       speakerNarrator: "Narrator",
@@ -2698,6 +2701,7 @@ const DICTIONARY = {
       }
     },
     dialogue: {
+      speakerPlayer: "旅人",
       speakerKohaku: "コハク",
       speakerPlatinumKohaku: "白金コハク",
       speakerNarrator: "ナレーション",
@@ -5626,9 +5630,10 @@ class BattleSystem {
       type: "player-hit",
       amount: totalDamage
     });
+    const playerName = (I18n.t("dialogue.speakerPlayer") && !I18n.t("dialogue.speakerPlayer").includes(".")) ? I18n.t("dialogue.speakerPlayer") : "旅人";
     this.bus.emit("battle:damage-logged", {
       target: "player",
-      targetName: I18n.t("dialogue.speakerPlayer") || "旅人",
+      targetName: playerName,
       amount: totalDamage,
       source: "enemy_attack"
     });
@@ -5688,9 +5693,10 @@ class BattleSystem {
       type: "player-hit",
       amount: totalDamage
     });
+    const playerName = (I18n.t("dialogue.speakerPlayer") && !I18n.t("dialogue.speakerPlayer").includes(".")) ? I18n.t("dialogue.speakerPlayer") : "旅人";
     this.bus.emit("battle:damage-logged", {
       target: "player",
-      targetName: I18n.t("dialogue.speakerPlayer") || "旅人",
+      targetName: playerName,
       amount: totalDamage,
       source: "enemy_attack"
     });
@@ -10653,12 +10659,41 @@ class AppView {
       burst: "ui.damageSourceBurst",
       enemy_attack: "ui.damageSourceEnemy"
     };
-    const key = sourceKeyMap[source] || ("ui." + source);
-    let sourceText = I18n.t(key);
-    if (!sourceText || sourceText.startsWith("UI.") || sourceText.startsWith("BATTLE.")) {
-      sourceText = source || "";
+    const fallbackSources = {
+      rps_win: "猜拳獲勝",
+      morph: "變拳克制",
+      counter: "QTE反擊",
+      momo: "摸摸偷襲",
+      burn: "太刀灼燒",
+      reflect: "鏡光反彈",
+      burst: "重劍暴擊",
+      enemy_attack: "小樂出拳"
+    };
+
+    let sourceText = "";
+    if (sourceKeyMap[source]) {
+      const translated = I18n.t(sourceKeyMap[source]);
+      if (translated && !translated.includes(".")) sourceText = translated;
     }
-    const cleanTargetName = targetName || (target === "enemy" ? I18n.t("dialogue.speakerKohaku") || "小樂" : I18n.t("dialogue.speakerPlayer") || "旅人");
+    if (!sourceText) {
+      const translated = I18n.t("ui." + source);
+      if (translated && !translated.includes(".")) sourceText = translated;
+    }
+    if (!sourceText) {
+      sourceText = fallbackSources[source] || "攻擊";
+    }
+
+    let cleanTargetName = targetName;
+    if (!cleanTargetName || cleanTargetName.includes(".")) {
+      if (target === "enemy") {
+        const t = I18n.t("dialogue.speakerKohaku");
+        cleanTargetName = (t && !t.includes(".")) ? t : "小樂";
+      } else {
+        const t = I18n.t("dialogue.speakerPlayer");
+        cleanTargetName = (t && !t.includes(".")) ? t : "旅人";
+      }
+    }
+
     const entry = {
       id: Date.now() + Math.random(),
       target,
@@ -10677,7 +10712,7 @@ class AppView {
     if (logList) {
       logList.innerHTML = this.recentDamageLog.map((item) => `
         <div class="damage-log-entry ${item.isEnemyHit ? "is-enemy-hit" : "is-player-hit"}">
-          <span class="damage-log-source" title="${item.targetName} [${item.sourceText}]">${item.targetName}・${item.sourceText}</span>
+          <span class="damage-log-source" title="${item.targetName}【${item.sourceText}】">${item.targetName}【${item.sourceText}】</span>
           <span class="damage-log-amount">−${item.amount}</span>
         </div>
       `).join("");

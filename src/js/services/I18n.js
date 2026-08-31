@@ -688,6 +688,7 @@ const DICTIONARY = {
       }
     },
     dialogue: {
+      speakerPlayer: "旅人",
       speakerKohaku: "小樂",
       speakerPlatinumKohaku: "白金小樂",
       speakerNarrator: "旁白",
@@ -1196,6 +1197,7 @@ const DICTIONARY = {
       }
     },
     dialogue: {
+      speakerPlayer: "旅人",
       speakerKohaku: "小乐",
       speakerPlatinumKohaku: "白金小乐",
       speakerNarrator: "旁白",
@@ -1703,6 +1705,7 @@ const DICTIONARY = {
       }
     },
     dialogue: {
+      speakerPlayer: "Traveler",
       speakerKohaku: "Kohaku",
       speakerPlatinumKohaku: "Platinum Kohaku",
       speakerNarrator: "Narrator",
@@ -2211,6 +2214,7 @@ const DICTIONARY = {
       }
     },
     dialogue: {
+      speakerPlayer: "旅人",
       speakerKohaku: "コハク",
       speakerPlatinumKohaku: "白金コハク",
       speakerNarrator: "ナレーション",

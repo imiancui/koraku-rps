@@ -993,9 +993,10 @@ export class BattleSystem {
       type: "player-hit",
       amount: totalDamage
     });
+    const playerName = (I18n.t("dialogue.speakerPlayer") && !I18n.t("dialogue.speakerPlayer").includes(".")) ? I18n.t("dialogue.speakerPlayer") : "旅人";
     this.bus.emit("battle:damage-logged", {
       target: "player",
-      targetName: I18n.t("dialogue.speakerPlayer") || "旅人",
+      targetName: playerName,
       amount: totalDamage,
       source: "enemy_attack"
     });
@@ -1055,9 +1056,10 @@ export class BattleSystem {
       type: "player-hit",
       amount: totalDamage
     });
+    const playerName = (I18n.t("dialogue.speakerPlayer") && !I18n.t("dialogue.speakerPlayer").includes(".")) ? I18n.t("dialogue.speakerPlayer") : "旅人";
     this.bus.emit("battle:damage-logged", {
       target: "player",
-      targetName: I18n.t("dialogue.speakerPlayer") || "旅人",
+      targetName: playerName,
       amount: totalDamage,
       source: "enemy_attack"
     });
