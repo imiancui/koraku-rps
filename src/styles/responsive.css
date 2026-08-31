@@ -1546,8 +1546,55 @@
    Tablet & Touchscreen Device Support (iPad / Android Tablets / Surface)
    -------------------------------------------------------------------------- */
 html.has-touch .qte-pad,
-body.has-touch .qte-pad,
-@media (pointer: coarse) {
+body.has-touch .qte-pad {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 8px !important;
+  width: min(90vw, 320px) !important;
+  margin: 14px auto 8px !important;
+}
+
+html.has-touch .qte-pad button,
+body.has-touch .qte-pad button {
+  height: 52px !important;
+  min-height: 52px !important;
+  font-size: 22px !important;
+  border-radius: 6px !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+}
+
+html.has-touch .qte-pad button .qte-dir-svg,
+body.has-touch .qte-pad button .qte-dir-svg {
+  width: 24px !important;
+  height: 24px !important;
+}
+
+html.has-touch .dual-qte-touch-controls,
+body.has-touch .dual-qte-touch-controls {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: flex-end !important;
+  gap: 12px !important;
+  width: 100% !important;
+  margin-top: 12px !important;
+}
+
+html.has-touch .is-dual-touch-pad,
+body.has-touch .is-dual-touch-pad {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 5px !important;
+}
+
+html.has-touch .is-dual-touch-pad button,
+body.has-touch .is-dual-touch-pad button {
+  height: 44px !important;
+  min-height: 44px !important;
+}
+
+@media (pointer: coarse), (any-pointer: coarse) {
   .qte-pad {
     display: grid !important;
     grid-template-columns: repeat(3, 1fr) !important;
@@ -1590,13 +1637,10 @@ body.has-touch .qte-pad,
     height: 44px !important;
     min-height: 44px !important;
   }
+}
 
-  .keyboard-only {
-    display: none !important;
-  }
-
-  .mobile-only {
-    display: inline-flex !important;
-  }
+html.has-physical-keyboard .keyboard-only,
+body.has-physical-keyboard .keyboard-only {
+  display: inline !important;
 }
 

@@ -9,6 +9,7 @@ import {
 import {
   combineCardinalDirections,
   directionFromKey,
+  directionFromSwipe,
   QTEKeyboardInput
 } from "../src/js/systems/QTEInputSystem.js";
 
@@ -139,6 +140,22 @@ test("斜向 QTE 目標按下無效正方向鍵時立即回傳錯誤方向供失
     handled: true,
     direction: "down"
   });
+});
+
+test("手指滑動 directionFromSwipe 正確識別 8 方向與最小距離閾值", () => {
+  // Distance threshold check
+  assert.equal(directionFromSwipe(10, 5, 24), null);
+  assert.equal(directionFromSwipe(0, 0, 24), null);
+
+  // 8 Directions with >= 24px displacement
+  assert.equal(directionFromSwipe(50, 0, 24), "right");
+  assert.equal(directionFromSwipe(50, 50, 24), "downRight");
+  assert.equal(directionFromSwipe(0, 50, 24), "down");
+  assert.equal(directionFromSwipe(-50, 50, 24), "downLeft");
+  assert.equal(directionFromSwipe(-50, 0, 24), "left");
+  assert.equal(directionFromSwipe(-50, -50, 24), "upLeft");
+  assert.equal(directionFromSwipe(0, -50, 24), "up");
+  assert.equal(directionFromSwipe(50, -50, 24), "upRight");
 });
 
 test("猜拳猜輸時觸發 punch 音效與 player-rps-loss 效果", async () => {

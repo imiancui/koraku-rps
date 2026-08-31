@@ -5,6 +5,7 @@ import { QTESystem, DualQTESystem } from "../systems/QTESystem.js";
 import {
   arrowDirectionFromKey,
   directionFromKey,
+  directionFromSwipe,
   getDirectionChord,
   QTEKeyboardInput,
   wasdDirectionFromKey
@@ -56,7 +57,7 @@ export class AppView {
 
     // 裝置觸控能力探測（支援手機、平板 iPad/Android、觸控螢幕筆電）
     if (typeof window !== "undefined" && typeof document !== "undefined") {
-      const isTouchDevice = ("ontouchstart" in window) || (navigator.maxTouchPoints > 0) || (window.matchMedia && window.matchMedia("(pointer: coarse)").matches);
+      const isTouchDevice = ("ontouchstart" in window) || (navigator.maxTouchPoints > 0) || (window.matchMedia && (window.matchMedia("(pointer: coarse)").matches || window.matchMedia("(any-pointer: coarse)").matches));
       if (isTouchDevice) {
         document.documentElement.classList.add("has-touch");
         document.body.classList.add("has-touch");
@@ -64,16 +65,13 @@ export class AppView {
       const enableTouch = () => {
         document.documentElement.classList.add("has-touch");
         document.body.classList.add("has-touch");
-        window.removeEventListener("touchstart", enableTouch);
-        window.removeEventListener("pointerdown", onPointer);
       };
-      const onPointer = (e) => {
+      window.addEventListener("touchstart", enableTouch, { passive: true });
+      window.addEventListener("pointerdown", (e) => {
         if (e.pointerType === "touch" || e.pointerType === "pen") {
           enableTouch();
         }
-      };
-      window.addEventListener("touchstart", enableTouch, { passive: true, once: true });
-      window.addEventListener("pointerdown", onPointer, { passive: true });
+      }, { passive: true });
     }
 
     this.cacheElements();
@@ -285,6 +283,128 @@ export class AppView {
     window.addEventListener("pointerdown", handleQtePointer, { passive: false });
     if (typeof window !== "undefined" && !window.PointerEvent) {
       window.addEventListener("touchstart", handleQtePointer, { passive: false });
+    }
+
+    // QTE 8-Direction Swipe Gesture Recognition (Mobile / Tablet Touch Support)
+    const activeQtePointers = new Map();
+
+    const onQtePointerDown = (event) => {
+      const isBattleQte = Boolean(this.battleState?.active && this.battleState.phase === "qte" && this.qteOverlay?.classList.contains("is-active"));
+      const isDojoQte = Boolean(this.dojoQteActive && (this.dojoQteSystem?.active || this.dojoDualQteSystem?.active));
+      if (!isBattleQte && !isDojoQte) return;
+
+      const pointerId = event.pointerId ?? (event.identifier ?? 0);
+      const clientX = event.clientX ?? event.touches?.[0]?.clientX ?? 0;
+      const clientY = event.clientY ?? event.touches?.[0]?.clientY ?? 0;
+      const isDual = isBattleQte ? (this.qteState?.mode === "dual") : (this.dojoQteStyle === "dual");
+      let slot = null;
+      if (isDual) {
+        const leftEl = event.target?.closest ? event.target.closest("#dual-qte-slot-left, #touch-pad-left, #dojo-dual-slot-left") : null;
+        const rightEl = event.target?.closest ? event.target.closest("#dual-qte-slot-right, #touch-pad-right, #dojo-dual-slot-right") : null;
+        if (leftEl) slot = "left";
+        else if (rightEl) slot = "right";
+        else slot = clientX < (window.innerWidth / 2) ? "left" : "right";
+      }
+
+      activeQtePointers.set(pointerId, {
+        startX: clientX,
+        startY: clientY,
+        startTime: performance.now(),
+        slot,
+        isDual,
+        isBattleQte,
+        isDojoQte,
+        triggered: false
+      });
+    };
+
+    const onQtePointerMove = (event) => {
+      const pointerId = event.pointerId ?? (event.identifier ?? 0);
+      const track = activeQtePointers.get(pointerId);
+      if (!track) return;
+
+      const isBattleQte = Boolean(this.battleState?.active && this.battleState.phase === "qte" && this.qteOverlay?.classList.contains("is-active"));
+      const isDojoQte = Boolean(this.dojoQteActive && (this.dojoQteSystem?.active || this.dojoDualQteSystem?.active));
+      if (!isBattleQte && !isDojoQte) {
+        activeQtePointers.delete(pointerId);
+        return;
+      }
+
+      const clientX = event.clientX ?? event.touches?.[0]?.clientX ?? 0;
+      const clientY = event.clientY ?? event.touches?.[0]?.clientY ?? 0;
+      const dx = clientX - track.startX;
+      const dy = clientY - track.startY;
+      const dir = directionFromSwipe(dx, dy, 26);
+      if (dir) {
+        if (event.cancelable) event.preventDefault();
+        track.startX = clientX;
+        track.startY = clientY;
+        track.triggered = true;
+
+        if (track.isBattleQte) {
+          if (track.isDual) {
+            this.battle.inputQte(dir, track.slot);
+            if (track.slot === "left") this.leftQteKeyboard.reset();
+            if (track.slot === "right") this.rightQteKeyboard.reset();
+          } else {
+            this.qteKeyboard.reset();
+            this.battle.inputQte(dir);
+          }
+          this.renderHeldQteDirections();
+        } else if (track.isDojoQte) {
+          if (track.isDual && this.dojoDualQteSystem) {
+            this.dojoDualQteSystem.input(dir, track.slot);
+          } else if (this.dojoQteSystem) {
+            this.dojoQteSystem.input(dir);
+          }
+        }
+      }
+    };
+
+    const onQtePointerUp = (event) => {
+      const pointerId = event.pointerId ?? (event.changedTouches?.[0]?.identifier ?? 0);
+      const track = activeQtePointers.get(pointerId);
+      if (!track) return;
+
+      if (!track.triggered) {
+        const clientX = event.clientX ?? event.changedTouches?.[0]?.clientX ?? 0;
+        const clientY = event.clientY ?? event.changedTouches?.[0]?.clientY ?? 0;
+        const dx = clientX - track.startX;
+        const dy = clientY - track.startY;
+        const dir = directionFromSwipe(dx, dy, 18);
+        if (dir) {
+          if (track.isBattleQte) {
+            if (track.isDual) {
+              this.battle.inputQte(dir, track.slot);
+              if (track.slot === "left") this.leftQteKeyboard.reset();
+              if (track.slot === "right") this.rightQteKeyboard.reset();
+            } else {
+              this.qteKeyboard.reset();
+              this.battle.inputQte(dir);
+            }
+            this.renderHeldQteDirections();
+          } else if (track.isDojoQte) {
+            if (track.isDual && this.dojoDualQteSystem) {
+              this.dojoDualQteSystem.input(dir, track.slot);
+            } else if (this.dojoQteSystem) {
+              this.dojoQteSystem.input(dir);
+            }
+          }
+        }
+      }
+      activeQtePointers.delete(pointerId);
+    };
+
+    window.addEventListener("pointerdown", onQtePointerDown, { passive: true });
+    window.addEventListener("pointermove", onQtePointerMove, { passive: false });
+    window.addEventListener("pointerup", onQtePointerUp, { passive: true });
+    window.addEventListener("pointercancel", onQtePointerUp, { passive: true });
+
+    if (typeof window !== "undefined" && !window.PointerEvent) {
+      window.addEventListener("touchstart", onQtePointerDown, { passive: true });
+      window.addEventListener("touchmove", onQtePointerMove, { passive: false });
+      window.addEventListener("touchend", onQtePointerUp, { passive: true });
+      window.addEventListener("touchcancel", onQtePointerUp, { passive: true });
     }
 
     document.addEventListener("click", (event) => this.handleClick(event));
@@ -963,6 +1083,11 @@ export class AppView {
   }
 
   handleKeydown(event) {
+    if (typeof document !== "undefined") {
+      document.documentElement.classList.add("has-physical-keyboard");
+      if (document.body) document.body.classList.add("has-physical-keyboard");
+    }
+
     if (event.key === "Escape" && this.changelogModal && !this.changelogModal.hidden) {
       this.closeChangelogModal();
       return;

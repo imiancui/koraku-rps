@@ -2139,8 +2139,11 @@ img.is-silhouette {
 }
 
 html.has-touch .qte-pad,
-body.has-touch .qte-pad,
-@media (pointer: coarse) {
+body.has-touch .qte-pad {
+  display: grid !important;
+}
+
+@media (pointer: coarse), (any-pointer: coarse) {
   .qte-pad {
     display: grid !important;
   }
@@ -2308,8 +2311,15 @@ body.has-touch .qte-pad,
 }
 
 html.has-touch .dual-qte-touch-controls,
-body.has-touch .dual-qte-touch-controls,
-@media (pointer: coarse) {
+body.has-touch .dual-qte-touch-controls {
+  display: flex !important;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+  width: 100%;
+}
+
+@media (pointer: coarse), (any-pointer: coarse) {
   .dual-qte-touch-controls {
     display: flex !important;
     justify-content: space-between;

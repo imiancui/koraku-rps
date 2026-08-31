@@ -114,6 +114,21 @@ export function combineCardinalDirections(directions) {
   })?.[0] || null;
 }
 
+export function directionFromSwipe(dx, dy, minDistance = 24) {
+  const distance = Math.hypot(dx, dy);
+  if (distance < minDistance) return null;
+  const deg = (Math.atan2(dy, dx) * 180) / Math.PI; // Range: -180 to 180
+  if (deg >= -22.5 && deg < 22.5) return "right";
+  if (deg >= 22.5 && deg < 67.5) return "downRight";
+  if (deg >= 67.5 && deg < 112.5) return "down";
+  if (deg >= 112.5 && deg < 157.5) return "downLeft";
+  if (deg >= 157.5 || deg < -157.5) return "left";
+  if (deg >= -157.5 && deg < -112.5) return "upLeft";
+  if (deg >= -112.5 && deg < -67.5) return "up";
+  if (deg >= -67.5 && deg < -22.5) return "upRight";
+  return null;
+}
+
 export class QTEKeyboardInput {
   constructor(mapper = directionFromKey) {
     this.mapper = mapper;
