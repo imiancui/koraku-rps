@@ -573,6 +573,7 @@ const DICTIONARY = {
       importSeedPlaceholder: "在此貼上存檔種子碼（如 KORAKU1_...）",
       btnImportSaveSeed: "載入並套用種子碼",
       confirmImportSeed: "載入此種子碼將會覆蓋本裝置當前的存檔進度，確定要載入嗎？",
+      confirmAbandonBattle: "現在撤退將不會得到星砂或經驗，確定離開嗎？",
       toastImportSuccess: "存檔種子碼已成功載入並套用！",
       toastImportFailed: "無效或損毀的存檔種子碼，請檢查是否複製完整。",
       toastSeedEmpty: "請先輸入或貼上存檔種子碼。",
@@ -1263,6 +1264,7 @@ const DICTIONARY = {
       importSeedPlaceholder: "在此粘贴存档种子码（如 KORAKU1_...）",
       btnImportSaveSeed: "加载并应用种子码",
       confirmImportSeed: "加载此种子码将会覆盖本设备当前的存档进度，确定要加载吗？",
+      confirmAbandonBattle: "现在撤退将不会得到星砂或经验，确定离开吗？",
       toastImportSuccess: "存档种子码已成功加载并应用！",
       toastImportFailed: "无效或损坏的存档种子码，请检查是否完整复制。",
       toastSeedEmpty: "请先输入或粘贴存档种子码。",
@@ -1769,6 +1771,7 @@ const DICTIONARY = {
       importSeedPlaceholder: "Paste save seed code here (e.g. KORAKU1_...)",
       btnImportSaveSeed: "Load & Apply Seed Code",
       confirmImportSeed: "Loading this seed code will overwrite your current save progress on this device. Do you want to proceed?",
+      confirmAbandonBattle: "Retreating now will forfeit all star dust and XP. Are you sure you want to leave?",
       toastImportSuccess: "Save seed code successfully loaded and applied!",
       toastImportFailed: "Invalid or corrupted save seed code. Please check that you copied the complete text.",
       toastSeedEmpty: "Please enter or paste a save seed code first.",
@@ -2276,6 +2279,7 @@ const DICTIONARY = {
       importSeedPlaceholder: "ここにセーブシードを貼り付け（例: KORAKU1_...）",
       btnImportSaveSeed: "シードを読み込んで適用",
       confirmImportSeed: "このシードを読み込むと現在の端末の進行データが上書きされます。適用しますか？",
+      confirmAbandonBattle: "今撤退すると星砂や経験値を獲得できません。本当に離脱しますか？",
       toastImportSuccess: "セーブシードが正常に読み込まれ、適用されました！",
       toastImportFailed: "無効または破損したセーブシードです。コピー内容を確認してください。",
       toastSeedEmpty: "セーブシードを入力または貼り付けてください。",
@@ -8291,11 +8295,15 @@ class AppView {
       this.postBattle?.closeAutoWatermelon?.();
       this.battleArena?.classList.remove("is-settlement");
       if (this.battleState?.active) {
-        const confirmed = window.confirm("現在撤退將不會得到星砂或經驗，確定離開嗎？");
-        if (!confirmed) return;
+        const isDojo = Boolean(this.battleState.stage?.isDojo);
+        if (!isDojo) {
+          const promptText = I18n.t("ui.confirmAbandonBattle") || "現在撤退將不會得到星砂或經驗，確定離開嗎？";
+          const confirmed = window.confirm(promptText);
+          if (!confirmed) return;
+        }
         this.battle.stopAutoBattle();
         this.battle.abandon();
-      } else if (this.battle.autoBattle.active) {
+      } else if (this.battle.autoBattle?.active) {
         this.battle.stopAutoBattle();
       }
     }

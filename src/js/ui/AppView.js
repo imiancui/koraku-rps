@@ -1245,11 +1245,15 @@ export class AppView {
       this.postBattle?.closeAutoWatermelon?.();
       this.battleArena?.classList.remove("is-settlement");
       if (this.battleState?.active) {
-        const confirmed = window.confirm("現在撤退將不會得到星砂或經驗，確定離開嗎？");
-        if (!confirmed) return;
+        const isDojo = Boolean(this.battleState.stage?.isDojo);
+        if (!isDojo) {
+          const promptText = I18n.t("ui.confirmAbandonBattle") || "現在撤退將不會得到星砂或經驗，確定離開嗎？";
+          const confirmed = window.confirm(promptText);
+          if (!confirmed) return;
+        }
         this.battle.stopAutoBattle();
         this.battle.abandon();
-      } else if (this.battle.autoBattle.active) {
+      } else if (this.battle.autoBattle?.active) {
         this.battle.stopAutoBattle();
       }
     }
