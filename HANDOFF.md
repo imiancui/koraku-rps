@@ -2,7 +2,7 @@
 
 > 文件用途：AI 代理人與開發者快速上手、架構交接與開發合約指引  
 > 專案根目錄：`D:\game-dev\New-game-project-4`  
-> 當前版本：`v0.0.12`（顯示於首頁頁腳最左側 `0.0.12`，自最後一位遞增，每 100 個版本進一位：`0.0.100` -> `0.1.0`）  
+> 當前版本：`v0.0.13`（顯示於首頁頁腳最左側 `0.0.13`，自最後一位遞增，每 100 個版本進一位：`0.0.100` -> `0.1.0`）  
 > 最新更新日期：2026-08-31  
 > 基準規範：`OPENSPEC.md` 與 `AGENTS.md`  
 > 測試狀態：`npm test` 107/107 全部通過 (100% Pass)
@@ -225,6 +225,15 @@ npm run specs:excel
 - **戰鬥與自動掛機無縫接續核心 (`BattleSystem.prototype.restore`)**：
   - 手動戰鬥或自動刷關時，即時將包含玩家 HP/MP、Boss HP、雙小樂存活狀態、當前回合、自動刷關輪次與勝負場次的快照寫入持久化快照。
   - 重新整理時由 `BattleSystem.prototype.restore` 精準還原數據並接續當前進度，切西瓜庫存累計亮燈與浮動小遊戲無縫同步。
+
+### 5.13 戰鬥畫面 RWD 精確校準 (v0.0.13 Updates)
+- **平板直向立繪基準線調高 (Standee Elevation)**：
+  - 針對 iPad 直向（834x1194 / 810x1080 / 768x1024）等高直向螢幕，新增 `@media (min-width: 601px) and (max-width: 1024px) and (orientation: portrait)`，將立繪基準線調高至 `bottom: clamp(160px, 22vh, 320px)`，消除中央留白發空，小樂大氣居中傲立。
+- **橫向對話框置中幾何修復 (Dialogue Box Centering)**：
+  - 徹底修復短螢幕/橫向查詢中 `.avg-dialogue` 同時設定 `left: 14px; right: 14px;` 與 `transform: translateX(-50%)` 疊加導致對話框向左偏離螢幕 50% 造成左半邊裁切的 Bug，恢復左右對稱置中。
+- **橫向猜拳儀表板與立繪安全避讓 (Round Oracle Facial Clearance)**：
+  - 緊湊優化橫向模式下回合儀表板尺寸與頂距（`top: clamp(62px, 8.5vh, 74px); width: min(40vw, 390px); padding: 6px 14px 8px;`），並將橫向立繪定位至 `left: 54%`，確保小樂面部、五官與狐耳 100% 完整顯露，絕無圖層遮擋。
+
 
 
 

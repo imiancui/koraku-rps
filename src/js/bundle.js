@@ -4,7 +4,7 @@
   "use strict";
 
 // --- src/js/config/gameConfig.js ---
-const APP_VERSION = "0.0.12";
+const APP_VERSION = "0.0.13";
 
 const DOJO_CONFIG = Object.freeze({
   defaultHp: 10000,
@@ -508,6 +508,33 @@ const DEFAULT_LOCALE = "en";
 const LOCALE_STORAGE_KEY = "koraku-rps-locale";
 
 const CHANGELOG_DATA = [
+  {
+    version: "0.0.13",
+    date: "2026-08-31",
+    tag: "Battle RWD Calibration: Portrait Standee Elevation & Landscape Dialogue Centering",
+    changes: {
+      "zh-Hant": [
+        "【平板直向立繪高度抬升】修復 iPad 直向（834x1194 等）模式下小樂立繪過度沉底的問題，基準線調高至中央黃金分割點，消除中央大面積留白發空。",
+        "【橫向對話框置中與尺寸修復】徹底修復橫向與短螢幕模式下對話框向左偏離螢幕 50% 造成裁切的排版 Bug，保持左右對稱置中且文字舒適排版。",
+        "【猜拳儀表板安全避讓小樂面部】緊湊優化橫向模式下回合儀表板尺寸與立繪定位，確保小樂面部、五官與狐耳 100% 完整顯露，無任何圖層遮擋。"
+      ],
+      "zh-Hans": [
+        "【平板直向立绘高度抬升】修复 iPad 直向（834x1194 等）模式下小乐立绘过度沉底的问题，基准线调高至中央黄金分割点，消除中央大面积留白发空。",
+        "【横向对话框居中与尺寸修复】彻底修复横向与短屏幕模式下对话框向左偏离屏幕 50% 造成裁切的排版 Bug，保持左右对称居中且文字舒适排版。",
+        "【猜拳仪表板安全避让小乐面部】紧凑优化横向模式下回合仪表板尺寸与立绘定位，确保小乐面部、五官与狐耳 100% 完整显露，无任何图层遮挡。"
+      ],
+      "en": [
+        "【Tablet Portrait Standee Elevation】Elevated Little Raku's sprite baseline on portrait tablets (iPad 834x1194, etc.) to the central golden ratio, eliminating empty vertical gaps.",
+        "【Landscape Dialogue Box Centering Fix】Fixed a critical layout bug where the dialogue box shifted 50% off-screen to the left on landscape/compact screens; now perfectly centered and symmetrical.",
+        "【Round Oracle Facial Clearance】Streamlined the round oracle card and adjusted landscape standee placement to ensure Little Raku's face, ears, and expressions are 100% visible with zero overlay obstruction."
+      ],
+      "ja": [
+        "【タブレット縦向き立ち絵の高さ引き上げ】iPad縦向き（834x1194など）で小楽の立ち絵が下に沈みすぎて中央に余白ができていた問題を修正し、画面中央の黄金比へ引き上げ。",
+        "【横向き会話ウィンドウ中央揃え修復】横向き・短画面環境で会話枠が左へ50%ズレて見切れていたバグを解消し、左右対称の美しい中央揃えに復元。",
+        "【じゃんけんラウンド枠と小楽顔グラの被り解消】横向きでのラウンド表示枠と立ち絵位置を微調整し、小楽の顔・耳・表情が一切隠れず美しく表示されるよう安全余白を確保。"
+      ]
+    }
+  },
   {
     version: "0.0.12",
     date: "2026-08-31",
