@@ -207,6 +207,27 @@ export class AppView {
 
   bindEvents() {
     const handleQtePointer = (event) => {
+      const dojoQteBtn = event.target.closest("#dojo-qte-pad button[data-direction]");
+      if (dojoQteBtn) {
+        event.preventDefault();
+        const dir = dojoQteBtn.dataset.direction;
+        if (this.dojoQteActive && this.dojoQteSystem) {
+          this.dojoQteSystem.input(dir);
+        }
+        return;
+      }
+
+      const dojoDualBtn = event.target.closest("#dojo-qte-dual-container [data-dual-slot][data-direction]");
+      if (dojoDualBtn) {
+        event.preventDefault();
+        const dir = dojoDualBtn.dataset.direction;
+        const slot = dojoDualBtn.dataset.dualSlot;
+        if (this.dojoQteActive && this.dojoDualQteSystem) {
+          this.dojoDualQteSystem.input(dir, slot);
+        }
+        return;
+      }
+
       const dualBtn = event.target.closest("[data-dual-slot][data-direction]");
       if (dualBtn) {
         event.preventDefault();
@@ -1283,8 +1304,10 @@ export class AppView {
     if (!next) return;
     document.querySelectorAll(".screen").forEach((screen) => {
       screen.classList.remove("is-active", "is-entering");
+      screen.hidden = true;
     });
     next.classList.add("is-active", "is-entering");
+    next.hidden = false;
     this.currentScreen = screenName;
     this.app.dataset.screen = screenName;
     next.scrollTop = 0;
@@ -3421,7 +3444,7 @@ export class AppView {
     if (dualContainer) dualContainer.hidden = style !== "dual";
 
     this.updateDojoMetrics();
-    this.switchScreen("dojo-qte");
+    this.navigate("dojo-qte");
 
     if (style === "dual") {
       this.dojoDualQteSystem = new DualQTESystem(this.bus, this.timers, Math.random);

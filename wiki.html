@@ -364,6 +364,7 @@
       <li><a href="#section-audio" class="nav-link">🎵 和風 BGM 與雙音訊開關</a></li>
       <li><a href="#section-i18n" class="nav-link">🌐 四國語系在地化</a></li>
       <li><a href="#section-save" class="nav-link">🗄️ 存檔紀錄與種子碼</a></li>
+      <li><a href="#section-dojo" class="nav-link">⛩️ 修練場、ATK 與傷害日誌</a></li>
     </ul>
   </aside>
 
@@ -790,6 +791,29 @@
               <span class="badge badge-crimson">覆蓋載入 / 清除</span>
             </div>
             <p>貼上其他裝置導出的存檔種子碼並點擊載入，經確認後即刻覆蓋並套用進度。視窗底部設有危險管理區域，點擊「重置存檔」並二次確認後，可徹底清除本裝置的所有紀錄，回歸初始遊戲狀態。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 18: Dojo & HUD ATK -->
+      <section id="section-dojo" class="section-card">
+        <h2 class="section-title">戰鬥血條 ATK、5次傷害紀錄與修練場系統</h2>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">
+              <span>戰鬥血條 ATK 與 5 次傷害紀錄面板</span>
+              <span class="badge badge-gold">即時戰力 / 傷害隊列</span>
+            </div>
+            <p><strong>血條 ATK 數值標籤</strong>：玩家血條顯示即時總攻擊力（基礎 100 + 配點 + 裝備），小樂血條顯示敵方單次出拳傷害（關卡 1~3: 100，關卡 4: 200，修練場 0 或自訂）。</p>
+            <p style="margin-top:8px;"><strong>5 次傷害日誌面板</strong>：戰鬥畫面配置 <code>#battle-damage-log</code>，採 FIFO 容量 5 筆滾動顯示，記錄目標、數值與傷害來源（克制、變拳、摸摸、灼燒、反彈、受擊等），具備 <code>pointer-events: none</code> 點擊穿透與行動端防推擠設計。</p>
+          </div>
+          <div class="card">
+            <div class="card-title">
+              <span>修練場系統 (Training Dojo)</span>
+              <span class="badge badge-crimson">純 QTE / 剪影沙盒</span>
+            </div>
+            <p><strong>模式一（純 QTE 反應練習）</strong>：第一式為單軌 8 方向連續輸入，第二式為雙軌（WASD + 方向鍵）鍵盤情境，無戰鬥環節，即時統計 Combo、最高 Combo、平均反應時間 (ms) 與成功率。</p>
+            <p style="margin-top:8px;"><strong>模式二（全黑剪影戰鬥沙盒）</strong>：標準戰鬥循環，對手為全黑預設小樂剪影（<code>filter: brightness(0)</code>），小樂預設 10,000 HP（可自訂）且對玩家 0 傷害（可自訂），支援第一式（單體木樁）與第二式（雙生木樁，模擬第 4 關雙手雙血條）。</p>
           </div>
         </div>
       </section>

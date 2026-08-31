@@ -336,17 +336,28 @@ const cheatRows = [
 ];
 sheets.push({ name: "存檔與作弊管理", data: cheatRows });
 
-// Sheet 9: 在地化字典摘要 (I18n Localization)
+// Sheet 10: 修練場與戰鬥日誌 (Training Dojo & Battle Log)
+const dojoRows = [
+  ["模式代碼", "模式名稱", "式別", "式別名稱", "對手外觀", "預設生命(HP)", "預設傷害(ATK)", "機制與用途說明"],
+  ["mode1", "模式一：純 QTE 反應練習", "style1", "第一式：單軌疾速", "無（純 QTE 軌道）", "—", "—", "8 方向單軌連續輸入，統計連擊數 (Combo)、最高連擊、平均反應時間 (ms) 與成功率"],
+  ["mode1", "模式一：純 QTE 反應練習", "style2", "第二式：雙軌協同", "無（雙 QTE 軌道）", "—", "—", "雙手雙軌獨立判定（左手 WASD、右手 方向鍵），模擬終章極限鍵位"],
+  ["mode2", "模式二：戰鬥沙盒與 DPS 測試", "style1", "第一式：單體木樁", "影・小樂（全黑剪影）", "10,000 (可自訂 1~999,999)", "0 (可自訂傷害)", "標準 3-2-1 猜拳、變拳、摸摸與 QTE 反制，無敗北壓力，測試配裝實戰 DPS"],
+  ["mode2", "模式二：戰鬥沙盒與 DPS 測試", "style2", "第二式：雙生木樁", "雙生影・小樂（全黑剪影）", "20,000 (每隻 10,000 可自訂)", "0 (可自訂傷害)", "模擬第 4 關雙手出拳與雙軌 QTE，支援雙手解放技能實戰演練"]
+];
+sheets.push({ name: "修練場與戰鬥日誌", data: dojoRows });
+
+// Sheet 11: 在地化對照字典 (I18n Dictionary)
 const i18nRows = [
   ["鍵路徑", "繁體中文 (zh-Hant)", "簡體中文 (zh-Hans)", "English (en)", "日本語 (ja)"]
 ];
 const sampleKeys = [
-  "nav.home", "nav.stages", "nav.shop", "nav.paperdoll", "nav.growth", "nav.gallery", "nav.records", "nav.guide",
+  "nav.home", "nav.stages", "nav.shop", "nav.paperdoll", "nav.growth", "nav.gallery", "nav.records", "nav.guide", "nav.dojo",
   "hands.rock", "hands.paper", "hands.scissors",
   "dialogue.chant3", "dialogue.chant2", "dialogue.chant1", "dialogue.morphReaction",
   "ui.autoBattle", "ui.autoWatermelonStock", "ui.btnNextWatermelonRound", "ui.floatingWatermelonTitle",
   "ui.clearAll", "ui.equip", "ui.unequip", "ui.victory", "ui.defeat",
-  "ui.saveRecord", "ui.saveRecordModalTitle", "ui.btnCopySaveSeed", "ui.btnImportSaveSeed", "ui.btnModalResetSave"
+  "ui.saveRecord", "ui.saveRecordModalTitle", "ui.btnCopySaveSeed", "ui.btnImportSaveSeed", "ui.btnModalResetSave",
+  "dojo.title", "dojo.mode1Title", "dojo.mode2Title", "ui.recentDamageLog", "ui.playerAtk", "ui.enemyAtk"
 ];
 for (const key of sampleKeys) {
   i18nRows.push([
