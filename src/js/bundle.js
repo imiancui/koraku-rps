@@ -7252,10 +7252,23 @@ class AppView {
   }
 
   bindEvents() {
+    let lastQtePointerTime = 0;
     const handleQtePointer = (event) => {
-      const dojoQteBtn = event.target.closest("#dojo-qte-pad button[data-direction]");
-      if (dojoQteBtn) {
+      const targetBtn = event.target.closest("[data-direction]");
+      if (!targetBtn) return;
+
+      const now = performance.now();
+      if (now - lastQtePointerTime < 45) {
         event.preventDefault();
+        return;
+      }
+      lastQtePointerTime = now;
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      const dojoQteBtn = targetBtn.closest("#dojo-qte-pad button[data-direction]");
+      if (dojoQteBtn) {
         const dir = dojoQteBtn.dataset.direction;
         if (this.dojoQteActive && this.dojoQteSystem) {
           this.dojoQteSystem.input(dir);
@@ -7263,9 +7276,8 @@ class AppView {
         return;
       }
 
-      const dojoDualBtn = event.target.closest("#dojo-qte-dual-container [data-dual-slot][data-direction]");
+      const dojoDualBtn = targetBtn.closest("#dojo-qte-dual-container [data-dual-slot][data-direction]");
       if (dojoDualBtn) {
-        event.preventDefault();
         const dir = dojoDualBtn.dataset.direction;
         const slot = dojoDualBtn.dataset.dualSlot;
         if (this.dojoQteActive && this.dojoDualQteSystem) {
@@ -7274,9 +7286,8 @@ class AppView {
         return;
       }
 
-      const dualBtn = event.target.closest("[data-dual-slot][data-direction]");
+      const dualBtn = targetBtn.closest("[data-dual-slot][data-direction]");
       if (dualBtn) {
-        event.preventDefault();
         const dir = dualBtn.dataset.direction;
         const slot = dualBtn.dataset.dualSlot;
         this.battle.inputQte(dir, slot);
@@ -7286,18 +7297,17 @@ class AppView {
         return;
       }
 
-      const dirBtn = event.target.closest("[data-direction]");
-      if (dirBtn && !dirBtn.closest(".is-dual-touch-pad")) {
-        event.preventDefault();
+      if (!targetBtn.closest(".is-dual-touch-pad")) {
         this.qteKeyboard.reset();
         this.renderHeldQteDirections();
-        this.battle.inputQte(dirBtn.dataset.direction);
-        return;
+        this.battle.inputQte(targetBtn.dataset.direction);
       }
     };
 
     window.addEventListener("pointerdown", handleQtePointer, { passive: false });
-    window.addEventListener("touchstart", handleQtePointer, { passive: false });
+    if (typeof window !== "undefined" && !window.PointerEvent) {
+      window.addEventListener("touchstart", handleQtePointer, { passive: false });
+    }
 
     document.addEventListener("click", (event) => this.handleClick(event));
     window.addEventListener("keydown", (event) => this.handleKeydown(event));
@@ -7596,15 +7606,6 @@ class AppView {
       return;
     }
 
-    const dojoQtePadBtn = event.target.closest("#dojo-qte-pad button[data-direction]");
-    if (dojoQtePadBtn) {
-      const dir = dojoQtePadBtn.dataset.direction;
-      if (this.dojoQteActive && this.dojoQteSystem) {
-        this.dojoQteSystem.input(dir);
-      }
-      return;
-    }
-
     const autoStageBtn = event.target.closest("[data-auto-stage]");
     if (autoStageBtn) {
       const stageId = Number(autoStageBtn.dataset.autoStage);
@@ -7877,25 +7878,6 @@ class AppView {
     if (event.target.closest("[data-skill='morph']")) {
       const result = this.battle.useMorph();
       if (!result.ok) this.showToast(result.message, "danger");
-      return;
-    }
-
-    const dualDirectionBtn = event.target.closest("[data-dual-slot][data-direction]");
-    if (dualDirectionBtn) {
-      const dir = dualDirectionBtn.dataset.direction;
-      const slot = dualDirectionBtn.dataset.dualSlot;
-      this.leftQteKeyboard.reset();
-      this.rightQteKeyboard.reset();
-      this.renderHeldQteDirections();
-      this.battle.inputQte(dir, slot);
-      return;
-    }
-
-    const directionButton = event.target.closest("[data-direction]");
-    if (directionButton) {
-      this.qteKeyboard.reset();
-      this.renderHeldQteDirections();
-      this.battle.inputQte(directionButton.dataset.direction);
       return;
     }
 
