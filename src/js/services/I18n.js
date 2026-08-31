@@ -22,6 +22,37 @@ export const LOCALE_STORAGE_KEY = "koraku-rps-locale";
 
 export const CHANGELOG_DATA = [
   {
+    version: "0.0.7",
+    date: "2026-08-31",
+    tag: "Mobile Visual & RWD Precision Overhaul",
+    changes: {
+      "zh-Hant": [
+        "【手機版戰鬥排版精準重構】重新計算關卡標籤、撤退按鈕、Boss 血條、回合神諭、傷害日誌與立繪之絕對垂直間距，徹底解決元素疊層與遮擋問題。",
+        "【血量數值右側自適應對齊】全面強制 `.hud-name` 採單行無換行排版與 `margin-left: auto` 右側對齊，根除血量數值擠壓換行問題。",
+        "【第四關雙 Boss 卡片雙行排版】重塑雙生 Boss 狀態卡為網格雙行架構，保證各尺寸手機均完整展示名稱與 ATK 數值，永不裁切。",
+        "【CSS 快取深度更新】全域 CSS 檔案附加全新快取版本戳記，確保 iOS Safari 與行動端即時載入最新設計樣式。"
+      ],
+      "zh-Hans": [
+        "【手机版战斗排版精准重构】重新计算关卡标签、撤退按钮、Boss 血条、回合神谕、伤害日志与立绘之绝对垂直间距，彻底解决元素叠层与遮挡问题。",
+        "【血量数值右侧自适应对齐】全面强制 `.hud-name` 采用单行无换行排版与 `margin-left: auto` 右侧对齐，根除血量数值挤压换行问题。",
+        "【第四关双 Boss 卡片双行排版】重塑双生 Boss 状态卡为网格双行架构，保证各尺寸手机均完整展示名称与 ATK 数值，永不裁切。",
+        "【CSS 缓存深度更新】全局 CSS 文件附加全新缓存版本时间戳，确保 iOS Safari 与移动端即时加载最新设计样式。"
+      ],
+      "en": [
+        "【Mobile Combat Layout Precision Overhaul】Recalculated vertical spacing for stage tag, exit button, Boss HUD, round oracle, damage log, and character sprites to completely eliminate overlaps.",
+        "【HP Text Auto Right Alignment】Enforced flex single-row layout with `margin-left: auto` across all HUD bars, eliminating multi-line number stacking.",
+        "【Stage 4 Dual Boss Card Grid】Refactored dual boss cards into an adaptive 2-row grid to guarantee complete visibility without edge clipping.",
+        "【CSS Cache Buster Refresh】Refreshed CSS cache query timestamps across all stylesheet links to ensure immediate mobile browser rendering."
+      ],
+      "ja": [
+        "【モバイル戦闘画面の精密レイアウト再構築】章タグ、撤退ボタン、ボスHPバー、ラウンド神託、ダメージログ、立ち絵の垂直配置を完全再計算し、重なりを解消。",
+        "【HP数値の右揃え適応】`.hud-name` を1行フレックス化し `margin-left: auto` で右端に整列させ、数値の折り返し重なりを根絶。",
+        "【第4章デュアルボスの2行グリッド化】デュアルボスのカードを2行構造に刷新し、画面幅に関わらず名前とATK数値が完全表示されるよう改善。",
+        "【CSSキャッシュ更新】全スタイルシートのキャッシュパラメータを刷新し、iOS Safari 等の端末で即座に最新デザインが反映されるように対応。"
+      ]
+    }
+  },
+  {
     version: "0.0.6",
     date: "2026-08-31",
     tag: "UI & Audio Refactor",

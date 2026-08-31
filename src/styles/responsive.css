@@ -538,119 +538,87 @@
   }
 
   /* --------------------------------------------------------------------------
-     Battle Screen Mobile: Centered Kohaku, Bottom-Right Hand Selector, Lowered Oracle
+     Battle Screen Mobile: Precision Japanese Dark Anime Shrine Layout
      -------------------------------------------------------------------------- */
-  .battle-character-wrap {
-    left: 50% !important;
-    right: auto !important;
-    top: 125px !important;
-    bottom: auto !important;
-    transform: translateX(-50%) !important;
-    width: min(84vw, 320px) !important;
-    height: clamp(260px, 44vh, 380px) !important;
-    opacity: 0.98 !important;
-    z-index: 10;
-    pointer-events: none;
-    filter: drop-shadow(0 10px 28px rgba(0, 0, 0, 0.65));
-  }
-
-  .battle-character-wrap .character-single-slot img {
-    object-fit: contain !important;
-    object-position: center top !important;
-  }
-
-  .battle-character-wrap.is-dual-stage {
-    top: 135px !important;
-    bottom: auto !important;
-    width: min(94vw, 380px) !important;
-    height: clamp(230px, 38vh, 310px) !important;
-    z-index: 10;
-  }
-
-  .battle-character-wrap.is-dual-stage .characters-dual-wrap {
-    justify-content: space-between;
-    align-items: flex-start;
-  }
-
-  .battle-character-wrap.is-dual-stage .character-dual-slot {
-    width: 48%;
-    height: 100%;
-  }
-
-  .battle-character-wrap.is-dual-stage .character-dual-slot img {
-    object-fit: contain;
-    object-position: center top;
-  }
-
-  .battle-character-wrap::after {
-    display: none;
-  }
-
   .chapter-tag {
-    left: 10px;
-    top: 10px;
+    left: 10px !important;
+    top: 58px !important;
+    z-index: 35 !important;
   }
 
   .battle-exit {
-    right: 10px;
-    top: 9px;
+    right: 10px !important;
+    top: 56px !important;
+    z-index: 35 !important;
   }
 
   .enemy-hud {
-    top: 42px;
-    left: 10px;
-    width: calc(100% - 20px);
-    transform: none;
-    z-index: 22;
+    top: 86px !important;
+    left: 10px !important;
+    width: calc(100% - 20px) !important;
+    transform: none !important;
+    z-index: 30 !important;
   }
 
   .dual-enemy-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px !important;
+    width: 100% !important;
   }
 
   .dual-enemy-card {
-    padding: 4px 6px;
-    border-radius: 4px;
-    overflow: hidden;
+    padding: 4px 6px !important;
+    border-radius: 4px !important;
+    background: rgba(14, 18, 28, 0.92) !important;
+    border: 1px solid rgba(216, 182, 106, 0.4) !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
   }
 
   .dual-enemy-card .hud-name {
     display: grid !important;
-    grid-template-columns: auto 1fr auto !important;
+    grid-template-columns: 20px 1fr auto !important;
     grid-template-rows: auto auto !important;
-    gap: 1px 4px !important;
-    margin-bottom: 2px !important;
     align-items: center !important;
+    gap: 1px 3px !important;
+    width: 100% !important;
+    margin-bottom: 1px !important;
   }
 
   .dual-enemy-card .fox-mark {
     grid-row: 1 / 3 !important;
-    width: 20px !important;
-    height: 20px !important;
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 18px !important;
+    min-height: 18px !important;
     font-size: 9px !important;
+    margin: 1px 2px !important;
   }
 
   .dual-enemy-card .hud-name > div {
     grid-column: 2 !important;
     grid-row: 1 !important;
     display: flex !important;
-    gap: 3px !important;
-    overflow: hidden !important;
+    align-items: baseline !important;
+    gap: 2px !important;
     min-width: 0 !important;
-    margin-right: 0 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
   }
 
   .dual-enemy-card .hud-name b {
-    font-size: 9.5px !important;
+    font-size: 10px !important;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
   }
 
   .dual-enemy-card .hud-name small {
-    font-size: 6.5px !important;
+    font-size: 7px !important;
   }
 
   .dual-enemy-card .hud-atk-badge {
@@ -658,7 +626,7 @@
     grid-row: 1 !important;
     padding: 1px 4px !important;
     gap: 2px !important;
-    font-size: 7.5px !important;
+    margin-left: auto !important;
   }
 
   .dual-enemy-card .hud-atk-badge small {
@@ -666,7 +634,7 @@
   }
 
   .dual-enemy-card .hud-atk-badge b {
-    font-size: 9.5px !important;
+    font-size: 9px !important;
   }
 
   .dual-enemy-card .hud-name em {
@@ -675,258 +643,415 @@
     text-align: right !important;
     font-size: 8.5px !important;
     margin-left: 0 !important;
+    color: var(--paper-dim) !important;
+    white-space: nowrap !important;
   }
 
-  /* Round oracle placed cleanly below Boss HP bar and scaled down */
+  /* Round oracle placed cleanly below Boss HP bar */
   .round-oracle {
-    left: 50%;
-    top: 86px;
-    width: min(84vw, 235px);
-    padding: 2px 5px 3px;
-    border: 1px solid rgba(216, 182, 106, 0.35);
-    border-radius: 5px;
-    background: linear-gradient(135deg, rgba(11, 13, 21, 0.95), rgba(25, 28, 41, 0.90));
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
-    transform: translateX(-50%);
-    z-index: 25;
+    left: 50% !important;
+    top: 136px !important;
+    width: min(86vw, 290px) !important;
+    padding: 3px 8px 4px !important;
+    border: 1px solid rgba(216, 182, 106, 0.4) !important;
+    border-radius: 6px !important;
+    background: linear-gradient(135deg, rgba(12, 15, 24, 0.96), rgba(22, 26, 38, 0.92)) !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7) !important;
+    transform: translateX(-50%) !important;
+    z-index: 25 !important;
   }
 
   .round-label {
-    margin-bottom: 1px;
-    font-size: 6.5px;
-    letter-spacing: 0.15em;
+    margin-bottom: 1px !important;
+    font-size: 7px !important;
+    letter-spacing: 0.15em !important;
   }
 
   .round-label b {
-    font-size: 8px;
+    font-size: 8.5px !important;
   }
 
   .hand-versus {
-    grid-template-columns: 1fr 16px 1fr;
-    gap: 0 2px;
+    grid-template-columns: 1fr 16px 1fr !important;
+    gap: 0 2px !important;
   }
 
   .hand-versus strong {
-    font-size: 13px;
+    font-size: 13px !important;
   }
 
   .hand-versus b {
-    font-size: 8px;
+    font-size: 8.5px !important;
   }
 
   .hand-versus small {
-    font-size: 5.5px;
+    font-size: 6px !important;
   }
 
   .hand-versus > span {
-    width: 14px;
-    height: 14px;
-    font-size: 7px;
+    width: 14px !important;
+    height: 14px !important;
+    font-size: 7.5px !important;
   }
 
   .round-countdown {
-    right: -6px;
-    top: 50%;
-    width: 26px;
-    height: 26px;
-    transform: translateY(-50%);
+    right: -6px !important;
+    top: 50% !important;
+    width: 26px !important;
+    height: 26px !important;
+    transform: translateY(-50%) !important;
   }
 
   .round-countdown b {
-    font-size: 10.5px;
+    font-size: 10.5px !important;
   }
 
   .round-countdown small {
-    display: none;
+    display: none !important;
   }
 
-  /* Left Cluster: Items & Player HP/MP docked bottom-left (wider for comfortable HUD) */
+  /* Damage Log Docked Safely at Middle-Right (Never Overlaps Oracle or Boss Bar) */
+  .battle-damage-log {
+    right: 8px !important;
+    top: 205px !important;
+    left: auto !important;
+    bottom: auto !important;
+    width: min(115px, 32vw) !important;
+    max-height: 80px !important;
+    padding: 4px 6px !important;
+    background: rgba(10, 13, 20, 0.88) !important;
+    backdrop-filter: blur(6px) !important;
+    border: 1px solid rgba(216, 182, 106, 0.3) !important;
+    border-radius: 4px !important;
+    z-index: 20 !important;
+    pointer-events: none !important;
+  }
+
+  /* Kohaku Sprites: Vertically Centered with Clear Clearance */
+  .battle-character-wrap {
+    left: 50% !important;
+    right: auto !important;
+    top: 195px !important;
+    bottom: auto !important;
+    transform: translateX(-50%) !important;
+    width: min(82vw, 300px) !important;
+    height: clamp(240px, 38vh, 320px) !important;
+    opacity: 0.98 !important;
+    z-index: 10 !important;
+    pointer-events: none !important;
+    filter: drop-shadow(0 10px 28px rgba(0, 0, 0, 0.65)) !important;
+  }
+
+  .battle-character-wrap .character-single-slot img {
+    object-fit: contain !important;
+    object-position: center top !important;
+    height: 100% !important;
+    width: 100% !important;
+  }
+
+  .battle-character-wrap.is-dual-stage {
+    top: 220px !important;
+    bottom: auto !important;
+    width: min(94vw, 380px) !important;
+    height: clamp(220px, 34vh, 290px) !important;
+    z-index: 10 !important;
+  }
+
+  .battle-character-wrap.is-dual-stage .characters-dual-wrap {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .battle-character-wrap.is-dual-stage .character-dual-slot {
+    width: 48% !important;
+    height: 100% !important;
+  }
+
+  .battle-character-wrap.is-dual-stage .character-dual-slot img {
+    object-fit: contain !important;
+    object-position: center top !important;
+    height: 100% !important;
+    width: 100% !important;
+  }
+
+  .battle-character-wrap::after {
+    display: none !important;
+  }
+
+  /* Left Cluster: Items & Player HP/MP docked bottom-left */
   .battle-left-cluster {
-    display: flex;
-    flex-direction: column;
-    left: 8px;
-    bottom: 58px;
-    width: min(48vw, 185px);
-    gap: 5px;
-    z-index: 30;
+    display: flex !important;
+    flex-direction: column !important;
+    left: 8px !important;
+    bottom: calc(62px + env(safe-area-inset-bottom, 0px)) !important;
+    width: min(46vw, 175px) !important;
+    gap: 4px !important;
+    z-index: 30 !important;
   }
 
   .quick-slots {
-    order: 1;
-    position: static;
-    width: 100%;
+    order: 1 !important;
+    position: static !important;
+    width: 100% !important;
+  }
+
+  .quick-label {
+    font-size: 7px !important;
+    margin-bottom: 2px !important;
+    letter-spacing: 0.1em !important;
+  }
+
+  .quick-label small {
+    display: none !important;
+  }
+
+  .slot-grid {
+    grid-template: repeat(3, 30px) / repeat(3, 30px) !important;
+    margin: 0 auto !important;
+  }
+
+  .soul-slot {
+    width: 26px !important;
+    height: 26px !important;
+    margin: 1px !important;
+  }
+
+  .slot-content {
+    inset: -6px !important;
+  }
+
+  .slot-content i {
+    font-size: 11px !important;
+  }
+
+  .slot-content small {
+    display: none !important;
+  }
+
+  .slot-content b {
+    font-size: 7px !important;
+  }
+
+  .slot-kbd {
+    display: none !important;
   }
 
   .player-hud {
-    order: 2;
-    position: static;
-    width: 100%;
-    margin-top: 1px;
+    order: 2 !important;
+    position: static !important;
+    width: 100% !important;
+    margin-top: 2px !important;
+    background: rgba(10, 13, 22, 0.92) !important;
+    padding: 5px 8px !important;
+    border-radius: 5px !important;
+    border: 1px solid rgba(216, 182, 106, 0.35) !important;
   }
 
-  /* Right Hand Selector: position:fixed to break out of parent container and dock at viewport bottom-right */
+  .player-hud .hud-name.player-name {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 4px !important;
+    margin-bottom: 3px !important;
+    width: 100% !important;
+  }
+
+  .player-hud .player-mark {
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px !important;
+    min-height: 20px !important;
+    font-size: 10px !important;
+    margin: 1px 3px 1px 1px !important;
+  }
+
+  .player-hud .hud-name > div {
+    display: flex !important;
+    align-items: baseline !important;
+    gap: 3px !important;
+    white-space: nowrap !important;
+  }
+
+  .player-hud .hud-name small {
+    font-size: 7.5px !important;
+  }
+
+  .player-hud .hud-name b {
+    font-size: 11px !important;
+  }
+
+  .player-hud .hud-atk-badge {
+    padding: 1px 4px !important;
+    gap: 2px !important;
+  }
+
+  .player-hud .hud-atk-badge small {
+    font-size: 7px !important;
+  }
+
+  .player-hud .hud-atk-badge b {
+    font-size: 10px !important;
+  }
+
+  .player-hud .hud-name em {
+    margin-left: auto !important;
+    font-size: 9.5px !important;
+    font-family: var(--sans) !important;
+    color: var(--paper) !important;
+    white-space: nowrap !important;
+  }
+
+  .player-meter {
+    height: 8px !important;
+    margin-bottom: 3px !important;
+  }
+
+  .resource-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+    width: 100% !important;
+  }
+
+  .resource-row > span {
+    font-size: 8px !important;
+    color: var(--azure) !important;
+    font-weight: 700 !important;
+    flex-shrink: 0 !important;
+  }
+
+  .resource-row .mp-meter {
+    height: 6px !important;
+    flex: 1 1 auto !important;
+  }
+
+  .resource-row em {
+    font-size: 8.5px !important;
+    font-family: var(--sans) !important;
+    color: var(--paper-dim) !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    margin-left: auto !important;
+  }
+
+  /* Right Hand Selector: Fixed bottom-right above dialogue */
   .hand-selector {
     position: fixed !important;
     right: 8px !important;
     left: auto !important;
-    bottom: calc(58px + env(safe-area-inset-bottom, 0px)) !important;
-    width: min(44vw, 165px) !important;
+    bottom: calc(62px + env(safe-area-inset-bottom, 0px)) !important;
+    width: min(46vw, 175px) !important;
     top: auto !important;
     z-index: 35 !important;
   }
 
   .auto-battle-hud-banner {
-    right: 8px;
-    bottom: 220px;
-    padding: 5px 12px;
-    gap: 8px;
-    font-size: 10px;
+    right: 8px !important;
+    bottom: 220px !important;
+    padding: 5px 12px !important;
+    gap: 8px !important;
+    font-size: 10px !important;
   }
 
   .panel-kicker {
-    font-size: 7.5px;
-    margin-bottom: 2px;
-    letter-spacing: 0.12em;
+    font-size: 7.5px !important;
+    margin-bottom: 2px !important;
+    letter-spacing: 0.12em !important;
+  }
+
+  .panel-kicker small {
+    display: none !important;
   }
 
   .hand-selector-group {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    width: 100%;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+    width: 100% !important;
   }
 
   .hand-button {
-    grid-template-columns: 26px 1fr;
-    min-height: 34px;
-    padding: 2px 8px;
-    background: rgba(12, 15, 23, 0.94);
-    border: 1px solid rgba(216, 182, 106, 0.3);
-    border-radius: 4px;
+    grid-template-columns: 26px 1fr !important;
+    min-height: 34px !important;
+    padding: 2px 8px !important;
+    background: rgba(12, 15, 23, 0.94) !important;
+    border: 1px solid rgba(216, 182, 106, 0.3) !important;
+    border-radius: 4px !important;
   }
 
   .hand-button i {
-    font-size: 17px;
+    font-size: 17px !important;
   }
 
   .hand-button span {
-    font-size: 11.5px;
-    letter-spacing: 0.08em;
+    font-size: 11.5px !important;
+    letter-spacing: 0.08em !important;
   }
 
   .hand-button kbd {
-    display: none;
+    display: none !important;
   }
 
   .hand-selector-dual {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 4px;
-    width: 100%;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 4px !important;
+    width: 100% !important;
   }
 
   .dual-hand-sub-column {
-    gap: 3px;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 3px !important;
+  }
+
+  .dual-hand-sub-column .panel-kicker {
+    font-size: 8px !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
   }
 
   .dual-hand-sub-column .hand-button {
-    grid-template-columns: 18px 1fr;
-    min-height: 28px;
-    padding: 2px 4px;
+    display: grid !important;
+    grid-template-columns: 18px 1fr !important;
+    align-items: center !important;
+    min-height: 28px !important;
+    padding: 2px 4px !important;
+    border-radius: 4px !important;
+    background: rgba(12, 15, 24, 0.95) !important;
+    border: 1px solid rgba(216, 182, 106, 0.3) !important;
   }
 
   .dual-hand-sub-column .hand-button span {
-    font-size: 9.5px;
+    font-size: 9.5px !important;
   }
 
   .dual-hand-sub-column .hand-button i {
-    font-size: 14px;
+    font-size: 14px !important;
   }
 
   .dual-hand-sub-column .hand-button kbd {
-    display: none;
-  }
-
-  .quick-label {
-    font-size: 6.5px;
-    margin-bottom: 2px;
-    letter-spacing: 0.12em;
-  }
-
-  .slot-grid {
-    grid-template: repeat(3, 36px) / repeat(3, 36px);
-  }
-
-  .soul-slot {
-    width: 32px;
-    height: 32px;
-    margin: 1px;
-  }
-
-  .slot-content {
-    inset: -8px;
-  }
-
-  .slot-content i {
-    font-size: 13px;
-  }
-
-  .slot-content small {
-    display: none;
-  }
-
-  .slot-content b {
-    font-size: 7px;
-  }
-
-  .slot-kbd {
-    display: none;
-  }
-
-  .hud-name {
-    gap: 6px;
-    margin-bottom: 2px;
-  }
-
-  .hud-name > span {
-    width: 22px;
-    height: 22px;
-    font-size: 10px;
-  }
-
-  .hud-name b {
-    font-size: 11.5px;
-  }
-
-  .hud-name em {
-    font-size: 8.5px;
-  }
-
-  .ornate-meter {
-    height: 10px;
-    padding: 2px;
-  }
-
-  .resource-row {
-    gap: 5px;
-    margin-top: 2px;
-  }
-
-  .resource-row > span {
-    font-size: 7.5px;
-  }
-
-  .resource-row em {
-    font-size: 8.5px;
+    display: none !important;
   }
 
   .avg-dialogue {
-    bottom: 6px;
-    width: calc(100% - 16px);
-    min-height: 48px;
-    max-height: 58px;
-    padding: 12px 16px 4px 48px;
-    border: 1px solid rgba(216, 182, 106, 0.45);
+    position: fixed !important;
+    bottom: calc(4px + env(safe-area-inset-bottom, 0px)) !important;
+    left: 8px !important;
+    width: calc(100% - 16px) !important;
+    min-height: 48px !important;
+    max-height: 56px !important;
+    padding: 10px 14px 4px 44px !important;
+    background: rgba(10, 13, 22, 0.96) !important;
+    border: 1px solid rgba(216, 182, 106, 0.45) !important;
+    border-radius: 4px !important;
+    z-index: 45 !important;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.8) !important;
   }
 
   .avg-dialogue > span {
@@ -1236,30 +1361,6 @@
     font-size: 13.5px;
   }
 
-  .round-oracle {
-    top: 86px;
-    width: min(84vw, 235px);
-    padding: 2px 5px 3px;
-  }
-
-  .battle-character-wrap.is-dual-stage {
-    top: 135px !important;
-    height: clamp(220px, 36vh, 300px) !important;
-  }
-
-  .battle-left-cluster {
-    left: 6px;
-    bottom: 58px;
-    width: min(46vw, 170px);
-    gap: 4px;
-  }
-
-  .hand-selector {
-    right: 6px !important;
-    bottom: calc(58px + env(safe-area-inset-bottom, 0px)) !important;
-    width: min(42vw, 155px) !important;
-  }
-
   .floating-autobattle-watermelon {
     right: 6px;
     width: min(285px, calc(100% - 12px));
@@ -1268,40 +1369,6 @@
 }
 
 @media (max-width: 768px) {
-  .battle-damage-log {
-    right: 8px !important;
-    top: 135px !important;
-    left: auto !important;
-    bottom: auto !important;
-    width: min(108px, 30vw) !important;
-    max-height: 76px !important;
-    padding: 3px 5px !important;
-    font-size: 8px !important;
-    z-index: 35 !important;
-    pointer-events: none !important;
-    border-radius: 4px !important;
-  }
-
-  .battle-damage-log .damage-log-header {
-    font-size: 7.5px !important;
-    padding-bottom: 2px !important;
-    margin-bottom: 2px !important;
-    letter-spacing: 0.05em !important;
-  }
-
-  .battle-damage-log .damage-log-entry {
-    font-size: 8px !important;
-    gap: 3px !important;
-  }
-
-  .battle-damage-log .damage-log-source {
-    font-size: 7.5px !important;
-  }
-
-  .battle-damage-log .damage-log-amount {
-    font-size: 8px !important;
-  }
-
   .dojo-metrics-bar {
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 8px !important;
