@@ -2,9 +2,10 @@
 
 > 文件用途：AI 代理人與開發者快速上手、架構交接與開發合約指引  
 > 專案根目錄：`D:\game-dev\New-game-project-4`  
+> 當前版本：`v0.4.0`（顯示於首頁頁腳最左側 `0.4.0`）  
 > 最新更新日期：2026-08-31  
 > 基準規範：`OPENSPEC.md` 與 `AGENTS.md`  
-> 測試狀態：`npm test` 95/95 全部通過 (100% Pass)
+> 測試狀態：`npm test` 101/101 全部通過 (100% Pass)
 
 ---
 
@@ -13,7 +14,7 @@
 本專案為純原生（Vanilla ES Modules / HTML5 / CSS3 / Web Audio API）架構的日式 ACGN 猜拳 RPG 對決遊戲。無前端框架、無外部執行期套件相依，可直接於本機或透過 GitHub Pages / 自訂網域（`https://koraku.app/`）部署運行。
 
 ### 1.1 核心命令
-- **執行測試**：`npm test`（Node.js 原生測試執行器，89 項測試）
+- **執行測試**：`npm test`（Node.js 原生測試執行器，101 項測試）
 - **打包發布**：`npm run build` 或 `node scripts/build.mjs`（生成 `src/js/bundle.js`）
 - **產生 Excel 規格**：`npm run specs:excel`
 - **線上網址**：`https://koraku.app/`
@@ -28,7 +29,7 @@
 src/
 ├── js/
 │   ├── config/
-│   │   └── gameConfig.js       # 全域數值設定（關卡、12格裝備、技能、道具、資產路徑、八方向）
+│   │   └── gameConfig.js       # 全域數值設定（關卡、12格裝備、技能、道具、資產路徑、八方向、修練場參數）
 │   ├── core/
 │   │   ├── EventBus.js         # 發布/訂閱事件中樞
 │   │   ├── GameStore.js        # 存檔、星砂、裝備背包、屬性推導、歷程紀錄、DPS 與作弊
@@ -37,7 +38,7 @@ src/
 │   │   ├── I18n.js             # 4國語系在地化引擎（zh-Hant, zh-Hans, en, ja）
 │   │   └── Persistence.js      # localStorage 讀寫容錯與持久化
 │   ├── systems/
-│   │   ├── BattleSystem.js     # 回合狀態機、倒數節奏、看清變拳、傷害/特效、自動刷關
+│   │   ├── BattleSystem.js     # 回合狀態機、倒數節奏、看清變拳、傷害/特效、自動刷關、修練場沙盒
 │   │   ├── QTESystem.js        # 單軌 QTESystem 與雙軌 DualQTESystem
 │   │   ├── QTEInputSystem.js   # WASD/方向鍵/數字鍵盤對應與雙正方向斜向合成
 │   │   ├── rpsRules.js         # 猜拳勝負判定、雙手勝負判定、剋制反制手勢與敘事
@@ -45,14 +46,14 @@ src/
 │   │   ├── PostBattleSystem.js # 戰後事件、泳裝切換、三刀切西瓜、自動刷關浮層切西瓜
 │   │   └── SoundSystem.js      # Web Audio API 音效合成（拳擊、撫摸、勝利、失敗）
 │   ├── ui/
-│   │   ├── AppView.js          # DOM 渲染、畫面導航、紙娃娃介面、浮動切西瓜、作弊面板
+│   │   ├── AppView.js          # DOM 渲染、畫面導航、紙娃娃、修練場、傷害日誌、浮動切西瓜
 │   │   └── DialogueController.js # AVG 逐字打字機台詞與角色說話跳動動態
 │   ├── main.js                 # 系統組裝與進入點
 │   └── bundle.js               # 打包產物
 └── styles/
     ├── tokens.css              # 色彩主題、字型、圓角、陰影
     ├── base.css                # 重置樣式與排版基底
-    ├── components.css          # 按鈕、卡片、模態框、HUD
+    ├── components.css          # 按鈕、卡片、模態框、HUD、修練場、傷害日誌
     ├── screens.css             # 各大主畫面（首頁/關卡/商店/裝備/圖鑑/戰鬥/歷程/浮動切西瓜）
     ├── animations.css          # 受擊震動、說話跳動、QTE 特效、雷擊/燃燒動畫
     └── responsive.css          # 780px/390px 行動版適配
@@ -163,12 +164,20 @@ LocalStorage 鍵名：`koraku-rps-save-v1`
 - **匯入**：呼叫 `store.importSaveCode(code)`，經過格式驗證與 `sanitizeSave` 後覆蓋當前存檔，自動存入 localStorage 並觸發 `store:changed`。
 - **集中管理**：首頁原「重置存檔」按鈕移入「💾 存檔紀錄」彈窗（`#save-record-modal`）內部危險區域，整合存檔狀態概覽、種子碼匯出複製、種子碼貼上載入與刪檔重置。
 
-### 5.6 測試與打包
+### 5.6 戰鬥血條 ATK、5次傷害紀錄與修練場系統 (HUD ATK, 5-Damage Log & Training Dojo)
+- **血條 ATK 數值標籤**：玩家血條顯示即時總傷害（基礎 + 配點 + 裝備），Boss 血條顯示敵方單次攻擊傷害（第 1~3 關 100、第 4 關 200、修練場 0 或自訂）。
+- **局內 5 次傷害紀錄面板**：`#battle-damage-log` 採 FIFO 容量 5 筆滾動顯示，記錄目標、數值與傷害來源（克制、變拳、摸摸、灼燒、反彈、受擊等），樣式具備 `pointer-events: none` 點擊穿透與行動端防推擠防護。
+- **修練場系統 (Training Dojo)**：
+  - 首頁配置向量 SVG 入口按鈕，開啟 `#dojo-modal`。
+  - **模式一（純 QTE 反應練習）**：第一式為單軌 8 方向連續輸入，第二式為雙軌（WASD + 方向鍵）鍵盤情境，無戰鬥環節，即時統計 Combo、最高 Combo、平均反應時間 (ms) 與成功率。
+  - **模式二（全黑剪影戰鬥沙盒）**：標準戰鬥循環，對手為全黑預設小樂剪影（`filter: brightness(0)`），小樂預設 10,000 HP（可自訂）且對玩家 0 傷害（可自訂），支援第一式（單體木樁）與第二式（雙生木樁，模擬第 4 關雙手雙血條）。
+
+### 5.7 測試與打包
 每次變更後必須執行：
 ```bash
 npm test
 node scripts/build.mjs
 npm run specs:excel
 ```
-確保 94 項測試全數通過且 bundle 打包無誤。
+確保 101 項測試全數通過且 bundle 打包無誤。
 

@@ -1,5 +1,7 @@
-import { DIRECTIONS, DIRECTION_SVGS, getDirectionSvg, GALLERY_ITEMS, HANDS, ITEMS, SKILLS, STAGES, EQUIPMENT_ITEMS, EQUIPMENT_SLOTS } from "../config/gameConfig.js";
+import { DIRECTIONS, DIRECTION_SVGS, getDirectionSvg, GALLERY_ITEMS, HANDS, ITEMS, SKILLS, STAGES, EQUIPMENT_ITEMS, EQUIPMENT_SLOTS, BATTLE_RULES, DOJO_CONFIG } from "../config/gameConfig.js";
 import { I18n, LOCALES, LOCALE_ORDER } from "../services/I18n.js";
+import { TimerRegistry } from "../core/TimerRegistry.js";
+import { QTESystem, DualQTESystem } from "../systems/QTESystem.js";
 import {
   arrowDirectionFromKey,
   directionFromKey,
@@ -18,6 +20,7 @@ export class AppView {
     this.battle = battle;
     this.postBattle = postBattle;
     this.sound = sound;
+    this.timers = new TimerRegistry();
     this.currentScreen = "home";
     this.activeGrowthTab = "stats";
     this.activeGuideTab = "basics";
@@ -26,6 +29,21 @@ export class AppView {
     this.battleState = null;
     this.postState = null;
     this.qteState = null;
+    this.recentDamageLog = [];
+    this.dojoQteActive = false;
+    this.dojoQteStyle = "single";
+    this.dojoCombo = 0;
+    this.dojoMaxCombo = 0;
+    this.dojoTotalAttempts = 0;
+    this.dojoSuccessHits = 0;
+    this.dojoReactionTimes = [];
+    this.dojoMode = "1";
+    this.dojoMode1Style = "single";
+    this.dojoMode2Style = "single";
+    this.dojoQteSystem = null;
+    this.dojoDualQteSystem = null;
+    this.dojoStepTimeout = null;
+    this.dojoStepStartTime = 0;
     this.qteKeyboard = new QTEKeyboardInput(directionFromKey);
     this.leftQteKeyboard = new QTEKeyboardInput(wasdDirectionFromKey);
     this.rightQteKeyboard = new QTEKeyboardInput(arrowDirectionFromKey);
@@ -57,6 +75,13 @@ export class AppView {
     this.playerHandWrapSingle = $("#player-hand-wrap-single");
     this.playerHandWrapDual = $("#player-hand-wrap-dual");
     this.playerHud = $(".player-hud");
+    this.playerAtkText = $("#player-atk-text");
+    this.enemyAtkText = $("#enemy-atk-text");
+    this.enemyLeftAtkText = $("#enemy-left-atk-text");
+    this.enemyRightAtkText = $("#enemy-right-atk-text");
+    this.battleDamageLog = $("#battle-damage-log");
+    this.battleDamageLogList = $("#battle-damage-log-list");
+    this.dojoModal = $("#dojo-modal");
     this.roundOracle = $(".round-oracle");
     this.roundWarningEmoji = $("#round-warning-emoji");
     this.qteOverlay = $("#qte-overlay");
@@ -181,6 +206,32 @@ export class AppView {
   }
 
   bindEvents() {
+    const handleQtePointer = (event) => {
+      const dualBtn = event.target.closest("[data-dual-slot][data-direction]");
+      if (dualBtn) {
+        event.preventDefault();
+        const dir = dualBtn.dataset.direction;
+        const slot = dualBtn.dataset.dualSlot;
+        this.battle.inputQte(dir, slot);
+        if (slot === "left") this.leftQteKeyboard.reset();
+        if (slot === "right") this.rightQteKeyboard.reset();
+        this.renderHeldQteDirections();
+        return;
+      }
+
+      const dirBtn = event.target.closest("[data-direction]");
+      if (dirBtn && !dirBtn.closest(".is-dual-touch-pad")) {
+        event.preventDefault();
+        this.qteKeyboard.reset();
+        this.renderHeldQteDirections();
+        this.battle.inputQte(dirBtn.dataset.direction);
+        return;
+      }
+    };
+
+    window.addEventListener("pointerdown", handleQtePointer, { passive: false });
+    window.addEventListener("touchstart", handleQtePointer, { passive: false });
+
     document.addEventListener("click", (event) => this.handleClick(event));
     window.addEventListener("keydown", (event) => this.handleKeydown(event));
     window.addEventListener("keyup", (event) => this.handleKeyup(event));
@@ -263,10 +314,41 @@ export class AppView {
     this.bus.on("battle:state", (state) => this.renderBattle(state));
     this.bus.on("battle:countdown-beat", (beat) => this.handleCountdownBeat(beat));
     this.bus.on("battle:effect", (effect) => this.playBattleEffect(effect));
-    this.bus.on("qte:update", (state) => this.renderQte(state));
+    this.bus.on("battle:damage-logged", (event) => this.addDamageLogEntry(event));
+    this.bus.on("battle:start", () => {
+      this.recentDamageLog = [];
+      if (this.battleDamageLogList) this.battleDamageLogList.innerHTML = "";
+    });
+    this.bus.on("qte:update", (state) => {
+      if (this.dojoQteActive) {
+        this.renderDojoQte(state);
+      } else {
+        this.renderQte(state);
+      }
+    });
+    this.bus.on("dualQte:update", (state) => {
+      if (this.dojoQteActive) {
+        this.renderDojoQte(state);
+      } else {
+        this.renderQte(state);
+      }
+    });
     this.bus.on("qte:step", (data) => this.flashQteCorrect(data));
     this.bus.on("qte:wrong", (data) => this.flashQteWrong(data?.slot, data?.received));
-    this.bus.on("qte:finished", (result) => this.handleQteFinished(result));
+    this.bus.on("qte:finished", (result) => {
+      if (this.dojoQteActive) {
+        this.handleDojoQteFinished(result);
+      } else {
+        this.handleQteFinished(result);
+      }
+    });
+    this.bus.on("dualQte:finished", (result) => {
+      if (this.dojoQteActive) {
+        this.handleDojoQteFinished(result);
+      } else {
+        this.handleQteFinished(result);
+      }
+    });
     this.bus.on("postbattle:state", (state) => this.renderPostBattle(state));
     this.bus.on("postbattle:auto-watermelon", (state) => this.renderFloatingWatermelon(state));
     this.bus.on("toast", (toast) => this.showToast(toast.message, toast.tone));
@@ -335,6 +417,17 @@ export class AppView {
   }
 
   handleClick(event) {
+    const pressedButton = event.target.closest("button, [role='button'], [data-nav], [data-allocate], [data-allocate-skill], [data-buy], [data-buy-equip], [data-slot], [data-equip-bag-item], .pill-btn, .tab-pill, .button-primary, .button-secondary, .button-ghost, .menu-command");
+    if (pressedButton) {
+      pressedButton.classList.remove("is-btn-pressed");
+      void pressedButton.offsetWidth;
+      pressedButton.classList.add("is-btn-pressed");
+      setTimeout(() => pressedButton.classList.remove("is-btn-pressed"), 180);
+      if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function") {
+        try { navigator.vibrate(12); } catch (_) {}
+      }
+    }
+
     if (event.target.closest("#lang-toggle")) {
       I18n.cycleLocale();
       this.renderI18n();
@@ -348,10 +441,100 @@ export class AppView {
 
     const navButton = event.target.closest("[data-nav]");
     if (navButton) {
+      if (navButton.dataset.nav === "dojo") {
+        this.openDojoModal();
+        return;
+      }
       if (this.saveRecordModal && !this.saveRecordModal.hidden) {
         this.closeSaveRecordModal();
       }
       this.requestNavigation(navButton.dataset.nav);
+      return;
+    }
+
+    if (event.target.closest("#open-dojo-modal")) {
+      this.openDojoModal();
+      return;
+    }
+
+    if (event.target.closest("#close-dojo-modal") || event.target === this.dojoModal) {
+      this.closeDojoModal();
+      return;
+    }
+
+    const dojoTabBtn = event.target.closest(".dojo-tab-btn[data-dojo-mode]");
+    if (dojoTabBtn) {
+      this.dojoMode = dojoTabBtn.dataset.dojoMode;
+      document.querySelectorAll(".dojo-tab-btn[data-dojo-mode]").forEach((btn) => {
+        btn.classList.toggle("is-active", btn.dataset.dojoMode === this.dojoMode);
+      });
+      const p1 = $("#dojo-mode1-panel");
+      const p2 = $("#dojo-mode2-panel");
+      if (p1) p1.hidden = this.dojoMode !== "1";
+      if (p2) p2.hidden = this.dojoMode !== "2";
+      return;
+    }
+
+    const dojoStyleCard = event.target.closest(".dojo-style-card");
+    if (dojoStyleCard) {
+      const radio = dojoStyleCard.querySelector('input[type="radio"]');
+      if (radio) {
+        radio.checked = true;
+        const groupName = radio.name;
+        document.querySelectorAll(`input[name="${groupName}"]`).forEach((r) => {
+          r.closest(".dojo-style-card")?.classList.toggle("is-selected", r.checked);
+        });
+      }
+      return;
+    }
+
+    const chipHpBtn = event.target.closest(".preset-chips .chip-btn[data-hp]");
+    if (chipHpBtn) {
+      const hpInput = $("#dojo-custom-hp");
+      if (hpInput) hpInput.value = chipHpBtn.dataset.hp;
+      chipHpBtn.closest(".preset-chips")?.querySelectorAll(".chip-btn").forEach((btn) => {
+        btn.classList.toggle("is-active", btn === chipHpBtn);
+      });
+      return;
+    }
+
+    const chipDmgBtn = event.target.closest(".preset-chips .chip-btn[data-dmg]");
+    if (chipDmgBtn) {
+      const dmgInput = $("#dojo-custom-dmg");
+      if (dmgInput) dmgInput.value = chipDmgBtn.dataset.dmg;
+      chipDmgBtn.closest(".preset-chips")?.querySelectorAll(".chip-btn").forEach((btn) => {
+        btn.classList.toggle("is-active", btn === chipDmgBtn);
+      });
+      return;
+    }
+
+    if (event.target.closest("#btn-start-dojo-practice")) {
+      if (this.dojoMode === "1") {
+        const style = document.querySelector('input[name="dojo-mode1-style"]:checked')?.value || "single";
+        this.closeDojoModal();
+        this.startDojoQte(style);
+      } else {
+        const style = document.querySelector('input[name="dojo-mode2-style"]:checked')?.value || "single";
+        const customHp = Number($("#dojo-custom-hp")?.value) || 10000;
+        const customDamage = Number($("#dojo-custom-dmg")?.value) || 0;
+        this.closeDojoModal();
+        this.startDojoSandbox({ isDual: style === "dual", customHp, customDamage });
+      }
+      return;
+    }
+
+    if (event.target.closest("#btn-exit-dojo-qte")) {
+      this.stopDojoQte();
+      this.navigate("home");
+      return;
+    }
+
+    const dojoQtePadBtn = event.target.closest("#dojo-qte-pad button[data-direction]");
+    if (dojoQtePadBtn) {
+      const dir = dojoQtePadBtn.dataset.direction;
+      if (this.dojoQteActive && this.dojoQteSystem) {
+        this.dojoQteSystem.input(dir);
+      }
       return;
     }
 
@@ -742,6 +925,87 @@ export class AppView {
   }
 
   handleKeydown(event) {
+    if (event.key === "Escape" && this.dojoModal && !this.dojoModal.hidden) {
+      this.closeDojoModal();
+      return;
+    }
+
+    if (this.dojoQteActive) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        this.stopDojoQte();
+        this.navigate("home");
+        return;
+      }
+
+      if (this.dojoQteStyle === "dual" && this.dojoDualQteSystem?.active) {
+        const isLeftActive = !this.dojoDualQteSystem.left?.completed;
+        const isRightActive = !this.dojoDualQteSystem.right?.completed;
+        const leftExpected = isLeftActive ? this.dojoDualQteSystem.left?.sequence[this.dojoDualQteSystem.left?.index] : null;
+        const rightExpected = isRightActive ? this.dojoDualQteSystem.right?.sequence[this.dojoDualQteSystem.right?.index] : null;
+
+        if (isLeftActive) {
+          const leftInput = this.leftQteKeyboard.keyDown(event.key, leftExpected, event.repeat, event.code);
+          if (leftInput.handled) {
+            event.preventDefault();
+            if (leftInput.direction) {
+              this.dojoDualQteSystem.input(leftInput.direction, "left");
+              this.leftQteKeyboard.reset();
+            }
+            return;
+          }
+        }
+
+        if (isRightActive) {
+          const rightInput = this.rightQteKeyboard.keyDown(event.key, rightExpected, event.repeat, event.code);
+          if (rightInput.handled) {
+            event.preventDefault();
+            if (rightInput.direction) {
+              this.dojoDualQteSystem.input(rightInput.direction, "right");
+              this.rightQteKeyboard.reset();
+            }
+            return;
+          }
+        }
+
+        if (!isLeftActive && isRightActive) {
+          const fallbackInput = this.qteKeyboard.keyDown(event.key, rightExpected, event.repeat, event.code);
+          if (fallbackInput.handled) {
+            event.preventDefault();
+            if (fallbackInput.direction) {
+              this.dojoDualQteSystem.input(fallbackInput.direction, "right");
+              this.qteKeyboard.reset();
+            }
+            return;
+          }
+        } else if (isLeftActive && !isRightActive) {
+          const fallbackInput = this.qteKeyboard.keyDown(event.key, leftExpected, event.repeat, event.code);
+          if (fallbackInput.handled) {
+            event.preventDefault();
+            if (fallbackInput.direction) {
+              this.dojoDualQteSystem.input(fallbackInput.direction, "left");
+              this.qteKeyboard.reset();
+            }
+            return;
+          }
+        }
+        return;
+      }
+
+      if (this.dojoQteStyle !== "dual" && this.dojoQteSystem?.active) {
+        const expected = this.dojoQteSystem.sequence[this.dojoQteSystem.index];
+        const input = this.qteKeyboard.keyDown(event.key, expected, event.repeat, event.code);
+        if (input.handled) {
+          event.preventDefault();
+          if (input.direction) {
+            this.dojoQteSystem.input(input.direction);
+            this.qteKeyboard.reset();
+          }
+        }
+        return;
+      }
+    }
+
     if (event.key === "Escape" && this.saveRecordModal && !this.saveRecordModal.hidden) {
       this.closeSaveRecordModal();
       return;
@@ -843,29 +1107,59 @@ export class AppView {
     if (!this.battleState?.active || this.battleState.isPaused) return;
     if (this.battleState.phase === "qte") {
       if (this.qteState?.mode === "dual") {
-        const leftExpected = this.qteState.left?.sequence[this.qteState.left?.index];
-        const rightExpected = this.qteState.right?.sequence[this.qteState.right?.index];
+        const isLeftActive = !this.qteState.left?.completed;
+        const isRightActive = !this.qteState.right?.completed;
+        const leftExpected = isLeftActive ? this.qteState.left?.sequence[this.qteState.left?.index] : null;
+        const rightExpected = isRightActive ? this.qteState.right?.sequence[this.qteState.right?.index] : null;
 
-        const leftInput = this.leftQteKeyboard.keyDown(event.key, leftExpected, event.repeat, event.code);
-        if (leftInput.handled) {
-          event.preventDefault();
-          if (leftInput.direction) {
-            this.battle.inputQte(leftInput.direction, "left");
-            this.leftQteKeyboard.reset();
+        if (isLeftActive) {
+          const leftInput = this.leftQteKeyboard.keyDown(event.key, leftExpected, event.repeat, event.code);
+          if (leftInput.handled) {
+            event.preventDefault();
+            if (leftInput.direction) {
+              this.battle.inputQte(leftInput.direction, "left");
+              this.leftQteKeyboard.reset();
+            }
+            this.renderHeldQteDirections();
+            return;
           }
-          this.renderHeldQteDirections();
-          return;
         }
 
-        const rightInput = this.rightQteKeyboard.keyDown(event.key, rightExpected, event.repeat, event.code);
-        if (rightInput.handled) {
-          event.preventDefault();
-          if (rightInput.direction) {
-            this.battle.inputQte(rightInput.direction, "right");
-            this.rightQteKeyboard.reset();
+        if (isRightActive) {
+          const rightInput = this.rightQteKeyboard.keyDown(event.key, rightExpected, event.repeat, event.code);
+          if (rightInput.handled) {
+            event.preventDefault();
+            if (rightInput.direction) {
+              this.battle.inputQte(rightInput.direction, "right");
+              this.rightQteKeyboard.reset();
+            }
+            this.renderHeldQteDirections();
+            return;
           }
-          this.renderHeldQteDirections();
-          return;
+        }
+
+        if (!isLeftActive && isRightActive) {
+          const fallbackInput = this.qteKeyboard.keyDown(event.key, rightExpected, event.repeat, event.code);
+          if (fallbackInput.handled) {
+            event.preventDefault();
+            if (fallbackInput.direction) {
+              this.battle.inputQte(fallbackInput.direction, "right");
+              this.qteKeyboard.reset();
+            }
+            this.renderHeldQteDirections();
+            return;
+          }
+        } else if (isLeftActive && !isRightActive) {
+          const fallbackInput = this.qteKeyboard.keyDown(event.key, leftExpected, event.repeat, event.code);
+          if (fallbackInput.handled) {
+            event.preventDefault();
+            if (fallbackInput.direction) {
+              this.battle.inputQte(fallbackInput.direction, "left");
+              this.qteKeyboard.reset();
+            }
+            this.renderHeldQteDirections();
+            return;
+          }
         }
         return;
       }
@@ -2243,6 +2537,12 @@ export class AppView {
     $("#player-mp-fill").style.width = clampPercent(state.playerMp, state.playerMaxMp) + "%";
     $("#battle-player-level").textContent = "LEVEL " + String(this.store.snapshot().profile.level).padStart(2, "0");
 
+    const playerStats = this.store.snapshot().playerStats;
+    const playerAtk = playerStats?.damage || 50;
+    if (this.playerAtkText) {
+      this.playerAtkText.textContent = String(playerAtk);
+    }
+
     // Single vs Dual Enemy Boss HUD
     const singleHud = $("#enemy-hud-single");
     const dualHud = $("#enemy-hud-dual");
@@ -2251,8 +2551,14 @@ export class AppView {
       if (dualHud) dualHud.hidden = false;
       const left = state.enemies.find((e) => e.id === "left");
       const right = state.enemies.find((e) => e.id === "right");
+      const multiplier = state.stage.enemyDamageMultiplier || 1;
+      const enemyAtk = state.stage.isDojo
+        ? Number(state.stage.customDamage ?? 0)
+        : Math.round(BATTLE_RULES.enemyDamage * multiplier);
+      if (this.enemyLeftAtkText) this.enemyLeftAtkText.textContent = String(enemyAtk);
+      if (this.enemyRightAtkText) this.enemyRightAtkText.textContent = String(enemyAtk);
       if (left) {
-        $("#enemy-left-name").textContent = I18n.t("dialogue.speakerPlatinumKohaku") + "・" + I18n.t("directions.left");
+        $("#enemy-left-name").textContent = state.stage.isDojo ? (I18n.t("dojo.dummySilhouetteLeft") || left.name) : (I18n.t("dialogue.speakerPlatinumKohaku") + "・" + I18n.t("directions.left"));
         $("#enemy-left-hp-text").textContent = left.hp.toLocaleString("zh-TW") + " / " + left.maxHp.toLocaleString("zh-TW");
         $("#enemy-left-hp-fill").style.width = clampPercent(left.hp, left.maxHp) + "%";
         const leftCard = document.querySelector("[data-target-enemy='left']");
@@ -2262,7 +2568,7 @@ export class AppView {
         }
       }
       if (right) {
-        $("#enemy-right-name").textContent = I18n.t("dialogue.speakerPlatinumKohaku") + "・" + I18n.t("directions.right");
+        $("#enemy-right-name").textContent = state.stage.isDojo ? (I18n.t("dojo.dummySilhouetteRight") || right.name) : (I18n.t("dialogue.speakerPlatinumKohaku") + "・" + I18n.t("directions.right"));
         $("#enemy-right-hp-text").textContent = right.hp.toLocaleString("zh-TW") + " / " + right.maxHp.toLocaleString("zh-TW");
         $("#enemy-right-hp-fill").style.width = clampPercent(right.hp, right.maxHp) + "%";
         const rightCard = document.querySelector("[data-target-enemy='right']");
@@ -2274,7 +2580,12 @@ export class AppView {
     } else {
       if (singleHud) singleHud.hidden = false;
       if (dualHud) dualHud.hidden = true;
-      $("#enemy-name").textContent = state.stage.final ? I18n.t("dialogue.speakerPlatinumKohaku") : I18n.t("dialogue.speakerKohaku");
+      const multiplier = state.stage.enemyDamageMultiplier || 1;
+      const enemyAtk = state.stage.isDojo
+        ? Number(state.stage.customDamage ?? 0)
+        : Math.round(BATTLE_RULES.enemyDamage * multiplier);
+      if (this.enemyAtkText) this.enemyAtkText.textContent = String(enemyAtk);
+      $("#enemy-name").textContent = state.stage.isDojo ? (I18n.t("dojo.dummySilhouette") || "影・小樂") : (state.stage.final ? I18n.t("dialogue.speakerPlatinumKohaku") : I18n.t("dialogue.speakerKohaku"));
       $("#enemy-hp-text").textContent = state.enemyHp.toLocaleString("zh-TW") + " / " + state.enemyMaxHp.toLocaleString("zh-TW");
       $("#enemy-hp-fill").style.width = clampPercent(state.enemyHp, state.enemyMaxHp) + "%";
     }
@@ -2293,6 +2604,7 @@ export class AppView {
 
     if (this.battleCharacterWrap) {
       this.battleCharacterWrap.classList.toggle("is-dual-stage", Boolean(state.stage.dualEnemy));
+      this.battleCharacterWrap.classList.toggle("is-silhouette", Boolean(state.stage.isSilhouette));
     }
 
     if (state.stage.dualEnemy && state.enemies?.length >= 2) {
@@ -2600,15 +2912,16 @@ export class AppView {
   renderSlotHint(hintEl, expected, mode) {
     if (!hintEl || !expected) return;
     const chord = getDirectionChord(expected);
+    const direction = DIRECTIONS.find((item) => item.id === expected);
+    const keyTip = mode === "WASD" ? (direction?.keys?.find((k) => ["w", "a", "s", "d", "q", "e", "z", "c"].includes(k))?.toUpperCase() || "") : "";
+    const svg = getDirectionSvg(expected) || direction?.glyph || "—";
     if (chord) {
       const svg1 = getDirectionSvg(chord[0]) || chord[0];
       const svg2 = getDirectionSvg(chord[1]) || chord[1];
-      hintEl.innerHTML = '斜向 <b>' + svg1 + "</b><i>＋</i><b>" + svg2 + "</b>";
+      hintEl.innerHTML = '<span class="mobile-only">目標 <b>' + svg + '</b></span>' +
+        '<span class="keyboard-only">斜向 <b>' + svg1 + "</b><i>＋</i><b>" + svg2 + "</b>" + (keyTip ? " (" + keyTip + ")" : "") + "</span>";
       hintEl.classList.add("is-chord");
     } else {
-      const direction = DIRECTIONS.find((item) => item.id === expected);
-      const keyTip = mode === "WASD" ? (direction?.keys?.find((k) => ["w", "a", "s", "d", "q", "e", "z", "c"].includes(k))?.toUpperCase() || "") : "";
-      const svg = getDirectionSvg(expected) || direction?.glyph || "—";
       hintEl.innerHTML = '輸入 <b>' + svg + "</b>" + (keyTip ? '<span class="keyboard-only"> (' + keyTip + ")</span>" : "");
       hintEl.classList.remove("is-chord");
     }
@@ -2619,15 +2932,16 @@ export class AppView {
     const chord = getDirectionChord(expected);
     const hint = $("#qte-input-hint");
     if (!hint) return;
+    const direction = DIRECTIONS.find((item) => item.id === expected);
+    const svg = getDirectionSvg(expected) || direction?.glyph || "—";
     if (chord) {
       const svg1 = getDirectionSvg(chord[0]) || chord[0];
       const svg2 = getDirectionSvg(chord[1]) || chord[1];
-      hint.innerHTML = '斜向合成 <b>' + svg1 + "</b><i>＋</i><b>" + svg2 + "</b>";
+      hint.innerHTML = '<span class="mobile-only">目標方向 <b>' + svg + '</b></span>' +
+        '<span class="keyboard-only">斜向合成 <b>' + svg1 + "</b><i>＋</i><b>" + svg2 + "</b></span>";
       hint.classList.add("is-chord");
     } else {
-      const direction = DIRECTIONS.find((item) => item.id === expected);
-      const svg = getDirectionSvg(expected) || direction?.glyph || "—";
-      hint.innerHTML = '單方向輸入 <b>' + svg + "</b>";
+      hint.innerHTML = '輸入方向 <b>' + svg + "</b>";
       hint.classList.remove("is-chord");
     }
   }
@@ -3070,5 +3384,257 @@ export class AppView {
     this.toastTimer = window.setTimeout(() => {
       this.toastElement.classList.remove("is-visible");
     }, 2400);
+  }
+
+  openDojoModal() {
+    if (this.dojoModal) {
+      this.dojoModal.hidden = false;
+      this.dojoModal.setAttribute("aria-hidden", "false");
+    }
+  }
+
+  closeDojoModal() {
+    if (this.dojoModal) {
+      this.dojoModal.hidden = true;
+      this.dojoModal.setAttribute("aria-hidden", "true");
+    }
+  }
+
+  startDojoQte(style = "single") {
+    this.stopDojoQte();
+    this.dojoQteActive = true;
+    this.dojoQteStyle = style;
+    this.dojoCombo = 0;
+    this.dojoMaxCombo = 0;
+    this.dojoTotalAttempts = 0;
+    this.dojoSuccessHits = 0;
+    this.dojoReactionTimes = [];
+
+    const modeTitle = $("#dojo-qte-mode-title");
+    if (modeTitle) {
+      modeTitle.textContent = style === "dual" ? I18n.t("dojo.mode1Style2") : I18n.t("dojo.mode1Style1");
+    }
+
+    const singleContainer = $("#dojo-qte-single-container");
+    const dualContainer = $("#dojo-qte-dual-container");
+    if (singleContainer) singleContainer.hidden = style === "dual";
+    if (dualContainer) dualContainer.hidden = style !== "dual";
+
+    this.updateDojoMetrics();
+    this.switchScreen("dojo-qte");
+
+    if (style === "dual") {
+      this.dojoDualQteSystem = new DualQTESystem(this.bus, this.timers, Math.random);
+    } else {
+      this.dojoQteSystem = new QTESystem(this.bus, this.timers, Math.random);
+    }
+
+    this.nextDojoQteStep();
+  }
+
+  stopDojoQte() {
+    this.dojoQteActive = false;
+    if (this.dojoQteSystem) {
+      this.dojoQteSystem.stop(false);
+      this.dojoQteSystem = null;
+    }
+    if (this.dojoDualQteSystem) {
+      this.dojoDualQteSystem.stop(false);
+      this.dojoDualQteSystem = null;
+    }
+    if (this.dojoStepTimeout) {
+      clearTimeout(this.dojoStepTimeout);
+      this.dojoStepTimeout = null;
+    }
+    this.qteKeyboard.reset();
+    this.leftQteKeyboard.reset();
+    this.rightQteKeyboard.reset();
+  }
+
+  updateDojoMetrics() {
+    const comboEl = $("#dojo-metric-combo");
+    const maxComboEl = $("#dojo-metric-max-combo");
+    const avgReactionEl = $("#dojo-metric-avg-reaction");
+    const successRateEl = $("#dojo-metric-success-rate");
+
+    if (comboEl) comboEl.textContent = String(this.dojoCombo);
+    if (maxComboEl) maxComboEl.textContent = String(this.dojoMaxCombo);
+    if (avgReactionEl) {
+      const avg = this.dojoReactionTimes.length > 0
+        ? Math.round(this.dojoReactionTimes.reduce((a, b) => a + b, 0) / this.dojoReactionTimes.length)
+        : 0;
+      avgReactionEl.textContent = avg + " ms";
+    }
+    if (successRateEl) {
+      const rate = this.dojoTotalAttempts > 0
+        ? Math.round((this.dojoSuccessHits / this.dojoTotalAttempts) * 100)
+        : 100;
+      successRateEl.textContent = rate + "%";
+    }
+  }
+
+  nextDojoQteStep() {
+    if (!this.dojoQteActive) return;
+    this.dojoStepStartTime = performance.now();
+
+    if (this.dojoQteStyle === "dual") {
+      this.dojoDualQteSystem.start({
+        length: 5,
+        durationMs: 6000,
+        directionMode: "all",
+        maxErrors: 2
+      });
+    } else {
+      this.dojoQteSystem.start({
+        length: 5,
+        durationMs: 5000,
+        directionMode: "all",
+        maxErrors: 2
+      });
+    }
+  }
+
+  renderDojoQte(state) {
+    if (!this.dojoQteActive) return;
+    if (state.mode === "dual") {
+      const leftSeq = $("#dojo-dual-sequence-left");
+      const rightSeq = $("#dojo-dual-sequence-right");
+      const arrowMap = {
+        up: "W",
+        down: "S",
+        left: "A",
+        right: "D",
+        upLeft: "Q",
+        upRight: "E",
+        downLeft: "Z",
+        downRight: "C"
+      };
+
+      if (leftSeq && state.left?.sequence) {
+        leftSeq.innerHTML = state.left.sequence.map((id, index) => {
+          const direction = DIRECTIONS.find((item) => item.id === id);
+          const status = index < state.left.index ? " is-done" : index === state.left.index ? " is-current" : "";
+          const hint = arrowMap[id] || "";
+          return '<span class="qte-arrow' + status + '" aria-label="' + (direction?.label || "") + '">' +
+            (getDirectionSvg(id) || direction?.glyph || "") +
+            (hint ? '<small class="qte-arrow-key-hint keyboard-only">' + hint + "</small>" : "") +
+            "</span>";
+        }).join("");
+      }
+
+      if (rightSeq && state.right?.sequence) {
+        rightSeq.innerHTML = state.right.sequence.map((id, index) => {
+          const direction = DIRECTIONS.find((item) => item.id === id);
+          const status = index < state.right.index ? " is-done" : index === state.right.index ? " is-current" : "";
+          return '<span class="qte-arrow' + status + '" aria-label="' + (direction?.label || "") + '">' +
+            (getDirectionSvg(id) || direction?.glyph || "") +
+            "</span>";
+        }).join("");
+      }
+
+      const leftStatus = $("#dojo-dual-left-status");
+      const rightStatus = $("#dojo-dual-right-status");
+      if (leftStatus) {
+        if (state.left?.completed) {
+          leftStatus.textContent = state.left.success ? "✓ 命中" : "× 失誤";
+        } else {
+          leftStatus.textContent = "進行中 (" + (state.left?.index || 0) + "/" + (state.left?.sequence?.length || 0) + ")";
+        }
+      }
+      if (rightStatus) {
+        if (state.right?.completed) {
+          rightStatus.textContent = state.right.success ? "✓ 命中" : "× 失誤";
+        } else {
+          rightStatus.textContent = "進行中 (" + (state.right?.index || 0) + "/" + (state.right?.sequence?.length || 0) + ")";
+        }
+      }
+      return;
+    }
+
+    // Single Dojo QTE
+    const seq = $("#dojo-qte-sequence");
+    if (seq && state.sequence) {
+      seq.innerHTML = state.sequence.map((id, index) => {
+        const direction = DIRECTIONS.find((item) => item.id === id);
+        const status = index < state.index ? " is-done" : index === state.index ? " is-current" : "";
+        return '<span class="qte-arrow' + status + '" aria-label="' + (direction?.label || "") + '">' + (getDirectionSvg(id) || direction?.glyph || "") + "</span>";
+      }).join("");
+    }
+    const timerFill = $("#dojo-qte-timer-fill");
+    if (timerFill) {
+      timerFill.style.width = Math.max(0, Math.min(100, state.progress * 100)) + "%";
+    }
+  }
+
+  handleDojoQteFinished(result) {
+    if (!this.dojoQteActive || !result) return;
+    const isSuccess = result.mode === "dual" ? (result.left?.success && result.right?.success) : result.success;
+    if (isSuccess) {
+      const reaction = Math.round(performance.now() - this.dojoStepStartTime);
+      this.dojoCombo += 1;
+      this.dojoMaxCombo = Math.max(this.dojoMaxCombo, this.dojoCombo);
+      this.dojoSuccessHits += 1;
+      this.dojoTotalAttempts += 1;
+      this.dojoReactionTimes.push(reaction);
+      this.updateDojoMetrics();
+      this.bus.emit("sound", { name: "select" });
+      this.dojoStepTimeout = setTimeout(() => this.nextDojoQteStep(), 350);
+    } else {
+      this.dojoCombo = 0;
+      this.dojoTotalAttempts += 1;
+      this.updateDojoMetrics();
+      this.bus.emit("sound", { name: "danger" });
+      this.dojoStepTimeout = setTimeout(() => this.nextDojoQteStep(), 500);
+    }
+  }
+
+  startDojoSandbox({ isDual, customHp, customDamage }) {
+    this.hideFloatingWatermelon();
+    this.postBattle?.closeAutoWatermelon?.();
+    this.battle.stopAutoBattle();
+    if (!this.battle.start(null, { isDojo: true, isDual, customHp, customDamage, isSilhouette: true })) return;
+    this.postState = null;
+    this.battleArena?.classList.remove("is-settlement");
+    this.resultOverlay.classList.remove("is-active");
+    this.resultOverlay.setAttribute("aria-hidden", "true");
+    this.navigate("battle");
+  }
+
+  addDamageLogEntry({ target, targetName, amount, source }) {
+    if (!this.recentDamageLog) this.recentDamageLog = [];
+    const sourceKeyMap = {
+      rps_win: "battle.damageSourceRps",
+      morph: "battle.damageSourceMorph",
+      counter: "battle.damageSourceCounter",
+      momo: "battle.damageSourceMomo",
+      burn: "battle.damageSourceBurn",
+      reflect: "battle.damageSourceReflect",
+      burst: "battle.damageSourceBurst",
+      enemy_attack: "battle.damageSourceEnemy"
+    };
+    const sourceText = sourceKeyMap[source] ? I18n.t(sourceKeyMap[source]) : (source || "");
+    const entry = {
+      id: Date.now() + Math.random(),
+      target,
+      targetName: targetName || (target === "enemy" ? "小樂" : "旅人"),
+      amount,
+      sourceText,
+      isEnemyHit: target === "enemy"
+    };
+
+    this.recentDamageLog.push(entry);
+    if (this.recentDamageLog.length > 5) {
+      this.recentDamageLog.shift();
+    }
+
+    const logList = $("#battle-damage-log-list");
+    if (logList) {
+      logList.innerHTML = this.recentDamageLog.map((item) => `
+        <div class="damage-log-entry ${item.isEnemyHit ? "is-enemy-hit" : "is-player-hit"}">
+          <span class="damage-log-source">${item.targetName} [${item.sourceText}]</span>
+          <span class="damage-log-amount">-${item.amount}</span>
+        </div>
+      `).join("");
+    }
   }
 }

@@ -11,12 +11,15 @@
     <meta property="og:title" content="狐樂・絆之勝負 — Endless Koraku">
     <meta property="og:description" content="與狐娘小樂進行猜拳、QTE 反制、升級與泳裝事件的日式 ACGN 網頁小遊戲。">
     <title>狐樂・絆之勝負</title>
-    <link rel="stylesheet" href="./src/styles/tokens.css?v=202608310652">
-    <link rel="stylesheet" href="./src/styles/base.css?v=202608310652">
-    <link rel="stylesheet" href="./src/styles/components.css?v=202608310652">
-    <link rel="stylesheet" href="./src/styles/screens.css?v=202608310652">
-    <link rel="stylesheet" href="./src/styles/animations.css?v=202608310652">
-    <link rel="stylesheet" href="./src/styles/responsive.css?v=202608310652">
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+    <link rel="icon" type="image/x-icon" href="./favicon.ico">
+    <link rel="apple-touch-icon" href="./favicon.svg">
+    <link rel="stylesheet" href="./src/styles/tokens.css?v=202608310845">
+    <link rel="stylesheet" href="./src/styles/base.css?v=202608310845">
+    <link rel="stylesheet" href="./src/styles/components.css?v=202608310845">
+    <link rel="stylesheet" href="./src/styles/screens.css?v=202608310845">
+    <link rel="stylesheet" href="./src/styles/animations.css?v=202608310845">
+    <link rel="stylesheet" href="./src/styles/responsive.css?v=202608310845">
   </head>
   <body>
     <div id="app" class="app-shell" data-screen="home">
@@ -112,6 +115,11 @@
                 <span><b data-i18n="ui.menuGuide">遊戲指南</b><small data-i18n="ui.menuGuideSub">HOW TO PLAY</small></span>
                 <i>›</i>
               </button>
+              <button class="menu-command" type="button" data-nav="dojo" id="btn-menu-dojo">
+                <span class="command-index">08</span>
+                <span><b data-i18n="ui.menuDojo">修練道場</b><small data-i18n="ui.menuDojoSub">QTE & SANDBOX</small></span>
+                <i>›</i>
+              </button>
             </nav>
 
             <div class="home-record" aria-label="戰績">
@@ -123,6 +131,10 @@
             </div>
 
             <div class="home-admin-actions">
+              <button id="open-dojo-modal" class="text-button dojo-button" type="button">
+                <svg class="admin-btn-icon" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                <span data-i18n="ui.navDojo">修練場</span>
+              </button>
               <button id="open-cheat-modal" class="text-button cheat-button" type="button">
                 <svg class="admin-btn-icon" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
                 <span data-i18n="ui.openCheat">測試調試 / 作弊選單</span>
@@ -132,6 +144,8 @@
                 <span data-i18n="ui.saveRecord">存檔紀錄</span>
               </button>
               <footer class="home-footer" aria-label="頁腳資訊">
+                <span class="footer-version" id="footer-app-version">0.4.0</span>
+                <span class="footer-plain-sep">/</span>
                 <a href="https://store.steampowered.com/app/1425000" target="_blank" rel="noopener noreferrer" class="footer-plain-link">Endless Alice</a>
                 <span class="footer-plain-sep">/</span>
                 <a href="https://discord.gg/fJFXdPPT5y" target="_blank" rel="noopener noreferrer" class="footer-plain-link">Discord</a>
@@ -701,6 +715,7 @@
                 <div class="hud-name">
                   <span class="fox-mark">狐</span>
                   <div><small>BOSS</small><b id="enemy-name">小樂</b></div>
+                  <span class="hud-atk-badge"><small>ATK</small> <b id="enemy-atk-text">100</b></span>
                   <em id="enemy-hp-text">1000 / 1000</em>
                 </div>
                 <div class="ornate-meter hp-meter enemy-meter"><i id="enemy-hp-fill"></i></div>
@@ -711,6 +726,7 @@
                     <div class="hud-name">
                       <span class="fox-mark">左</span>
                       <div><small>BOSS</small><b id="enemy-left-name">白金小樂・左</b></div>
+                      <span class="hud-atk-badge"><small>ATK</small> <b id="enemy-left-atk-text">200</b></span>
                       <em id="enemy-left-hp-text">5000 / 5000</em>
                     </div>
                     <div class="ornate-meter hp-meter enemy-meter"><i id="enemy-left-hp-fill"></i></div>
@@ -719,6 +735,7 @@
                     <div class="hud-name">
                       <span class="fox-mark">右</span>
                       <div><small>BOSS</small><b id="enemy-right-name">白金小樂・右</b></div>
+                      <span class="hud-atk-badge"><small>ATK</small> <b id="enemy-right-atk-text">200</b></span>
                       <em id="enemy-right-hp-text">5000 / 5000</em>
                     </div>
                     <div class="ornate-meter hp-meter enemy-meter"><i id="enemy-right-hp-fill"></i></div>
@@ -726,6 +743,14 @@
                 </div>
               </div>
             </section>
+
+            <!-- Recent 5 Damage Log (Compact FIFO) -->
+            <div id="battle-damage-log" class="battle-damage-log" aria-label="最近傷害紀錄">
+              <div class="damage-log-header">
+                <span data-i18n="battle.recentDamageLog">最近傷害</span>
+              </div>
+              <div id="battle-damage-log-list" class="damage-log-list"></div>
+            </div>
 
             <div id="battle-character-wrap" class="battle-character-wrap character-speaker" data-character-speaker>
               <div class="battle-character-aura" aria-hidden="true"></div>
@@ -799,6 +824,7 @@
                 <div class="hud-name player-name">
                   <span class="player-mark">主</span>
                   <div><small id="battle-player-level">LEVEL 01</small><b>旅人</b></div>
+                  <span class="hud-atk-badge"><small>ATK</small> <b id="player-atk-text">50</b></span>
                   <em id="player-hp-text">100 / 100</em>
                 </div>
                 <div class="ornate-meter hp-meter player-meter"><i id="player-hp-fill"></i></div>
@@ -1055,7 +1081,186 @@
             </section>
           </div>
         </section>
+
+        <!-- Screen: Dojo Continuous QTE -->
+        <section id="screen-dojo-qte" class="screen screen-dojo-qte" hidden aria-label="修練場 QTE 練習">
+          <div class="screen-content dojo-qte-content">
+            <header class="dojo-qte-header">
+              <div class="dojo-qte-title-group">
+                <p class="eyebrow" data-i18n="dojo.mode1Title">模式一：純 QTE 無限反應練習</p>
+                <h2 id="dojo-qte-mode-title" data-i18n="dojo.mode1Style1">第一式・單軌連續 QTE</h2>
+              </div>
+              <button id="btn-exit-dojo-qte" class="button-secondary dojo-exit-btn" type="button">
+                <svg class="admin-btn-icon" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                <span data-i18n="dojo.btnExitDojo">結束修練</span> <kbd>ESC</kbd>
+              </button>
+            </header>
+
+            <!-- Metrics bar -->
+            <div class="dojo-metrics-bar">
+              <div class="dojo-metric-card">
+                <small data-i18n="dojo.combo">連擊</small>
+                <b id="dojo-metric-combo">0</b>
+              </div>
+              <div class="dojo-metric-card">
+                <small data-i18n="dojo.maxCombo">最高連擊</small>
+                <b id="dojo-metric-max-combo">0</b>
+              </div>
+              <div class="dojo-metric-card">
+                <small data-i18n="dojo.avgReaction">平均反應</small>
+                <b id="dojo-metric-avg-reaction">0 ms</b>
+              </div>
+              <div class="dojo-metric-card">
+                <small data-i18n="dojo.successRate">成功率</small>
+                <b id="dojo-metric-success-rate">100%</b>
+              </div>
+            </div>
+
+            <!-- Single QTE container -->
+            <div id="dojo-qte-single-container" class="dojo-qte-track-container">
+              <div id="dojo-qte-sequence" class="qte-sequence dojo-sequence"></div>
+              <div id="dojo-qte-hint" class="qte-input-hint">方向鍵 / WASD / 數字鍵盤</div>
+              <div class="qte-timer"><i id="dojo-qte-timer-fill"></i></div>
+              <div id="dojo-qte-pad" class="qte-pad" aria-label="方向輸入">
+                <button type="button" data-direction="upLeft" aria-label="左上"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 6v8h2V9.41l9.29 9.3 1.42-1.42L9.41 8H14V6H6z"/></svg></button>
+                <button type="button" data-direction="up" aria-label="上"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 4l-7 7 1.41 1.41L11 7.83V20h2V7.83l4.59 4.58L19 11z"/></svg></button>
+                <button type="button" data-direction="upRight" aria-label="右上"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18 6h-8v2h4.59L5.29 17.29l1.42 1.42L16 9.41V14h2V6z"/></svg></button>
+                <button type="button" data-direction="left" aria-label="左"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 12l7-7 1.41 1.41L7.83 11H20v2H7.83l4.58 4.59L11 19z"/></svg></button>
+                <span></span>
+                <button type="button" data-direction="right" aria-label="右"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 12l-7-7-1.41 1.41L16.17 11H4v2h12.17l-4.58 4.59L14 19z"/></svg></button>
+                <button type="button" data-direction="downLeft" aria-label="左下"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 18h8v-2H9.41l9.3-9.29-1.42-1.42L8 14.59V10H6v8z"/></svg></button>
+                <button type="button" data-direction="down" aria-label="下"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 20l7-7-1.41-1.41L13 16.17V4h-2v12.17l-4.59-4.58L5 13z"/></svg></button>
+                <button type="button" data-direction="downRight" aria-label="右下"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18 18v-8h-2v4.59L6.71 5.29 5.29 6.71 14.59 16H10v2h8z"/></svg></button>
+              </div>
+            </div>
+
+            <!-- Dual QTE container -->
+            <div id="dojo-qte-dual-container" class="dojo-qte-track-container dual-qte-split-grid" hidden>
+              <div class="dual-qte-slot" id="dojo-dual-slot-left">
+                <div class="slot-header">
+                  <span class="slot-badge wasd-badge keyboard-only">WASD 控制 (左軌)</span>
+                  <span class="slot-status-indicator" id="dojo-dual-left-status">進行中</span>
+                </div>
+                <div id="dojo-dual-sequence-left" class="qte-sequence"></div>
+                <div class="qte-input-hint">W / A / S / D</div>
+              </div>
+              <div class="dual-qte-slot" id="dojo-dual-slot-right">
+                <div class="slot-header">
+                  <span class="slot-badge arrow-badge keyboard-only">方向鍵 控制 (右軌)</span>
+                  <span class="slot-status-indicator" id="dojo-dual-right-status">進行中</span>
+                </div>
+                <div id="dojo-dual-sequence-right" class="qte-sequence"></div>
+                <div class="qte-input-hint">↑ / ← / ↓ / →</div>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
+
+      <!-- Training Dojo Modal -->
+      <div id="dojo-modal" class="modal-overlay dojo-modal-overlay" hidden aria-hidden="true">
+        <div class="modal-card dojo-modal-card">
+          <header class="modal-header">
+            <div>
+              <h3><span data-i18n="dojo.modalTitle">修練場・特訓選單</span></h3>
+              <p class="modal-subtitle" data-i18n="dojo.modalSubtitle">鍛鍊反應神經，測試數值與配裝極限</p>
+            </div>
+            <button id="close-dojo-modal" class="modal-close-btn" type="button">×</button>
+          </header>
+          <div class="dojo-modal-content">
+            <!-- Mode selection tabs -->
+            <div class="dojo-mode-tabs">
+              <button type="button" class="dojo-tab-btn is-active" data-dojo-mode="1">
+                <b data-i18n="dojo.mode1Title">模式一：純 QTE 無限反應練習</b>
+              </button>
+              <button type="button" class="dojo-tab-btn" data-dojo-mode="2">
+                <b data-i18n="dojo.mode2Title">模式二：戰鬥模擬與 DPS 測試沙盒</b>
+              </button>
+            </div>
+
+            <!-- Mode 1 Options Panel -->
+            <div id="dojo-mode1-panel" class="dojo-panel">
+              <p class="dojo-mode-desc" data-i18n="dojo.mode1Desc">無猜拳與回合等待，純粹連續生成 QTE 按鍵指令，即時鍛鍊反應與鍵位記憶。</p>
+              <div class="dojo-style-selection">
+                <label class="dojo-style-card is-selected">
+                  <input type="radio" name="dojo-mode1-style" value="single" checked>
+                  <div class="style-card-body">
+                    <strong data-i18n="dojo.mode1Style1">第一式・單軌連續 QTE</strong>
+                    <span data-i18n="dojo.mode1Style1Desc">標準 8 方向單軌鍵盤連續輸入練習</span>
+                  </div>
+                </label>
+                <label class="dojo-style-card">
+                  <input type="radio" name="dojo-mode1-style" value="dual">
+                  <div class="style-card-body">
+                    <strong data-i18n="dojo.mode1Style2">第二式・雙軌同步 QTE</strong>
+                    <span data-i18n="dojo.mode1Style2Desc">模擬第四關雙生 Boss 雙軌情境（左手 WASD，右手 方向鍵）</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Mode 2 Options Panel -->
+            <div id="dojo-mode2-panel" class="dojo-panel" hidden>
+              <p class="dojo-mode-desc" data-i18n="dojo.mode2Desc">完整保留標準戰鬥節奏，對戰全黑小樂剪影假人，可自訂 HP 與傷害，無敗北壓力。</p>
+              <div class="dojo-style-selection">
+                <label class="dojo-style-card is-selected">
+                  <input type="radio" name="dojo-mode2-style" value="single" checked>
+                  <div class="style-card-body">
+                    <strong data-i18n="dojo.mode2Style1">第一式・單體假人對決</strong>
+                    <span data-i18n="dojo.mode2Style1Desc">單個全黑剪影假人，測試單體 DPS 與變拳/反擊</span>
+                  </div>
+                </label>
+                <label class="dojo-style-card">
+                  <input type="radio" name="dojo-mode2-style" value="dual">
+                  <div class="style-card-body">
+                    <strong data-i18n="dojo.mode2Style2">第二式・雙生假人對決</strong>
+                    <span data-i18n="dojo.mode2Style2Desc">雙個全黑剪影假人，模擬第四關雙手出拳與雙軌反制</span>
+                  </div>
+                </label>
+              </div>
+
+              <!-- Custom parameters for Sandbox -->
+              <div class="dojo-custom-params">
+                <div class="param-row">
+                  <label for="dojo-custom-hp" data-i18n="dojo.customHpLabel">假人生命值 (HP)</label>
+                  <div class="param-input-group">
+                    <input type="number" id="dojo-custom-hp" value="10000" min="1" max="999999" step="1000">
+                    <div class="preset-chips">
+                      <button type="button" class="chip-btn" data-hp="1000">1K</button>
+                      <button type="button" class="chip-btn is-active" data-hp="10000">10K</button>
+                      <button type="button" class="chip-btn" data-hp="50000">50K</button>
+                      <button type="button" class="chip-btn" data-hp="100000">100K</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="param-row">
+                  <label for="dojo-custom-dmg">
+                    <span data-i18n="dojo.customDmgLabel">假人傷害值 (ATK)</span>
+                    <small class="param-hint" data-i18n="dojo.zeroDamageHint">（預設 0 傷害，對玩家無傷害，無敗北壓力）</small>
+                  </label>
+                  <div class="param-input-group">
+                    <input type="number" id="dojo-custom-dmg" value="0" min="0" max="9999" step="10">
+                    <div class="preset-chips">
+                      <button type="button" class="chip-btn is-active" data-dmg="0">0 (無傷)</button>
+                      <button type="button" class="chip-btn" data-dmg="50">50</button>
+                      <button type="button" class="chip-btn" data-dmg="100">100</button>
+                      <button type="button" class="chip-btn" data-dmg="250">250</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="dojo-modal-actions">
+              <button type="button" class="button-primary dojo-start-btn" id="btn-start-dojo-practice">
+                <svg class="admin-btn-icon" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+                <span data-i18n="dojo.btnStartPractice">開始修練</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <!-- Battle Pause Modal -->
       <div id="battle-pause-modal" class="modal-overlay pause-modal-overlay" hidden aria-hidden="true">
@@ -1311,6 +1516,6 @@
       <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
     </div>
-    <script src="./src/js/bundle.js?v=202608310652"></script>
+    <script src="./src/js/bundle.js?v=202608310845"></script>
   </body>
 </html>

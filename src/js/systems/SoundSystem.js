@@ -35,8 +35,10 @@ export class SoundSystem {
     const unlock = () => {
       this.ensureContext();
       if (this.context) {
-        if (this.context.state === "suspended") {
-          this.context.resume().catch(() => {});
+        if (this.context.state === "suspended" || this.context.state === "interrupted") {
+          this.context.resume().then(() => {
+            this.updateMusicState();
+          }).catch(() => {});
         }
         try {
           const buffer = this.context.createBuffer(1, 1, 22050);
@@ -47,12 +49,28 @@ export class SoundSystem {
         } catch (_) {}
       }
       this.updateMusicState();
-      if (this.context && this.context.state === "running") {
-        events.forEach((evt) => window.removeEventListener(evt, unlock));
-      }
     };
+
     const events = ["pointerdown", "touchstart", "touchend", "click", "keydown"];
     events.forEach((evt) => window.addEventListener(evt, unlock, { passive: true }));
+
+    if (typeof document !== "undefined") {
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible" && this.context) {
+          if (this.context.state === "suspended" || this.context.state === "interrupted") {
+            this.context.resume().then(() => this.updateMusicState()).catch(() => {});
+          } else {
+            this.updateMusicState();
+          }
+        }
+      });
+    }
+
+    window.addEventListener("pageshow", () => {
+      if (this.context) {
+        this.context.resume().then(() => this.updateMusicState()).catch(() => {});
+      }
+    });
   }
 
   ensureContext() {
@@ -112,8 +130,16 @@ export class SoundSystem {
       this.masterSfxGain.gain.linearRampToValueAtTime(isSfxMuted ? 0.0001 : 0.35, now + 0.08);
     }
 
-    if (!this.isMusicRunning && this.context.state === "running") {
-      this.startMusicScheduler();
+    if (!isMusicMuted) {
+      if (this.context.state === "running") {
+        this.startMusicScheduler();
+      } else if (this.context.state === "suspended" || this.context.state === "interrupted") {
+        this.context.resume().then(() => {
+          if (this.context?.state === "running") {
+            this.startMusicScheduler();
+          }
+        }).catch(() => {});
+      }
     }
   }
 

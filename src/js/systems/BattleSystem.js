@@ -60,12 +60,76 @@ export class BattleSystem {
   }
 
   start(stageId, options = {}) {
-    const stage = STAGES.find((item) => item.id === Number(stageId));
+    let stage = null;
     const profile = this.store.snapshot();
-    const isStageUnlocked = (profile.records?.clearedStages || []).includes(Number(stageId)) || profile.profile.level >= stage?.requiredLevel;
-    if (!stage || !isStageUnlocked) {
-      this.bus.emit("toast", { message: "等級尚未達到這一章的挑戰條件。", tone: "danger" });
-      return false;
+
+    if (options.isDojo) {
+      const customHp = Math.max(1, Number(options.customHp || 10000));
+      const customDamage = Math.max(0, Number(options.customDamage ?? 0));
+      if (options.isDual) {
+        stage = {
+          id: 992,
+          chapter: I18n.t("dojo.chapterName") || "修練場",
+          name: I18n.t("dojo.mode2Style2") || "影小樂・雙生木樁",
+          subtitle: I18n.t("dojo.mode2Style2Desc") || "第四關雙手雙軌模擬",
+          enemyHp: customHp * 2,
+          requiredLevel: 1,
+          rewardMultiplier: 0,
+          xpWin: 0,
+          xpLoss: 0,
+          winCoins: 0,
+          lossCoins: 0,
+          roundSeconds: 3,
+          reactionWindowMs: 750,
+          momoDodgeRate: 0,
+          qteDirections: "all",
+          qteLength: 7,
+          maxErrors: 1,
+          enemyDamageMultiplier: 1,
+          customDamage,
+          dualEnemy: true,
+          isDojo: true,
+          isSilhouette: true,
+          enemies: [
+            { id: "left", name: I18n.t("dojo.dummySilhouetteLeft") || "影・小樂（左）", hp: customHp, maxHp: customHp, alive: true },
+            { id: "right", name: I18n.t("dojo.dummySilhouetteRight") || "影・小樂（右）", hp: customHp, maxHp: customHp, alive: true }
+          ],
+          final: false
+        };
+      } else {
+        stage = {
+          id: 991,
+          chapter: I18n.t("dojo.chapterName") || "修練場",
+          name: I18n.t("dojo.mode2Style1") || "影小樂・單體木樁",
+          subtitle: I18n.t("dojo.mode2Style1Desc") || "無壓實戰與 DPS 測試",
+          enemyHp: customHp,
+          requiredLevel: 1,
+          rewardMultiplier: 0,
+          xpWin: 0,
+          xpLoss: 0,
+          winCoins: 0,
+          lossCoins: 0,
+          roundSeconds: 3,
+          reactionWindowMs: 750,
+          momoDodgeRate: 0,
+          qteDirections: "all",
+          qteLength: 5,
+          maxErrors: 2,
+          enemyDamageMultiplier: 1,
+          customDamage,
+          isDojo: true,
+          isSilhouette: true,
+          enemies: [{ id: "main", name: I18n.t("dojo.dummySilhouette") || "影・小樂", hp: customHp, maxHp: customHp, alive: true }],
+          final: false
+        };
+      }
+    } else {
+      stage = STAGES.find((item) => item.id === Number(stageId));
+      const isStageUnlocked = (profile.records?.clearedStages || []).includes(Number(stageId)) || profile.profile.level >= stage?.requiredLevel;
+      if (!stage || !isStageUnlocked) {
+        this.bus.emit("toast", { message: "等級尚未達到這一章的挑戰條件。", tone: "danger" });
+        return false;
+      }
     }
 
     if (options.autoBattle) {
@@ -708,6 +772,12 @@ export class BattleSystem {
             targetId: target.id,
             skill: "momo"
           });
+          this.bus.emit("battle:damage-logged", {
+            target: "enemy",
+            targetName: target.name,
+            amount: momoDamage,
+            source: "momo"
+          });
           this.bus.emit("sound", { name: "counterRub" });
           this.finishRound("draw", "平手！但你偷摸了" + target.name + "一下，造成 " + momoDamage + " 點傷害！");
           return;
@@ -869,6 +939,17 @@ export class BattleSystem {
       targetId: target.id,
       countered
     });
+    let logSource = "rps_win";
+    if (countered) logSource = "counter";
+    else if (this.state.morphUsed) logSource = "morph";
+    else if (!damageAmount && this.hasEquipEffect("burst")) logSource = "burst";
+
+    this.bus.emit("battle:damage-logged", {
+      target: "enemy",
+      targetName: target.name,
+      amount,
+      source: logSource
+    });
     this.bus.emit("sound", { name: countered ? "counterRub" : "hit" });
   }
 
@@ -896,16 +977,27 @@ export class BattleSystem {
     }
 
     const multiplier = this.state.stage.enemyDamageMultiplier || 1;
+    const isDojo = Boolean(this.state.stage?.isDojo);
+    const baseDamage = isDojo
+      ? Number(this.state.stage.customDamage ?? 0)
+      : (BATTLE_RULES.enemyDamage * multiplier);
+
     const shieldReduction = this.getAllEquipEffects("shield").reduce((sum, eff) => sum + (eff.damageReduction || 0), 0);
     const armorReduction = this.getAllEquipEffects("armor_reduction").reduce((sum, eff) => sum + (eff.damageReduction || 0), 0);
     const reduction = shieldReduction + armorReduction;
-    const totalDamage = Math.max(1, (BATTLE_RULES.enemyDamage * multiplier) - reduction);
+    const totalDamage = baseDamage === 0 ? 0 : Math.max(0, baseDamage - reduction);
 
     this.state.playerHp = Math.max(0, this.state.playerHp - totalDamage);
     this.battleDamageTaken = (this.battleDamageTaken || 0) + totalDamage;
     this.bus.emit("battle:effect", {
       type: "player-hit",
       amount: totalDamage
+    });
+    this.bus.emit("battle:damage-logged", {
+      target: "player",
+      targetName: I18n.t("dialogue.speakerPlayer") || "旅人",
+      amount: totalDamage,
+      source: "enemy_attack"
     });
     this.bus.emit("sound", { name: "hurt" });
 
@@ -924,6 +1016,12 @@ export class BattleSystem {
           amount: reflectDamage,
           targetId: target.id
         });
+        this.bus.emit("battle:damage-logged", {
+          target: "enemy",
+          targetName: target.name,
+          amount: reflectDamage,
+          source: "reflect"
+        });
       }
     }
 
@@ -940,10 +1038,15 @@ export class BattleSystem {
     }
 
     const multiplier = this.state.stage.enemyDamageMultiplier || 1;
+    const isDojo = Boolean(this.state.stage?.isDojo);
+    const baseDamage = isDojo
+      ? Number(this.state.stage.customDamage ?? 0)
+      : (BATTLE_RULES.enemyDamage * multiplier);
+
     const shieldReduction = this.getAllEquipEffects("shield").reduce((sum, eff) => sum + (eff.damageReduction || 0), 0);
     const armorReduction = this.getAllEquipEffects("armor_reduction").reduce((sum, eff) => sum + (eff.damageReduction || 0), 0);
     const reduction = shieldReduction + armorReduction;
-    const singleDamage = Math.max(1, (BATTLE_RULES.enemyDamage * multiplier) - reduction);
+    const singleDamage = baseDamage === 0 ? 0 : Math.max(0, baseDamage - reduction);
     const totalDamage = singleDamage * count;
 
     this.state.playerHp = Math.max(0, this.state.playerHp - totalDamage);
@@ -951,6 +1054,12 @@ export class BattleSystem {
     this.bus.emit("battle:effect", {
       type: "player-hit",
       amount: totalDamage
+    });
+    this.bus.emit("battle:damage-logged", {
+      target: "player",
+      targetName: I18n.t("dialogue.speakerPlayer") || "旅人",
+      amount: totalDamage,
+      source: "enemy_attack"
     });
     this.bus.emit("sound", { name: "hurt" });
 
@@ -968,6 +1077,12 @@ export class BattleSystem {
           type: "enemy-hit",
           amount: reflectDamage,
           targetId: target.id
+        });
+        this.bus.emit("battle:damage-logged", {
+          target: "enemy",
+          targetName: target.name,
+          amount: reflectDamage,
+          source: "reflect"
         });
       }
     }
@@ -998,6 +1113,12 @@ export class BattleSystem {
         this.state.targetEnemyId = this.state.enemies.find((e) => e.alive)?.id || target.id;
       }
       this.bus.emit("battle:effect", { type: "burn", amount: totalBurn, targetId: target?.id });
+      this.bus.emit("battle:damage-logged", {
+        target: "enemy",
+        targetName: target?.name || "小樂",
+        amount: totalBurn,
+        source: "burn"
+      });
     }
 
     this.emitState();

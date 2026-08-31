@@ -76,3 +76,17 @@ Product spec: `OPENSPEC.md`. Follow the workspace OpenSpec workflow in `D:\game-
    - 所有管理彈窗與行動端按鈕必須具備獨立的 `z-index`、適當的觸控熱區（最小 40px 高度）與 `pointer-events: auto;`。
    - 角色立繪等裝飾層必須設置 `pointer-events: none;`，嚴格防止點擊穿透或事件攔截。
 
+---
+
+## 6. 版本號維護規範 (Versioning Requirements)
+
+1. **頁腳版本號位置與格式**：
+   - 遊戲版本號必須固定顯示於首頁頁腳（`footer.home-footer`）最左側第一個位置。
+   - 版本號格式嚴格遵循三段式語意化版號：`0.0.0`（例如 `0.3.0`）。
+2. **每次改版同步更新**：
+   - 任何功能更新、修復或發布上線時，必須同步更新：
+     - `src/js/config/gameConfig.js` 中的 `APP_VERSION` 常數。
+     - `index.html` 頁腳元素 `<span class="footer-version" id="footer-app-version">0.0.0</span>`。
+     - `index.html` 中的 CSS 與 `bundle.js` 快取版本號參數（`?v=YYYYMMDDHHmm`）。
+     - `HANDOFF.md` 與 `wiki.md` 交接與百科文件中的版本記錄。
+

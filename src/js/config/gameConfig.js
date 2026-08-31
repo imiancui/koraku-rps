@@ -1,3 +1,12 @@
+export const APP_VERSION = "0.4.0";
+
+export const DOJO_CONFIG = Object.freeze({
+  defaultHp: 10000,
+  defaultDamage: 0,
+  minHp: 1,
+  maxHp: 999999
+});
+
 export const ASSETS = Object.freeze({
   default: "./koraku/小樂-預設.png",
   final: "./koraku/小樂-2P色.png",

@@ -125,11 +125,21 @@ export class QTEKeyboardInput {
     if (!direction) return { handled: false, direction: null };
 
     if (isDiagonalDirection(direction)) {
+      if (repeat && direction !== expectedDirection) {
+        return { handled: true, direction: null };
+      }
       return { handled: true, direction };
     }
 
     if (!CARDINAL_DIRECTIONS.has(direction)) {
       return { handled: false, direction: null };
+    }
+
+    if (repeat) {
+      if (direction === expectedDirection) {
+        return { handled: true, direction };
+      }
+      return { handled: true, direction: null };
     }
 
     this.held.delete(OPPOSITES[direction]);

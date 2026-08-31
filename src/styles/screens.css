@@ -2476,6 +2476,15 @@
   width: fit-content;
 }
 
+.footer-version {
+  display: inline-block;
+  color: var(--gold);
+  font: 700 10px/1 var(--sans);
+  letter-spacing: 0.08em;
+  opacity: 0.75;
+  user-select: none;
+}
+
 .footer-plain-link {
   display: inline-block;
   width: fit-content;

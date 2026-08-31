@@ -4,6 +4,15 @@
   "use strict";
 
 // --- src/js/config/gameConfig.js ---
+const APP_VERSION = "0.4.0";
+
+const DOJO_CONFIG = Object.freeze({
+  defaultHp: 10000,
+  defaultDamage: 0,
+  minHp: 1,
+  maxHp: 999999
+});
+
 const ASSETS = Object.freeze({
   default: "./koraku/小樂-預設.png",
   final: "./koraku/小樂-2P色.png",
@@ -570,6 +579,20 @@ const DICTIONARY = {
       dangerZoneTitle: "存檔重置與刪除管理",
       dangerZoneDesc: "清除本裝置上的所有遊戲進度（等級、星砂、裝備、技能與戰績），回歸初始狀態：",
       btnModalResetSave: "重置存檔（清除所有紀錄）",
+      navDojo: "修練場",
+      menuDojo: "修練道場",
+      menuDojoSub: "QTE & SANDBOX",
+      recentDamageLog: "最近傷害",
+      damageSourceRps: "猜拳獲勝",
+      damageSourceMorph: "變拳克制",
+      damageSourceCounter: "QTE反制",
+      damageSourceMomo: "摸摸偷襲",
+      damageSourceBurn: "燃燒灼燒",
+      damageSourceReflect: "鏡光反彈",
+      damageSourceThunder: "神鳴追加",
+      damageSourceBurst: "重劍暴擊",
+      damageSourceEnemy: "敵方受擊",
+      atkLabel: "ATK",
       // Main menu
       menuStages: "開始對局",
       menuStagesSub: "STORY BATTLE",
@@ -1097,6 +1120,37 @@ const DICTIONARY = {
         description: "與小樂深厚羈絆的信物。全面提升能力，且戰勝時額外獲得 20% 星砂。"
       }
     },
+    dojo: {
+      modalTitle: "修練場・特訓選單",
+      modalSubtitle: "鍛鍊反應神經，測試數值與配裝極限",
+      mode1Title: "模式一：純 QTE 無限反應練習",
+      mode1Desc: "無猜拳與回合等待，純粹連續生成 QTE 按鍵指令，即時鍛鍊反應與鍵位記憶。",
+      mode1Style1: "第一式・單軌連續 QTE",
+      mode1Style1Desc: "標準 8 方向單軌鍵盤連續輸入練習",
+      mode1Style2: "第二式・雙軌同步 QTE",
+      mode1Style2Desc: "模擬第四關雙生 Boss 雙軌情境（左手 WASD，右手 方向鍵）",
+      mode2Title: "模式二：戰鬥模擬與 DPS 測試沙盒",
+      mode2Desc: "完整保留標準戰鬥節奏，對戰全黑小樂剪影假人，可自訂 HP 與傷害，無敗北壓力。",
+      mode2Style1: "第一式・單體假人對決",
+      mode2Style1Desc: "單個全黑剪影假人，測試單體 DPS 與變拳/反擊",
+      mode2Style2: "第二式・雙生假人對決",
+      mode2Style2Desc: "雙個全黑剪影假人，模擬第四關雙手出拳與雙軌反制",
+      customHpLabel: "假人生命值 (HP)",
+      customDmgLabel: "假人傷害值 (ATK)",
+      zeroDamageHint: "（預設 0 傷害，對玩家無傷害，無敗北壓力）",
+      btnStartPractice: "開始修練",
+      btnExitDojo: "結束修練",
+      combo: "連擊",
+      maxCombo: "最高連擊",
+      avgReaction: "平均反應",
+      successRate: "成功率",
+      dummySilhouette: "影・小樂",
+      dummySilhouetteLeft: "影・小樂（左）",
+      dummySilhouetteRight: "影・小樂（右）",
+      chapterName: "修練場",
+      dojoStatsTitle: "修練結算報告",
+      btnReturnDojoMenu: "返回修練選單"
+    },
     gallery: {
       koraku_default: {
         name: "巫女社・狐娘小樂",
@@ -1215,6 +1269,20 @@ const DICTIONARY = {
       dangerZoneTitle: "存档重置与删除管理",
       dangerZoneDesc: "清除本设备上的所有游戏进度（等级、星砂、装备、技能与战绩），回归初始状态：",
       btnModalResetSave: "重置存档（清除所有记录）",
+      navDojo: "修练场",
+      menuDojo: "修练道场",
+      menuDojoSub: "QTE & SANDBOX",
+      recentDamageLog: "最近伤害",
+      damageSourceRps: "猜拳获胜",
+      damageSourceMorph: "变拳克制",
+      damageSourceCounter: "QTE反制",
+      damageSourceMomo: "摸摸偷袭",
+      damageSourceBurn: "燃烧灼烧",
+      damageSourceReflect: "镜光反弹",
+      damageSourceThunder: "神鸣追加",
+      damageSourceBurst: "重剑暴击",
+      damageSourceEnemy: "敌方受击",
+      atkLabel: "ATK",
       menuStages: "开始对局",
       menuStagesSub: "STORY BATTLE",
       menuGrowth: "属性成长",
@@ -1559,6 +1627,37 @@ const DICTIONARY = {
         description: "与小乐深厚羁绊的信物。全面提升能力，且战胜时额外获得 20% 星砂。"
       }
     },
+    dojo: {
+      modalTitle: "修练场・特训菜单",
+      modalSubtitle: "锻炼反应神经，测试数值与配装极限",
+      mode1Title: "模式一：纯 QTE 无限反应练习",
+      mode1Desc: "无猜拳与回合等待，纯粹连续生成 QTE 按键指令，即时锻炼反应与键位记忆。",
+      mode1Style1: "第一式・单轨连续 QTE",
+      mode1Style1Desc: "标准 8 方向单轨键盘连续输入练习",
+      mode1Style2: "第二式・双轨同步 QTE",
+      mode1Style2Desc: "模拟第四关双生 Boss 双轨情境（左手 WASD，右手 方向键）",
+      mode2Title: "模式二：战斗模拟与 DPS 测试沙盒",
+      mode2Desc: "完整保留标准战斗节奏，对战全黑小乐剪影假人，可自订 HP 与伤害，无败北压力。",
+      mode2Style1: "第一式・单体假人对决",
+      mode2Style1Desc: "单个全黑剪影假人，测试单体 DPS 与变拳/反击",
+      mode2Style2: "第二式・双生假人对决",
+      mode2Style2Desc: "双个全黑剪影假人，模拟第四关双手出拳与双轨反制",
+      customHpLabel: "假人生命值 (HP)",
+      customDmgLabel: "假人伤害值 (ATK)",
+      zeroDamageHint: "（预设 0 伤害，对玩家无伤害，无败北压力）",
+      btnStartPractice: "开始修练",
+      btnExitDojo: "结束修练",
+      combo: "连击",
+      maxCombo: "最高连击",
+      avgReaction: "平均反应",
+      successRate: "成功率",
+      dummySilhouette: "影・小乐",
+      dummySilhouetteLeft: "影・小乐（左）",
+      dummySilhouetteRight: "影・小乐（右）",
+      chapterName: "修练场",
+      dojoStatsTitle: "修练结算报告",
+      btnReturnDojoMenu: "返回修练菜单"
+    },
     gallery: {
       koraku_default: {
         name: "巫女社・狐娘小乐",
@@ -1676,6 +1775,20 @@ const DICTIONARY = {
       dangerZoneTitle: "Save Reset & Deletion Management",
       dangerZoneDesc: "Clear all game progress on this device (level, star sand, equipment, skills, and stats) back to default initial state:",
       btnModalResetSave: "Reset Save (Clear All Progress)",
+      navDojo: "Training Dojo",
+      menuDojo: "Training Dojo",
+      menuDojoSub: "QTE & SANDBOX",
+      recentDamageLog: "Recent Damage",
+      damageSourceRps: "RPS Win",
+      damageSourceMorph: "Morph Counter",
+      damageSourceCounter: "QTE Counter",
+      damageSourceMomo: "Momo Assist",
+      damageSourceBurn: "Burn DOT",
+      damageSourceReflect: "Mirror Reflect",
+      damageSourceThunder: "Thunder Strike",
+      damageSourceBurst: "Greatsword Burst",
+      damageSourceEnemy: "Enemy Strike",
+      atkLabel: "ATK",
       menuStages: "Story Battle",
       menuStagesSub: "STORY BATTLE",
       menuGrowth: "Player Growth",
@@ -2020,6 +2133,37 @@ const DICTIONARY = {
         description: "Token of deep bonding with Kohaku. Boosts all stats and grants +20% extra Star Sand on victory."
       }
     },
+    dojo: {
+      modalTitle: "Training Dojo & Sandbox",
+      modalSubtitle: "Hone reflexes & test DPS build limits",
+      mode1Title: "Mode 1: Pure Continuous QTE",
+      mode1Desc: "No RPS or turns; continuous QTE sequence generation to sharpen muscle memory.",
+      mode1Style1: "Style 1: Single Track QTE",
+      mode1Style1Desc: "Standard 8-direction single-track keyboard drills",
+      mode1Style2: "Style 2: Dual Track QTE",
+      mode1Style2Desc: "Simulate Stage 4 dual-track controls (Left: WASD, Right: Arrows)",
+      mode2Title: "Mode 2: Combat & DPS Sandbox",
+      mode2Desc: "Full battle flow against solid-black Koyuki dummy with custom HP & damage, zero risk.",
+      mode2Style1: "Style 1: Single Dummy Battle",
+      mode2Style1Desc: "Single shadow silhouette dummy for DPS and morph counter practice",
+      mode2Style2: "Style 2: Dual Dummy Battle",
+      mode2Style2Desc: "Dual shadow silhouette dummies simulating Stage 4 dual hands & QTE",
+      customHpLabel: "Dummy Max HP",
+      customDmgLabel: "Dummy ATK Damage",
+      zeroDamageHint: "(Default 0 DMG = player immune to loss)",
+      btnStartPractice: "Start Practice",
+      btnExitDojo: "End Practice",
+      combo: "Combo",
+      maxCombo: "Max Combo",
+      avgReaction: "Avg Reaction",
+      successRate: "Success Rate",
+      dummySilhouette: "Shadow Kohaku",
+      dummySilhouetteLeft: "Shadow Kohaku (L)",
+      dummySilhouetteRight: "Shadow Kohaku (R)",
+      chapterName: "Training Dojo",
+      dojoStatsTitle: "Dojo Training Summary",
+      btnReturnDojoMenu: "Return to Dojo Menu"
+    },
     gallery: {
       koraku_default: {
         name: "Shrine Maiden: Fox Maiden Kohaku",
@@ -2138,6 +2282,20 @@ const DICTIONARY = {
       dangerZoneTitle: "セーブデータ初期化・削除管理",
       dangerZoneDesc: "この端末に保存されているすべての進行状況（レベル、星砂、装備、スキル、戦績）を消去して初期状態に戻します：",
       btnModalResetSave: "全セーブデータを初期化（消去）",
+      navDojo: "修練場",
+      menuDojo: "修練道場",
+      menuDojoSub: "QTE & SANDBOX",
+      recentDamageLog: "最近のダメージ",
+      damageSourceRps: "じゃんけん勝利",
+      damageSourceMorph: "変拳カウンター",
+      damageSourceCounter: "QTEカウンター",
+      damageSourceMomo: "なでなで急襲",
+      damageSourceBurn: "炎上ダメージ",
+      damageSourceReflect: "鏡光反射",
+      damageSourceThunder: "雷鳴追撃",
+      damageSourceBurst: "大剣一撃",
+      damageSourceEnemy: "敵の攻撃",
+      atkLabel: "ATK",
       menuStages: "物語対戦",
       menuStagesSub: "STORY BATTLE",
       menuGrowth: "能力強化",
@@ -2481,6 +2639,37 @@ const DICTIONARY = {
         name: "絆の守護バッジ",
         description: "コハクとの深い絆の証。全能力を高め、勝利時の獲得星砂が 20% 増加する。"
       }
+    },
+    dojo: {
+      modalTitle: "修練場・特訓メニュー",
+      modalSubtitle: "反射神経を鍛え、ビルドの限界を試す",
+      mode1Title: "モード1：純粋QTE無限練習",
+      mode1Desc: "じゃんけんやターンなし。純粋に連続QTEを生成し、反射とキー入力を鍛えます。",
+      mode1Style1: "第一式・単軌連続QTE",
+      mode1Style1Desc: "標準8方向単一トラック連続入力練習",
+      mode1Style2: "第二式・双軌同時QTE",
+      mode1Style2Desc: "第4章双生ボスの双軌状況を再現（左手WASD、右手方向キー）",
+      mode2Title: "モード2：戦闘シミュレーション＆DPS検証",
+      mode2Desc: "通常戦闘の流れで黒影小楽と対戦。HPとダメージを自由に設定可能、敗北リスクなし。",
+      mode2Style1: "第一式・単体ダミー対決",
+      mode2Style1Desc: "単体黒影ダミーでDPSと変拳・カウンターを検証",
+      mode2Style2: "第二式・双生ダミー対決",
+      mode2Style2Desc: "双生黒影ダミーで第4章の両手出しと双軌QTEを再現",
+      customHpLabel: "ダミーHP設定",
+      customDmgLabel: "ダミー攻撃力",
+      zeroDamageHint: "（初期値0＝プレイヤーへのダメージなし、敗北なし）",
+      btnStartPractice: "修練開始",
+      btnExitDojo: "修練終了",
+      combo: "コンボ",
+      maxCombo: "最大コンボ",
+      avgReaction: "平均反応",
+      successRate: "成功率",
+      dummySilhouette: "影・小楽",
+      dummySilhouetteLeft: "影・小楽（左）",
+      dummySilhouetteRight: "影・小楽（右）",
+      chapterName: "修練場",
+      dojoStatsTitle: "修練リザルト",
+      btnReturnDojoMenu: "修練メニューへ戻る"
     },
     gallery: {
       koraku_default: {
@@ -3123,11 +3312,21 @@ class QTEKeyboardInput {
     if (!direction) return { handled: false, direction: null };
 
     if (isDiagonalDirection(direction)) {
+      if (repeat && direction !== expectedDirection) {
+        return { handled: true, direction: null };
+      }
       return { handled: true, direction };
     }
 
     if (!CARDINAL_DIRECTIONS.has(direction)) {
       return { handled: false, direction: null };
+    }
+
+    if (repeat) {
+      if (direction === expectedDirection) {
+        return { handled: true, direction };
+      }
+      return { handled: true, direction: null };
     }
 
     this.held.delete(OPPOSITES[direction]);
@@ -4490,12 +4689,76 @@ class BattleSystem {
   }
 
   start(stageId, options = {}) {
-    const stage = STAGES.find((item) => item.id === Number(stageId));
+    let stage = null;
     const profile = this.store.snapshot();
-    const isStageUnlocked = (profile.records?.clearedStages || []).includes(Number(stageId)) || profile.profile.level >= stage?.requiredLevel;
-    if (!stage || !isStageUnlocked) {
-      this.bus.emit("toast", { message: "等級尚未達到這一章的挑戰條件。", tone: "danger" });
-      return false;
+
+    if (options.isDojo) {
+      const customHp = Math.max(1, Number(options.customHp || 10000));
+      const customDamage = Math.max(0, Number(options.customDamage ?? 0));
+      if (options.isDual) {
+        stage = {
+          id: 992,
+          chapter: I18n.t("dojo.chapterName") || "修練場",
+          name: I18n.t("dojo.mode2Style2") || "影小樂・雙生木樁",
+          subtitle: I18n.t("dojo.mode2Style2Desc") || "第四關雙手雙軌模擬",
+          enemyHp: customHp * 2,
+          requiredLevel: 1,
+          rewardMultiplier: 0,
+          xpWin: 0,
+          xpLoss: 0,
+          winCoins: 0,
+          lossCoins: 0,
+          roundSeconds: 3,
+          reactionWindowMs: 750,
+          momoDodgeRate: 0,
+          qteDirections: "all",
+          qteLength: 7,
+          maxErrors: 1,
+          enemyDamageMultiplier: 1,
+          customDamage,
+          dualEnemy: true,
+          isDojo: true,
+          isSilhouette: true,
+          enemies: [
+            { id: "left", name: I18n.t("dojo.dummySilhouetteLeft") || "影・小樂（左）", hp: customHp, maxHp: customHp, alive: true },
+            { id: "right", name: I18n.t("dojo.dummySilhouetteRight") || "影・小樂（右）", hp: customHp, maxHp: customHp, alive: true }
+          ],
+          final: false
+        };
+      } else {
+        stage = {
+          id: 991,
+          chapter: I18n.t("dojo.chapterName") || "修練場",
+          name: I18n.t("dojo.mode2Style1") || "影小樂・單體木樁",
+          subtitle: I18n.t("dojo.mode2Style1Desc") || "無壓實戰與 DPS 測試",
+          enemyHp: customHp,
+          requiredLevel: 1,
+          rewardMultiplier: 0,
+          xpWin: 0,
+          xpLoss: 0,
+          winCoins: 0,
+          lossCoins: 0,
+          roundSeconds: 3,
+          reactionWindowMs: 750,
+          momoDodgeRate: 0,
+          qteDirections: "all",
+          qteLength: 5,
+          maxErrors: 2,
+          enemyDamageMultiplier: 1,
+          customDamage,
+          isDojo: true,
+          isSilhouette: true,
+          enemies: [{ id: "main", name: I18n.t("dojo.dummySilhouette") || "影・小樂", hp: customHp, maxHp: customHp, alive: true }],
+          final: false
+        };
+      }
+    } else {
+      stage = STAGES.find((item) => item.id === Number(stageId));
+      const isStageUnlocked = (profile.records?.clearedStages || []).includes(Number(stageId)) || profile.profile.level >= stage?.requiredLevel;
+      if (!stage || !isStageUnlocked) {
+        this.bus.emit("toast", { message: "等級尚未達到這一章的挑戰條件。", tone: "danger" });
+        return false;
+      }
     }
 
     if (options.autoBattle) {
@@ -5138,6 +5401,12 @@ class BattleSystem {
             targetId: target.id,
             skill: "momo"
           });
+          this.bus.emit("battle:damage-logged", {
+            target: "enemy",
+            targetName: target.name,
+            amount: momoDamage,
+            source: "momo"
+          });
           this.bus.emit("sound", { name: "counterRub" });
           this.finishRound("draw", "平手！但你偷摸了" + target.name + "一下，造成 " + momoDamage + " 點傷害！");
           return;
@@ -5299,6 +5568,17 @@ class BattleSystem {
       targetId: target.id,
       countered
     });
+    let logSource = "rps_win";
+    if (countered) logSource = "counter";
+    else if (this.state.morphUsed) logSource = "morph";
+    else if (!damageAmount && this.hasEquipEffect("burst")) logSource = "burst";
+
+    this.bus.emit("battle:damage-logged", {
+      target: "enemy",
+      targetName: target.name,
+      amount,
+      source: logSource
+    });
     this.bus.emit("sound", { name: countered ? "counterRub" : "hit" });
   }
 
@@ -5326,16 +5606,27 @@ class BattleSystem {
     }
 
     const multiplier = this.state.stage.enemyDamageMultiplier || 1;
+    const isDojo = Boolean(this.state.stage?.isDojo);
+    const baseDamage = isDojo
+      ? Number(this.state.stage.customDamage ?? 0)
+      : (BATTLE_RULES.enemyDamage * multiplier);
+
     const shieldReduction = this.getAllEquipEffects("shield").reduce((sum, eff) => sum + (eff.damageReduction || 0), 0);
     const armorReduction = this.getAllEquipEffects("armor_reduction").reduce((sum, eff) => sum + (eff.damageReduction || 0), 0);
     const reduction = shieldReduction + armorReduction;
-    const totalDamage = Math.max(1, (BATTLE_RULES.enemyDamage * multiplier) - reduction);
+    const totalDamage = baseDamage === 0 ? 0 : Math.max(0, baseDamage - reduction);
 
     this.state.playerHp = Math.max(0, this.state.playerHp - totalDamage);
     this.battleDamageTaken = (this.battleDamageTaken || 0) + totalDamage;
     this.bus.emit("battle:effect", {
       type: "player-hit",
       amount: totalDamage
+    });
+    this.bus.emit("battle:damage-logged", {
+      target: "player",
+      targetName: I18n.t("dialogue.speakerPlayer") || "旅人",
+      amount: totalDamage,
+      source: "enemy_attack"
     });
     this.bus.emit("sound", { name: "hurt" });
 
@@ -5354,6 +5645,12 @@ class BattleSystem {
           amount: reflectDamage,
           targetId: target.id
         });
+        this.bus.emit("battle:damage-logged", {
+          target: "enemy",
+          targetName: target.name,
+          amount: reflectDamage,
+          source: "reflect"
+        });
       }
     }
 
@@ -5370,10 +5667,15 @@ class BattleSystem {
     }
 
     const multiplier = this.state.stage.enemyDamageMultiplier || 1;
+    const isDojo = Boolean(this.state.stage?.isDojo);
+    const baseDamage = isDojo
+      ? Number(this.state.stage.customDamage ?? 0)
+      : (BATTLE_RULES.enemyDamage * multiplier);
+
     const shieldReduction = this.getAllEquipEffects("shield").reduce((sum, eff) => sum + (eff.damageReduction || 0), 0);
     const armorReduction = this.getAllEquipEffects("armor_reduction").reduce((sum, eff) => sum + (eff.damageReduction || 0), 0);
     const reduction = shieldReduction + armorReduction;
-    const singleDamage = Math.max(1, (BATTLE_RULES.enemyDamage * multiplier) - reduction);
+    const singleDamage = baseDamage === 0 ? 0 : Math.max(0, baseDamage - reduction);
     const totalDamage = singleDamage * count;
 
     this.state.playerHp = Math.max(0, this.state.playerHp - totalDamage);
@@ -5381,6 +5683,12 @@ class BattleSystem {
     this.bus.emit("battle:effect", {
       type: "player-hit",
       amount: totalDamage
+    });
+    this.bus.emit("battle:damage-logged", {
+      target: "player",
+      targetName: I18n.t("dialogue.speakerPlayer") || "旅人",
+      amount: totalDamage,
+      source: "enemy_attack"
     });
     this.bus.emit("sound", { name: "hurt" });
 
@@ -5398,6 +5706,12 @@ class BattleSystem {
           type: "enemy-hit",
           amount: reflectDamage,
           targetId: target.id
+        });
+        this.bus.emit("battle:damage-logged", {
+          target: "enemy",
+          targetName: target.name,
+          amount: reflectDamage,
+          source: "reflect"
         });
       }
     }
@@ -5428,6 +5742,12 @@ class BattleSystem {
         this.state.targetEnemyId = this.state.enemies.find((e) => e.alive)?.id || target.id;
       }
       this.bus.emit("battle:effect", { type: "burn", amount: totalBurn, targetId: target?.id });
+      this.bus.emit("battle:damage-logged", {
+        target: "enemy",
+        targetName: target?.name || "小樂",
+        amount: totalBurn,
+        source: "burn"
+      });
     }
 
     this.emitState();
@@ -5923,8 +6243,10 @@ class SoundSystem {
     const unlock = () => {
       this.ensureContext();
       if (this.context) {
-        if (this.context.state === "suspended") {
-          this.context.resume().catch(() => {});
+        if (this.context.state === "suspended" || this.context.state === "interrupted") {
+          this.context.resume().then(() => {
+            this.updateMusicState();
+          }).catch(() => {});
         }
         try {
           const buffer = this.context.createBuffer(1, 1, 22050);
@@ -5935,12 +6257,28 @@ class SoundSystem {
         } catch (_) {}
       }
       this.updateMusicState();
-      if (this.context && this.context.state === "running") {
-        events.forEach((evt) => window.removeEventListener(evt, unlock));
-      }
     };
+
     const events = ["pointerdown", "touchstart", "touchend", "click", "keydown"];
     events.forEach((evt) => window.addEventListener(evt, unlock, { passive: true }));
+
+    if (typeof document !== "undefined") {
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible" && this.context) {
+          if (this.context.state === "suspended" || this.context.state === "interrupted") {
+            this.context.resume().then(() => this.updateMusicState()).catch(() => {});
+          } else {
+            this.updateMusicState();
+          }
+        }
+      });
+    }
+
+    window.addEventListener("pageshow", () => {
+      if (this.context) {
+        this.context.resume().then(() => this.updateMusicState()).catch(() => {});
+      }
+    });
   }
 
   ensureContext() {
@@ -6000,8 +6338,16 @@ class SoundSystem {
       this.masterSfxGain.gain.linearRampToValueAtTime(isSfxMuted ? 0.0001 : 0.35, now + 0.08);
     }
 
-    if (!this.isMusicRunning && this.context.state === "running") {
-      this.startMusicScheduler();
+    if (!isMusicMuted) {
+      if (this.context.state === "running") {
+        this.startMusicScheduler();
+      } else if (this.context.state === "suspended" || this.context.state === "interrupted") {
+        this.context.resume().then(() => {
+          if (this.context?.state === "running") {
+            this.startMusicScheduler();
+          }
+        }).catch(() => {});
+      }
     }
   }
 
@@ -6720,6 +7066,7 @@ class AppView {
     this.battle = battle;
     this.postBattle = postBattle;
     this.sound = sound;
+    this.timers = new TimerRegistry();
     this.currentScreen = "home";
     this.activeGrowthTab = "stats";
     this.activeGuideTab = "basics";
@@ -6728,6 +7075,21 @@ class AppView {
     this.battleState = null;
     this.postState = null;
     this.qteState = null;
+    this.recentDamageLog = [];
+    this.dojoQteActive = false;
+    this.dojoQteStyle = "single";
+    this.dojoCombo = 0;
+    this.dojoMaxCombo = 0;
+    this.dojoTotalAttempts = 0;
+    this.dojoSuccessHits = 0;
+    this.dojoReactionTimes = [];
+    this.dojoMode = "1";
+    this.dojoMode1Style = "single";
+    this.dojoMode2Style = "single";
+    this.dojoQteSystem = null;
+    this.dojoDualQteSystem = null;
+    this.dojoStepTimeout = null;
+    this.dojoStepStartTime = 0;
     this.qteKeyboard = new QTEKeyboardInput(directionFromKey);
     this.leftQteKeyboard = new QTEKeyboardInput(wasdDirectionFromKey);
     this.rightQteKeyboard = new QTEKeyboardInput(arrowDirectionFromKey);
@@ -6759,6 +7121,13 @@ class AppView {
     this.playerHandWrapSingle = $("#player-hand-wrap-single");
     this.playerHandWrapDual = $("#player-hand-wrap-dual");
     this.playerHud = $(".player-hud");
+    this.playerAtkText = $("#player-atk-text");
+    this.enemyAtkText = $("#enemy-atk-text");
+    this.enemyLeftAtkText = $("#enemy-left-atk-text");
+    this.enemyRightAtkText = $("#enemy-right-atk-text");
+    this.battleDamageLog = $("#battle-damage-log");
+    this.battleDamageLogList = $("#battle-damage-log-list");
+    this.dojoModal = $("#dojo-modal");
     this.roundOracle = $(".round-oracle");
     this.roundWarningEmoji = $("#round-warning-emoji");
     this.qteOverlay = $("#qte-overlay");
@@ -6883,6 +7252,32 @@ class AppView {
   }
 
   bindEvents() {
+    const handleQtePointer = (event) => {
+      const dualBtn = event.target.closest("[data-dual-slot][data-direction]");
+      if (dualBtn) {
+        event.preventDefault();
+        const dir = dualBtn.dataset.direction;
+        const slot = dualBtn.dataset.dualSlot;
+        this.battle.inputQte(dir, slot);
+        if (slot === "left") this.leftQteKeyboard.reset();
+        if (slot === "right") this.rightQteKeyboard.reset();
+        this.renderHeldQteDirections();
+        return;
+      }
+
+      const dirBtn = event.target.closest("[data-direction]");
+      if (dirBtn && !dirBtn.closest(".is-dual-touch-pad")) {
+        event.preventDefault();
+        this.qteKeyboard.reset();
+        this.renderHeldQteDirections();
+        this.battle.inputQte(dirBtn.dataset.direction);
+        return;
+      }
+    };
+
+    window.addEventListener("pointerdown", handleQtePointer, { passive: false });
+    window.addEventListener("touchstart", handleQtePointer, { passive: false });
+
     document.addEventListener("click", (event) => this.handleClick(event));
     window.addEventListener("keydown", (event) => this.handleKeydown(event));
     window.addEventListener("keyup", (event) => this.handleKeyup(event));
@@ -6965,10 +7360,41 @@ class AppView {
     this.bus.on("battle:state", (state) => this.renderBattle(state));
     this.bus.on("battle:countdown-beat", (beat) => this.handleCountdownBeat(beat));
     this.bus.on("battle:effect", (effect) => this.playBattleEffect(effect));
-    this.bus.on("qte:update", (state) => this.renderQte(state));
+    this.bus.on("battle:damage-logged", (event) => this.addDamageLogEntry(event));
+    this.bus.on("battle:start", () => {
+      this.recentDamageLog = [];
+      if (this.battleDamageLogList) this.battleDamageLogList.innerHTML = "";
+    });
+    this.bus.on("qte:update", (state) => {
+      if (this.dojoQteActive) {
+        this.renderDojoQte(state);
+      } else {
+        this.renderQte(state);
+      }
+    });
+    this.bus.on("dualQte:update", (state) => {
+      if (this.dojoQteActive) {
+        this.renderDojoQte(state);
+      } else {
+        this.renderQte(state);
+      }
+    });
     this.bus.on("qte:step", (data) => this.flashQteCorrect(data));
     this.bus.on("qte:wrong", (data) => this.flashQteWrong(data?.slot, data?.received));
-    this.bus.on("qte:finished", (result) => this.handleQteFinished(result));
+    this.bus.on("qte:finished", (result) => {
+      if (this.dojoQteActive) {
+        this.handleDojoQteFinished(result);
+      } else {
+        this.handleQteFinished(result);
+      }
+    });
+    this.bus.on("dualQte:finished", (result) => {
+      if (this.dojoQteActive) {
+        this.handleDojoQteFinished(result);
+      } else {
+        this.handleQteFinished(result);
+      }
+    });
     this.bus.on("postbattle:state", (state) => this.renderPostBattle(state));
     this.bus.on("postbattle:auto-watermelon", (state) => this.renderFloatingWatermelon(state));
     this.bus.on("toast", (toast) => this.showToast(toast.message, toast.tone));
@@ -7037,6 +7463,17 @@ class AppView {
   }
 
   handleClick(event) {
+    const pressedButton = event.target.closest("button, [role='button'], [data-nav], [data-allocate], [data-allocate-skill], [data-buy], [data-buy-equip], [data-slot], [data-equip-bag-item], .pill-btn, .tab-pill, .button-primary, .button-secondary, .button-ghost, .menu-command");
+    if (pressedButton) {
+      pressedButton.classList.remove("is-btn-pressed");
+      void pressedButton.offsetWidth;
+      pressedButton.classList.add("is-btn-pressed");
+      setTimeout(() => pressedButton.classList.remove("is-btn-pressed"), 180);
+      if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function") {
+        try { navigator.vibrate(12); } catch (_) {}
+      }
+    }
+
     if (event.target.closest("#lang-toggle")) {
       I18n.cycleLocale();
       this.renderI18n();
@@ -7050,10 +7487,100 @@ class AppView {
 
     const navButton = event.target.closest("[data-nav]");
     if (navButton) {
+      if (navButton.dataset.nav === "dojo") {
+        this.openDojoModal();
+        return;
+      }
       if (this.saveRecordModal && !this.saveRecordModal.hidden) {
         this.closeSaveRecordModal();
       }
       this.requestNavigation(navButton.dataset.nav);
+      return;
+    }
+
+    if (event.target.closest("#open-dojo-modal")) {
+      this.openDojoModal();
+      return;
+    }
+
+    if (event.target.closest("#close-dojo-modal") || event.target === this.dojoModal) {
+      this.closeDojoModal();
+      return;
+    }
+
+    const dojoTabBtn = event.target.closest(".dojo-tab-btn[data-dojo-mode]");
+    if (dojoTabBtn) {
+      this.dojoMode = dojoTabBtn.dataset.dojoMode;
+      document.querySelectorAll(".dojo-tab-btn[data-dojo-mode]").forEach((btn) => {
+        btn.classList.toggle("is-active", btn.dataset.dojoMode === this.dojoMode);
+      });
+      const p1 = $("#dojo-mode1-panel");
+      const p2 = $("#dojo-mode2-panel");
+      if (p1) p1.hidden = this.dojoMode !== "1";
+      if (p2) p2.hidden = this.dojoMode !== "2";
+      return;
+    }
+
+    const dojoStyleCard = event.target.closest(".dojo-style-card");
+    if (dojoStyleCard) {
+      const radio = dojoStyleCard.querySelector('input[type="radio"]');
+      if (radio) {
+        radio.checked = true;
+        const groupName = radio.name;
+        document.querySelectorAll(`input[name="${groupName}"]`).forEach((r) => {
+          r.closest(".dojo-style-card")?.classList.toggle("is-selected", r.checked);
+        });
+      }
+      return;
+    }
+
+    const chipHpBtn = event.target.closest(".preset-chips .chip-btn[data-hp]");
+    if (chipHpBtn) {
+      const hpInput = $("#dojo-custom-hp");
+      if (hpInput) hpInput.value = chipHpBtn.dataset.hp;
+      chipHpBtn.closest(".preset-chips")?.querySelectorAll(".chip-btn").forEach((btn) => {
+        btn.classList.toggle("is-active", btn === chipHpBtn);
+      });
+      return;
+    }
+
+    const chipDmgBtn = event.target.closest(".preset-chips .chip-btn[data-dmg]");
+    if (chipDmgBtn) {
+      const dmgInput = $("#dojo-custom-dmg");
+      if (dmgInput) dmgInput.value = chipDmgBtn.dataset.dmg;
+      chipDmgBtn.closest(".preset-chips")?.querySelectorAll(".chip-btn").forEach((btn) => {
+        btn.classList.toggle("is-active", btn === chipDmgBtn);
+      });
+      return;
+    }
+
+    if (event.target.closest("#btn-start-dojo-practice")) {
+      if (this.dojoMode === "1") {
+        const style = document.querySelector('input[name="dojo-mode1-style"]:checked')?.value || "single";
+        this.closeDojoModal();
+        this.startDojoQte(style);
+      } else {
+        const style = document.querySelector('input[name="dojo-mode2-style"]:checked')?.value || "single";
+        const customHp = Number($("#dojo-custom-hp")?.value) || 10000;
+        const customDamage = Number($("#dojo-custom-dmg")?.value) || 0;
+        this.closeDojoModal();
+        this.startDojoSandbox({ isDual: style === "dual", customHp, customDamage });
+      }
+      return;
+    }
+
+    if (event.target.closest("#btn-exit-dojo-qte")) {
+      this.stopDojoQte();
+      this.navigate("home");
+      return;
+    }
+
+    const dojoQtePadBtn = event.target.closest("#dojo-qte-pad button[data-direction]");
+    if (dojoQtePadBtn) {
+      const dir = dojoQtePadBtn.dataset.direction;
+      if (this.dojoQteActive && this.dojoQteSystem) {
+        this.dojoQteSystem.input(dir);
+      }
       return;
     }
 
@@ -7444,6 +7971,87 @@ class AppView {
   }
 
   handleKeydown(event) {
+    if (event.key === "Escape" && this.dojoModal && !this.dojoModal.hidden) {
+      this.closeDojoModal();
+      return;
+    }
+
+    if (this.dojoQteActive) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        this.stopDojoQte();
+        this.navigate("home");
+        return;
+      }
+
+      if (this.dojoQteStyle === "dual" && this.dojoDualQteSystem?.active) {
+        const isLeftActive = !this.dojoDualQteSystem.left?.completed;
+        const isRightActive = !this.dojoDualQteSystem.right?.completed;
+        const leftExpected = isLeftActive ? this.dojoDualQteSystem.left?.sequence[this.dojoDualQteSystem.left?.index] : null;
+        const rightExpected = isRightActive ? this.dojoDualQteSystem.right?.sequence[this.dojoDualQteSystem.right?.index] : null;
+
+        if (isLeftActive) {
+          const leftInput = this.leftQteKeyboard.keyDown(event.key, leftExpected, event.repeat, event.code);
+          if (leftInput.handled) {
+            event.preventDefault();
+            if (leftInput.direction) {
+              this.dojoDualQteSystem.input(leftInput.direction, "left");
+              this.leftQteKeyboard.reset();
+            }
+            return;
+          }
+        }
+
+        if (isRightActive) {
+          const rightInput = this.rightQteKeyboard.keyDown(event.key, rightExpected, event.repeat, event.code);
+          if (rightInput.handled) {
+            event.preventDefault();
+            if (rightInput.direction) {
+              this.dojoDualQteSystem.input(rightInput.direction, "right");
+              this.rightQteKeyboard.reset();
+            }
+            return;
+          }
+        }
+
+        if (!isLeftActive && isRightActive) {
+          const fallbackInput = this.qteKeyboard.keyDown(event.key, rightExpected, event.repeat, event.code);
+          if (fallbackInput.handled) {
+            event.preventDefault();
+            if (fallbackInput.direction) {
+              this.dojoDualQteSystem.input(fallbackInput.direction, "right");
+              this.qteKeyboard.reset();
+            }
+            return;
+          }
+        } else if (isLeftActive && !isRightActive) {
+          const fallbackInput = this.qteKeyboard.keyDown(event.key, leftExpected, event.repeat, event.code);
+          if (fallbackInput.handled) {
+            event.preventDefault();
+            if (fallbackInput.direction) {
+              this.dojoDualQteSystem.input(fallbackInput.direction, "left");
+              this.qteKeyboard.reset();
+            }
+            return;
+          }
+        }
+        return;
+      }
+
+      if (this.dojoQteStyle !== "dual" && this.dojoQteSystem?.active) {
+        const expected = this.dojoQteSystem.sequence[this.dojoQteSystem.index];
+        const input = this.qteKeyboard.keyDown(event.key, expected, event.repeat, event.code);
+        if (input.handled) {
+          event.preventDefault();
+          if (input.direction) {
+            this.dojoQteSystem.input(input.direction);
+            this.qteKeyboard.reset();
+          }
+        }
+        return;
+      }
+    }
+
     if (event.key === "Escape" && this.saveRecordModal && !this.saveRecordModal.hidden) {
       this.closeSaveRecordModal();
       return;
@@ -7545,29 +8153,59 @@ class AppView {
     if (!this.battleState?.active || this.battleState.isPaused) return;
     if (this.battleState.phase === "qte") {
       if (this.qteState?.mode === "dual") {
-        const leftExpected = this.qteState.left?.sequence[this.qteState.left?.index];
-        const rightExpected = this.qteState.right?.sequence[this.qteState.right?.index];
+        const isLeftActive = !this.qteState.left?.completed;
+        const isRightActive = !this.qteState.right?.completed;
+        const leftExpected = isLeftActive ? this.qteState.left?.sequence[this.qteState.left?.index] : null;
+        const rightExpected = isRightActive ? this.qteState.right?.sequence[this.qteState.right?.index] : null;
 
-        const leftInput = this.leftQteKeyboard.keyDown(event.key, leftExpected, event.repeat, event.code);
-        if (leftInput.handled) {
-          event.preventDefault();
-          if (leftInput.direction) {
-            this.battle.inputQte(leftInput.direction, "left");
-            this.leftQteKeyboard.reset();
+        if (isLeftActive) {
+          const leftInput = this.leftQteKeyboard.keyDown(event.key, leftExpected, event.repeat, event.code);
+          if (leftInput.handled) {
+            event.preventDefault();
+            if (leftInput.direction) {
+              this.battle.inputQte(leftInput.direction, "left");
+              this.leftQteKeyboard.reset();
+            }
+            this.renderHeldQteDirections();
+            return;
           }
-          this.renderHeldQteDirections();
-          return;
         }
 
-        const rightInput = this.rightQteKeyboard.keyDown(event.key, rightExpected, event.repeat, event.code);
-        if (rightInput.handled) {
-          event.preventDefault();
-          if (rightInput.direction) {
-            this.battle.inputQte(rightInput.direction, "right");
-            this.rightQteKeyboard.reset();
+        if (isRightActive) {
+          const rightInput = this.rightQteKeyboard.keyDown(event.key, rightExpected, event.repeat, event.code);
+          if (rightInput.handled) {
+            event.preventDefault();
+            if (rightInput.direction) {
+              this.battle.inputQte(rightInput.direction, "right");
+              this.rightQteKeyboard.reset();
+            }
+            this.renderHeldQteDirections();
+            return;
           }
-          this.renderHeldQteDirections();
-          return;
+        }
+
+        if (!isLeftActive && isRightActive) {
+          const fallbackInput = this.qteKeyboard.keyDown(event.key, rightExpected, event.repeat, event.code);
+          if (fallbackInput.handled) {
+            event.preventDefault();
+            if (fallbackInput.direction) {
+              this.battle.inputQte(fallbackInput.direction, "right");
+              this.qteKeyboard.reset();
+            }
+            this.renderHeldQteDirections();
+            return;
+          }
+        } else if (isLeftActive && !isRightActive) {
+          const fallbackInput = this.qteKeyboard.keyDown(event.key, leftExpected, event.repeat, event.code);
+          if (fallbackInput.handled) {
+            event.preventDefault();
+            if (fallbackInput.direction) {
+              this.battle.inputQte(fallbackInput.direction, "left");
+              this.qteKeyboard.reset();
+            }
+            this.renderHeldQteDirections();
+            return;
+          }
         }
         return;
       }
@@ -8945,6 +9583,12 @@ class AppView {
     $("#player-mp-fill").style.width = clampPercent(state.playerMp, state.playerMaxMp) + "%";
     $("#battle-player-level").textContent = "LEVEL " + String(this.store.snapshot().profile.level).padStart(2, "0");
 
+    const playerStats = this.store.snapshot().playerStats;
+    const playerAtk = playerStats?.damage || 50;
+    if (this.playerAtkText) {
+      this.playerAtkText.textContent = String(playerAtk);
+    }
+
     // Single vs Dual Enemy Boss HUD
     const singleHud = $("#enemy-hud-single");
     const dualHud = $("#enemy-hud-dual");
@@ -8953,8 +9597,14 @@ class AppView {
       if (dualHud) dualHud.hidden = false;
       const left = state.enemies.find((e) => e.id === "left");
       const right = state.enemies.find((e) => e.id === "right");
+      const multiplier = state.stage.enemyDamageMultiplier || 1;
+      const enemyAtk = state.stage.isDojo
+        ? Number(state.stage.customDamage ?? 0)
+        : Math.round(BATTLE_RULES.enemyDamage * multiplier);
+      if (this.enemyLeftAtkText) this.enemyLeftAtkText.textContent = String(enemyAtk);
+      if (this.enemyRightAtkText) this.enemyRightAtkText.textContent = String(enemyAtk);
       if (left) {
-        $("#enemy-left-name").textContent = I18n.t("dialogue.speakerPlatinumKohaku") + "・" + I18n.t("directions.left");
+        $("#enemy-left-name").textContent = state.stage.isDojo ? (I18n.t("dojo.dummySilhouetteLeft") || left.name) : (I18n.t("dialogue.speakerPlatinumKohaku") + "・" + I18n.t("directions.left"));
         $("#enemy-left-hp-text").textContent = left.hp.toLocaleString("zh-TW") + " / " + left.maxHp.toLocaleString("zh-TW");
         $("#enemy-left-hp-fill").style.width = clampPercent(left.hp, left.maxHp) + "%";
         const leftCard = document.querySelector("[data-target-enemy='left']");
@@ -8964,7 +9614,7 @@ class AppView {
         }
       }
       if (right) {
-        $("#enemy-right-name").textContent = I18n.t("dialogue.speakerPlatinumKohaku") + "・" + I18n.t("directions.right");
+        $("#enemy-right-name").textContent = state.stage.isDojo ? (I18n.t("dojo.dummySilhouetteRight") || right.name) : (I18n.t("dialogue.speakerPlatinumKohaku") + "・" + I18n.t("directions.right"));
         $("#enemy-right-hp-text").textContent = right.hp.toLocaleString("zh-TW") + " / " + right.maxHp.toLocaleString("zh-TW");
         $("#enemy-right-hp-fill").style.width = clampPercent(right.hp, right.maxHp) + "%";
         const rightCard = document.querySelector("[data-target-enemy='right']");
@@ -8976,7 +9626,12 @@ class AppView {
     } else {
       if (singleHud) singleHud.hidden = false;
       if (dualHud) dualHud.hidden = true;
-      $("#enemy-name").textContent = state.stage.final ? I18n.t("dialogue.speakerPlatinumKohaku") : I18n.t("dialogue.speakerKohaku");
+      const multiplier = state.stage.enemyDamageMultiplier || 1;
+      const enemyAtk = state.stage.isDojo
+        ? Number(state.stage.customDamage ?? 0)
+        : Math.round(BATTLE_RULES.enemyDamage * multiplier);
+      if (this.enemyAtkText) this.enemyAtkText.textContent = String(enemyAtk);
+      $("#enemy-name").textContent = state.stage.isDojo ? (I18n.t("dojo.dummySilhouette") || "影・小樂") : (state.stage.final ? I18n.t("dialogue.speakerPlatinumKohaku") : I18n.t("dialogue.speakerKohaku"));
       $("#enemy-hp-text").textContent = state.enemyHp.toLocaleString("zh-TW") + " / " + state.enemyMaxHp.toLocaleString("zh-TW");
       $("#enemy-hp-fill").style.width = clampPercent(state.enemyHp, state.enemyMaxHp) + "%";
     }
@@ -8995,6 +9650,7 @@ class AppView {
 
     if (this.battleCharacterWrap) {
       this.battleCharacterWrap.classList.toggle("is-dual-stage", Boolean(state.stage.dualEnemy));
+      this.battleCharacterWrap.classList.toggle("is-silhouette", Boolean(state.stage.isSilhouette));
     }
 
     if (state.stage.dualEnemy && state.enemies?.length >= 2) {
@@ -9302,15 +9958,16 @@ class AppView {
   renderSlotHint(hintEl, expected, mode) {
     if (!hintEl || !expected) return;
     const chord = getDirectionChord(expected);
+    const direction = DIRECTIONS.find((item) => item.id === expected);
+    const keyTip = mode === "WASD" ? (direction?.keys?.find((k) => ["w", "a", "s", "d", "q", "e", "z", "c"].includes(k))?.toUpperCase() || "") : "";
+    const svg = getDirectionSvg(expected) || direction?.glyph || "—";
     if (chord) {
       const svg1 = getDirectionSvg(chord[0]) || chord[0];
       const svg2 = getDirectionSvg(chord[1]) || chord[1];
-      hintEl.innerHTML = '斜向 <b>' + svg1 + "</b><i>＋</i><b>" + svg2 + "</b>";
+      hintEl.innerHTML = '<span class="mobile-only">目標 <b>' + svg + '</b></span>' +
+        '<span class="keyboard-only">斜向 <b>' + svg1 + "</b><i>＋</i><b>" + svg2 + "</b>" + (keyTip ? " (" + keyTip + ")" : "") + "</span>";
       hintEl.classList.add("is-chord");
     } else {
-      const direction = DIRECTIONS.find((item) => item.id === expected);
-      const keyTip = mode === "WASD" ? (direction?.keys?.find((k) => ["w", "a", "s", "d", "q", "e", "z", "c"].includes(k))?.toUpperCase() || "") : "";
-      const svg = getDirectionSvg(expected) || direction?.glyph || "—";
       hintEl.innerHTML = '輸入 <b>' + svg + "</b>" + (keyTip ? '<span class="keyboard-only"> (' + keyTip + ")</span>" : "");
       hintEl.classList.remove("is-chord");
     }
@@ -9321,15 +9978,16 @@ class AppView {
     const chord = getDirectionChord(expected);
     const hint = $("#qte-input-hint");
     if (!hint) return;
+    const direction = DIRECTIONS.find((item) => item.id === expected);
+    const svg = getDirectionSvg(expected) || direction?.glyph || "—";
     if (chord) {
       const svg1 = getDirectionSvg(chord[0]) || chord[0];
       const svg2 = getDirectionSvg(chord[1]) || chord[1];
-      hint.innerHTML = '斜向合成 <b>' + svg1 + "</b><i>＋</i><b>" + svg2 + "</b>";
+      hint.innerHTML = '<span class="mobile-only">目標方向 <b>' + svg + '</b></span>' +
+        '<span class="keyboard-only">斜向合成 <b>' + svg1 + "</b><i>＋</i><b>" + svg2 + "</b></span>";
       hint.classList.add("is-chord");
     } else {
-      const direction = DIRECTIONS.find((item) => item.id === expected);
-      const svg = getDirectionSvg(expected) || direction?.glyph || "—";
-      hint.innerHTML = '單方向輸入 <b>' + svg + "</b>";
+      hint.innerHTML = '輸入方向 <b>' + svg + "</b>";
       hint.classList.remove("is-chord");
     }
   }
@@ -9772,6 +10430,258 @@ class AppView {
     this.toastTimer = window.setTimeout(() => {
       this.toastElement.classList.remove("is-visible");
     }, 2400);
+  }
+
+  openDojoModal() {
+    if (this.dojoModal) {
+      this.dojoModal.hidden = false;
+      this.dojoModal.setAttribute("aria-hidden", "false");
+    }
+  }
+
+  closeDojoModal() {
+    if (this.dojoModal) {
+      this.dojoModal.hidden = true;
+      this.dojoModal.setAttribute("aria-hidden", "true");
+    }
+  }
+
+  startDojoQte(style = "single") {
+    this.stopDojoQte();
+    this.dojoQteActive = true;
+    this.dojoQteStyle = style;
+    this.dojoCombo = 0;
+    this.dojoMaxCombo = 0;
+    this.dojoTotalAttempts = 0;
+    this.dojoSuccessHits = 0;
+    this.dojoReactionTimes = [];
+
+    const modeTitle = $("#dojo-qte-mode-title");
+    if (modeTitle) {
+      modeTitle.textContent = style === "dual" ? I18n.t("dojo.mode1Style2") : I18n.t("dojo.mode1Style1");
+    }
+
+    const singleContainer = $("#dojo-qte-single-container");
+    const dualContainer = $("#dojo-qte-dual-container");
+    if (singleContainer) singleContainer.hidden = style === "dual";
+    if (dualContainer) dualContainer.hidden = style !== "dual";
+
+    this.updateDojoMetrics();
+    this.switchScreen("dojo-qte");
+
+    if (style === "dual") {
+      this.dojoDualQteSystem = new DualQTESystem(this.bus, this.timers, Math.random);
+    } else {
+      this.dojoQteSystem = new QTESystem(this.bus, this.timers, Math.random);
+    }
+
+    this.nextDojoQteStep();
+  }
+
+  stopDojoQte() {
+    this.dojoQteActive = false;
+    if (this.dojoQteSystem) {
+      this.dojoQteSystem.stop(false);
+      this.dojoQteSystem = null;
+    }
+    if (this.dojoDualQteSystem) {
+      this.dojoDualQteSystem.stop(false);
+      this.dojoDualQteSystem = null;
+    }
+    if (this.dojoStepTimeout) {
+      clearTimeout(this.dojoStepTimeout);
+      this.dojoStepTimeout = null;
+    }
+    this.qteKeyboard.reset();
+    this.leftQteKeyboard.reset();
+    this.rightQteKeyboard.reset();
+  }
+
+  updateDojoMetrics() {
+    const comboEl = $("#dojo-metric-combo");
+    const maxComboEl = $("#dojo-metric-max-combo");
+    const avgReactionEl = $("#dojo-metric-avg-reaction");
+    const successRateEl = $("#dojo-metric-success-rate");
+
+    if (comboEl) comboEl.textContent = String(this.dojoCombo);
+    if (maxComboEl) maxComboEl.textContent = String(this.dojoMaxCombo);
+    if (avgReactionEl) {
+      const avg = this.dojoReactionTimes.length > 0
+        ? Math.round(this.dojoReactionTimes.reduce((a, b) => a + b, 0) / this.dojoReactionTimes.length)
+        : 0;
+      avgReactionEl.textContent = avg + " ms";
+    }
+    if (successRateEl) {
+      const rate = this.dojoTotalAttempts > 0
+        ? Math.round((this.dojoSuccessHits / this.dojoTotalAttempts) * 100)
+        : 100;
+      successRateEl.textContent = rate + "%";
+    }
+  }
+
+  nextDojoQteStep() {
+    if (!this.dojoQteActive) return;
+    this.dojoStepStartTime = performance.now();
+
+    if (this.dojoQteStyle === "dual") {
+      this.dojoDualQteSystem.start({
+        length: 5,
+        durationMs: 6000,
+        directionMode: "all",
+        maxErrors: 2
+      });
+    } else {
+      this.dojoQteSystem.start({
+        length: 5,
+        durationMs: 5000,
+        directionMode: "all",
+        maxErrors: 2
+      });
+    }
+  }
+
+  renderDojoQte(state) {
+    if (!this.dojoQteActive) return;
+    if (state.mode === "dual") {
+      const leftSeq = $("#dojo-dual-sequence-left");
+      const rightSeq = $("#dojo-dual-sequence-right");
+      const arrowMap = {
+        up: "W",
+        down: "S",
+        left: "A",
+        right: "D",
+        upLeft: "Q",
+        upRight: "E",
+        downLeft: "Z",
+        downRight: "C"
+      };
+
+      if (leftSeq && state.left?.sequence) {
+        leftSeq.innerHTML = state.left.sequence.map((id, index) => {
+          const direction = DIRECTIONS.find((item) => item.id === id);
+          const status = index < state.left.index ? " is-done" : index === state.left.index ? " is-current" : "";
+          const hint = arrowMap[id] || "";
+          return '<span class="qte-arrow' + status + '" aria-label="' + (direction?.label || "") + '">' +
+            (getDirectionSvg(id) || direction?.glyph || "") +
+            (hint ? '<small class="qte-arrow-key-hint keyboard-only">' + hint + "</small>" : "") +
+            "</span>";
+        }).join("");
+      }
+
+      if (rightSeq && state.right?.sequence) {
+        rightSeq.innerHTML = state.right.sequence.map((id, index) => {
+          const direction = DIRECTIONS.find((item) => item.id === id);
+          const status = index < state.right.index ? " is-done" : index === state.right.index ? " is-current" : "";
+          return '<span class="qte-arrow' + status + '" aria-label="' + (direction?.label || "") + '">' +
+            (getDirectionSvg(id) || direction?.glyph || "") +
+            "</span>";
+        }).join("");
+      }
+
+      const leftStatus = $("#dojo-dual-left-status");
+      const rightStatus = $("#dojo-dual-right-status");
+      if (leftStatus) {
+        if (state.left?.completed) {
+          leftStatus.textContent = state.left.success ? "✓ 命中" : "× 失誤";
+        } else {
+          leftStatus.textContent = "進行中 (" + (state.left?.index || 0) + "/" + (state.left?.sequence?.length || 0) + ")";
+        }
+      }
+      if (rightStatus) {
+        if (state.right?.completed) {
+          rightStatus.textContent = state.right.success ? "✓ 命中" : "× 失誤";
+        } else {
+          rightStatus.textContent = "進行中 (" + (state.right?.index || 0) + "/" + (state.right?.sequence?.length || 0) + ")";
+        }
+      }
+      return;
+    }
+
+    // Single Dojo QTE
+    const seq = $("#dojo-qte-sequence");
+    if (seq && state.sequence) {
+      seq.innerHTML = state.sequence.map((id, index) => {
+        const direction = DIRECTIONS.find((item) => item.id === id);
+        const status = index < state.index ? " is-done" : index === state.index ? " is-current" : "";
+        return '<span class="qte-arrow' + status + '" aria-label="' + (direction?.label || "") + '">' + (getDirectionSvg(id) || direction?.glyph || "") + "</span>";
+      }).join("");
+    }
+    const timerFill = $("#dojo-qte-timer-fill");
+    if (timerFill) {
+      timerFill.style.width = Math.max(0, Math.min(100, state.progress * 100)) + "%";
+    }
+  }
+
+  handleDojoQteFinished(result) {
+    if (!this.dojoQteActive || !result) return;
+    const isSuccess = result.mode === "dual" ? (result.left?.success && result.right?.success) : result.success;
+    if (isSuccess) {
+      const reaction = Math.round(performance.now() - this.dojoStepStartTime);
+      this.dojoCombo += 1;
+      this.dojoMaxCombo = Math.max(this.dojoMaxCombo, this.dojoCombo);
+      this.dojoSuccessHits += 1;
+      this.dojoTotalAttempts += 1;
+      this.dojoReactionTimes.push(reaction);
+      this.updateDojoMetrics();
+      this.bus.emit("sound", { name: "select" });
+      this.dojoStepTimeout = setTimeout(() => this.nextDojoQteStep(), 350);
+    } else {
+      this.dojoCombo = 0;
+      this.dojoTotalAttempts += 1;
+      this.updateDojoMetrics();
+      this.bus.emit("sound", { name: "danger" });
+      this.dojoStepTimeout = setTimeout(() => this.nextDojoQteStep(), 500);
+    }
+  }
+
+  startDojoSandbox({ isDual, customHp, customDamage }) {
+    this.hideFloatingWatermelon();
+    this.postBattle?.closeAutoWatermelon?.();
+    this.battle.stopAutoBattle();
+    if (!this.battle.start(null, { isDojo: true, isDual, customHp, customDamage, isSilhouette: true })) return;
+    this.postState = null;
+    this.battleArena?.classList.remove("is-settlement");
+    this.resultOverlay.classList.remove("is-active");
+    this.resultOverlay.setAttribute("aria-hidden", "true");
+    this.navigate("battle");
+  }
+
+  addDamageLogEntry({ target, targetName, amount, source }) {
+    if (!this.recentDamageLog) this.recentDamageLog = [];
+    const sourceKeyMap = {
+      rps_win: "battle.damageSourceRps",
+      morph: "battle.damageSourceMorph",
+      counter: "battle.damageSourceCounter",
+      momo: "battle.damageSourceMomo",
+      burn: "battle.damageSourceBurn",
+      reflect: "battle.damageSourceReflect",
+      burst: "battle.damageSourceBurst",
+      enemy_attack: "battle.damageSourceEnemy"
+    };
+    const sourceText = sourceKeyMap[source] ? I18n.t(sourceKeyMap[source]) : (source || "");
+    const entry = {
+      id: Date.now() + Math.random(),
+      target,
+      targetName: targetName || (target === "enemy" ? "小樂" : "旅人"),
+      amount,
+      sourceText,
+      isEnemyHit: target === "enemy"
+    };
+
+    this.recentDamageLog.push(entry);
+    if (this.recentDamageLog.length > 5) {
+      this.recentDamageLog.shift();
+    }
+
+    const logList = $("#battle-damage-log-list");
+    if (logList) {
+      logList.innerHTML = this.recentDamageLog.map((item) => `
+        <div class="damage-log-entry ${item.isEnemyHit ? "is-enemy-hit" : "is-player-hit"}">
+          <span class="damage-log-source">${item.targetName} [${item.sourceText}]</span>
+          <span class="damage-log-amount">-${item.amount}</span>
+        </div>
+      `).join("");
+    }
   }
 }
 

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="crimsonBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#b52537"/>
+      <stop offset="100%" stop-color="#550e18"/>
+    </linearGradient>
+    <filter id="goldShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="#000" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+  
+  <!-- Outer Rounded Border & Dark Crimson Shrine Texture -->
+  <rect x="2" y="2" width="60" height="60" rx="12" fill="url(#crimsonBg)" stroke="#ffe2a0" stroke-width="2.5" stroke-opacity="0.85"/>
+  
+  <!-- Inner Border for Japanese Crest Depth -->
+  <rect x="5.5" y="5.5" width="53" height="53" rx="8.5" fill="none" stroke="#0a0a10" stroke-width="1.5" stroke-opacity="0.55"/>
+  
+  <!-- Centered "狐" Calligraphic Character -->
+  <text x="32" y="47" text-anchor="middle" font-family="'Noto Serif TC', 'Source Han Serif TC', 'Songti SC', 'Yu Mincho', 'Hiragino Mincho ProN', 'PMingLiU', 'MingLiU', serif" font-weight="700" font-size="40" fill="#fff6e7" filter="url(#goldShadow)">狐</text>
+</svg>
