@@ -22,6 +22,37 @@ export const LOCALE_STORAGE_KEY = "koraku-rps-locale";
 
 export const CHANGELOG_DATA = [
   {
+    version: "0.0.8",
+    date: "2026-08-31",
+    tag: "Tablet Touch D-Pad & Player HUD Fix",
+    changes: {
+      "zh-Hant": [
+        "【平板觸控方向盤支援】修正 iPad、Android 平板與觸控螢幕被當作電腦鍵盤裝置的問題，全域啟用八方向與雙軌觸控方向盤。",
+        "【玩家 HUD 雙行網格排版】重塑玩家 HUD 為雙行自適應網格，徹底根除 ATK 標籤與等級、血量數值碰撞重疊問題。",
+        "【提示框與對話框層次優化】將 Toast 系統通知移至螢幕頂部，徹底杜絕提示訊息覆蓋底部血條、對話框與快捷欄。",
+        "【修練場雙軌方向盤補完】修練場雙生假人練習模式同步支援雙軌觸控方向盤。"
+      ],
+      "zh-Hans": [
+        "【平板触控方向盘支援】修正 iPad、Android 平板与触控屏幕被当作电脑键盘装置的问题，全局启用八方向与双轨触控方向盘。",
+        "【玩家 HUD 双行网格排版】重塑玩家 HUD 为双行自适应网格，彻底根除 ATK 标签与等级、血量数值碰撞重叠问题。",
+        "【提示框与对话框层次优化】将 Toast 系统通知移至屏幕顶部，彻底杜绝提示讯息覆盖底部血条、对话框与快捷栏。",
+        "【修练场双轨方向盘补完】修练场双生假人练习模式同步支援双轨触控方向盘。"
+      ],
+      "en": [
+        "【Tablet Touch D-Pad Support】Fixed tablets (iPad, Android, Surface) being misclassified as desktop PCs; on-screen 8-direction and dual D-pads are now fully accessible.",
+        "【Player HUD 2-Row Grid Layout】Redesigned player HUD to a 2-row adaptive grid to permanently eliminate ATK badge overlaps with Level and HP numbers.",
+        "【Toast Notification Re-anchoring】Moved toast system alerts to the top of the viewport to prevent obscuring bottom combat gauges, quick slots, and dialogue.",
+        "【Dojo Dual Touch D-Pad】Added dual on-screen touch pads to Dojo Training Mode for touchscreen users."
+      ],
+      "ja": [
+        "【タブレット向けタッチパッド対応】iPad や Android タブレットがPCと誤判定されキーボード入力を要求される問題を修正し、全方向タッチパッドを常時利用可能に。",
+        "【プレイヤーHUDの2行グリッド化】プレイヤーHUDを2行構造に刷新し、ATKバッジとレベル・HP数値の重なりを完全解消。",
+        "【トースト通知の配置適正化】システム通知（Toast）を画面上部に移動し、下部のHPバー・会話枠・ショートカットへの干渉を防止。",
+        "【修練道場のデュアルパッド追加】道場モードの双軌練習にもデュアルタッチ方向パッドを実装。"
+      ]
+    }
+  },
+  {
     version: "0.0.7",
     date: "2026-08-31",
     tag: "Mobile Visual & RWD Precision Overhaul",

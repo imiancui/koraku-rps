@@ -2132,16 +2132,26 @@ img.is-silhouette {
 
 .qte-pad {
   display: none;
-  grid-template: repeat(3, 38px) / repeat(3, 38px);
+  grid-template: repeat(3, 44px) / repeat(3, 44px);
   justify-content: center;
-  gap: 4px;
+  gap: 6px;
   margin-top: 12px;
+}
+
+html.has-touch .qte-pad,
+body.has-touch .qte-pad,
+@media (pointer: coarse) {
+  .qte-pad {
+    display: grid !important;
+  }
 }
 
 .qte-pad button {
   border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.05);
   font-size: 19px;
+  display: grid;
+  place-items: center;
 }
 
 .dual-hand-wrap {
@@ -2261,6 +2271,18 @@ img.is-silhouette {
   grid-template-columns: 1fr 1fr;
   gap: 16px;
   margin-top: 14px;
+}
+
+html.has-touch .dual-qte-touch-controls,
+body.has-touch .dual-qte-touch-controls,
+@media (pointer: coarse) {
+  .dual-qte-touch-controls {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 12px;
+    width: 100%;
+  }
 }
 
 .dual-touch-col {

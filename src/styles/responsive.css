@@ -851,57 +851,74 @@
   }
 
   .player-hud .hud-name.player-name {
-    display: flex !important;
+    display: grid !important;
+    grid-template-columns: 20px 1fr auto !important;
+    grid-template-rows: auto auto !important;
     align-items: center !important;
-    justify-content: flex-start !important;
-    gap: 4px !important;
-    margin-bottom: 3px !important;
+    gap: 1px 4px !important;
     width: 100% !important;
+    margin-bottom: 2px !important;
   }
 
   .player-hud .player-mark {
-    width: 20px !important;
-    height: 20px !important;
-    min-width: 20px !important;
-    min-height: 20px !important;
-    font-size: 10px !important;
-    margin: 1px 3px 1px 1px !important;
+    grid-column: 1 !important;
+    grid-row: 1 / 3 !important;
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 18px !important;
+    min-height: 18px !important;
+    font-size: 9.5px !important;
+    margin: 1px 2px !important;
   }
 
   .player-hud .hud-name > div {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
     display: flex !important;
     align-items: baseline !important;
-    gap: 3px !important;
+    gap: 2px !important;
     white-space: nowrap !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
   }
 
   .player-hud .hud-name small {
-    font-size: 7.5px !important;
-  }
-
-  .player-hud .hud-name b {
-    font-size: 11px !important;
-  }
-
-  .player-hud .hud-atk-badge {
-    padding: 1px 4px !important;
-    gap: 2px !important;
-  }
-
-  .player-hud .hud-atk-badge small {
     font-size: 7px !important;
   }
 
+  .player-hud .hud-name b {
+    font-size: 10.5px !important;
+  }
+
+  .player-hud .hud-atk-badge {
+    grid-column: 3 !important;
+    grid-row: 1 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 2px !important;
+    padding: 1px 4px !important;
+    margin-left: auto !important;
+    flex-shrink: 0 !important;
+  }
+
+  .player-hud .hud-atk-badge small {
+    font-size: 6.5px !important;
+  }
+
   .player-hud .hud-atk-badge b {
-    font-size: 10px !important;
+    font-size: 9.5px !important;
   }
 
   .player-hud .hud-name em {
-    margin-left: auto !important;
-    font-size: 9.5px !important;
+    grid-column: 2 / 4 !important;
+    grid-row: 2 !important;
+    text-align: right !important;
+    font-size: 9px !important;
     font-family: var(--sans) !important;
     color: var(--paper) !important;
     white-space: nowrap !important;
+    margin: 0 !important;
   }
 
   .player-meter {
@@ -1043,6 +1060,7 @@
     position: fixed !important;
     bottom: calc(4px + env(safe-area-inset-bottom, 0px)) !important;
     left: 8px !important;
+    transform: none !important;
     width: calc(100% - 16px) !important;
     min-height: 48px !important;
     max-height: 56px !important;
@@ -1052,6 +1070,7 @@
     border-radius: 4px !important;
     z-index: 45 !important;
     box-shadow: 0 4px 18px rgba(0, 0, 0, 0.8) !important;
+    overflow: visible !important;
   }
 
   .avg-dialogue > span {
@@ -1521,5 +1540,63 @@
   border-top: 1px solid var(--line);
   display: flex;
   justify-content: flex-end;
+}
+
+/* --------------------------------------------------------------------------
+   Tablet & Touchscreen Device Support (iPad / Android Tablets / Surface)
+   -------------------------------------------------------------------------- */
+html.has-touch .qte-pad,
+body.has-touch .qte-pad,
+@media (pointer: coarse) {
+  .qte-pad {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
+    width: min(90vw, 320px) !important;
+    margin: 14px auto 8px !important;
+  }
+
+  .qte-pad button {
+    height: 52px !important;
+    min-height: 52px !important;
+    font-size: 22px !important;
+    border-radius: 6px !important;
+    display: grid !important;
+    place-items: center !important;
+    padding: 0 !important;
+  }
+
+  .qte-pad button .qte-dir-svg {
+    width: 24px !important;
+    height: 24px !important;
+  }
+
+  .dual-qte-touch-controls {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: flex-end !important;
+    gap: 12px !important;
+    width: 100% !important;
+    margin-top: 12px !important;
+  }
+
+  .is-dual-touch-pad {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 5px !important;
+  }
+
+  .is-dual-touch-pad button {
+    height: 44px !important;
+    min-height: 44px !important;
+  }
+
+  .keyboard-only {
+    display: none !important;
+  }
+
+  .mobile-only {
+    display: inline-flex !important;
+  }
 }
 

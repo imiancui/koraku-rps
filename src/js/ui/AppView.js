@@ -53,6 +53,29 @@ export class AppView {
     this.watermelonFrame = 0;
     this.floatingWatermelonFrame = 0;
     this.isWatermelonZoomed = false;
+
+    // 裝置觸控能力探測（支援手機、平板 iPad/Android、觸控螢幕筆電）
+    if (typeof window !== "undefined" && typeof document !== "undefined") {
+      const isTouchDevice = ("ontouchstart" in window) || (navigator.maxTouchPoints > 0) || (window.matchMedia && window.matchMedia("(pointer: coarse)").matches);
+      if (isTouchDevice) {
+        document.documentElement.classList.add("has-touch");
+        document.body.classList.add("has-touch");
+      }
+      const enableTouch = () => {
+        document.documentElement.classList.add("has-touch");
+        document.body.classList.add("has-touch");
+        window.removeEventListener("touchstart", enableTouch);
+        window.removeEventListener("pointerdown", onPointer);
+      };
+      const onPointer = (e) => {
+        if (e.pointerType === "touch" || e.pointerType === "pen") {
+          enableTouch();
+        }
+      };
+      window.addEventListener("touchstart", enableTouch, { passive: true, once: true });
+      window.addEventListener("pointerdown", onPointer, { passive: true });
+    }
+
     this.cacheElements();
     this.bindEvents();
   }
@@ -3467,8 +3490,10 @@ export class AppView {
 
     const singleContainer = $("#dojo-qte-single-container");
     const dualContainer = $("#dojo-qte-dual-container");
+    const dualPadWrap = $("#dojo-dual-qte-pad-wrap");
     if (singleContainer) singleContainer.hidden = style === "dual";
     if (dualContainer) dualContainer.hidden = style !== "dual";
+    if (dualPadWrap) dualPadWrap.hidden = style !== "dual";
 
     this.updateDojoMetrics();
     this.navigate("dojo-qte");

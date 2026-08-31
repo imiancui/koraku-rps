@@ -14,12 +14,12 @@
     <link rel="icon" type="image/svg+xml" href="./favicon.svg">
     <link rel="icon" type="image/x-icon" href="./favicon.ico">
     <link rel="apple-touch-icon" href="./favicon.svg">
-    <link rel="stylesheet" href="./src/styles/tokens.css?v=202608310948">
-    <link rel="stylesheet" href="./src/styles/base.css?v=202608310948">
-    <link rel="stylesheet" href="./src/styles/components.css?v=202608310948">
-    <link rel="stylesheet" href="./src/styles/screens.css?v=202608310948">
-    <link rel="stylesheet" href="./src/styles/animations.css?v=202608310948">
-    <link rel="stylesheet" href="./src/styles/responsive.css?v=202608310948">
+    <link rel="stylesheet" href="./src/styles/tokens.css?v=202608311730">
+    <link rel="stylesheet" href="./src/styles/base.css?v=202608311730">
+    <link rel="stylesheet" href="./src/styles/components.css?v=202608311730">
+    <link rel="stylesheet" href="./src/styles/screens.css?v=202608311730">
+    <link rel="stylesheet" href="./src/styles/animations.css?v=202608311730">
+    <link rel="stylesheet" href="./src/styles/responsive.css?v=202608311730">
   </head>
   <body>
     <div id="app" class="app-shell" data-screen="home">
@@ -141,7 +141,7 @@
               </button>
               <footer class="home-footer" aria-label="頁腳資訊">
                 <button type="button" class="footer-version-btn" id="footer-app-version-btn" title="查看更新日誌 (Changelog)" aria-label="查看更新日誌">
-                  <span class="footer-version" id="footer-app-version">0.0.7</span>
+                  <span class="footer-version" id="footer-app-version">0.0.8</span>
                 </button>
                 <span class="footer-plain-sep">/</span>
                 <a href="https://store.steampowered.com/app/1425000" target="_blank" rel="noopener noreferrer" class="footer-plain-link">Endless Alice</a>
@@ -1151,6 +1151,36 @@
                 <div class="qte-input-hint">↑ / ← / ↓ / →</div>
               </div>
             </div>
+            <div id="dojo-dual-qte-pad-wrap" class="dual-qte-touch-controls" style="margin-top: 12px;">
+              <div class="dual-touch-col">
+                <small class="dual-pad-label">左側<span class="keyboard-only"> (WASD)</span></small>
+                <div class="qte-pad is-dual-touch-pad" id="dojo-touch-pad-left">
+                  <button type="button" data-dual-slot="left" data-direction="upLeft" aria-label="左上"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 6v8h2V9.41l9.29 9.3 1.42-1.42L9.41 8H14V6H6z"/></svg></button>
+                  <button type="button" data-dual-slot="left" data-direction="up" aria-label="上"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 4l-7 7 1.41 1.41L11 7.83V20h2V7.83l4.59 4.58L19 11z"/></svg></button>
+                  <button type="button" data-dual-slot="left" data-direction="upRight" aria-label="右上"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18 6h-8v2h4.59L5.29 17.29l1.42 1.42L16 9.41V14h2V6z"/></svg></button>
+                  <button type="button" data-dual-slot="left" data-direction="left" aria-label="左"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 12l7-7 1.41 1.41L7.83 11H20v2H7.83l4.58 4.59L11 19z"/></svg></button>
+                  <span></span>
+                  <button type="button" data-dual-slot="left" data-direction="right" aria-label="右"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 12l-7-7-1.41 1.41L16.17 11H4v2h12.17l-4.58 4.59L14 19z"/></svg></button>
+                  <button type="button" data-dual-slot="left" data-direction="downLeft" aria-label="左下"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 18h8v-2H9.41l9.3-9.29-1.42-1.42L8 14.59V10H6v8z"/></svg></button>
+                  <button type="button" data-dual-slot="left" data-direction="down" aria-label="下"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 20l7-7-1.41-1.41L13 16.17V4h-2v12.17l-4.59-4.58L5 13z"/></svg></button>
+                  <button type="button" data-dual-slot="left" data-direction="downRight" aria-label="右下"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18 18v-8h-2v4.59L6.71 5.29 5.29 6.71 14.59 16H10v2h8z"/></svg></button>
+                </div>
+              </div>
+              <div class="dual-touch-col">
+                <small class="dual-pad-label">右側<span class="keyboard-only"> (方向鍵)</span></small>
+                <div class="qte-pad is-dual-touch-pad" id="dojo-touch-pad-right">
+                  <button type="button" data-dual-slot="right" data-direction="upLeft" aria-label="左上"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 6v8h2V9.41l9.29 9.3 1.42-1.42L9.41 8H14V6H6z"/></svg></button>
+                  <button type="button" data-dual-slot="right" data-direction="up" aria-label="上"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 4l-7 7 1.41 1.41L11 7.83V20h2V7.83l4.59 4.58L19 11z"/></svg></button>
+                  <button type="button" data-dual-slot="right" data-direction="upRight" aria-label="右上"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18 6h-8v2h4.59L5.29 17.29l1.42 1.42L16 9.41V14h2V6z"/></svg></button>
+                  <button type="button" data-dual-slot="right" data-direction="left" aria-label="左"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 12l7-7 1.41 1.41L7.83 11H20v2H7.83l4.58 4.59L11 19z"/></svg></button>
+                  <span></span>
+                  <button type="button" data-dual-slot="right" data-direction="right" aria-label="右"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 12l-7-7-1.41 1.41L16.17 11H4v2h12.17l-4.58 4.59L14 19z"/></svg></button>
+                  <button type="button" data-dual-slot="right" data-direction="downLeft" aria-label="左下"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 18h8v-2H9.41l9.3-9.29-1.42-1.42L8 14.59V10H6v8z"/></svg></button>
+                  <button type="button" data-dual-slot="right" data-direction="down" aria-label="下"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 20l7-7-1.41-1.41L13 16.17V4h-2v12.17l-4.59-4.58L5 13z"/></svg></button>
+                  <button type="button" data-dual-slot="right" data-direction="downRight" aria-label="右下"><svg class="qte-dir-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18 18v-8h-2v4.59L6.71 5.29 5.29 6.71 14.59 16H10v2h8z"/></svg></button>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
       </main>
@@ -1533,6 +1563,6 @@
       <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
     </div>
-    <script src="./src/js/bundle.js?v=202608310948"></script>
+    <script src="./src/js/bundle.js?v=202608311730"></script>
   </body>
 </html>
