@@ -3590,20 +3590,25 @@ export class AppView {
   addDamageLogEntry({ target, targetName, amount, source }) {
     if (!this.recentDamageLog) this.recentDamageLog = [];
     const sourceKeyMap = {
-      rps_win: "battle.damageSourceRps",
-      morph: "battle.damageSourceMorph",
-      counter: "battle.damageSourceCounter",
-      momo: "battle.damageSourceMomo",
-      burn: "battle.damageSourceBurn",
-      reflect: "battle.damageSourceReflect",
-      burst: "battle.damageSourceBurst",
-      enemy_attack: "battle.damageSourceEnemy"
+      rps_win: "ui.damageSourceRps",
+      morph: "ui.damageSourceMorph",
+      counter: "ui.damageSourceCounter",
+      momo: "ui.damageSourceMomo",
+      burn: "ui.damageSourceBurn",
+      reflect: "ui.damageSourceReflect",
+      burst: "ui.damageSourceBurst",
+      enemy_attack: "ui.damageSourceEnemy"
     };
-    const sourceText = sourceKeyMap[source] ? I18n.t(sourceKeyMap[source]) : (source || "");
+    const key = sourceKeyMap[source] || ("ui." + source);
+    let sourceText = I18n.t(key);
+    if (!sourceText || sourceText.startsWith("UI.") || sourceText.startsWith("BATTLE.")) {
+      sourceText = source || "";
+    }
+    const cleanTargetName = targetName || (target === "enemy" ? I18n.t("dialogue.speakerKohaku") || "小樂" : I18n.t("dialogue.speakerPlayer") || "旅人");
     const entry = {
       id: Date.now() + Math.random(),
       target,
-      targetName: targetName || (target === "enemy" ? "小樂" : "旅人"),
+      targetName: cleanTargetName,
       amount,
       sourceText,
       isEnemyHit: target === "enemy"
@@ -3618,8 +3623,8 @@ export class AppView {
     if (logList) {
       logList.innerHTML = this.recentDamageLog.map((item) => `
         <div class="damage-log-entry ${item.isEnemyHit ? "is-enemy-hit" : "is-player-hit"}">
-          <span class="damage-log-source">${item.targetName} [${item.sourceText}]</span>
-          <span class="damage-log-amount">-${item.amount}</span>
+          <span class="damage-log-source" title="${item.targetName} [${item.sourceText}]">${item.targetName}・${item.sourceText}</span>
+          <span class="damage-log-amount">−${item.amount}</span>
         </div>
       `).join("");
     }

@@ -279,9 +279,11 @@ button:active,
   margin-bottom: 4px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   color: var(--gold-bright);
-  font: 700 10px/1 var(--sans);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font: 700 9px/1 var(--sans);
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .damage-log-list {
@@ -295,9 +297,10 @@ button:active,
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 6px;
-  font-size: 10px;
+  gap: 4px;
+  font-size: 9.5px;
   line-height: 1.2;
+  overflow: hidden;
   animation: logFadeSlideIn 0.25s ease-out;
 }
 
@@ -311,15 +314,19 @@ button:active,
 
 .damage-log-source {
   color: var(--paper-dim);
-  font-size: 9px;
+  font-size: 8.5px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  flex: 1;
+  min-width: 0;
 }
 
 .damage-log-amount {
-  font-weight: 700;
+  font-weight: 800;
   font-feature-settings: "tnum";
+  flex-shrink: 0;
+  font-size: 9.5px;
 }
 
 @keyframes logFadeSlideIn {
