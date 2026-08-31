@@ -1246,7 +1246,8 @@
   margin-bottom: 7px;
 }
 
-.hud-name > span {
+.hud-name > .fox-mark,
+.hud-name > .player-mark {
   display: grid;
   place-items: center;
   width: 34px;
@@ -1255,9 +1256,11 @@
   background: rgba(80, 15, 26, 0.82);
   font: 600 17px/1 var(--serif);
   transform: rotate(45deg);
+  flex-shrink: 0;
 }
 
-.hud-name > span::first-letter {
+.hud-name > .fox-mark::first-letter,
+.hud-name > .player-mark::first-letter {
   transform: rotate(-45deg);
 }
 
@@ -1342,6 +1345,15 @@
   object-fit: contain;
   object-position: center bottom;
   filter: drop-shadow(-10px 19px 27px rgba(0, 0, 0, 0.58));
+}
+
+.battle-character-wrap.is-silhouette img,
+.character-single-slot.is-silhouette img,
+.character-dual-slot.is-silhouette img,
+.is-silhouette img,
+img.is-silhouette {
+  filter: brightness(0) contrast(200%) drop-shadow(0 0 14px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 3px var(--gold)) !important;
+  transition: filter 0.3s ease;
 }
 
 .characters-dual-wrap {

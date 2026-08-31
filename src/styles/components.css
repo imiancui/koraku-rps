@@ -217,49 +217,55 @@ button:active,
 
 /* Combat HUD ATK Badges */
 .hud-atk-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 7px;
-  border: 1px solid rgba(216, 182, 106, 0.4);
-  border-radius: 3px;
-  background: rgba(18, 20, 29, 0.85);
-  box-shadow: 0 0 6px rgba(216, 182, 106, 0.2);
-  font-family: var(--sans);
-  font-size: 11px;
-  line-height: 1;
-  white-space: nowrap;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  padding: 3px 8px !important;
+  width: auto !important;
+  height: auto !important;
+  border: 1px solid rgba(216, 182, 106, 0.45) !important;
+  border-radius: 4px !important;
+  background: rgba(14, 16, 24, 0.92) !important;
+  box-shadow: 0 0 8px rgba(216, 182, 106, 0.2) !important;
+  font-family: var(--sans) !important;
+  font-size: 11px !important;
+  line-height: 1 !important;
+  transform: none !important;
+  white-space: nowrap !important;
 }
 
 .hud-atk-badge small {
-  color: var(--gold-bright);
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  color: var(--gold-bright) !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
 }
 
 .hud-atk-badge b {
-  color: var(--paper);
-  font-weight: 800;
-  font-feature-settings: "tnum";
+  color: var(--paper) !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  font-feature-settings: "tnum" !important;
 }
 
-/* Battle Damage Log (Compact FIFO) */
+/* Battle Damage Log (Compact FIFO - Docked at Top Right) */
 .battle-damage-log {
   position: absolute;
-  left: 20px;
-  bottom: 120px;
-  z-index: 12;
+  right: 24px;
+  top: 68px;
+  left: auto;
+  bottom: auto;
+  z-index: 35;
   display: flex;
   flex-direction: column;
-  width: 170px;
+  width: 175px;
   max-height: 140px;
   padding: 8px 10px;
-  border: 1px solid rgba(216, 182, 106, 0.25);
-  border-radius: 4px;
-  background: rgba(12, 14, 22, 0.78);
-  backdrop-filter: blur(6px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(216, 182, 106, 0.35);
+  border-radius: 6px;
+  background: rgba(12, 14, 22, 0.84);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5);
   pointer-events: none;
   user-select: none;
   transition: opacity 0.2s ease;
@@ -327,10 +333,13 @@ button:active,
   }
 }
 
-/* Silhouette Dummy Styling */
+/* Silhouette Dummy Styling (Pure black silhouette with gold outline) */
 .is-silhouette img,
+.battle-character-wrap.is-silhouette img,
+.character-single-slot.is-silhouette img,
+.character-dual-slot.is-silhouette img,
 img.is-silhouette {
-  filter: brightness(0) drop-shadow(0 0 10px rgba(0,0,0,0.85)) drop-shadow(0 0 2px var(--gold));
+  filter: brightness(0) contrast(200%) drop-shadow(0 0 12px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 2px var(--gold)) !important;
   transition: filter 0.3s ease;
 }
 

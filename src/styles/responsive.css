@@ -1197,14 +1197,16 @@
 
 @media (max-width: 768px) {
   .battle-damage-log {
-    left: 8px !important;
-    top: 165px !important;
+    right: 10px !important;
+    top: 140px !important;
+    left: auto !important;
     bottom: auto !important;
-    width: min(140px, 38vw) !important;
-    max-height: 100px !important;
+    width: min(135px, 36vw) !important;
+    max-height: 96px !important;
     padding: 4px 6px !important;
     font-size: 9px !important;
-    z-index: 15 !important;
+    z-index: 35 !important;
+    pointer-events: none !important;
   }
 
   .dojo-metrics-bar {

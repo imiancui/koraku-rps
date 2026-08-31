@@ -2626,8 +2626,12 @@ export class AppView {
     }
 
     if (this.battleCharacterWrap) {
+      const isSil = Boolean(state.stage.isSilhouette);
       this.battleCharacterWrap.classList.toggle("is-dual-stage", Boolean(state.stage.dualEnemy));
-      this.battleCharacterWrap.classList.toggle("is-silhouette", Boolean(state.stage.isSilhouette));
+      this.battleCharacterWrap.classList.toggle("is-silhouette", isSil);
+      if (this.battleCharacterSingle) this.battleCharacterSingle.classList.toggle("is-silhouette", isSil);
+      if (this.battleCharactersDual) this.battleCharactersDual.classList.toggle("is-silhouette", isSil);
+      if (this.battleCharacter) this.battleCharacter.classList.toggle("is-silhouette", isSil);
     }
 
     if (state.stage.dualEnemy && state.enemies?.length >= 2) {
