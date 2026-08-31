@@ -35,7 +35,7 @@ export class SoundSystem {
 
     if (typeof navigator !== "undefined" && navigator.audioSession) {
       try {
-        navigator.audioSession.type = "playback";
+        navigator.audioSession.type = "ambient";
       } catch (_) {}
     }
 
@@ -96,7 +96,7 @@ export class SoundSystem {
   ensureContext() {
     if (typeof navigator !== "undefined" && navigator.audioSession) {
       try {
-        navigator.audioSession.type = "playback";
+        navigator.audioSession.type = "ambient";
       } catch (_) {}
     }
 

@@ -140,7 +140,9 @@
                 <span data-i18n="ui.saveRecord">存檔紀錄</span>
               </button>
               <footer class="home-footer" aria-label="頁腳資訊">
-                <span class="footer-version" id="footer-app-version">0.0.5</span>
+                <button type="button" class="footer-version-btn" id="footer-app-version-btn" title="查看更新日誌 (Changelog)" aria-label="查看更新日誌">
+                  <span class="footer-version" id="footer-app-version">0.0.6</span>
+                </button>
                 <span class="footer-plain-sep">/</span>
                 <a href="https://store.steampowered.com/app/1425000" target="_blank" rel="noopener noreferrer" class="footer-plain-link">Endless Alice</a>
                 <span class="footer-plain-sep">/</span>
@@ -1508,10 +1510,29 @@
         </div>
       </div>
 
+      <!-- Version Changelog Modal -->
+      <div id="changelog-modal" class="modal-overlay changelog-modal-overlay" aria-hidden="true" hidden>
+        <div class="modal-card changelog-modal-card">
+          <header class="modal-header">
+            <div>
+              <p class="eyebrow" data-i18n="ui.changelogSubtitle">遊戲版本迭代與修復紀錄</p>
+              <h3 data-i18n="ui.changelogTitle">更新日誌</h3>
+            </div>
+            <button id="close-changelog-modal" class="modal-close-btn" type="button" aria-label="關閉日誌">×</button>
+          </header>
+          <div class="changelog-modal-body" id="changelog-modal-list">
+            <!-- Dynamically populated by AppView -->
+          </div>
+          <footer class="changelog-modal-footer">
+            <button type="button" id="btn-close-changelog" class="button-primary" data-i18n="ui.closeChangelog">關閉</button>
+          </footer>
+        </div>
+      </div>
+
       <div id="equip-tooltip" class="equip-tooltip" hidden></div>
       <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
     </div>
-    <script src="./src/js/bundle.js?v=202608310928"></script>
+    <script src="./src/js/bundle.js?v=202608310938"></script>
   </body>
 </html>

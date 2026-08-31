@@ -20,6 +20,198 @@ export const LOCALE_ORDER = Object.freeze(["zh-Hant", "zh-Hans", "en", "ja"]);
 export const DEFAULT_LOCALE = "en";
 export const LOCALE_STORAGE_KEY = "koraku-rps-locale";
 
+export const CHANGELOG_DATA = [
+  {
+    version: "0.0.6",
+    date: "2026-08-31",
+    tag: "UI & Audio Refactor",
+    changes: {
+      "zh-Hant": [
+        "【戰鬥介面優化】重構手機版戰鬥排版：Boss 血條與玩家 HUD 採彈性水平對齊，徹底修復血量與魔力數值文字重疊問題。",
+        "【第四關卡片防裁切】優化雙 Boss 狀態卡為雙行自適應排版，防止右側敵人卡片與 ATK 數值於手機螢幕邊緣被裁切。",
+        "【小樂立繪與回合介面層次】微調小樂立繪垂直置中比例，避免與 Boss 血條、回合儀表及傷害日誌重疊。",
+        "【更新日誌系統】點擊首頁版本號即可開啟獨立和風歷史更新日誌視窗，完整記錄所有版本歷程。",
+        "【iOS 音訊防搶佔】將 AudioSession 模式切換為 Ambient 模式，不再打斷或暫停玩家於背景播放的 YouTube 或音樂 App。"
+      ],
+      "zh-Hans": [
+        "【战斗界面优化】重构手机版战斗排版：Boss 血条与玩家 HUD 采用弹性水平对齐，彻底修复血量与魔力数值文字重叠问题。",
+        "【第四关卡片防裁切】优化双 Boss 状态卡为双行自适应排版，防止右侧敌人卡片与 ATK 数值于手机屏幕边缘被裁切。",
+        "【小乐立绘与回合界面层次】微调小乐立绘垂直置中比例，避免与 Boss 血条、回合仪表及伤害日志重叠。",
+        "【更新日志系统】点击首页版本号即可开启独立和风历史更新日志视窗，完整记录所有版本历程。",
+        "【iOS 音频防抢占】将 AudioSession 模式切换为 Ambient 模式，不再打断或暂停玩家在后台播放的 YouTube 或音乐 App。"
+      ],
+      "en": [
+        "【Combat UI Refactor】Completely redesigned mobile combat HUD: flex layout for Boss and Player bars, fixing overlapping HP/MP text.",
+        "【Stage 4 Dual Boss Fix】Applied 2-row adaptive layout for dual Boss cards to prevent right-edge clipping on mobile screens.",
+        "【Character Layering】Fine-tuned Kohaku's sprite positioning to eliminate overlap with the Boss bar, round oracle, and damage logs.",
+        "【Changelog Modal】Clicking the version badge opens a dedicated Japanese Shrine-style patch notes modal.",
+        "【iOS Background Audio Fix】Configured AudioSession to Ambient mode so game sounds will no longer interrupt or pause YouTube/Spotify."
+      ],
+      "ja": [
+        "【戦闘画面UI最適化】モバイル版の戦闘レイアウトを再構築：ボスHPバーとプレイヤーHUDの重なり不具合を完全修正。",
+        "【第4章デュアルボス表示改善】2行適応型レイアウトにより、右側ボスのカードとATK数値が見切れる問題を解消。",
+        "【立ち絵とラウンド表示の階層調整】小楽の立ち絵位置を微調整し、HPバー・ラウンド計器・ダメージログとの重なりを防止。",
+        "【更新履歴モーダル】バージョン番号をタップすることで、和風デザインの更新履歴一覧ウィンドウを表示可能に。",
+        "【iOS オーディオ改善】AudioSession を Ambient モードに変更し、YouTube や音楽のバックグラウンド再生を中断しないように改善。"
+      ]
+    }
+  },
+  {
+    version: "0.0.5",
+    date: "2026-08-31",
+    tag: "iOS Safari Audio Fix",
+    changes: {
+      "zh-Hant": [
+        "【iOS Web Audio 深度防護】加入 scheduler 防時鐘積壓重置機制，徹底解決切換 App 或背景節流時節點爆炸崩潰問題。",
+        "【中斷自動恢復】註冊 context.onstatechange 與多重手勢喚醒鏈，支援 interrupted 狀態自動恢復。",
+        "【合成器安全邊界】全面防護 AudioParam 自動化曲線時間，避免傳入過去時間導致 Safari 拋錯無聲。"
+      ],
+      "zh-Hans": [
+        "【iOS Web Audio 深度防护】加入 scheduler 防时钟积压重置机制，彻底解决切换 App 或后台节流时节点爆炸崩溃问题。",
+        "【中断自动恢复】注册 context.onstatechange 与多重手势唤醒链，支持 interrupted 状态自动恢复。",
+        "【合成器安全边界】全面防护 AudioParam 自动化曲线时间，避免传入过去时间导致 Safari 报错无声。"
+      ],
+      "en": [
+        "【iOS Web Audio Hardening】Added scheduler clock catch-up guard to prevent audio node backlog and engine crash upon backgrounding.",
+        "【Interruption Auto-Recovery】Attached statechange and multi-gesture listeners to seamlessly resume from interrupted state.",
+        "【AudioParam Safety】Enforced safe future time limits on all parameter automation curves."
+      ],
+      "ja": [
+        "【iOS Web Audio 強化】スケジューラーのクロック遅延防止ガードを追加し、バックグラウンド復帰時のクラッシュを防止。",
+        "【中断自動復帰】onstatechange と各種タッチイベントによる自動再開処理を追加。",
+        "【AudioParam 安全対策】過去時間へのスケジューリング例外を防止するタイムクランプを実装。"
+      ]
+    }
+  },
+  {
+    version: "0.0.4",
+    date: "2026-08-31",
+    tag: "Damage Log & Dual QTE",
+    changes: {
+      "zh-Hant": [
+        "【傷害紀錄純淨化】全面在地化最近 5 筆傷害來源文字（如【猜拳獲勝】、【變拳克制】），杜絕顯示程式碼變數。",
+        "【結算畫面隱藏】於對戰勝利或失敗結算時自動隱藏並清空即時傷害日誌，保持畫面乾淨整潔。",
+        "【修練道場優化】清理首頁重複之修練場按鈕，保留目錄第 08 項修練道場。",
+        "【雙軌 QTE 嚴格隔離】WASD 專屬左軌、方向鍵專屬右軌，兩側獨立判定且絕不互相干擾。"
+      ],
+      "zh-Hans": [
+        "【伤害纪录纯净化】全面本地化最近 5 笔伤害来源文字，杜绝显示代码变量名。",
+        "【结算画面隐藏】对局胜利或失败结算时自动隐藏并清空即时伤害日志。",
+        "【修炼道场优化】清理首页重复之修炼场按钮，保留目录第 08 项修炼道场。",
+        "【双轨 QTE 严格隔离】WASD 专属左轨、方向键专属右轨，两侧独立判定且互不干扰。"
+      ],
+      "en": [
+        "【Clean Damage Log】Localized all combat damage source texts naturally without exposing code variable strings.",
+        "【Settlement Auto-Hide】Automatically hides and clears the damage log box during victory and defeat screens.",
+        "【Dojo Button Cleanup】Removed duplicate globe Dojo button from the home footer.",
+        "【Dual QTE Key Segregation】WASD strictly controls left track, Arrow keys strictly control right track."
+      ],
+      "ja": [
+        "【ダメージログ純化】ダメージ発生源を自然な翻訳テキストに統一し、変数名の露出を完全排除。",
+        "【リザルト非表示】勝敗リザルト画面表示時にダメージログを自動で非表示・初期化。",
+        "【道場ボタン整理】ホーム画面フッターの重複した道場ボタンを削除し、メニュー08番に統一。",
+        "【2系統QTEの独立化】WASDは左レーン、矢印キーは右レーンのみに厳格割り当て。"
+      ]
+    }
+  },
+  {
+    version: "0.0.3",
+    date: "2026-08-30",
+    tag: "Dojo & Silhouette Sandbox",
+    changes: {
+      "zh-Hant": [
+        "【修練道場沙盒】新增單人與雙人木人樁自訂血量與傷害模式，支援中途安全退出。",
+        "【影・小樂剪影】修復修練道場影小樂黑色剪影遮罩效果。",
+        "【ATK 與數值框修復】修復戰鬥介面攻擊力數值超出外框與位置重疊問題。"
+      ],
+      "zh-Hans": [
+        "【修炼道场沙盒】新增单人与双人假人桩自定义血量与伤害模式，支持中途安全退出。",
+        "【影・小乐剪影】修复修炼道场影小乐黑色剪影遮罩效果。",
+        "【ATK 与数值框修复】修复战斗界面攻击力数值超出外框与位置重叠问题。"
+      ],
+      "en": [
+        "【Dojo Training Sandbox】Added custom HP and damage settings for single and dual training dummies with safe quit.",
+        "【Silhouette Shader】Fixed black shadow silhouette mask for Shadow Kohaku in the Dojo.",
+        "【ATK Badge Overflow Fix】Fixed ATK number overflowing container box."
+      ],
+      "ja": [
+        "【修練道場サンドボックス】カスタムHP・攻撃力設定可能なシングル・デュアル案山子モードを実装。",
+        "【影・小楽シルエット】道場内の影・小楽に漆黒のシルエットマスクを適用。",
+        "【ATK枠溢れ修正】戦闘画面の攻撃力バッジ数値の枠みだしを修正。"
+      ]
+    }
+  },
+  {
+    version: "0.0.2",
+    date: "2026-08-30",
+    tag: "QTE & Watermelon Slicing",
+    changes: {
+      "zh-Hant": [
+        "【雙軌 QTE 系統】第四章加入左右雙軌獨立 QTE 判定與雙手解放機制。",
+        "【切西瓜小遊戲】戰勝後觸發三刀切西瓜趣味玩法，附帶動態難度遞增與額外 EXP 結算。"
+      ],
+      "zh-Hans": [
+        "【双轨 QTE 系统】第四章加入左右双轨独立 QTE 判定与双手解放机制。",
+        "【切西瓜小游戏】战胜后触发三刀切西瓜趣味玩法，附带动态难度递增与额外 EXP 结算。"
+      ],
+      "en": [
+        "【Dual-Track QTE】Added independent dual-track QTE mechanics and two-handed liberation for Chapter 4.",
+        "【Watermelon Slicing Minigame】Post-battle 3-strike watermelon slicing with dynamic difficulty scaling and bonus EXP."
+      ],
+      "ja": [
+        "【デュアルQTEシステム】第4章向けに左右独立レーンQTEと両手解放奥義を実装。",
+        "【スイカ割りミニゲーム】勝利後の3段階スイカ割り判定と動的難易度上昇・ボーナスEXP清算を導入。"
+      ]
+    }
+  },
+  {
+    version: "0.0.1",
+    date: "2026-08-29",
+    tag: "Localization & 12-Slot Gear",
+    changes: {
+      "zh-Hant": [
+        "【4 語系在地化】全面支援繁體中文、簡體中文、英文與日文切換。",
+        "【12 格位紙娃娃】新增頭盔、胸甲、肩甲、主副手、耳環、腰帶、戒指與鞋子等 12 格位武具系統。",
+        "【實時 DPS 分析】引入理論 DPS 與實戰輸出統計紀錄。"
+      ],
+      "zh-Hans": [
+        "【4 语系本地化】全面支持繁体中文、简体中文、英文与日文切换。",
+        "【12 格位纸娃娃】新增头盔、胸甲、肩甲、主副手、耳环、腰带、戒指与鞋子等 12 格位武具系统。",
+        "【实时 DPS 分析】引入理论 DPS 与实战输出统计纪录。"
+      ],
+      "en": [
+        "【Full 4-Language Localization】Added complete translations for Traditional Chinese, Simplified Chinese, English, and Japanese.",
+        "【12-Slot Paperdoll Equipment】Added comprehensive gear system including Helmet, Chestplate, Weapons, Badges, and Accessories.",
+        "【DPS Analytics】Introduced Theoretical and Combat DPS metrics in Journey Records."
+      ],
+      "ja": [
+        "【4言語ローカライズ】繁体字、簡体字、英語、日本語の完全対応。",
+        "【12部位装備システム】兜、胸甲、主副手武器、耳飾り、指輪、靴などの装備紙人形システムを実装。",
+        "【DPS分析】理論DPSおよび実戦DPSの記録・分析機能を導入。"
+      ]
+    }
+  },
+  {
+    version: "0.0.0",
+    date: "2026-08-28",
+    tag: "Initial Release",
+    changes: {
+      "zh-Hant": [
+        "【遊戲初始發布】經典和風猜拳博弈、四大章節梯度 BOSS、時機變拳秘術與小樂摸摸互動。"
+      ],
+      "zh-Hans": [
+        "【游戏初始发布】经典和风猜拳博弈、四大章节梯度 BOSS、时机变拳秘术与小乐摸摸互动。"
+      ],
+      "en": [
+        "【Initial Release】Japanese anime shrine aesthetic, 4 Chapter Bosses, Reaction Morph mechanic, and Kohaku pet skill."
+      ],
+      "ja": [
+        "【初回リリース】和風ダーク神社調のじゃんけん勝負、4章のボス階層、時機変拳秘術、小楽なでなでインタラクションを公開。"
+      ]
+    }
+  }
+];
+
 const DICTIONARY = {
   "zh-Hant": {
     meta: {
@@ -33,6 +225,9 @@ const DICTIONARY = {
       home: "首頁",
       level: "等級",
       xp: "經驗",
+      changelogTitle: "更新日誌",
+      changelogSubtitle: "遊戲版本迭代與修復紀錄",
+      closeChangelog: "關閉",
       coins: "星砂",
       soundToggle: "切換遊戲音效",
       sfxToggle: "切換遊戲音效",
@@ -725,6 +920,9 @@ const DICTIONARY = {
       home: "首页",
       level: "等级",
       xp: "经验",
+      changelogTitle: "更新日志",
+      changelogSubtitle: "游戏版本迭代与修复纪录",
+      closeChangelog: "关闭",
       coins: "星砂",
       soundToggle: "切换游戏音效",
       sfxToggle: "切换游戏音效",
@@ -1233,6 +1431,9 @@ const DICTIONARY = {
       home: "Home",
       level: "Level",
       xp: "EXP",
+      changelogTitle: "Changelog",
+      changelogSubtitle: "Version history and patch notes",
+      closeChangelog: "Close",
       coins: "Star Sand",
       soundToggle: "Toggle SFX",
       sfxToggle: "Toggle SFX",
@@ -1742,6 +1943,9 @@ const DICTIONARY = {
       home: "ホーム",
       level: "レベル",
       xp: "経験値",
+      changelogTitle: "更新履歴",
+      changelogSubtitle: "バージョン履歴と更新記録",
+      closeChangelog: "閉じる",
       coins: "星砂",
       soundToggle: "効果音切替",
       sfxToggle: "効果音切替",
@@ -2452,6 +2656,16 @@ export class I18nService {
       variantName: loc.variantName || item.variantName,
       description: loc.description || item.description
     };
+  }
+
+  getChangelog() {
+    const locale = this.currentLocale || "zh-Hant";
+    return CHANGELOG_DATA.map((entry) => ({
+      version: entry.version,
+      date: entry.date,
+      tag: entry.tag,
+      changes: entry.changes[locale] || entry.changes["zh-Hant"] || []
+    }));
   }
 }
 

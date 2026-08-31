@@ -413,5 +413,22 @@ $$\text{Theoretical DPS} = \frac{(\text{Base DMG} \times \text{Greatsword Mult} 
    - **第一式（單體假人對決）**：單個全黑剪影，適用於測試配裝單體實戰 DPS 與變拳窗口練習。
    - **第二式（雙生假人對決）**：雙個全黑剪影，模擬第 4 關雙手出拳（左手對左、右手對右）與雙軌 QTE 實戰情境。
 
+---
+
+## 19. 版本更新日誌彈窗與手機戰鬥排版優化 (v0.0.6)
+
+### 19.1 歷史更新日誌彈窗 (Changelog Modal)
+- **首頁版本點擊**：點擊首頁頁腳左側之版本號標籤（`#footer-app-version-btn`），即可開啟暗黑神社主題之全功能更新日誌彈窗（`#changelog-modal`）。
+- **多語系完整收錄**：動態對應 4 國語系，完整收錄自 `v0.0.0` 至當前 `v0.0.6` 之功能演進與架構優化細節。
+
+### 19.2 手機端戰鬥介面精準佈局 (Mobile Combat HUD Refactoring)
+- **血量條單行彈性佈局 (Flexbox HUD)**：玩家與 Boss 狀態列重構為 Flex 排版，解決長數值（如 `100100 / 100100`）在 CSS Grid 欄位不足時被迫折行並壓在血條與立繪上的問題。
+- **第四關雙 Boss 卡片雙行自適應**：手機端雙 Boss 卡片採雙行緊湊排版，卡片寬度自適應螢幕，徹底解決右側 Boss 卡片與 ATK 200 標籤被手機右邊界裁切的現象。
+- **小樂立繪與回合儀表層次釋放**：將小樂立繪垂直置中比例微調至 `top: 125px`，使 Boss HP 條、回合神諭儀表及最近傷害日誌各自擁有獨立安全空間，不再遮擋小樂面容與頭髮。
+
+### 19.3 iOS 背景音訊防搶佔機制 (Ambient AudioSession)
+- **背景音訊共存混音**：將 `navigator.audioSession.type` 設為 `"ambient"`，使遊戲內的 Web Audio API 合成音效不會中斷或暫停玩家於背景播放之 YouTube、Spotify 或 Podcast，達到完美的遊戲體驗。
+
+
 
 

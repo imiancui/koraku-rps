@@ -239,5 +239,17 @@ test("I18n 完整性檢查：繁中、簡中、英文、日文所有關卡、道
     assert.ok(i18n.t("ui.dangerZoneTitle"));
     assert.ok(i18n.t("ui.dangerZoneDesc"));
     assert.ok(i18n.t("ui.btnModalResetSave"));
+    assert.ok(i18n.t("ui.changelogTitle"));
+    assert.ok(i18n.t("ui.changelogSubtitle"));
+    assert.ok(i18n.t("ui.closeChangelog"));
+
+    const changelogs = i18n.getChangelog();
+    assert.ok(Array.isArray(changelogs) && changelogs.length >= 7);
+    for (const log of changelogs) {
+      assert.ok(log.version);
+      assert.ok(log.date);
+      assert.ok(log.tag);
+      assert.ok(Array.isArray(log.changes) && log.changes.length > 0);
+    }
   }
 });

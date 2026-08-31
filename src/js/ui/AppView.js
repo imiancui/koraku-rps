@@ -106,6 +106,7 @@ export class AppView {
     this.cheatAuthModal = $("#cheat-auth-modal");
     this.cheatAuthPassword = $("#cheat-auth-password");
     this.cheatAuthForm = $("#cheat-auth-form");
+    this.changelogModal = $("#changelog-modal");
     this.equipTooltip = $("#equip-tooltip");
     this.activeShopFilter = "all";
   }
@@ -926,9 +927,24 @@ export class AppView {
       this.closeGalleryLightbox();
       return;
     }
+
+    if (event.target.closest("#footer-app-version-btn, #footer-app-version")) {
+      this.openChangelogModal();
+      return;
+    }
+
+    if (event.target.closest("#close-changelog-modal, #btn-close-changelog") || event.target === this.changelogModal) {
+      this.closeChangelogModal();
+      return;
+    }
   }
 
   handleKeydown(event) {
+    if (event.key === "Escape" && this.changelogModal && !this.changelogModal.hidden) {
+      this.closeChangelogModal();
+      return;
+    }
+
     if (event.key === "Escape" && this.dojoModal && !this.dojoModal.hidden) {
       this.closeDojoModal();
       return;
@@ -2347,6 +2363,49 @@ export class AppView {
       this.saveRecordModal.hidden = true;
       this.saveRecordModal.setAttribute("aria-hidden", "true");
     }
+  }
+
+  openChangelogModal() {
+    if (!this.changelogModal) {
+      this.changelogModal = $("#changelog-modal");
+    }
+    if (!this.changelogModal) return;
+    this.renderChangelog();
+    this.changelogModal.hidden = false;
+    this.changelogModal.setAttribute("aria-hidden", "false");
+    this.bus.emit("sound", { name: "select" });
+  }
+
+  closeChangelogModal() {
+    if (!this.changelogModal) return;
+    this.changelogModal.hidden = true;
+    this.changelogModal.setAttribute("aria-hidden", "true");
+  }
+
+  renderChangelog() {
+    const listEl = $("#changelog-modal-list");
+    if (!listEl) return;
+    const changelogs = I18n.getChangelog();
+    listEl.innerHTML = changelogs
+      .map((entry, idx) => {
+        const isCurrent = idx === 0;
+        const changesHtml = entry.changes
+          .map((c) => `<li>${c}</li>`)
+          .join("");
+        return `
+          <div class="changelog-entry ${isCurrent ? "is-current" : ""}">
+            <div class="changelog-entry-header">
+              <span class="changelog-ver">v${entry.version}</span>
+              <span class="changelog-date">${entry.date}</span>
+              <span class="changelog-tag">${entry.tag}</span>
+            </div>
+            <ul class="changelog-list">
+              ${changesHtml}
+            </ul>
+          </div>
+        `;
+      })
+      .join("");
   }
 
   populateSaveRecordModal() {
