@@ -2292,6 +2292,7 @@ img.is-silhouette {
 .battle-arena.is-settlement .combatant-hud,
 .battle-arena.is-settlement .round-oracle,
 .battle-arena.is-settlement .battle-left-cluster,
+.battle-arena.is-settlement .battle-damage-log,
 .battle-arena.is-settlement .frozen-hand-badge,
 .battle-arena.is-settlement .round-warning-emoji,
 .battle-arena.is-settlement .avg-dialogue,
@@ -2300,12 +2301,14 @@ img.is-silhouette {
 .battle-arena:has(.result-overlay.is-active) .combatant-hud,
 .battle-arena:has(.result-overlay.is-active) .round-oracle,
 .battle-arena:has(.result-overlay.is-active) .battle-left-cluster,
+.battle-arena:has(.result-overlay.is-active) .battle-damage-log,
 .battle-arena:has(.result-overlay.is-active) .frozen-hand-badge,
 .battle-arena:has(.result-overlay.is-active) .round-warning-emoji,
 .battle-arena:has(.result-overlay.is-active) .avg-dialogue {
   opacity: 0 !important;
   visibility: hidden !important;
   pointer-events: none !important;
+  display: none !important;
   transition: opacity 240ms ease, visibility 240ms ease;
 }
 

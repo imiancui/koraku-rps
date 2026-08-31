@@ -4,7 +4,7 @@
   "use strict";
 
 // --- src/js/config/gameConfig.js ---
-const APP_VERSION = "0.0.2";
+const APP_VERSION = "0.0.3";
 
 const DOJO_CONFIG = Object.freeze({
   defaultHp: 10000,
@@ -7399,6 +7399,7 @@ class AppView {
     this.bus.on("battle:start", () => {
       this.recentDamageLog = [];
       if (this.battleDamageLogList) this.battleDamageLogList.innerHTML = "";
+      if (this.battleDamageLog) this.battleDamageLog.hidden = false;
     });
     this.bus.on("qte:update", (state) => {
       if (this.dojoQteActive) {
@@ -10155,6 +10156,9 @@ class AppView {
   renderPostBattle(state) {
     if (!state) return;
     this.postState = state;
+    this.recentDamageLog = [];
+    if (this.battleDamageLogList) this.battleDamageLogList.innerHTML = "";
+    if (this.battleDamageLog) this.battleDamageLog.hidden = true;
     this.battleArena?.classList.add("is-settlement");
     this.resultOverlay.classList.add("is-active");
     this.resultOverlay.setAttribute("aria-hidden", "false");
