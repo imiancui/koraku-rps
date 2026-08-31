@@ -32,6 +32,13 @@ export class SoundSystem {
 
   bindUnlockGesture() {
     if (typeof window === "undefined") return;
+
+    if (typeof navigator !== "undefined" && navigator.audioSession) {
+      try {
+        navigator.audioSession.type = "playback";
+      } catch (_) {}
+    }
+
     const unlock = () => {
       this.ensureContext();
       if (this.context) {
@@ -56,29 +63,55 @@ export class SoundSystem {
 
     if (typeof document !== "undefined") {
       document.addEventListener("visibilitychange", () => {
-        if (document.visibilityState === "visible" && this.context) {
-          if (this.context.state === "suspended" || this.context.state === "interrupted") {
-            this.context.resume().then(() => this.updateMusicState()).catch(() => {});
-          } else {
-            this.updateMusicState();
+        if (document.visibilityState === "visible") {
+          this.ensureContext();
+          if (this.context) {
+            if (this.context.state === "suspended" || this.context.state === "interrupted") {
+              this.context.resume().then(() => this.updateMusicState()).catch(() => {});
+            } else {
+              this.updateMusicState();
+            }
           }
         }
       });
     }
 
     window.addEventListener("pageshow", () => {
+      this.ensureContext();
       if (this.context) {
         this.context.resume().then(() => this.updateMusicState()).catch(() => {});
+      }
+    });
+
+    window.addEventListener("focus", () => {
+      this.ensureContext();
+      if (this.context) {
+        if (this.context.state === "suspended" || this.context.state === "interrupted") {
+          this.context.resume().then(() => this.updateMusicState()).catch(() => {});
+        }
       }
     });
   }
 
   ensureContext() {
-    if (this.context) return this.context;
+    if (typeof navigator !== "undefined" && navigator.audioSession) {
+      try {
+        navigator.audioSession.type = "playback";
+      } catch (_) {}
+    }
+
+    if (this.context && this.context.state !== "closed") return this.context;
     try {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
       if (!AudioCtx) return null;
       this.context = new AudioCtx();
+
+      this.context.onstatechange = () => {
+        if (this.context?.state === "interrupted" || this.context?.state === "suspended") {
+          this.context.resume().catch(() => {});
+        }
+        this.updateMusicState();
+      };
 
       this.masterMusicGain = this.context.createGain();
       this.masterSfxGain = this.context.createGain();
@@ -87,8 +120,9 @@ export class SoundSystem {
       const isMusicMuted = Boolean(snap.settings?.musicMuted);
       const isSfxMuted = Boolean(snap.settings?.sfxMuted ?? snap.settings?.muted);
 
-      this.masterMusicGain.gain.setValueAtTime(isMusicMuted ? 0.0001 : 0.22, this.context.currentTime);
-      this.masterSfxGain.gain.setValueAtTime(isSfxMuted ? 0.0001 : 0.35, this.context.currentTime);
+      const now = Math.max(this.context.currentTime, 0);
+      this.masterMusicGain.gain.setValueAtTime(isMusicMuted ? 0.0001 : 0.22, now);
+      this.masterSfxGain.gain.setValueAtTime(isSfxMuted ? 0.0001 : 0.35, now);
 
       this.masterMusicGain.connect(this.context.destination);
       this.masterSfxGain.connect(this.context.destination);
@@ -117,7 +151,7 @@ export class SoundSystem {
     const snap = this.store.snapshot();
     const isMusicMuted = Boolean(snap.settings?.musicMuted);
     const isSfxMuted = Boolean(snap.settings?.sfxMuted ?? snap.settings?.muted);
-    const now = this.context.currentTime;
+    const now = Math.max(this.context.currentTime, 0);
 
     if (this.masterMusicGain) {
       this.masterMusicGain.gain.cancelScheduledValues(now);
@@ -165,8 +199,13 @@ export class SoundSystem {
 
   scheduler() {
     if (!this.context || this.context.state !== "running") return;
+    const now = this.context.currentTime;
+    // Prevent scheduler backlog when browser/tab is backgrounded or throttled on iOS
+    if (this.nextNoteTime < now) {
+      this.nextNoteTime = now + 0.04;
+    }
     const scheduleAheadTime = 0.22;
-    while (this.nextNoteTime < this.context.currentTime + scheduleAheadTime) {
+    while (this.nextNoteTime < now + scheduleAheadTime) {
       if (this.currentScene === "battle") {
         this.scheduleBattleStep(this.currentStep, this.nextNoteTime);
         const sixteenthTime = 60.0 / (136.0 * 4.0); // 136 BPM
@@ -277,6 +316,8 @@ export class SoundSystem {
   playKotoPluck(frequency, time, velocity = 0.2, duration = 0.8) {
     const ctx = this.context;
     if (!ctx || !this.masterMusicGain) return;
+    const safeTime = Math.max(time, ctx.currentTime + 0.002);
+    const safeVel = Math.max(velocity, 0.0001);
     try {
       const osc = ctx.createOscillator();
       const oscHarmonic = ctx.createOscillator();
@@ -284,77 +325,81 @@ export class SoundSystem {
       const filter = ctx.createBiquadFilter();
 
       osc.type = "triangle";
-      osc.frequency.setValueAtTime(frequency, time);
+      osc.frequency.setValueAtTime(frequency, safeTime);
       // Slight pitch bend drop at initial pluck attack
-      osc.frequency.linearRampToValueAtTime(frequency * 0.992, time + 0.04);
+      osc.frequency.linearRampToValueAtTime(frequency * 0.992, safeTime + 0.04);
 
       oscHarmonic.type = "sine";
-      oscHarmonic.frequency.setValueAtTime(frequency * 2, time);
+      oscHarmonic.frequency.setValueAtTime(frequency * 2, safeTime);
 
       filter.type = "lowpass";
-      filter.frequency.setValueAtTime(frequency * 3.5, time);
-      filter.frequency.exponentialRampToValueAtTime(frequency * 1.2, time + duration);
+      filter.frequency.setValueAtTime(frequency * 3.5, safeTime);
+      filter.frequency.exponentialRampToValueAtTime(frequency * 1.2, safeTime + duration);
 
-      gain.gain.setValueAtTime(0.0001, time);
-      gain.gain.linearRampToValueAtTime(velocity, time + 0.006);
-      gain.gain.exponentialRampToValueAtTime(0.0001, time + duration);
+      gain.gain.setValueAtTime(0.0001, safeTime);
+      gain.gain.linearRampToValueAtTime(safeVel, safeTime + 0.006);
+      gain.gain.exponentialRampToValueAtTime(0.0001, safeTime + duration);
 
       osc.connect(filter);
       oscHarmonic.connect(filter);
       filter.connect(gain).connect(this.masterMusicGain);
 
-      osc.start(time);
-      oscHarmonic.start(time);
-      osc.stop(time + duration + 0.05);
-      oscHarmonic.stop(time + duration + 0.05);
+      osc.start(safeTime);
+      oscHarmonic.start(safeTime);
+      osc.stop(safeTime + duration + 0.05);
+      oscHarmonic.stop(safeTime + duration + 0.05);
     } catch {}
   }
 
   playShakuhachi(frequency, time, velocity = 0.12, duration = 2.0) {
     const ctx = this.context;
     if (!ctx || !this.masterMusicGain) return;
+    const safeTime = Math.max(time, ctx.currentTime + 0.002);
+    const safeVel = Math.max(velocity, 0.0001);
     try {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       const filter = ctx.createBiquadFilter();
 
       osc.type = "sine";
-      osc.frequency.setValueAtTime(frequency, time);
+      osc.frequency.setValueAtTime(frequency, safeTime);
       // Natural gentle vibrato
-      osc.frequency.linearRampToValueAtTime(frequency + 4, time + 0.8);
-      osc.frequency.linearRampToValueAtTime(frequency - 4, time + 1.4);
+      osc.frequency.linearRampToValueAtTime(frequency + 4, safeTime + 0.8);
+      osc.frequency.linearRampToValueAtTime(frequency - 4, safeTime + 1.4);
 
       filter.type = "bandpass";
-      filter.frequency.setValueAtTime(frequency * 1.4, time);
-      filter.Q.setValueAtTime(2.0, time);
+      filter.frequency.setValueAtTime(frequency * 1.4, safeTime);
+      filter.Q.setValueAtTime(2.0, safeTime);
 
-      gain.gain.setValueAtTime(0.0001, time);
-      gain.gain.linearRampToValueAtTime(velocity, time + 0.4);
-      gain.gain.linearRampToValueAtTime(velocity * 0.7, time + duration * 0.6);
-      gain.gain.exponentialRampToValueAtTime(0.0001, time + duration);
+      gain.gain.setValueAtTime(0.0001, safeTime);
+      gain.gain.linearRampToValueAtTime(safeVel, safeTime + 0.4);
+      gain.gain.linearRampToValueAtTime(safeVel * 0.7, safeTime + duration * 0.6);
+      gain.gain.exponentialRampToValueAtTime(0.0001, safeTime + duration);
 
       osc.connect(filter).connect(gain).connect(this.masterMusicGain);
-      osc.start(time);
-      osc.stop(time + duration + 0.05);
+      osc.start(safeTime);
+      osc.stop(safeTime + duration + 0.05);
     } catch {}
   }
 
   playSuzuBell(frequency, time, velocity = 0.08) {
     const ctx = this.context;
     if (!ctx || !this.masterMusicGain) return;
+    const safeTime = Math.max(time, ctx.currentTime + 0.002);
+    const safeVel = Math.max(velocity, 0.0001);
     try {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.type = "sine";
-      osc.frequency.setValueAtTime(frequency, time);
+      osc.frequency.setValueAtTime(frequency, safeTime);
 
-      gain.gain.setValueAtTime(0.0001, time);
-      gain.gain.linearRampToValueAtTime(velocity, time + 0.004);
-      gain.gain.exponentialRampToValueAtTime(0.0001, time + 1.4);
+      gain.gain.setValueAtTime(0.0001, safeTime);
+      gain.gain.linearRampToValueAtTime(safeVel, safeTime + 0.004);
+      gain.gain.exponentialRampToValueAtTime(0.0001, safeTime + 1.4);
 
       osc.connect(gain).connect(this.masterMusicGain);
-      osc.start(time);
-      osc.stop(time + 1.45);
+      osc.start(safeTime);
+      osc.stop(safeTime + 1.45);
     } catch {}
   }
 
@@ -435,31 +480,35 @@ export class SoundSystem {
   playTaikoKick(time, velocity = 0.28) {
     const ctx = this.context;
     if (!ctx || !this.masterMusicGain) return;
+    const safeTime = Math.max(time, ctx.currentTime + 0.002);
+    const safeVel = Math.max(velocity, 0.0001);
     try {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       const filter = ctx.createBiquadFilter();
 
       osc.type = "sine";
-      osc.frequency.setValueAtTime(148, time);
-      osc.frequency.exponentialRampToValueAtTime(36, time + 0.18);
+      osc.frequency.setValueAtTime(148, safeTime);
+      osc.frequency.exponentialRampToValueAtTime(36, safeTime + 0.18);
 
       filter.type = "lowpass";
-      filter.frequency.setValueAtTime(280, time);
-      filter.frequency.exponentialRampToValueAtTime(70, time + 0.16);
+      filter.frequency.setValueAtTime(280, safeTime);
+      filter.frequency.exponentialRampToValueAtTime(70, safeTime + 0.16);
 
-      gain.gain.setValueAtTime(velocity, time);
-      gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.22);
+      gain.gain.setValueAtTime(safeVel, safeTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, safeTime + 0.22);
 
       osc.connect(filter).connect(gain).connect(this.masterMusicGain);
-      osc.start(time);
-      osc.stop(time + 0.24);
+      osc.start(safeTime);
+      osc.stop(safeTime + 0.24);
     } catch {}
   }
 
   playTaikoRim(time, velocity = 0.16) {
     const ctx = this.context;
     if (!ctx || !this.masterMusicGain) return;
+    const safeTime = Math.max(time, ctx.currentTime + 0.002);
+    const safeVel = Math.max(velocity, 0.0001);
     try {
       const bufferSize = Math.floor(ctx.sampleRate * 0.04);
       const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
@@ -472,90 +521,96 @@ export class SoundSystem {
 
       const filter = ctx.createBiquadFilter();
       filter.type = "bandpass";
-      filter.frequency.setValueAtTime(1350, time);
-      filter.Q.setValueAtTime(3.2, time);
+      filter.frequency.setValueAtTime(1350, safeTime);
+      filter.Q.setValueAtTime(3.2, safeTime);
 
       const gain = ctx.createGain();
-      gain.gain.setValueAtTime(velocity, time);
-      gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.045);
+      gain.gain.setValueAtTime(safeVel, safeTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, safeTime + 0.045);
 
       noise.connect(filter).connect(gain).connect(this.masterMusicGain);
-      noise.start(time);
-      noise.stop(time + 0.05);
+      noise.start(safeTime);
+      noise.stop(safeTime + 0.05);
     } catch {}
   }
 
   playBattleShamisen(frequency, time, velocity = 0.15) {
     const ctx = this.context;
     if (!ctx || !this.masterMusicGain) return;
+    const safeTime = Math.max(time, ctx.currentTime + 0.002);
+    const safeVel = Math.max(velocity, 0.0001);
     try {
       const osc = ctx.createOscillator();
       const filter = ctx.createBiquadFilter();
       const gain = ctx.createGain();
 
       osc.type = "sawtooth";
-      osc.frequency.setValueAtTime(frequency, time);
-      osc.frequency.linearRampToValueAtTime(frequency * 0.99, time + 0.02);
+      osc.frequency.setValueAtTime(frequency, safeTime);
+      osc.frequency.linearRampToValueAtTime(frequency * 0.99, safeTime + 0.02);
 
       filter.type = "lowpass";
-      filter.frequency.setValueAtTime(frequency * 4.2, time);
-      filter.frequency.exponentialRampToValueAtTime(frequency * 1.5, time + 0.12);
+      filter.frequency.setValueAtTime(frequency * 4.2, safeTime);
+      filter.frequency.exponentialRampToValueAtTime(frequency * 1.5, safeTime + 0.12);
 
-      gain.gain.setValueAtTime(0.0001, time);
-      gain.gain.linearRampToValueAtTime(velocity, time + 0.003);
-      gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.14);
+      gain.gain.setValueAtTime(0.0001, safeTime);
+      gain.gain.linearRampToValueAtTime(safeVel, safeTime + 0.003);
+      gain.gain.exponentialRampToValueAtTime(0.0001, safeTime + 0.14);
 
       osc.connect(filter).connect(gain).connect(this.masterMusicGain);
-      osc.start(time);
-      osc.stop(time + 0.16);
+      osc.start(safeTime);
+      osc.stop(safeTime + 0.16);
     } catch {}
   }
 
   playTensionBass(frequency, time, velocity = 0.14) {
     const ctx = this.context;
     if (!ctx || !this.masterMusicGain) return;
+    const safeTime = Math.max(time, ctx.currentTime + 0.002);
+    const safeVel = Math.max(velocity, 0.0001);
     try {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       const filter = ctx.createBiquadFilter();
 
       osc.type = "sawtooth";
-      osc.frequency.setValueAtTime(frequency, time);
+      osc.frequency.setValueAtTime(frequency, safeTime);
 
       filter.type = "lowpass";
-      filter.frequency.setValueAtTime(340, time);
+      filter.frequency.setValueAtTime(340, safeTime);
 
-      gain.gain.setValueAtTime(0.0001, time);
-      gain.gain.linearRampToValueAtTime(velocity, time + 0.008);
-      gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.12);
+      gain.gain.setValueAtTime(0.0001, safeTime);
+      gain.gain.linearRampToValueAtTime(safeVel, safeTime + 0.008);
+      gain.gain.exponentialRampToValueAtTime(0.0001, safeTime + 0.12);
 
       osc.connect(filter).connect(gain).connect(this.masterMusicGain);
-      osc.start(time);
-      osc.stop(time + 0.13);
+      osc.start(safeTime);
+      osc.stop(safeTime + 0.13);
     } catch {}
   }
 
   playHyoshigi(time, velocity = 0.18) {
     const ctx = this.context;
     if (!ctx || !this.masterMusicGain) return;
+    const safeTime = Math.max(time, ctx.currentTime + 0.002);
+    const safeVel = Math.max(velocity, 0.0001);
     try {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       const filter = ctx.createBiquadFilter();
 
       osc.type = "triangle";
-      osc.frequency.setValueAtTime(2350, time);
+      osc.frequency.setValueAtTime(2350, safeTime);
 
       filter.type = "bandpass";
-      filter.frequency.setValueAtTime(2350, time);
-      filter.Q.setValueAtTime(4.5, time);
+      filter.frequency.setValueAtTime(2350, safeTime);
+      filter.Q.setValueAtTime(4.5, safeTime);
 
-      gain.gain.setValueAtTime(velocity, time);
-      gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.05);
+      gain.gain.setValueAtTime(safeVel, safeTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, safeTime + 0.05);
 
       osc.connect(filter).connect(gain).connect(this.masterMusicGain);
-      osc.start(time);
-      osc.stop(time + 0.06);
+      osc.start(safeTime);
+      osc.stop(safeTime + 0.06);
     } catch {}
   }
 
@@ -567,7 +622,7 @@ export class SoundSystem {
     if (!this.context) return;
 
     try {
-      if (this.context.state === "suspended") {
+      if (this.context.state === "suspended" || this.context.state === "interrupted") {
         this.context.resume().catch(() => {});
       }
 
@@ -593,7 +648,7 @@ export class SoundSystem {
       }
 
       if (!NOTES[name]) return;
-      let cursor = this.context.currentTime;
+      let cursor = Math.max(this.context.currentTime, 0) + 0.002;
       NOTES[name].forEach(([frequency, duration]) => {
         const oscillator = this.context.createOscillator();
         const gain = this.context.createGain();
@@ -613,7 +668,7 @@ export class SoundSystem {
   playQteSuccess() {
     const ctx = this.context;
     if (!ctx) return;
-    const now = ctx.currentTime;
+    const now = Math.max(ctx.currentTime, 0) + 0.002;
     const sfxDest = this.masterSfxGain || ctx.destination;
 
     // High pitched crisp bell
@@ -647,7 +702,7 @@ export class SoundSystem {
   playQteWrong() {
     const ctx = this.context;
     if (!ctx) return;
-    const now = ctx.currentTime;
+    const now = Math.max(ctx.currentTime, 0) + 0.002;
     const sfxDest = this.masterSfxGain || ctx.destination;
 
     const osc = ctx.createOscillator();
@@ -673,7 +728,7 @@ export class SoundSystem {
   playQteFail() {
     const ctx = this.context;
     if (!ctx) return;
-    const now = ctx.currentTime;
+    const now = Math.max(ctx.currentTime, 0) + 0.002;
     const sfxDest = this.masterSfxGain || ctx.destination;
 
     // Deep low monotone boom
@@ -700,7 +755,7 @@ export class SoundSystem {
   playFistPunch() {
     const ctx = this.context;
     if (!ctx) return;
-    const now = ctx.currentTime;
+    const now = Math.max(ctx.currentTime, 0) + 0.002;
     const sfxDest = this.masterSfxGain || ctx.destination;
 
     const osc = ctx.createOscillator();
@@ -747,7 +802,7 @@ export class SoundSystem {
   playCounterRub() {
     const ctx = this.context;
     if (!ctx) return;
-    const now = ctx.currentTime;
+    const now = Math.max(ctx.currentTime, 0) + 0.002;
     const sfxDest = this.masterSfxGain || ctx.destination;
     const duration = 0.44;
 
