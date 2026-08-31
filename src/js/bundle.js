@@ -4,7 +4,7 @@
   "use strict";
 
 // --- src/js/config/gameConfig.js ---
-const APP_VERSION = "0.4.0";
+const APP_VERSION = "0.0.0";
 
 const DOJO_CONFIG = Object.freeze({
   defaultHp: 10000,

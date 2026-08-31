@@ -82,11 +82,13 @@ Product spec: `OPENSPEC.md`. Follow the workspace OpenSpec workflow in `D:\game-
 
 1. **頁腳版本號位置與格式**：
    - 遊戲版本號必須固定顯示於首頁頁腳（`footer.home-footer`）最左側第一個位置。
-   - 版本號格式嚴格遵循三段式語意化版號：`0.0.0`（例如 `0.3.0`）。
-2. **每次改版同步更新**：
-   - 任何功能更新、修復或發布上線時，必須同步更新：
-     - `src/js/config/gameConfig.js` 中的 `APP_VERSION` 常數。
-     - `index.html` 頁腳元素 `<span class="footer-version" id="footer-app-version">0.0.0</span>`。
-     - `index.html` 中的 CSS 與 `bundle.js` 快取版本號參數（`?v=YYYYMMDDHHmm`）。
-     - `HANDOFF.md` 與 `wiki.md` 交接與百科文件中的版本記錄。
+   - 版本號格式嚴格遵循三段式版號：`MAJOR.MINOR.PATCH`（從 `0.0.0` 起算）。
+2. **版本號累加與進位規則（每 100 個版本進一位）**：
+   - 每次功能更新、修復或發布上線時，由最後一位數（PATCH）遞增 `+1`（例如：`0.0.0` -> `0.0.1` -> `0.0.2` ... -> `0.0.99` -> `0.0.100`）。
+   - **每 100 個版本進一位規則**：當最後一位數達到 100（如 `0.0.100`）時，下一版進位為 `0.1.0`；同理 `0.1.100` 下一版進位為 `0.2.0`、`0.99.100` 下一版進位為 `1.0.0`。
+3. **每次改版同步更新四處**：
+   - `src/js/config/gameConfig.js` 中的 `APP_VERSION` 常數。
+   - `index.html` 頁腳元素 `<span class="footer-version" id="footer-app-version">0.0.0</span>`。
+   - `index.html` 中的 CSS 與 `bundle.js` 快取版本號參數（`?v=YYYYMMDDHHmm`）。
+   - `HANDOFF.md` 與 `wiki.md` 交接與百科文件中的版本記錄。
 
