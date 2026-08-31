@@ -971,7 +971,7 @@ const DICTIONARY = {
       navDojo: "修練場",
       menuDojo: "修練道場",
       menuDojoSub: "QTE & SANDBOX",
-      recentDamageLog: "最近傷害",
+      recentDamageLog: "戰鬥紀錄",
       damageSourceRps: "猜拳獲勝",
       damageSourceMorph: "變拳克制",
       damageSourceCounter: "QTE反制",
@@ -1666,7 +1666,7 @@ const DICTIONARY = {
       navDojo: "修练场",
       menuDojo: "修练道场",
       menuDojoSub: "QTE & SANDBOX",
-      recentDamageLog: "最近伤害",
+      recentDamageLog: "战斗记录",
       damageSourceRps: "猜拳获胜",
       damageSourceMorph: "变拳克制",
       damageSourceCounter: "QTE反制",
@@ -2177,7 +2177,7 @@ const DICTIONARY = {
       navDojo: "Training Dojo",
       menuDojo: "Training Dojo",
       menuDojoSub: "QTE & SANDBOX",
-      recentDamageLog: "Recent Damage",
+      recentDamageLog: "Battle Log",
       damageSourceRps: "RPS Win",
       damageSourceMorph: "Morph Counter",
       damageSourceCounter: "QTE Counter",
@@ -2689,7 +2689,7 @@ const DICTIONARY = {
       navDojo: "修練場",
       menuDojo: "修練道場",
       menuDojoSub: "QTE & SANDBOX",
-      recentDamageLog: "最近のダメージ",
+      recentDamageLog: "戦闘ログ",
       damageSourceRps: "じゃんけん勝利",
       damageSourceMorph: "変拳カウンター",
       damageSourceCounter: "QTEカウンター",
@@ -5946,9 +5946,12 @@ class BattleSystem {
           });
           this.bus.emit("battle:damage-logged", {
             target: "enemy",
+            targetId: target.id,
             targetName: target.name,
             amount: momoDamage,
-            source: "momo"
+            source: "momo",
+            round: this.state?.round || 1,
+            actionType: "attack"
           });
           this.bus.emit("sound", { name: "counterRub" });
           this.finishRound("draw", "平手！但你偷摸了" + target.name + "一下，造成 " + momoDamage + " 點傷害！");
@@ -6118,9 +6121,12 @@ class BattleSystem {
 
     this.bus.emit("battle:damage-logged", {
       target: "enemy",
+      targetId: target.id,
       targetName: target.name,
       amount,
-      source: logSource
+      source: logSource,
+      round: this.state?.round || 1,
+      actionType: "attack"
     });
     this.bus.emit("sound", { name: countered ? "counterRub" : "hit" });
   }
@@ -6170,7 +6176,9 @@ class BattleSystem {
       target: "player",
       targetName: playerName,
       amount: totalDamage,
-      source: "enemy_attack"
+      source: "enemy_attack",
+      round: this.state?.round || 1,
+      actionType: "damaged"
     });
     this.bus.emit("sound", { name: "hurt" });
 
@@ -6191,9 +6199,12 @@ class BattleSystem {
         });
         this.bus.emit("battle:damage-logged", {
           target: "enemy",
+          targetId: target.id,
           targetName: target.name,
           amount: reflectDamage,
-          source: "reflect"
+          source: "reflect",
+          round: this.state?.round || 1,
+          actionType: "reflect"
         });
       }
     }
@@ -6233,7 +6244,9 @@ class BattleSystem {
       target: "player",
       targetName: playerName,
       amount: totalDamage,
-      source: "enemy_attack"
+      source: "enemy_attack",
+      round: this.state?.round || 1,
+      actionType: "damaged"
     });
     this.bus.emit("sound", { name: "hurt" });
 
@@ -6254,9 +6267,12 @@ class BattleSystem {
         });
         this.bus.emit("battle:damage-logged", {
           target: "enemy",
+          targetId: target.id,
           targetName: target.name,
           amount: reflectDamage,
-          source: "reflect"
+          source: "reflect",
+          round: this.state?.round || 1,
+          actionType: "reflect"
         });
       }
     }
@@ -6271,7 +6287,21 @@ class BattleSystem {
     // MP Regen effect check
     const totalMpRegen = this.getAllEquipEffects("mp_regen").reduce((sum, eff) => sum + (eff.mpRegen || 0), 0);
     if (totalMpRegen > 0) {
+      const before = this.state.playerMp;
       this.state.playerMp = Math.min(this.state.playerMaxMp, this.state.playerMp + totalMpRegen);
+      const restored = this.state.playerMp - before;
+      if (restored > 0) {
+        const playerName = (I18n.t("dialogue.speakerPlayer") && !I18n.t("dialogue.speakerPlayer").includes(".")) ? I18n.t("dialogue.speakerPlayer") : "旅人";
+        this.bus.emit("battle:damage-logged", {
+          target: "player",
+          targetName: playerName,
+          amount: restored,
+          source: "regen_mp",
+          round: this.state?.round || 1,
+          actionType: "mana",
+          resource: "mp"
+        });
+      }
     }
 
     // Burn effect check
@@ -6289,9 +6319,12 @@ class BattleSystem {
       this.bus.emit("battle:effect", { type: "burn", amount: totalBurn, targetId: target?.id });
       this.bus.emit("battle:damage-logged", {
         target: "enemy",
+        targetId: target?.id,
         targetName: target?.name || "小樂",
         amount: totalBurn,
-        source: "burn"
+        source: "burn",
+        round: this.state?.round || 1,
+        actionType: "burn"
       });
     }
 
@@ -6340,6 +6373,16 @@ class BattleSystem {
       this.battleMpRestored = (this.battleMpRestored || 0) + restored;
     }
     this.store.recordPotionUse(item.resource === "hp" ? "hpPotion" : "mpPotion", { restored });
+    const playerName = (I18n.t("dialogue.speakerPlayer") && !I18n.t("dialogue.speakerPlayer").includes(".")) ? I18n.t("dialogue.speakerPlayer") : "旅人";
+    this.bus.emit("battle:damage-logged", {
+      target: "player",
+      targetName: playerName,
+      amount: restored,
+      source: item.resource === "hp" ? "heal_hp" : "heal_mp",
+      round: this.state?.round || 1,
+      actionType: item.resource === "hp" ? "heal" : "mana",
+      resource: item.resource
+    });
     this.emitState();
     this.bus.emit("battle:effect", { type: "item", resource: item.resource, amount: restored });
     this.bus.emit("sound", { name: "heal" });
@@ -6736,6 +6779,12 @@ class PostBattleSystem {
 
   say(text) {
     this.bus.emit("dialogue", { speaker: I18n.t("dialogue.speakerKohaku"), text });
+  }
+
+  restore(savedState) {
+    if (!savedState) return;
+    this.state = savedState;
+    this.emit();
   }
 
   emit() {
@@ -7789,6 +7838,21 @@ class AppView {
     this.changelogModal = $("#changelog-modal");
     this.equipTooltip = $("#equip-tooltip");
     this.activeShopFilter = "all";
+    this.battleLogTier = 1;
+
+    if (this.battleDamageLog) {
+      this.battleDamageLog.addEventListener("click", () => {
+        this.battleLogTier = (this.battleLogTier % 3) + 1;
+        this.updateDamageLogDisplay();
+      });
+      this.battleDamageLog.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          this.battleLogTier = (this.battleLogTier % 3) + 1;
+          this.updateDamageLogDisplay();
+        }
+      });
+    }
   }
 
   init() {
@@ -7828,12 +7892,27 @@ class AppView {
     } catch (_) {}
 
     let activeBattle = null;
+    let activePostBattle = null;
     let savedStageId = 1;
     try {
+      const rawPost = window.localStorage?.getItem("koraku_active_postbattle") || sessionStorage.getItem("koraku_active_postbattle");
+      if (rawPost) activePostBattle = JSON.parse(rawPost);
       const rawBattle = window.localStorage?.getItem("koraku_active_battle_state") || sessionStorage.getItem("koraku_active_battle_state") || sessionStorage.getItem("koraku_active_battle");
       if (rawBattle) activeBattle = JSON.parse(rawBattle);
       savedStageId = Number(window.localStorage?.getItem("koraku_active_stage") || sessionStorage.getItem("koraku_active_stage")) || activeBattle?.stage?.id || activeBattle?.stageId || this.store.snapshot().records?.bestStage || 1;
     } catch (_) {}
+
+    if (activePostBattle) {
+      if (typeof window !== "undefined" && window.history) {
+        window.history.replaceState({ screen: "battle" }, "", "#battle");
+      }
+      this.navigate("battle", { pushHistory: false });
+      this.postBattle.restore(activePostBattle);
+      if (this.postBattle?.getWatermelonStock() > 0) {
+        this.postBattle.emitAutoWatermelon();
+      }
+      return;
+    }
 
     if (targetScreen === "battle") {
       if (typeof window !== "undefined" && window.history) {
@@ -9140,6 +9219,10 @@ class AppView {
     this.hideFloatingWatermelon();
     this.postBattle?.closeAutoWatermelon?.();
     this.battle.stopAutoBattle();
+    try {
+      window.localStorage?.removeItem("koraku_active_postbattle");
+      sessionStorage.removeItem("koraku_active_postbattle");
+    } catch (_) {}
     if (!this.battle.start(stageId)) return;
     try {
       sessionStorage.setItem("koraku_active_battle", JSON.stringify({ stageId, isAuto: false }));
@@ -9206,6 +9289,10 @@ class AppView {
     }
 
     this.closeAutoBattleModal();
+    try {
+      window.localStorage?.removeItem("koraku_active_postbattle");
+      sessionStorage.removeItem("koraku_active_postbattle");
+    } catch (_) {}
     if (!this.battle.startAutoBattle(stageId, rounds)) return;
     try {
       sessionStorage.setItem("koraku_active_battle", JSON.stringify({ stageId, isAuto: true, remainingRounds: rounds }));
@@ -10688,6 +10775,10 @@ class AppView {
       this.roundOracle.classList.remove("is-revealing");
       void this.roundOracle.offsetWidth;
       this.roundOracle.classList.add("is-revealing");
+      clearTimeout(this.revealTimer);
+      this.revealTimer = setTimeout(() => {
+        this.roundOracle?.classList.remove("is-revealing");
+      }, 340);
     }
   }
 
@@ -11048,6 +11139,13 @@ class AppView {
   renderPostBattle(state) {
     if (!state) return;
     this.postState = state;
+    try {
+      window.localStorage?.setItem("koraku_active_postbattle", JSON.stringify(state));
+      sessionStorage.setItem("koraku_active_postbattle", JSON.stringify(state));
+      sessionStorage.removeItem("koraku_active_battle");
+      window.localStorage?.removeItem("koraku_active_battle_state");
+      sessionStorage.removeItem("koraku_active_battle_state");
+    } catch (_) {}
     this.recentDamageLog = [];
     if (this.battleDamageLogList) this.battleDamageLogList.innerHTML = "";
     if (this.battleDamageLog) this.battleDamageLog.hidden = true;
@@ -11297,10 +11395,18 @@ class AppView {
       return;
     }
     if (action === "rematch") {
+      try {
+        window.localStorage?.removeItem("koraku_active_postbattle");
+        sessionStorage.removeItem("koraku_active_postbattle");
+      } catch (_) {}
       this.startStage(this.postState.stage.id);
       return;
     }
     if (action === "stages" || action === "home") {
+      try {
+        window.localStorage?.removeItem("koraku_active_postbattle");
+        sessionStorage.removeItem("koraku_active_postbattle");
+      } catch (_) {}
       this.battle.stopAutoBattle();
       this.battle.abandon();
       this.battleArena?.classList.remove("is-settlement");
@@ -11527,6 +11633,10 @@ class AppView {
     this.hideFloatingWatermelon();
     this.postBattle?.closeAutoWatermelon?.();
     this.battle.stopAutoBattle();
+    try {
+      window.localStorage?.removeItem("koraku_active_postbattle");
+      sessionStorage.removeItem("koraku_active_postbattle");
+    } catch (_) {}
     if (!this.battle.start(null, { isDojo: true, isDual, customHp, customDamage, isSilhouette: true })) return;
     this.postState = null;
     this.battleArena?.classList.remove("is-settlement");
@@ -11535,75 +11645,143 @@ class AppView {
     this.navigate("battle");
   }
 
-  addDamageLogEntry({ target, targetName, amount, source }) {
+  addDamageLogEntry({ target, targetId, targetName, amount, source, round, actionType, resource }) {
     if (!this.recentDamageLog) this.recentDamageLog = [];
-    const sourceKeyMap = {
-      rps_win: "ui.damageSourceRps",
-      morph: "ui.damageSourceMorph",
-      counter: "ui.damageSourceCounter",
-      momo: "ui.damageSourceMomo",
-      burn: "ui.damageSourceBurn",
-      reflect: "ui.damageSourceReflect",
-      burst: "ui.damageSourceBurst",
-      enemy_attack: "ui.damageSourceEnemy"
-    };
-    const fallbackSources = {
-      rps_win: "猜拳獲勝",
-      morph: "變拳克制",
-      counter: "QTE反擊",
-      momo: "摸摸偷襲",
-      burn: "太刀灼燒",
-      reflect: "鏡光反彈",
-      burst: "重劍暴擊",
-      enemy_attack: "小樂出拳"
-    };
+    const currentRound = round ?? this.battle?.state?.round ?? 1;
 
-    let sourceText = "";
-    if (sourceKeyMap[source]) {
-      const translated = I18n.t(sourceKeyMap[source]);
-      if (translated && !translated.includes(".")) sourceText = translated;
-    }
-    if (!sourceText) {
-      const translated = I18n.t("ui." + source);
-      if (translated && !translated.includes(".")) sourceText = translated;
-    }
-    if (!sourceText) {
-      sourceText = fallbackSources[source] || "攻擊";
-    }
+    let actorName = "";
+    let actionBadge = "攻";
+    let isHeal = actionType === "heal";
+    let isMana = actionType === "mana";
+    let isEnemyHit = false;
 
-    let cleanTargetName = targetName;
-    if (!cleanTargetName || cleanTargetName.includes(".")) {
-      if (target === "enemy") {
-        const t = I18n.t("dialogue.speakerKohaku");
-        cleanTargetName = (t && !t.includes(".")) ? t : "小樂";
+    if (actionType === "heal") {
+      actorName = "旅人";
+      actionBadge = "療";
+    } else if (actionType === "mana") {
+      actorName = "旅人";
+      actionBadge = "魔";
+    } else if (actionType === "burn") {
+      if (targetId === "left" || (targetName && targetName.includes("左"))) {
+        actorName = "左";
+      } else if (targetId === "right" || (targetName && targetName.includes("右"))) {
+        actorName = "右";
       } else {
-        const t = I18n.t("dialogue.speakerPlayer");
-        cleanTargetName = (t && !t.includes(".")) ? t : "旅人";
+        actorName = "小樂";
       }
+      actionBadge = "灼";
+      isEnemyHit = true;
+    } else if (actionType === "reflect") {
+      if (targetId === "left" || (targetName && targetName.includes("左"))) {
+        actorName = "左";
+      } else if (targetId === "right" || (targetName && targetName.includes("右"))) {
+        actorName = "右";
+      } else {
+        actorName = "小樂";
+      }
+      actionBadge = "反";
+      isEnemyHit = true;
+    } else if (target === "enemy") {
+      if (targetId === "left" || (targetName && targetName.includes("左"))) {
+        actorName = "左";
+      } else if (targetId === "right" || (targetName && targetName.includes("右"))) {
+        actorName = "右";
+      } else {
+        actorName = "小樂";
+      }
+      actionBadge = "受";
+      isEnemyHit = true;
+    } else {
+      actorName = "旅人";
+      actionBadge = "受";
     }
 
     const entry = {
       id: Date.now() + Math.random(),
-      target,
-      targetName: cleanTargetName,
+      round: currentRound,
+      actorName,
+      actionBadge,
       amount,
-      sourceText,
-      isEnemyHit: target === "enemy"
+      isHeal,
+      isMana,
+      isEnemyHit
     };
 
     this.recentDamageLog.push(entry);
-    if (this.recentDamageLog.length > 5) {
+    if (this.recentDamageLog.length > 100) {
       this.recentDamageLog.shift();
     }
 
+    this.updateDamageLogDisplay();
+  }
+
+  formatDamageLogItem(item) {
+    const locale = I18n.currentLocale || "zh-Hant";
+    let actor = item.actorName;
+    let badge = item.actionBadge;
+
+    if (locale === "en") {
+      const enActors = { "旅人": "Hero", "小樂": "Koraku", "左": "L", "右": "R" };
+      const enBadges = { "攻": "ATK", "受": "HIT", "療": "HEAL", "魔": "MP", "灼": "BURN", "反": "REFL" };
+      actor = enActors[actor] || actor;
+      badge = enBadges[badge] || badge;
+    } else if (locale === "zh-Hans") {
+      if (actor === "小樂") actor = "小乐";
+    } else if (locale === "ja") {
+      if (actor === "小樂") actor = "小楽";
+    }
+
+    const typeClass = item.isHeal ? "is-heal" : item.isMana ? "is-mana" : item.isEnemyHit ? "is-enemy-hit" : "is-player-hit";
+    const sign = (item.isHeal || item.isMana) ? "+" : "−";
+    const unit = item.isMana ? " MP" : item.isHeal ? " HP" : "";
+    const bracketOpen = locale === "en" ? "[" : "【";
+    const bracketClose = locale === "en" ? "]" : "】";
+
+    return `
+      <div class="damage-log-entry ${typeClass}">
+        <span class="damage-log-round">R${item.round}</span>
+        <span class="damage-log-source" title="${actor}${bracketOpen}${badge}${bracketClose}">${actor}${bracketOpen}${badge}${bracketClose}</span>
+        <span class="damage-log-amount">${sign}${item.amount}${unit}</span>
+      </div>
+    `;
+  }
+
+  updateDamageLogDisplay() {
+    if (!this.battleDamageLog) return;
+    const tier = this.battleLogTier || 1;
+    this.battleDamageLog.classList.remove("tier-1", "tier-2", "tier-3");
+    this.battleDamageLog.classList.add(`tier-${tier}`);
+
+    const tierBadge = $("#battle-damage-log-tier");
+    if (tierBadge) {
+      const locale = I18n.currentLocale || "zh-Hant";
+      if (locale === "en") {
+        tierBadge.textContent = tier === 1 ? "▾ [1/3 Latest]" : tier === 2 ? "▾ [2/3 Last 5]" : "▴ [3/3 All 100]";
+      } else if (locale === "ja") {
+        tierBadge.textContent = tier === 1 ? "▾ [1/3 最新]" : tier === 2 ? "▾ [2/3 直近5件]" : "▴ [3/3 全履歴]";
+      } else if (locale === "zh-Hans") {
+        tierBadge.textContent = tier === 1 ? "▾ [1/3 最新]" : tier === 2 ? "▾ [2/3 近5条]" : "▴ [3/3 全记录]";
+      } else {
+        tierBadge.textContent = tier === 1 ? "▾ [1/3 最新]" : tier === 2 ? "▾ [2/3 近5筆]" : "▴ [3/3 全紀錄]";
+      }
+    }
+
     const logList = $("#battle-damage-log-list");
-    if (logList) {
-      logList.innerHTML = this.recentDamageLog.map((item) => `
-        <div class="damage-log-entry ${item.isEnemyHit ? "is-enemy-hit" : "is-player-hit"}">
-          <span class="damage-log-source" title="${item.targetName}【${item.sourceText}】">${item.targetName}【${item.sourceText}】</span>
-          <span class="damage-log-amount">−${item.amount}</span>
-        </div>
-      `).join("");
+    if (!logList) return;
+
+    let itemsToShow = [];
+    if (tier === 1) {
+      itemsToShow = this.recentDamageLog.slice(-1);
+    } else if (tier === 2) {
+      itemsToShow = this.recentDamageLog.slice(-5);
+    } else {
+      itemsToShow = this.recentDamageLog.slice(-100);
+    }
+
+    logList.innerHTML = itemsToShow.map((item) => this.formatDamageLogItem(item)).join("");
+
+    if (tier === 3) {
+      logList.scrollTop = logList.scrollHeight;
     }
   }
 }

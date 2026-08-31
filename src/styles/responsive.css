@@ -33,14 +33,14 @@
   .enemy-hud {
     top: clamp(14px, 2.2vh, 24px);
     left: 50%;
-    width: min(54vw, 640px);
+    width: min(52vw, 600px);
     transform: translateX(-50%);
   }
 
   .round-oracle {
-    top: clamp(70px, 10.5vh, 94px);
+    top: clamp(82px, 12vh, 106px);
     left: 50%;
-    width: min(46vw, 440px);
+    width: min(44vw, 420px);
     padding: 10px 16px 12px;
     transform: translateX(-50%);
   }
@@ -60,29 +60,116 @@
   }
 
   .battle-character-wrap.is-dual-stage {
-    left: 50%;
-    width: min(84vw, 960px);
-    bottom: clamp(120px, 18vh, 220px);
+    left: 58%;
+    width: min(66vw, 760px);
+    bottom: clamp(90px, 13vh, 160px);
+    height: 80%;
   }
 }
 
 /* --------------------------------------------------------------------------
-   Tablet Portrait (iPad 834x1194, 810x1080, 768x1024, etc.): Elevate Standee
+   Tablet Portrait (iPad 834x1194, 820x1180, 810x1080, 768x1024, etc.): Elevate Standee & Center Controls
    -------------------------------------------------------------------------- */
-@media (min-width: 601px) and (max-width: 1024px) and (orientation: portrait) {
+@media (min-width: 601px) and (max-width: 1024px) and (orientation: portrait),
+       (min-width: 601px) and (max-width: 1024px) and (max-aspect-ratio: 13/10) {
+  .chapter-tag {
+    top: 14px !important;
+    left: 18px !important;
+  }
+
+  .battle-exit {
+    top: 14px !important;
+    right: 18px !important;
+    z-index: 35 !important;
+  }
+
+  .enemy-hud {
+    top: 54px !important;
+    left: 50% !important;
+    width: min(94vw, 760px) !important;
+    transform: translateX(-50%) !important;
+  }
+
+  .dual-enemy-row {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+    width: 100% !important;
+  }
+
+  .dual-enemy-card {
+    min-width: 0 !important;
+    padding: 6px 12px !important;
+  }
+
+  .dual-enemy-card .hud-name b {
+    font-size: 15px !important;
+  }
+
+  .dual-enemy-card .hud-atk-badge b {
+    font-size: 12px !important;
+  }
+
+  .round-oracle {
+    top: 140px !important;
+    left: 50% !important;
+    width: min(72vw, 420px) !important;
+    transform: translateX(-50%) !important;
+    padding: 8px 16px 10px !important;
+  }
+
+  .battle-damage-log {
+    top: 140px !important;
+    right: 18px !important;
+    z-index: 35 !important;
+  }
+
   .battle-character-wrap {
-    left: 50%;
-    width: min(74vw, 680px);
-    bottom: clamp(160px, 22vh, 320px);
-    height: clamp(55%, 65vh, 76%);
-    transform: translateX(-50%);
+    left: 50% !important;
+    top: clamp(210px, 20vh, 250px) !important;
+    bottom: auto !important;
+    width: min(72vw, 560px) !important;
+    height: clamp(280px, 32vh, 380px) !important;
+    transform: translateX(-50%) !important;
   }
 
   .battle-character-wrap.is-dual-stage {
-    left: 58%;
-    width: min(80vw, 700px);
-    bottom: clamp(160px, 22vh, 320px);
-    height: clamp(50%, 58vh, 70%);
+    left: 50% !important;
+    top: clamp(210px, 20vh, 250px) !important;
+    bottom: auto !important;
+    width: min(92vw, 740px) !important;
+    height: clamp(280px, 32vh, 380px) !important;
+    transform: translateX(-50%) !important;
+  }
+
+  .battle-character-wrap .character-single-slot img,
+  .battle-character-wrap.is-dual-stage .character-dual-slot img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    object-position: center top !important;
+  }
+
+  .battle-left-cluster {
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    bottom: clamp(96px, 10.5vh, 120px) !important;
+    width: min(88vw, 420px) !important;
+    z-index: 25 !important;
+    gap: 8px !important;
+  }
+
+  .hand-button {
+    min-height: 44px !important;
+    font-size: 15px !important;
+  }
+
+  .avg-dialogue {
+    bottom: 12px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: min(calc(100% - 36px), 760px) !important;
+    min-height: 76px !important;
   }
 }
 
@@ -124,18 +211,30 @@
     padding: clamp(3px, 0.5vh, 6px) 12px;
   }
 
+  .battle-exit {
+    top: 14px;
+    right: 18px;
+  }
+
+  .battle-damage-log {
+    top: 60px;
+    right: 18px;
+    width: 160px;
+    max-height: 110px;
+  }
+
   .enemy-hud {
     top: 14px;
     left: 50%;
-    width: min(52vw, 620px);
+    width: min(50vw, 580px);
     transform: translateX(-50%);
   }
 
   .round-oracle {
-    top: clamp(62px, 8.5vh, 74px);
+    top: clamp(80px, 11.5vh, 92px);
     left: 50%;
     transform: translateX(-50%);
-    width: min(40vw, 390px);
+    width: min(38vw, 380px);
     padding: 6px 14px 8px;
   }
 
@@ -164,6 +263,14 @@
   .battle-character-wrap {
     left: 54%;
     width: min(44vw, 530px);
+    bottom: clamp(10px, 2vh, 36px);
+    height: clamp(58%, 70vh, 78%);
+    transform: translateX(-50%);
+  }
+
+  .battle-character-wrap.is-dual-stage {
+    left: 58%;
+    width: min(62vw, 680px);
     bottom: clamp(10px, 2vh, 36px);
     height: clamp(58%, 70vh, 78%);
     transform: translateX(-50%);
@@ -404,6 +511,55 @@
 
   .character-seal {
     display: none;
+  }
+
+  /* Mobile Home Dialogue: Manga Speech Bubble Floating Above Kohaku's Head */
+  .home-dialogue {
+    position: absolute;
+    z-index: 22 !important;
+    right: 12px;
+    bottom: clamp(340px, 48vh, 460px);
+    width: min(54vw, 220px);
+    padding: 8px 12px 10px 14px;
+    border: 1.5px solid rgba(216, 182, 106, 0.75);
+    border-radius: 8px;
+    background: rgba(12, 14, 22, 0.92);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65), 0 0 14px rgba(216, 182, 106, 0.2);
+    pointer-events: none;
+    animation: floatFadeIn 0.35s ease-out;
+  }
+
+  /* Manga Speech Bubble Caret Pointer Pointing Down to Kohaku */
+  .home-dialogue::after {
+    content: "";
+    position: absolute;
+    bottom: -8px;
+    right: 32px;
+    width: 0;
+    height: 0;
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-top: 8px solid rgba(216, 182, 106, 0.9);
+  }
+
+  .home-dialogue span {
+    position: static;
+    display: inline-block;
+    padding: 2px 8px;
+    margin-bottom: 4px;
+    background: var(--crimson);
+    border-radius: 3px;
+    font: 700 10.5px/1 var(--serif);
+    letter-spacing: 0.12em;
+    color: #fff;
+  }
+
+  .home-dialogue p {
+    color: var(--paper-soft);
+    font: 500 11.5px/1.45 var(--serif);
+    letter-spacing: 0.03em;
+    margin: 0;
   }
 
   .reset-button {
@@ -779,21 +935,40 @@
     display: none !important;
   }
 
-  /* Damage Log Docked Safely at Middle-Right (Never Overlaps Oracle or Boss Bar) */
+  /* Battle Log (3-Tier Interactive FIFO - Mobile Optimized) */
   .battle-damage-log {
     right: 8px !important;
-    top: 205px !important;
+    top: 195px !important;
     left: auto !important;
     bottom: auto !important;
-    width: min(115px, 32vw) !important;
-    max-height: 80px !important;
     padding: 4px 6px !important;
-    background: rgba(10, 13, 20, 0.88) !important;
-    backdrop-filter: blur(6px) !important;
-    border: 1px solid rgba(216, 182, 106, 0.3) !important;
-    border-radius: 4px !important;
-    z-index: 20 !important;
-    pointer-events: none !important;
+    background: rgba(10, 13, 20, 0.92) !important;
+    backdrop-filter: blur(8px) !important;
+    border: 1px solid rgba(216, 182, 106, 0.4) !important;
+    border-radius: 5px !important;
+    z-index: 25 !important;
+    pointer-events: auto !important;
+    cursor: pointer !important;
+  }
+
+  .battle-damage-log.tier-1 {
+    width: min(135px, 36vw) !important;
+    max-height: 44px !important;
+  }
+
+  .battle-damage-log.tier-2 {
+    width: min(150px, 42vw) !important;
+    max-height: 110px !important;
+  }
+
+  .battle-damage-log.tier-3 {
+    width: min(165px, 46vw) !important;
+    max-height: 200px !important;
+  }
+
+  .battle-damage-log.tier-3 .damage-log-list {
+    max-height: 165px !important;
+    overflow-y: auto !important;
   }
 
   /* Kohaku Sprites: Vertically Centered with Clear Clearance */
@@ -1614,8 +1789,8 @@
 /* --------------------------------------------------------------------------
    Tablet & Touchscreen Device Support (iPad / Android Tablets / Surface)
    -------------------------------------------------------------------------- */
-html.has-touch .qte-pad,
-body.has-touch .qte-pad {
+html.has-touch .qte-pad:not(.is-dual-touch-pad),
+body.has-touch .qte-pad:not(.is-dual-touch-pad) {
   display: grid !important;
   grid-template-columns: repeat(3, 1fr) !important;
   gap: 8px !important;
@@ -1623,8 +1798,8 @@ body.has-touch .qte-pad {
   margin: 14px auto 8px !important;
 }
 
-html.has-touch .qte-pad button,
-body.has-touch .qte-pad button {
+html.has-touch .qte-pad:not(.is-dual-touch-pad) button,
+body.has-touch .qte-pad:not(.is-dual-touch-pad) button {
   height: 52px !important;
   min-height: 52px !important;
   font-size: 22px !important;
@@ -1634,8 +1809,8 @@ body.has-touch .qte-pad button {
   padding: 0 !important;
 }
 
-html.has-touch .qte-pad button .qte-dir-svg,
-body.has-touch .qte-pad button .qte-dir-svg {
+html.has-touch .qte-pad:not(.is-dual-touch-pad) button .qte-dir-svg,
+body.has-touch .qte-pad:not(.is-dual-touch-pad) button .qte-dir-svg {
   width: 24px !important;
   height: 24px !important;
 }
@@ -1645,26 +1820,49 @@ body.has-touch .dual-qte-touch-controls {
   display: flex !important;
   justify-content: space-between !important;
   align-items: flex-end !important;
-  gap: 12px !important;
+  gap: 10px !important;
   width: 100% !important;
-  margin-top: 12px !important;
+  margin-top: 10px !important;
+}
+
+html.has-touch .dual-touch-col,
+body.has-touch .dual-touch-col {
+  flex: 1 !important;
+  max-width: 48% !important;
+  min-width: 0 !important;
 }
 
 html.has-touch .is-dual-touch-pad,
 body.has-touch .is-dual-touch-pad {
   display: grid !important;
   grid-template-columns: repeat(3, 1fr) !important;
-  gap: 5px !important;
+  gap: 4px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
 }
 
 html.has-touch .is-dual-touch-pad button,
 body.has-touch .is-dual-touch-pad button {
-  height: 44px !important;
-  min-height: 44px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  font-size: 16px !important;
+  border-radius: 4px !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+}
+
+html.has-touch .is-dual-touch-pad button .qte-dir-svg,
+body.has-touch .is-dual-touch-pad button .qte-dir-svg {
+  width: 18px !important;
+  height: 18px !important;
 }
 
 @media (pointer: coarse), (any-pointer: coarse) {
-  .qte-pad {
+  .qte-pad:not(.is-dual-touch-pad) {
     display: grid !important;
     grid-template-columns: repeat(3, 1fr) !important;
     gap: 8px !important;
@@ -1672,7 +1870,7 @@ body.has-touch .is-dual-touch-pad button {
     margin: 14px auto 8px !important;
   }
 
-  .qte-pad button {
+  .qte-pad:not(.is-dual-touch-pad) button {
     height: 52px !important;
     min-height: 52px !important;
     font-size: 22px !important;
@@ -1682,7 +1880,7 @@ body.has-touch .is-dual-touch-pad button {
     padding: 0 !important;
   }
 
-  .qte-pad button .qte-dir-svg {
+  .qte-pad:not(.is-dual-touch-pad) button .qte-dir-svg {
     width: 24px !important;
     height: 24px !important;
   }
@@ -1691,20 +1889,41 @@ body.has-touch .is-dual-touch-pad button {
     display: flex !important;
     justify-content: space-between !important;
     align-items: flex-end !important;
-    gap: 12px !important;
+    gap: 10px !important;
     width: 100% !important;
-    margin-top: 12px !important;
+    margin-top: 10px !important;
+  }
+
+  .dual-touch-col {
+    flex: 1 !important;
+    max-width: 48% !important;
+    min-width: 0 !important;
   }
 
   .is-dual-touch-pad {
     display: grid !important;
     grid-template-columns: repeat(3, 1fr) !important;
-    gap: 5px !important;
+    gap: 4px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
   }
 
   .is-dual-touch-pad button {
-    height: 44px !important;
-    min-height: 44px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    font-size: 16px !important;
+    border-radius: 4px !important;
+    display: grid !important;
+    place-items: center !important;
+    padding: 0 !important;
+  }
+
+  .is-dual-touch-pad button .qte-dir-svg {
+    width: 18px !important;
+    height: 18px !important;
   }
 }
 

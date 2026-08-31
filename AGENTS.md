@@ -1,94 +1,133 @@
-# 狐樂・絆之勝負 — Agent 開發與維護準則
+# Repository Agent Instructions — Koraku RPS
 
-Product spec: `OPENSPEC.md`. Follow the workspace OpenSpec workflow in `D:\game-dev\AGENTS.md`.
+## Scope and Authority
 
----
+- This file governs **New-game-project-4**, the directory containing this file and its descendants. The local checkout is `D:\game-dev\New-game-project-4`.
+- The enclosing Git root is currently `D:\game-dev`. "Project root" in these instructions means this game's directory, not the enclosing multi-project workspace.
+- Do not edit ancestor instructions, sibling games, shared skill sources, or user-global AI settings without explicit authorization.
+- Preserve existing and concurrent changes. Record the starting status with `git status --short -- .`; compare your own changes against that baseline. Never assume the workspace is clean.
+- Platform/system instructions, safety rules, tool permissions, and explicit user scope remain controlling. These documents do not redefine the platform's instruction hierarchy.
+- Within the project, applicable nested instructions refine workflow; approved product specifications define game behavior. Approved design references and established design conventions take precedence over generic skill suggestions.
+- Skills are advisory capabilities, not permission to expand scope. Accessibility, usable interaction, responsive correctness, and data safety are acceptance constraints, not tradeoffs for shorter code.
+- If instructions, product requirements, or references conflict, identify the sources and record `NEEDS HUMAN DECISION`. Do not silently choose a new product behavior.
+- Write new agent-governance rules in English. Report to this project's user in Traditional Chinese unless requested otherwise.
 
-## 1. 開發前置規範 (OpenSpec Workflow & Prompt Comprehension)
+## Product and Source Map
 
-在進行任何功能開發、規則修改或行為變更時，必須嚴格遵守以下流程：
+- Product specification: [OPENSPEC.md](OPENSPEC.md). Architecture and event/save contracts: [HANDOFF.md](HANDOFF.md) and [AI_HANDOVER.md](AI_HANDOVER.md).
+- Stack: vanilla HTML, CSS, ES Modules, Web Audio API, and localStorage; no third-party runtime framework.
+- Game markup and early touch detection: [index.html](index.html). DOM rendering, navigation, and interaction: [src/js/ui](src/js/ui).
+- Shared presentation: [src/styles](src/styles). Labels and localization helpers: [I18n.js](src/js/services/I18n.js). Debug UI also exists in [main.js](src/js/main.js).
+- The standalone [wiki.html](wiki.html) has its own embedded styles and script. Do not overlook it when its UI is in scope.
+- [bundle.js](src/js/bundle.js) is generated; edit source modules and rebuild only when the task authorizes production changes.
+- Root instructions cover root HTML and all UI-affecting files. Also read [style rules](src/styles/AGENTS.md) or [DOM UI rules](src/js/ui/AGENTS.md) before working in those directories. Do not treat all of `src/js` as presentation.
 
-1. **先理解提示詞**：深入分析玩家與使用者的真實意圖、影響範圍、潛在邊界條件與相關聯系統。
-2. **更新或編寫 OpenSpec 規格**：在動手編寫或修改任何專案程式碼前，**必須先在 `openspec/specs/` 或 `OPENSPEC.md` 中更新或寫入規格**：
-   - **規格目的 (Purpose)**：清楚定義此功能之目的與價值。
-   - **規格需求 (Requirements)**：條列清晰的系統規範與行為約束。
-   - **驗收情境 (Scenarios)**：使用標準的 **GIVEN / WHEN / THEN** 格式撰寫可量化之驗收條目。
-3. **執行 OpenSpec 標準流程**：`openspec context --json` -> `/opsx:propose` -> `/opsx:apply`（或相應指令）。
+## Task Classification and Reading
 
----
+Classify before acting; use the smallest relevant scope:
 
-## 2. AI 交接與全域規格表維護規範 (AI Handover & Full Specs Artifacts)
+| Task | Required context and approach |
+| --- | --- |
+| Read-only investigation/review | Inspect relevant sources and specifications; no fixes, generated files, installation, or release without authorization. |
+| Documentation/governance or local skill setup | Read the affected instructions and [skill routing](docs/engineering/skill-routing.md); change only authorized governance/setup artifacts. |
+| Functional core | Read relevant OpenSpec contracts, callers, and tests; use Ponytail within its non-visual boundary. |
+| UI maintenance, responsive repair, or accessibility fix | Read affected product requirements, the relevant parts of the [UI/RWD baseline](docs/ui/responsive-spec.md), and related [regression entries](docs/ui/rwd-regression-log.md). |
+| New UI or visual redesign | Use the same product/RWD context; establish an authorized design direction before implementation. |
+| Browser verification | Read the relevant RWD cases and command side effects; isolate browser state and report actual evidence. |
+| Mixed | Classify presentation and functional portions separately; do not refactor merely to enable a skill. |
 
-為確保跨 AI 代理人與開發者能無縫交接、秒級理解全系統契約，必須同步維護以下 4 份核心交接與百科文件：
+Do not read every governance document or invoke every installed skill for every small task. Read each selected skill's complete `SKILL.md` before using it, then only the references required for that task.
 
-1. **AI 交接指南 (`HANDOFF.md` / `AI_HANDOVER.md`)**：
-   - 記錄系統架構分層、EventBus 契約、狀態機轉換、存檔資料結構（GameStore）、重要測試指令與建置流程。
-2. **遊戲全規格 Markdown 百科 (`wiki.md`)**：
-   - 詳盡記錄全遊戲玩法、角色立繪、四大章節 Boss 梯度、猜拳與時機變拳、八方向單/雙軌 QTE、摸摸與雙手技能、12 格位裝備目錄、切西瓜小遊戲、DPS 計算公式、圖鑑解鎖、作弊選單與在地化字典。
-3. **獨立互動式 HTML 遊戲百科 (`wiki.html`)**：
-   - 具備日式動漫暗黑神社視覺風格、即時搜尋、分類過濾（角色/關卡/裝備/技能/公式/作弊）、以及互動式等級/配點/DPS/QTE 計算器之單頁離線 HTML 百科。
-4. **全規格 Excel 試算表 (`game_specs.xlsx`)**：
-   - 多工作表 Excel 總表，涵蓋「關卡與Boss」、「裝備武具一覽」、「道具與藥水」、「技能與摸摸」、「戰鬥與QTE規則」、「成長與數值公式」、「切西瓜與圖鑑」、「作弊與除錯」及「在地化字典」。
+## OpenSpec Workflow
 
-**維護要求**：任何新增/調整遊戲內容（新裝備、數值調整、新關卡等）後，必須同步更新上述 4 份文件。
+Before changing any player-visible behavior, game rule, UI interaction, or localized text:
 
----
+1. Understand intent, affected systems, edge cases, and the expected result.
+2. Run `openspec context --json` from this project. A nested `openspec/` wins; currently this game uses the workspace fallback `D:\game-dev\openspec`.
+3. Read this game's existing specifications and applicable change artifacts. Keep fallback-root artifacts scoped to Koraku RPS, not sibling products.
+4. Propose first using `openspec-propose` (Codex: `$openspec-propose`), with Purpose, Requirements, and measurable GIVEN / WHEN / THEN scenarios.
+5. Respect the selected workflow's proposal/review boundary, then implement approved change tasks using `openspec-apply-change` (Codex: `$openspec-apply-change`). Use the platform's installed command spelling; do not invent slash commands.
+6. Update the approved specification and required handover artifacts as part of the change. Reuse an existing applicable change instead of creating duplicates.
+7. After an authorized CLI upgrade, refresh generated tool files with `openspec update` at the affected roots; do not run a workspace-wide refresh as incidental project maintenance.
 
-## 3. 本地化翻譯規範 (Localization Requirements)
+Pure governance/documentation and local skill installation do not change game behavior. They do not by themselves require a new gameplay proposal, game version bump, bundle/Excel generation, or deployment. New behavior discovered during that work must be proposed separately, not implemented as an incidental fix.
 
-專案全面支援 4 種語系：
-- 繁體中文 (`zh-Hant`)
-- 簡體中文 (`zh-Hans`)
-- 英文 (`en`)
-- 日文 (`ja`)
+## Skill Routing and Ponytail Boundary
 
-**開發規範**：
-1. **全語系同步維護**：任何新增或修改之功能、道具、裝備、技能、章節關卡、AVG 對白台詞、UI 按鈕/標籤、作弊選單與說明文字，必須同步維護並更新 `src/js/services/I18n.js` 中的 4 語系字典與在地化輔助方法。
-2. **語氣與用語**：台詞與技能說明必須符合當地 ACGN 遊戲網民之自然用語與日常習慣（例如日文的 じゃんけん 口令、スキあり；英文的 Rock-Paper-Scissors、Counter Chance 等）。
-3. **語系切換按鈕**：保持純文字標籤按鈕切換（不使用國旗圖示），支援自動探測玩家系統/瀏覽器語系與未匹配時預設英文回退。
-4. **測試與打包**：更新後必須執行 `npm test` 通過所有測試（包含 `tests/i18n.test.js` 字典完整性檢驗），並執行 `node scripts/build.mjs` 重新建置 `src/js/bundle.js`。
+Detailed routing, installation locations, and fallback rules: [Agent Skill Routing Policy](docs/engineering/skill-routing.md).
 
----
+- `ui-ux-pro-max`: targeted UX, interaction, accessibility, and responsive reasoning.
+- `frontend-design`: new visual direction or explicitly authorized redesign only; not a default maintenance/RWD repair skill.
+- `web-design-guidelines`: rule-based review of affected UI, including post-implementation audit; not creative direction.
+- `webapp-testing`: reproduction and rendered/browser verification, only when runtime access is appropriate.
+- [rwd-ui-guardian](.agents/skills/rwd-ui-guardian/SKILL.md): this game's responsive impact map, risk-based case selection, and evidence verdict. Use for applicable RWD work when discovered by the current AI; if unavailable, use the UI/RWD baseline. It does not authorize fixes or replace browser verification.
+- `ponytail`: functional-core simplicity. This project explicitly narrows the parent workspace's broad Ponytail policy: **Ponytail is OFF for presentation work**, including markup, CSS, layout, animation, visible state, and control replacement.
+- For mixed work, apply Ponytail only to safely separable non-visual logic already within scope. If that is unsafe, leave it off for the mixed change; never extract modules solely to switch it on.
+- Do not replace custom UI with native controls, remove visual wrappers, or drop interaction/motion just to shorten code. Native controls already used by this game remain valid.
+- Ponytail may reduce implementation complexity, but it may not reduce design intent.
+- For UI work, the smallest implementation is selected only among solutions that are already visually and behaviorally equivalent.
 
-## 4. 部署與發布規範 (Deployment to GitHub Pages & Custom Domain)
+## UI Preservation and Responsive Gate
 
-本專案線上部署網址為：**https://koraku.app/**
-對應 GitHub 倉庫：`imiancui/koraku-rps` (`main` 分支，自訂網域 CNAME: `koraku.app`)
+- Default to preservation. An RWD fix is not permission to change palette, typography, effects, animation, character composition, or approved interaction.
+- Keep the dark Japanese anime shrine aesthetic: crimson, gold, deep ink, and paper; translucent gold-leaf borders/shadows. Use existing tokens from [tokens.css](src/styles/tokens.css).
+- The implemented deep-background token is `--ink-950`; the older instruction name `--night-pure` is not currently defined. Do not invent a token or change the palette to resolve a documentation mismatch.
+- No colorful OS emoji in UI buttons, headings, menus, or labels. Use theme-colored inline SVG; keep SVG separate from the localized `span`. Localization strings contain plain text.
+- Keep decorative character layers non-interactive (`pointer-events: none`); give controls usable stacking contexts and `pointer-events: auto`. Preserve the project minimum 40px control-height requirement; existing undersized exceptions need explicit resolution, not an unearned pass.
+- Before a UI change, briefly map affected screens/components, shared styles, width/height breakpoints, input modes, UI states, localization, fixed overlays, persisted state, and planned verification. Omit genuinely irrelevant fields.
+- Game-stage layering and deliberate scene clipping are legitimate architecture, not blanket violations. Never add root overflow hiding, arbitrary offsets, `!important`, or z-index escalation to conceal unreachable content.
+- Follow the risk-based viewport/state matrix, including runtime resize and affected breakpoint boundaries. Shared changes cover every affected screen; mobile fixes must not regress tablet/desktop.
+- Treat newly introduced application console errors as blocking. Record existing errors separately; do not expand scope or hide them to obtain a clean report.
+- Source review, Node tests, and screenshots at one width are not responsive verification. Without rendered verification, report exactly: `Responsive status: code-reviewed but not visually verified.`
+- On a confirmed repeat RWD defect, update its regression entry, root cause, failed fixes, invariant, and a permanent guard when feasible. If a guard requires unapproved infrastructure, record the gap; do not claim permanent prevention.
 
-**發布規範**：
-每當完成新功能或修復並通過測試與建置後，必須將 `New-game-project-4` 最新提交同步推送至 GitHub 遠端倉庫 `imiancui/koraku-rps` 的 `main` 分支，確保 GitHub Pages 與 `https://koraku.app/` 即時更新為最新版本。
+## Localization
 
----
+- Maintain all four locales: `zh-Hant`, `zh-Hans`, `en`, and `ja`, in [I18n.js](src/js/services/I18n.js).
+- Synchronize new/changed features, items, equipment, skills, stages, dialogue, menus, labels, cheats, and help text across all locales.
+- Use natural local ACGN/game terminology, including Japanese janken calls and natural English Rock-Paper-Scissors / Counter Chance phrasing.
+- Language controls use text labels, never flags. Preserve browser/system-language detection and English fallback.
+- Test long CJK/English labels and large numbers in the affected layout. Do not use shrinking or hiding required text as the first overflow fix.
+- For localized implementation changes, `npm test` must include the dictionary-completeness checks in [tests/i18n.test.js](tests/i18n.test.js), followed by the required bundle build.
 
-## 5. 視覺設計與全域 UI 風格統一規範 (Visual Design & UI Consistency)
+## Commands and Side Effects
 
-為維持遊戲整體高品質的 ACGN 沉浸感與視覺一致性，所有頁面、彈窗、按鈕與元件必須嚴格遵循以下設計標準：
+Run commands from this project and inspect scripts before assuming they are read-only.
 
-1. **暗黑神社動漫調性 (Japanese Dark Anime Shrine Aesthetic)**：
-   - 核心色系嚴格採用神社朱紅 (`var(--crimson)`)、神聖金黃 (`var(--gold)`, `var(--gold-bright)`)、深邃墨夜 (`var(--night-pure)`) 與宣紙柔白 (`var(--paper)`）。
-   - 邊框與陰影需具備古典和風半透明金箔質感，避免使用高飽和度的非和風雜色。
-2. **嚴格禁止彩色 OS Emoji (No Colorful OS Emoji Icons)**：
-   - 全遊戲的所有 UI 按鈕、系統選單、彈窗標題、功能標籤與對白提示中，**一律嚴格禁止使用作業系統原生彩色 Emoji 圖示（如 💾, ⚙️, 📋, 📥, 🗑️, ⚡, ⏸️, 🏳️ 等）**。
-   - 所有圖示必須採用內嵌向量 SVG 或主題色樣式（套用 `fill="currentColor"` 或主題色變數），使其色彩與按鈕字體、懸停金光完美統一。
-3. **文字與圖示分離 (Separation of Icon & Localized Label)**：
-   - 包含圖示的按鈕與標題，必須將向量 `<svg>` 與文字標籤 `<span data-i18n="...">` 分開包裹，確保在地化字典（`I18n.js`）只包含純文字字串，避免語系切換時覆蓋向量圖示。
-4. **跨裝置響應式排版與點擊安全 (Responsive & Click Safety)**：
-   - 所有管理彈窗與行動端按鈕必須具備獨立的 `z-index`、適當的觸控熱區（最小 40px 高度）與 `pointer-events: auto;`。
-   - 角色立繪等裝飾層必須設置 `pointer-events: none;`，嚴格防止點擊穿透或事件攔截。
+| Existing command | Effect |
+| --- | --- |
+| `openspec context --json` | Resolves the specification root. |
+| `npm test` | Runs Node's test runner; the bundle test also writes `src/js/bundle.js`. |
+| `npm run build` / `node scripts/build.mjs` | Writes the generated bundle. |
+| `npm run dev` / `npm start` | Rebuilds the bundle, then serves the app; default local port is 4173. |
+| `npm run specs:excel` | Regenerates `game_specs.xlsx`. |
+| `npm run start:tailscale` | Also changes network-sharing/firewall state; use only when explicitly requested. |
 
----
+For read-only or governance-only work, do not run the writing commands merely as a checklist. Use file/link validation and scoped diffs. If browser evidence is necessary, use a verified non-writing route to existing artifacts, a disposable browser context, and evidence storage outside the project. Do not modify a player's save or stop a server/browser owned by someone else.
 
-## 6. 版本號維護規範 (Versioning Requirements)
+## Handover and Game Content Artifacts
 
-1. **頁腳版本號位置與格式**：
-   - 遊戲版本號必須固定顯示於首頁頁腳（`footer.home-footer`）最左側第一個位置。
-   - 版本號格式嚴格遵循三段式版號：`MAJOR.MINOR.PATCH`（從 `0.0.0` 起算）。
-2. **版本號累加與進位規則（每 100 個版本進一位）**：
-   - 每次功能更新、修復或發布上線時，由最後一位數（PATCH）遞增 `+1`（例如：`0.0.0` -> `0.0.1` -> `0.0.2` ... -> `0.0.99` -> `0.0.100`）。
-   - **每 100 個版本進一位規則**：當最後一位數達到 100（如 `0.0.100`）時，下一版進位為 `0.1.0`；同理 `0.1.100` 下一版進位為 `0.2.0`、`0.99.100` 下一版進位為 `1.0.0`。
-3. **每次改版同步更新四處**：
-   - `src/js/config/gameConfig.js` 中的 `APP_VERSION` 常數。
-   - `index.html` 頁腳元素 `<span class="footer-version" id="footer-app-version">0.0.0</span>`。
-   - `index.html` 中的 CSS 與 `bundle.js` 快取版本號參數（`?v=YYYYMMDDHHmm`）。
-   - `HANDOFF.md` 與 `wiki.md` 交接與百科文件中的版本記錄。
+For new/changed game content, synchronize the existing four artifact categories:
 
+1. [HANDOFF.md](HANDOFF.md) / [AI_HANDOVER.md](AI_HANDOVER.md): architecture, EventBus contracts, state transitions, GameStore/save schema, testing, and build workflow; keep overlapping contracts consistent.
+2. [wiki.md](wiki.md): the complete gameplay reference, including characters, four Boss chapters, RPS/morph, single/dual eight-direction QTE, skills, 12 equipment slots, watermelon, DPS, gallery, cheats, and localization.
+3. [wiki.html](wiki.html): the offline searchable/filterable shrine-themed encyclopedia and interactive level/allocation/DPS/QTE calculators.
+4. [game_specs.xlsx](game_specs.xlsx): stages/Bosses, equipment, items/potions, skills, combat/QTE, growth/formulas, watermelon/gallery, cheats/debugging, and localization worksheets.
+
+Do not regenerate player-facing HTML or Excel for a governance-only edit. Keep governance details in the linked agent documents rather than duplicating the product encyclopedia.
+
+## Versioning and Release
+
+For completed gameplay features/fixes/releases, preserve the existing release requirements:
+
+- The home footer's leftmost first item displays `MAJOR.MINOR.PATCH`.
+- Increment PATCH through 100; the next release carries: `0.0.100 -> 0.1.0`, `0.1.100 -> 0.2.0`, `0.99.100 -> 1.0.0`.
+- Update `APP_VERSION` in [gameConfig.js](src/js/config/gameConfig.js), the footer version in [index.html](index.html), CSS/bundle cache parameters (`?v=YYYYMMDDHHmm`), and version records in HANDOFF/wiki.
+- Run `npm test` and `node scripts/build.mjs`; regenerate Excel when game-content changes require it.
+- Publish the game's latest tested commit to `imiancui/koraku-rps`, branch `main`, for [koraku.app](https://koraku.app/) with `CNAME: koraku.app`.
+- Verify the exact remote and project-only publication scope first. Do not push the entire multi-project workspace, sibling files, or unrelated changes. If safe isolation is unclear, stop and request direction.
+- No version bump, commit/push, or deployment is implied by read-only review, governance edits, or skill installation alone.
+
+## Final Reporting
+
+Lead with the result. Report changed files, relevant skills used or meaningfully skipped, actual commands/checks, limitations, and remaining decisions. For UI implementation include affected screens/states, viewport and input coverage, console findings, and evidence paths. Distinguish proposed, source-reviewed, browser-emulated, and real-device-verified results; never claim testing or regression protection that was not performed.

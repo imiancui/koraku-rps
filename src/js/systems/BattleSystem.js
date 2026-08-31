@@ -874,9 +874,12 @@ export class BattleSystem {
           });
           this.bus.emit("battle:damage-logged", {
             target: "enemy",
+            targetId: target.id,
             targetName: target.name,
             amount: momoDamage,
-            source: "momo"
+            source: "momo",
+            round: this.state?.round || 1,
+            actionType: "attack"
           });
           this.bus.emit("sound", { name: "counterRub" });
           this.finishRound("draw", "平手！但你偷摸了" + target.name + "一下，造成 " + momoDamage + " 點傷害！");
@@ -1046,9 +1049,12 @@ export class BattleSystem {
 
     this.bus.emit("battle:damage-logged", {
       target: "enemy",
+      targetId: target.id,
       targetName: target.name,
       amount,
-      source: logSource
+      source: logSource,
+      round: this.state?.round || 1,
+      actionType: "attack"
     });
     this.bus.emit("sound", { name: countered ? "counterRub" : "hit" });
   }
@@ -1098,7 +1104,9 @@ export class BattleSystem {
       target: "player",
       targetName: playerName,
       amount: totalDamage,
-      source: "enemy_attack"
+      source: "enemy_attack",
+      round: this.state?.round || 1,
+      actionType: "damaged"
     });
     this.bus.emit("sound", { name: "hurt" });
 
@@ -1119,9 +1127,12 @@ export class BattleSystem {
         });
         this.bus.emit("battle:damage-logged", {
           target: "enemy",
+          targetId: target.id,
           targetName: target.name,
           amount: reflectDamage,
-          source: "reflect"
+          source: "reflect",
+          round: this.state?.round || 1,
+          actionType: "reflect"
         });
       }
     }
@@ -1161,7 +1172,9 @@ export class BattleSystem {
       target: "player",
       targetName: playerName,
       amount: totalDamage,
-      source: "enemy_attack"
+      source: "enemy_attack",
+      round: this.state?.round || 1,
+      actionType: "damaged"
     });
     this.bus.emit("sound", { name: "hurt" });
 
@@ -1182,9 +1195,12 @@ export class BattleSystem {
         });
         this.bus.emit("battle:damage-logged", {
           target: "enemy",
+          targetId: target.id,
           targetName: target.name,
           amount: reflectDamage,
-          source: "reflect"
+          source: "reflect",
+          round: this.state?.round || 1,
+          actionType: "reflect"
         });
       }
     }
@@ -1199,7 +1215,21 @@ export class BattleSystem {
     // MP Regen effect check
     const totalMpRegen = this.getAllEquipEffects("mp_regen").reduce((sum, eff) => sum + (eff.mpRegen || 0), 0);
     if (totalMpRegen > 0) {
+      const before = this.state.playerMp;
       this.state.playerMp = Math.min(this.state.playerMaxMp, this.state.playerMp + totalMpRegen);
+      const restored = this.state.playerMp - before;
+      if (restored > 0) {
+        const playerName = (I18n.t("dialogue.speakerPlayer") && !I18n.t("dialogue.speakerPlayer").includes(".")) ? I18n.t("dialogue.speakerPlayer") : "旅人";
+        this.bus.emit("battle:damage-logged", {
+          target: "player",
+          targetName: playerName,
+          amount: restored,
+          source: "regen_mp",
+          round: this.state?.round || 1,
+          actionType: "mana",
+          resource: "mp"
+        });
+      }
     }
 
     // Burn effect check
@@ -1217,9 +1247,12 @@ export class BattleSystem {
       this.bus.emit("battle:effect", { type: "burn", amount: totalBurn, targetId: target?.id });
       this.bus.emit("battle:damage-logged", {
         target: "enemy",
+        targetId: target?.id,
         targetName: target?.name || "小樂",
         amount: totalBurn,
-        source: "burn"
+        source: "burn",
+        round: this.state?.round || 1,
+        actionType: "burn"
       });
     }
 
@@ -1268,6 +1301,16 @@ export class BattleSystem {
       this.battleMpRestored = (this.battleMpRestored || 0) + restored;
     }
     this.store.recordPotionUse(item.resource === "hp" ? "hpPotion" : "mpPotion", { restored });
+    const playerName = (I18n.t("dialogue.speakerPlayer") && !I18n.t("dialogue.speakerPlayer").includes(".")) ? I18n.t("dialogue.speakerPlayer") : "旅人";
+    this.bus.emit("battle:damage-logged", {
+      target: "player",
+      targetName: playerName,
+      amount: restored,
+      source: item.resource === "hp" ? "heal_hp" : "heal_mp",
+      round: this.state?.round || 1,
+      actionType: item.resource === "hp" ? "heal" : "mana",
+      resource: item.resource
+    });
     this.emitState();
     this.bus.emit("battle:effect", { type: "item", resource: item.resource, amount: restored });
     this.bus.emit("sound", { name: "heal" });

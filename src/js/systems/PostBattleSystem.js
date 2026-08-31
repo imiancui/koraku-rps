@@ -262,6 +262,12 @@ export class PostBattleSystem {
     this.bus.emit("dialogue", { speaker: I18n.t("dialogue.speakerKohaku"), text });
   }
 
+  restore(savedState) {
+    if (!savedState) return;
+    this.state = savedState;
+    this.emit();
+  }
+
   emit() {
     this.bus.emit("postbattle:state", structuredClone(this.state));
   }

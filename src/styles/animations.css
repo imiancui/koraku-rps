@@ -182,9 +182,9 @@
 }
 
 @keyframes reveal-card {
-  0% { filter: brightness(1); }
-  40% { filter: brightness(1.9); transform: scale(1.025); }
-  100% { filter: brightness(1); transform: scale(1); }
+  0% { filter: brightness(1); transform: translateX(-50%) scale(1); }
+  40% { filter: brightness(1.8); transform: translateX(-50%) scale(1.025); }
+  100% { filter: brightness(1); transform: translateX(-50%) scale(1); }
 }
 
 @keyframes skill-ready {

@@ -248,7 +248,7 @@ button:active,
   font-feature-settings: "tnum" !important;
 }
 
-/* Battle Damage Log (Compact FIFO - Docked at Top Right) */
+/* Battle Damage Log (3-Tier Interactive FIFO - Docked at Top Right) */
 .battle-damage-log {
   position: absolute;
   right: 24px;
@@ -260,15 +260,36 @@ button:active,
   flex-direction: column;
   width: 175px;
   max-height: 140px;
-  padding: 8px 10px;
+  padding: 6px 10px;
   border: 1px solid rgba(216, 182, 106, 0.35);
   border-radius: 6px;
-  background: rgba(12, 14, 22, 0.84);
+  background: rgba(12, 14, 22, 0.88);
   backdrop-filter: blur(8px);
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5);
-  pointer-events: none;
+  pointer-events: auto;
+  cursor: pointer;
   user-select: none;
-  transition: opacity 0.2s ease;
+  transition: max-height 0.22s ease, width 0.22s ease, opacity 0.2s ease;
+}
+
+.battle-damage-log:hover {
+  border-color: rgba(216, 182, 106, 0.65);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.6), 0 0 12px rgba(216, 182, 106, 0.18);
+}
+
+.battle-damage-log.tier-1 {
+  width: 150px;
+  max-height: 52px;
+}
+
+.battle-damage-log.tier-2 {
+  width: 165px;
+  max-height: 130px;
+}
+
+.battle-damage-log.tier-3 {
+  width: 175px;
+  max-height: 240px;
 }
 
 .damage-log-header {
@@ -286,11 +307,26 @@ button:active,
   text-overflow: ellipsis;
 }
 
+.damage-log-tier-badge {
+  font-size: 8px;
+  color: var(--gold);
+  opacity: 0.88;
+  letter-spacing: 0.02em;
+}
+
 .damage-log-list {
   display: flex;
   flex-direction: column-reverse;
   gap: 3px;
   overflow: hidden;
+}
+
+.battle-damage-log.tier-3 .damage-log-list {
+  max-height: 200px;
+  overflow-y: auto;
+  flex-direction: column;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gold) rgba(0, 0, 0, 0.3);
 }
 
 .damage-log-entry {
@@ -304,12 +340,36 @@ button:active,
   animation: logFadeSlideIn 0.25s ease-out;
 }
 
+.damage-log-round {
+  font-size: 8px;
+  font-weight: 700;
+  color: var(--gold-bright);
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+
 .damage-log-entry.is-enemy-hit {
   color: var(--crimson-bright);
 }
 
 .damage-log-entry.is-player-hit {
   color: #ff9800;
+}
+
+.damage-log-entry.is-heal {
+  color: #4ade80;
+}
+
+.damage-log-entry.is-heal .damage-log-amount {
+  color: #4ade80;
+}
+
+.damage-log-entry.is-mana {
+  color: #38bdf8;
+}
+
+.damage-log-entry.is-mana .damage-log-amount {
+  color: #38bdf8;
 }
 
 .damage-log-source {

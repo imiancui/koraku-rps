@@ -753,10 +753,11 @@
               </div>
             </section>
 
-            <!-- Recent 5 Damage Log (Compact FIFO) -->
-            <div id="battle-damage-log" class="battle-damage-log" aria-label="最近傷害紀錄">
+            <!-- Battle Log (3-Tier Collapsible / Expandable) -->
+            <div id="battle-damage-log" class="battle-damage-log tier-1" role="button" tabindex="0" aria-label="戰鬥紀錄（點擊切換顯示規模）" title="點擊切換顯示規模：最新1筆 / 近5筆 / 全紀錄">
               <div class="damage-log-header">
-                <span data-i18n="ui.recentDamageLog">最近傷害</span>
+                <span data-i18n="ui.recentDamageLog">戰鬥紀錄</span>
+                <small id="battle-damage-log-tier" class="damage-log-tier-badge">▾ [1/3 最新]</small>
               </div>
               <div id="battle-damage-log-list" class="damage-log-list"></div>
             </div>
