@@ -4,7 +4,7 @@
   "use strict";
 
 // --- src/js/config/gameConfig.js ---
-const APP_VERSION = "0.0.0";
+const APP_VERSION = "0.0.1";
 
 const DOJO_CONFIG = Object.freeze({
   defaultHp: 10000,
@@ -8020,28 +8020,6 @@ class AppView {
             return;
           }
         }
-
-        if (!isLeftActive && isRightActive) {
-          const fallbackInput = this.qteKeyboard.keyDown(event.key, rightExpected, event.repeat, event.code);
-          if (fallbackInput.handled) {
-            event.preventDefault();
-            if (fallbackInput.direction) {
-              this.dojoDualQteSystem.input(fallbackInput.direction, "right");
-              this.qteKeyboard.reset();
-            }
-            return;
-          }
-        } else if (isLeftActive && !isRightActive) {
-          const fallbackInput = this.qteKeyboard.keyDown(event.key, leftExpected, event.repeat, event.code);
-          if (fallbackInput.handled) {
-            event.preventDefault();
-            if (fallbackInput.direction) {
-              this.dojoDualQteSystem.input(fallbackInput.direction, "left");
-              this.qteKeyboard.reset();
-            }
-            return;
-          }
-        }
         return;
       }
 
@@ -8190,30 +8168,6 @@ class AppView {
             return;
           }
         }
-
-        if (!isLeftActive && isRightActive) {
-          const fallbackInput = this.qteKeyboard.keyDown(event.key, rightExpected, event.repeat, event.code);
-          if (fallbackInput.handled) {
-            event.preventDefault();
-            if (fallbackInput.direction) {
-              this.battle.inputQte(fallbackInput.direction, "right");
-              this.qteKeyboard.reset();
-            }
-            this.renderHeldQteDirections();
-            return;
-          }
-        } else if (isLeftActive && !isRightActive) {
-          const fallbackInput = this.qteKeyboard.keyDown(event.key, leftExpected, event.repeat, event.code);
-          if (fallbackInput.handled) {
-            event.preventDefault();
-            if (fallbackInput.direction) {
-              this.battle.inputQte(fallbackInput.direction, "left");
-              this.qteKeyboard.reset();
-            }
-            this.renderHeldQteDirections();
-            return;
-          }
-        }
         return;
       }
 
@@ -8250,10 +8204,20 @@ class AppView {
         } else if (["numpad9", "numpad3"].includes(event.code.toLowerCase())) {
           this.battle.selectHand("scissors", "right");
         }
-      } else {
-        const handByKey = { "1": "rock", "2": "paper", "3": "scissors" };
-        if (handByKey[event.key]) this.battle.selectHand(handByKey[event.key]);
+        return;
       }
+
+      const handByKey = { "1": "rock", "2": "paper", "3": "scissors", "j": "rock", "k": "paper", "l": "scissors" };
+      if (handByKey[key]) {
+        this.battle.selectHand(handByKey[key]);
+      } else if (["numpad7", "numpad1"].includes(event.code.toLowerCase())) {
+        this.battle.selectHand("rock");
+      } else if (["numpad8", "numpad2"].includes(event.code.toLowerCase())) {
+        this.battle.selectHand("paper");
+      } else if (["numpad9", "numpad3"].includes(event.code.toLowerCase())) {
+        this.battle.selectHand("scissors");
+      }
+      return;
     }
 
     if (["4", "h"].includes(key)) {
@@ -8275,6 +8239,16 @@ class AppView {
   }
 
   handleKeyup(event) {
+    if (this.dojoQteActive) {
+      if (this.dojoQteStyle === "dual") {
+        this.leftQteKeyboard.keyUp(event.key, event.code);
+        this.rightQteKeyboard.keyUp(event.key, event.code);
+      } else {
+        this.qteKeyboard.keyUp(event.key, event.code);
+      }
+      return;
+    }
+
     if (!this.qteState?.active) return;
     if (this.qteState?.mode === "dual") {
       const leftUp = this.leftQteKeyboard.keyUp(event.key, event.code);
