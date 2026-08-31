@@ -4,7 +4,7 @@
   "use strict";
 
 // --- src/js/config/gameConfig.js ---
-const APP_VERSION = "0.0.10";
+const APP_VERSION = "0.0.11";
 
 const DOJO_CONFIG = Object.freeze({
   defaultHp: 10000,
@@ -508,6 +508,33 @@ const DEFAULT_LOCALE = "en";
 const LOCALE_STORAGE_KEY = "koraku-rps-locale";
 
 const CHANGELOG_DATA = [
+  {
+    version: "0.0.11",
+    date: "2026-08-31",
+    tag: "Tablet Landscape Desktop-Like Spacious Layout & Overlap Fix",
+    changes: {
+      "zh-Hant": [
+        "【平板橫放寬螢幕佈局優化】重構 iPad Pro（11 吋/12.9 吋）與 Android 平板在橫向模式下的視覺佈局，擁有與電腦版一致之寬敞大氣空間。",
+        "【首頁標題單行大氣呈現】修正主標題「狐樂・絆之勝負」在橫放平板時文字折行（「負」被擠至第二行）的問題，實裝單行防折行與流體字級縮放。",
+        "【戰鬥場景元素重疊徹底修復】修復舊版絕對定位導致回合儀表板與 Boss 血條及角色面部重疊的 Bug，重塑垂直層次結構，消除元素碰撞。"
+      ],
+      "zh-Hans": [
+        "【平板横放宽屏幕布局优化】重构 iPad Pro（11 吋/12.9 吋）与 Android 平板在横向模式下的视觉布局，拥有与电脑版一致之宽敞大气空间。",
+        "【首页标题单行大气呈现】修正主标题「狐乐・绊之胜负」在横放平板时文字折行（「负」被挤至第二行）的问题，实装单行防折行与流体字级缩放。",
+        "【战斗场景元素重叠彻底修复】修复旧版绝对定位导致回合仪表板与 Boss 血条及角色面部重叠的 Bug，重塑垂直层次结构，消除元素碰撞。"
+      ],
+      "en": [
+        "【Tablet Landscape Spacious Layout】Redesigned the landscape layout for iPad Pro (11\"/12.9\") and Android tablets to provide a spacious, desktop-like immersive layout.",
+        "【Home Title Single-Line Fix】Resolved an issue where the main title wrapped onto a second line on landscape tablets; now guaranteed to display cleanly on a single line with fluid typography.",
+        "【Battle Scene Overlap Elimination】Completely removed legacy hardcoded positioning that caused the round oracle box to overlap the boss health bar and character face, restoring clean vertical layering."
+      ],
+      "ja": [
+        "【タブレット横向き大画面レイアウト最適化】iPad Pro（11/12.9インチ）およびAndroidタブレットの横向き表示をPC版同様に開放感あふれるレイアウトへ全面刷新。",
+        "【タイトル改行崩れ修正】横向きタブレットでメインタイトル「狐樂・絆之勝負」が途中で改行されていた問題を修正し、常に1行で美しく表示されるよう流体タイポグラフィを適用。",
+        "【戦闘画面の要素重複解消】ラウンド通知枠とBossHPゲージ・キャラクター顔グラフィックが重なっていたレガシー絶対配置バグを完全解消し、階層構造を整理。"
+      ]
+    }
+  },
   {
     version: "0.0.10",
     date: "2026-08-31",

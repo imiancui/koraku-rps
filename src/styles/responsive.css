@@ -1,16 +1,24 @@
 @media (max-width: 1100px) {
   .home-copy {
-    width: 52vw;
-    margin-left: 5vw;
+    width: min(48vw, 560px);
+    margin-left: clamp(20px, 4vw, 52px);
+  }
+
+  .home-copy h1 span {
+    white-space: nowrap;
+    font-size: clamp(36px, 4.8vw, 76px);
+    letter-spacing: 0.12em;
+  }
+
+  .home-copy h1 em {
+    white-space: nowrap;
+    font-size: clamp(16px, 2vw, 32px);
+    letter-spacing: 0.26em;
   }
 
   .home-character {
-    right: -8vw;
-    width: 64vw;
-  }
-
-  .home-dialogue {
-    display: none;
+    right: 0;
+    width: min(52vw, 640px);
   }
 
   .stage-grid,
@@ -23,44 +31,62 @@
   }
 
   .enemy-hud {
-    width: 58vw;
+    top: clamp(14px, 2.2vh, 24px);
+    left: 50%;
+    width: min(54vw, 640px);
+    transform: translateX(-50%);
   }
 
   .round-oracle {
+    top: clamp(70px, 10.5vh, 94px);
     left: 50%;
-    width: min(88vw, 460px);
+    width: min(46vw, 440px);
+    padding: 10px 16px 12px;
     transform: translateX(-50%);
   }
 
   .battle-left-cluster {
-    left: 16px;
-    bottom: 128px;
-    width: 36vw;
+    left: clamp(16px, 2.5vw, 36px);
+    bottom: clamp(100px, 14vh, 140px);
+    width: min(32vw, 320px);
+    gap: 8px;
   }
 
   .battle-character-wrap {
-    left: 58%;
-    width: 58vw;
+    left: 50%;
+    width: min(48vw, 620px);
+    bottom: clamp(50px, 8vh, 120px);
+    transform: translateX(-50%);
   }
 
   .battle-character-wrap.is-dual-stage {
     left: 50%;
-    width: min(88vw, 980px);
-    bottom: clamp(160px, 24vh, 260px);
+    width: min(84vw, 960px);
+    bottom: clamp(120px, 18vh, 220px);
   }
 }
 
 @media (max-height: 780px) and (min-width: 721px) {
   .home-copy {
-    margin-top: 22px;
+    margin-top: clamp(14px, 2.8vh, 28px);
+    margin-left: clamp(20px, 4vw, 48px);
+    width: min(48vw, 540px);
+  }
+
+  .home-copy h1 {
+    margin: 4px 0 8px;
   }
 
   .home-copy h1 span {
-    font-size: clamp(50px, 6vw, 82px);
+    white-space: nowrap;
+    font-size: clamp(34px, 4.2vw, 68px);
+    letter-spacing: 0.12em;
   }
 
   .home-copy h1 em {
-    font-size: clamp(21px, 2.5vw, 36px);
+    white-space: nowrap;
+    font-size: clamp(15px, 1.7vw, 28px);
+    letter-spacing: 0.24em;
   }
 
   .home-lead {
@@ -68,45 +94,63 @@
   }
 
   .main-menu {
-    margin-top: 18px;
+    margin-top: clamp(8px, 1.8vh, 18px);
+    gap: clamp(3px, 0.6vh, 6px);
+    width: min(100%, 480px);
   }
 
   .menu-command {
-    min-height: 50px;
+    min-height: clamp(36px, 5vh, 48px);
+    padding: clamp(3px, 0.5vh, 6px) 12px;
   }
 
-  .round-oracle {
-    top: 75px;
+  .enemy-hud {
+    top: 14px;
     left: 50%;
+    width: min(52vw, 620px);
     transform: translateX(-50%);
   }
 
-  .hand-selector {
-    top: 220px;
+  .round-oracle {
+    top: 68px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(46vw, 430px);
+    padding: 8px 14px 10px;
+  }
+
+  .battle-left-cluster {
+    left: clamp(14px, 2.2vw, 28px);
+    bottom: 96px;
+    width: min(32vw, 300px);
+    gap: 6px;
   }
 
   .hand-button {
-    min-height: 42px;
+    min-height: 38px;
+    padding: 3px 10px;
   }
 
   .avg-dialogue {
-    min-height: 94px;
-    padding-top: 27px;
-    padding-bottom: 16px;
+    min-height: 68px;
+    padding: 8px 16px 10px;
+    bottom: 10px;
+    left: clamp(14px, 2.2vw, 28px);
+    right: clamp(14px, 2.2vw, 28px);
   }
 
-  .quick-slots,
-  .player-hud {
-    bottom: 119px;
+  .battle-character-wrap {
+    bottom: clamp(40px, 6vh, 90px);
+    height: clamp(65%, 80vh, 92%);
   }
 
   .slot-grid {
-    grid-template: repeat(3, 48px) / repeat(3, 48px);
+    grid-template: repeat(3, 40px) / repeat(3, 40px);
   }
 
   .soul-slot {
-    width: 44px;
-    height: 44px;
+    width: 36px;
+    height: 36px;
   }
 
   .slot-content small {
