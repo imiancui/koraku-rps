@@ -321,12 +321,12 @@ export class DualQTESystem {
     if (!this.active) return false;
     let slot = "left";
     let direction = directionOrSlot;
-    if (directionOrSlot === "left" || directionOrSlot === "right") {
-      slot = directionOrSlot;
-      direction = slotOrDirection;
-    } else if (slotOrDirection === "left" || slotOrDirection === "right") {
+    if (slotOrDirection === "left" || slotOrDirection === "right") {
       slot = slotOrDirection;
       direction = directionOrSlot;
+    } else if (directionOrSlot === "left" || directionOrSlot === "right") {
+      slot = directionOrSlot;
+      direction = slotOrDirection;
     } else if (!slotOrDirection) {
       if (!this.left.completed) slot = "left";
       else if (!this.right.completed) slot = "right";
@@ -432,4 +432,3 @@ export class DualQTESystem {
     if (emit && wasActive) this.emit();
   }
 }
-

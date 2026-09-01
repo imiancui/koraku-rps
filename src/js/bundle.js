@@ -4124,12 +4124,12 @@ class DualQTESystem {
     if (!this.active) return false;
     let slot = "left";
     let direction = directionOrSlot;
-    if (directionOrSlot === "left" || directionOrSlot === "right") {
-      slot = directionOrSlot;
-      direction = slotOrDirection;
-    } else if (slotOrDirection === "left" || slotOrDirection === "right") {
+    if (slotOrDirection === "left" || slotOrDirection === "right") {
       slot = slotOrDirection;
       direction = directionOrSlot;
+    } else if (directionOrSlot === "left" || directionOrSlot === "right") {
+      slot = directionOrSlot;
+      direction = slotOrDirection;
     } else if (!slotOrDirection) {
       if (!this.left.completed) slot = "left";
       else if (!this.right.completed) slot = "right";
@@ -7877,7 +7877,7 @@ class AppView {
         const now = performance.now();
         if (now - lastTouchEnd <= 300) {
           const target = event.target;
-          if (target && target.tagName !== "INPUT" && target.tagName !== "TEXTAREA" && target.tagName !== "SELECT") {
+          if (event.cancelable && target && target.tagName !== "INPUT" && target.tagName !== "TEXTAREA" && target.tagName !== "SELECT") {
             event.preventDefault();
           }
         }
@@ -7975,17 +7975,21 @@ class AppView {
   }
 
   bindEvents() {
-    let lastQtePointerTime = 0;
+    const lastQtePointerTimes = new Map();
     const handleQtePointer = (event) => {
       const targetBtn = event.target.closest("[data-direction]");
       if (!targetBtn) return;
 
       const now = performance.now();
-      if (now - lastQtePointerTime < 45) {
+      const area = targetBtn.closest("#dojo-dual-qte-pad-wrap") ? "dojo-dual"
+        : targetBtn.closest("#dojo-qte-pad") ? "dojo-single"
+        : targetBtn.closest("#dual-qte-pad-wrap") ? "battle-dual" : "battle-single";
+      const pointerKey = `${area}:${targetBtn.dataset.dualSlot || "single"}`;
+      if (now - (lastQtePointerTimes.get(pointerKey) || 0) < 45) {
         event.preventDefault();
         return;
       }
-      lastQtePointerTime = now;
+      lastQtePointerTimes.set(pointerKey, now);
 
       event.preventDefault();
       event.stopPropagation();
@@ -7999,7 +8003,7 @@ class AppView {
         return;
       }
 
-      const dojoDualBtn = targetBtn.closest("#dojo-qte-dual-container [data-dual-slot][data-direction]");
+      const dojoDualBtn = targetBtn.closest("#dojo-dual-qte-pad-wrap [data-dual-slot][data-direction]");
       if (dojoDualBtn) {
         const dir = dojoDualBtn.dataset.direction;
         const slot = dojoDualBtn.dataset.dualSlot;

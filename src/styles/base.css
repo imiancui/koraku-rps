@@ -47,7 +47,10 @@ button,
 }
 
 .qte-pad,
-.dual-qte-touch-controls {
+.dual-qte-touch-controls,
+.qte-overlay.is-active .qte-panel,
+.dual-qte-slot,
+.dojo-qte-track-container {
   touch-action: none;
 }
 

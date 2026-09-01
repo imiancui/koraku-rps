@@ -9,6 +9,28 @@
     "start": "node scripts/serve.mjs",
     "start:tailscale": "node scripts/serve.mjs --tailscale",
     "specs:excel": "node scripts/generate_excel_specs.mjs",
-    "test": "node --test"
+    "test": "node --test",
+    "test:rwd:stage-a": "node scripts/run-rwd.mjs stage-a",
+    "test:rwd:calibrate": "node scripts/run-rwd.mjs calibrate",
+    "test:rwd:smoke-stage-a": "node scripts/run-rwd.mjs smoke",
+    "test:rwd:smoke": "node scripts/run-rwd.mjs smoke-core",
+    "test:rwd:smoke-complement": "node scripts/run-rwd.mjs smoke-complement",
+    "test:rwd:boundary": "node scripts/run-rwd.mjs boundary",
+    "test:rwd:sweep": "node scripts/run-rwd.mjs sweep",
+    "test:rwd:stress-content": "node scripts/run-rwd.mjs stress-content",
+    "test:rwd:stress-input": "node scripts/run-rwd.mjs stress-input",
+    "test:rwd:stress-animation": "node scripts/run-rwd.mjs stress-animation",
+    "test:rwd:states": "node scripts/run-rwd.mjs states",
+    "test:rwd:tooling": "node scripts/run-rwd.mjs tooling",
+    "test:rwd:stage-b-before": "node scripts/run-rwd.mjs stage-b-before",
+    "test:rwd:candidates": "node scripts/run-rwd.mjs candidate",
+    "test:rwd:accept-baseline": "node scripts/accept-rwd-baseline.mjs",
+    "test:rwd:visual": "node scripts/run-rwd.mjs visual",
+    "test:rwd:full": "node scripts/run-rwd-full.mjs",
+    "test:rwd:repeat": "node scripts/run-rwd-repeat.mjs",
+    "report:rwd": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.62.1"
   }
 }

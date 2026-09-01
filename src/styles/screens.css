@@ -1,6 +1,8 @@
 /* Home */
 .home-screen {
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
   background:
     linear-gradient(90deg, rgba(8, 10, 16, 0.99) 0%, rgba(12, 14, 23, 0.92) 39%, rgba(13, 15, 24, 0.22) 74%),
     radial-gradient(circle at 77% 34%, rgba(181, 37, 55, 0.22), transparent 28%),
@@ -214,11 +216,13 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-width: 0;
 }
 
 .menu-command b {
   font: 500 16px/1.25 var(--serif);
   letter-spacing: 0.13em;
+  overflow-wrap: anywhere;
 }
 
 .menu-command small {
@@ -319,13 +323,24 @@
 .home-dialogue {
   position: absolute;
   z-index: 14;
-  right: 4.5%;
-  bottom: 4%;
+  right: clamp(20px, 4.5vw, 88px);
+  top: clamp(110px, 14vh, 160px);
+  bottom: auto;
   width: min(34vw, 460px);
   padding: 15px 20px 16px 62px;
   border: 1px solid rgba(216, 182, 106, 0.42);
   background: rgba(11, 13, 20, 0.84);
   box-shadow: 0 18px 42px rgba(0, 0, 0, 0.42);
+}
+
+.home-dialogue::after {
+  content: "";
+  position: absolute;
+  right: 42px;
+  bottom: -11px;
+  border-right: 9px solid transparent;
+  border-left: 9px solid transparent;
+  border-top: 11px solid rgba(216, 182, 106, 0.72);
 }
 
 .home-dialogue span {
@@ -1216,12 +1231,47 @@
 }
 
 .dual-enemy-card {
+  min-width: 0;
   padding: 8px 14px;
   border: 1px solid var(--line);
   background: rgba(10, 13, 20, 0.88);
   cursor: pointer;
   transition: 160ms ease;
   text-align: left;
+}
+
+.dual-enemy-card .hud-name {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  grid-template-rows: auto auto;
+  align-items: center;
+  gap: 3px 8px;
+  margin-bottom: 5px;
+}
+
+.dual-enemy-card .hud-name > .fox-mark {
+  grid-column: 1;
+  grid-row: 1 / 3;
+}
+
+.dual-enemy-card .hud-name > div {
+  grid-column: 2;
+  grid-row: 1;
+  width: 100%;
+  margin-right: 0;
+}
+
+.dual-enemy-card .hud-atk-badge {
+  grid-column: 3;
+  grid-row: 1;
+  align-self: center;
+}
+
+.dual-enemy-card .hud-name em {
+  grid-column: 2 / 4;
+  grid-row: 2;
+  margin-left: 0;
+  text-align: right;
 }
 
 .dual-enemy-card:hover {
@@ -1346,19 +1396,21 @@
   position: absolute;
   z-index: 5;
   left: 50%;
-  bottom: clamp(100px, 16vh, 200px);
-  width: min(52vw, 760px);
-  height: 94%;
+  top: clamp(180px, 22vh, 230px);
+  bottom: clamp(110px, 14vh, 150px);
+  width: min(48vw, 700px);
+  height: auto;
   pointer-events: none;
   transform: translateX(-50%);
   transition: transform 240ms ease, opacity 240ms ease, bottom 240ms ease;
 }
 
 .battle-character-wrap.is-dual-stage {
-  left: 56%;
-  width: min(68vw, 860px);
-  bottom: clamp(110px, 16vh, 200px);
-  height: 82%;
+  left: 50%;
+  top: clamp(140px, 16vh, 175px);
+  bottom: clamp(170px, 19vh, 200px);
+  width: min(68vw, 940px);
+  height: auto;
 }
 
 .character-single-slot {
@@ -1457,8 +1509,8 @@ img.is-silhouette {
 }
 
 .dual-hand-sub-column {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: auto repeat(3, minmax(44px, auto));
   gap: 4px;
 }
 
@@ -1491,9 +1543,9 @@ img.is-silhouette {
   position: absolute;
   z-index: 28;
   left: 50%;
-  top: clamp(80px, 14vh, 130px);
-  width: min(88vw, 470px);
-  padding: 16px 20px 20px;
+  top: clamp(72px, 10vh, 100px);
+  width: min(88vw, 420px);
+  padding: 12px 16px 14px;
   border: 1px solid rgba(216, 182, 106, 0.4);
   background: linear-gradient(135deg, rgba(11, 13, 21, 0.94), rgba(25, 28, 41, 0.88));
   box-shadow: 0 18px 46px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.04);
@@ -1502,7 +1554,7 @@ img.is-silhouette {
 
 .round-label {
   display: block;
-  margin-bottom: 11px;
+  margin-bottom: 7px;
   color: var(--paper-dim);
   font-size: 8px;
   letter-spacing: 0.26em;
@@ -1564,10 +1616,10 @@ img.is-silhouette {
 
 .round-countdown {
   position: absolute;
-  right: -32px;
+  right: -26px;
   top: 50%;
-  width: 72px;
-  height: 72px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   background: rgba(9, 11, 17, 0.95);
   box-shadow: 0 0 0 1px var(--line), 0 8px 24px rgba(0, 0, 0, 0.45);
@@ -1587,7 +1639,7 @@ img.is-silhouette {
   inset: 0;
   display: grid;
   place-items: center;
-  font: 500 24px/1 var(--serif);
+  font: 500 21px/1 var(--serif);
 }
 
 .round-countdown small {
@@ -1655,7 +1707,9 @@ img.is-silhouette {
 }
 
 .hand-selector-dual {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: start;
   gap: 8px;
   width: 100%;
 }
@@ -1667,8 +1721,8 @@ img.is-silhouette {
 
 .dual-hand-sub-column {
   flex: 1;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: auto repeat(3, minmax(44px, auto));
   gap: 6px;
 }
 
@@ -1700,6 +1754,7 @@ img.is-silhouette {
   text-align: left;
   cursor: pointer;
   transition: 160ms ease;
+  width: 100%;
 }
 
 .hand-button i {
@@ -1730,7 +1785,7 @@ img.is-silhouette {
 .hand-button.is-selected {
   border-color: rgba(216, 182, 106, 0.68);
   background: linear-gradient(90deg, rgba(94, 24, 36, 0.94), rgba(21, 24, 35, 0.58));
-  transform: translateX(5px);
+  box-shadow: inset 3px 0 0 var(--gold);
 }
 
 .hand-button.is-morph-target {
@@ -2039,14 +2094,14 @@ img.is-silhouette {
   border-color: var(--gold-bright);
   background: rgba(181, 37, 55, 0.28);
   box-shadow: 0 0 24px rgba(216, 182, 106, 0.2);
-  transform: scale(1.08);
+  transform: none;
 }
 
 .qte-arrow.is-done {
   border-color: var(--green);
   background: rgba(97, 169, 133, 0.13);
   color: var(--green);
-  transform: scale(0.88);
+  transform: none;
 }
 
 .qte-arrow.is-hit-flash {
@@ -2080,7 +2135,7 @@ img.is-silhouette {
   justify-content: center;
   gap: 8px;
   min-height: 28px;
-  margin: -7px 0 11px;
+  margin: 6px 0 11px;
   color: var(--paper-dim);
   font-size: 9px;
   letter-spacing: 0.14em;
@@ -2215,17 +2270,27 @@ body.has-touch .qte-pad {
 }
 
 .dual-qte-slot {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto auto;
+  align-items: center;
   padding: 14px 12px 10px;
   border: 1px solid rgba(216, 182, 106, 0.35);
   background: rgba(8, 10, 16, 0.85);
   border-radius: 4px;
   transition: 160ms ease;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   box-sizing: border-box;
 }
 
+.dual-qte-slot .slot-header {
+  grid-column: 1 / -1;
+}
+
 .dual-qte-slot .qte-sequence {
+  grid-column: 1;
+  grid-row: 2;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -2235,9 +2300,18 @@ body.has-touch .qte-pad {
   box-sizing: border-box;
 }
 
+.dual-qte-slot > .qte-input-hint {
+  grid-column: 2;
+  grid-row: 2;
+  margin: 14px 0 10px 6px;
+  white-space: nowrap;
+  min-width: 82px;
+  flex-wrap: nowrap;
+}
+
 .dual-qte-slot .qte-arrow {
-  width: clamp(34px, 3.6vw, 46px);
-  height: clamp(34px, 3.6vw, 46px);
+  width: clamp(30px, 3.2vw, 42px);
+  height: clamp(30px, 3.2vw, 42px);
   aspect-ratio: 1;
   font-size: clamp(18px, 2.2vw, 26px);
   flex: 0 0 auto;
@@ -2687,6 +2761,9 @@ body.has-touch .dual-qte-touch-controls {
 
 .save-record-card {
   width: min(94vw, 680px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   background: rgba(18, 15, 24, 0.97);
   border: 1px solid rgba(216, 182, 106, 0.5);
   box-shadow: 0 16px 60px rgba(0, 0, 0, 0.9), 0 0 35px rgba(216, 182, 106, 0.2);
@@ -2698,6 +2775,9 @@ body.has-touch .dual-qte-touch-controls {
   display: flex;
   flex-direction: column;
   gap: 18px;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
 }
 
 .save-record-section {
@@ -2918,6 +2998,11 @@ body.has-touch .dual-qte-touch-controls {
   overflow-y: auto;
   border-radius: 4px;
   color: var(--paper);
+}
+
+/* Save records owns scrolling in its content pane, never in both card layers. */
+.modal-card.save-record-card {
+  overflow: hidden;
 }
 
 .cheat-auth-card {
@@ -4361,9 +4446,8 @@ body.has-touch .dual-qte-touch-controls {
 
 /* Recent Battles List */
 .records-recent-battles-wrap {
-  max-height: 380px;
-  overflow-y: auto;
-  padding-right: 6px;
+  max-height: none;
+  overflow: visible;
 }
 
 .records-recent-battles-list {
@@ -5034,10 +5118,3 @@ body.has-touch .dual-qte-touch-controls {
   image-rendering: -webkit-optimize-contrast;
   image-rendering: high-quality;
 }
-
-
-
-
-
-
-

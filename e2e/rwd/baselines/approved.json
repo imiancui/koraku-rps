@@ -1,0 +1,803 @@
+{
+  "schemaVersion": 1,
+  "approval": "explicit-user-approval",
+  "approvedAt": "2026-09-01",
+  "sourceEvidenceRoot": "C:/Users/Administrator/AppData/Local/Temp/koraku-rwd-GS0OAR",
+  "gitHead": "7eaf758d75f6ad8ce3d08d3c7c698406ec3dd00d",
+  "browser": "151.0.7922.34",
+  "os": "win32",
+  "osRelease": "10.0.26200",
+  "dpr": 1,
+  "source": {
+    "index.html": "94da114078bcb63a306d1ed4a922d6b0874b023a5e89f421123783a08faa3f05",
+    "src/js/bundle.js": "69919fb879995a299934f1a91b2a8a752de2abba722b2c169365100b5b2bd3cd",
+    "src/styles/tokens.css": "6cb3e2b8030e76bec257836879dae80a4b695f9c4884c3b3397a9d9c50715ec6",
+    "src/styles/base.css": "119f2c72e698a32efc9deb854a6a144dea0ea90f8d1090ef6fd1ccbcfba72ff6",
+    "src/styles/components.css": "3755a6d5f524a976089bd114fd9a417ec240ca89feade572bb3fda3afcadacfa",
+    "src/styles/screens.css": "aca048da4ec78a632992e1e2f10240495b3f2e2d440d79ecc449d4d716bc622a",
+    "src/styles/animations.css": "c32bc3a9e1d3ce490b5c2bfec9d409674709538174c147d93b530ef656a60b56",
+    "src/styles/responsive.css": "32591787e64260221c46a39794a49c10eda9d9c9c68bb7b31c0d675c48cc7787",
+    "package-lock.json": "372c79e1f8132f7e51b586511dc7a6f3b6755bbea04edb20061f15656223d737",
+    "playwright.rwd.config.js": "4bdf56dd0ed0bae733975e03a262c6a7fccad222a2929d4a8f444e7542f37c46",
+    "scripts/run-rwd.mjs": "c34646146ae5ff48c9c18247d213f7ffd0349311b1b9781b4c171671601229f1",
+    "e2e/rwd/manifest.json": "d68c1fcdcb1bc3aa4084c5ed76c9745cd85c76ddcfcd53440863e94bc4b6472e",
+    "e2e/rwd/coverage.js": "3805052d0d319a51553f3e10b4af695a8b8948a434657b6a34feeef8ab1df259",
+    "e2e/rwd/report.js": "25594ae6bdb4eac320b8013a77f19a1c6e8debe666b4654dadefdca0949b7747",
+    "e2e/rwd/fixtures.js": "e359c33a542980273f2cedd0b5c56cc8642eb102188df9f0c7b598ae00fc6792",
+    "e2e/rwd/application.js": "3be5388e9b5e3ce80d28b2b679dd13bbee938c20b9998004746bc2cb36070f73",
+    "e2e/rwd/layout-audit.js": "5bfa31335be2933e99cd309f43a5289a6afaaef97dcad42b32789550f8c262b7",
+    "e2e/rwd/calibration.spec.js": "9740ff637d76dd24ca133e8947cee9640e74d3111d0b8ca73a273a9afe8abe5a",
+    "e2e/rwd/probes.spec.js": "7ec313ed83b5260d1b394ba667b948ab186890151ccee243e0a173e0243451d6",
+    "e2e/rwd/states.spec.js": "36f8535a60602303e50c808741b3e9921af35365c87435f634be0c5de02dbc98",
+    "e2e/rwd/smoke.spec.js": "b18b725338ab9f82d9aa8ed463bca0d12693ffa18805478bd3197989f97e7ba9",
+    "e2e/rwd/tooling.spec.js": "66ea32305431c024c0bb9319343b15fced77f0b0ffe8cf1559f9d65bbd644110",
+    "e2e/rwd/stage-b-helpers.js": "f1c7052b14df883a2f463bf38fc8e5105cd0b4906720c9413272c838b1845f98",
+    "e2e/rwd/stage-b-before.spec.js": "29c6617140c18cb355092c9f28e1945f1145b03ff17efb6f0959a58f2e739213",
+    "e2e/rwd/candidates.spec.js": "cae80fce3701495c43d374cf544a034771bafe3905fc7f273732ab0b0544c7c3",
+    "e2e/rwd/visual.spec.js": "06350565dbee55be54bdf260950a65ef17a85c33209a95a42e3d0af76a637970",
+    "e2e/rwd/smoke-core.spec.js": "088b2904bf1026d963cd1c8810c26950e316a52ea2ad0bedc21aaff5e8d1555b",
+    "e2e/rwd/smoke-complement.spec.js": "273cd5a7059b3e199ab5be69bd5a68d3a1c55551446bc929489932f7a308a9b4",
+    "e2e/rwd/boundary.spec.js": "5899b69a2878bbbd5f978f9ad04de47b55e80ce3cc28a6d2b703105dc1aff35f",
+    "e2e/rwd/sweep.spec.js": "f14a094f67cfe253571aaa1a4319c9d849b501be026905b89ada441938a0da6b",
+    "e2e/rwd/stress-content.spec.js": "778d36d293da9f8706e8db612bb584875f3eefed266826b983546bb80b0b294d",
+    "e2e/rwd/stress-input.spec.js": "9f225a38d3f78314c49aa3f02d1cad60aa79e3d4ea5e07f4858c8ed318874679",
+    "e2e/rwd/stress-animation.spec.js": "305674f7fb63b87073f768cba7c6c3c68f692a32d390bce47130dcbdb2603957",
+    "e2e/rwd/baselines/approved.json": "39903b61195783053181873539193e8c320b2d0779a8ac1bf94b9c1b8754811a"
+  },
+  "caseCount": 61,
+  "pixelTolerance": {
+    "maxDiffPixels": 1400
+  },
+  "previousApproval": {
+    "approvedAt": "2026-09-01",
+    "sourceEvidenceRoot": "C:/Users/Administrator/AppData/Local/Temp/koraku-rwd-BKuue7",
+    "baselineTreeSha256": "fb1064d61fbc59be6d0233e4e9a7f72ae15d20cf3190535e7f5d001fdd4618c7",
+    "manifestSha256": "39903b61195783053181873539193e8c320b2d0779a8ac1bf94b9c1b8754811a"
+  },
+  "notes": [
+    "Seventh-round 61-case candidate set explicitly approved by the user after the bounded wide-desktop dojo layout review.",
+    "VP-DESKTOP-M home-default and home-footer-end intentionally share identical pixels because the footer is already fully visible at initial load.",
+    "The existing same-environment maxDiffPixels tolerance is retained; normal visual runs remain updateSnapshots:none.",
+    "Three post-import reruns showed stable text-raster differences of 1606 pixels for VP-PHONE-M stages-end and 2794 pixels for VP-DESKTOP-M shop-end, with no visible geometry movement; only those cases use bounded 1700/3000 overrides."
+  ],
+  "cases": [
+    {
+      "id": "RWD-G010.candidate.VP-PHONE-S.home-default",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-PHONE-S-home-default.png",
+      "sha256": "6c948e34a1e42ac3b8483c0025bc4206da433668e80d987b719fc8552d945270",
+      "viewport": [
+        360,
+        800
+      ],
+      "input": "touch",
+      "locale": "zh-Hant",
+      "state": "home-default"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-PHONE-S.home-footer-end",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-PHONE-S-home-footer-end.png",
+      "sha256": "a1e829cf9f434dbe2ffc5660f41aa9ffb0678b719d785d16969159ec0bbcc2bb",
+      "viewport": [
+        360,
+        800
+      ],
+      "input": "touch",
+      "locale": "zh-Hant",
+      "state": "home-footer-end"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-PHONE-S.save-long",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-PHONE-S-save-long.png",
+      "sha256": "b4772992df5fec4a4dcd83aca6ecac5e441728bcea38368b775d4b15eac409c3",
+      "viewport": [
+        360,
+        800
+      ],
+      "input": "touch",
+      "locale": "zh-Hant",
+      "state": "save-long"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-PHONE-S.battle-single-countdown",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-PHONE-S-battle-single-countdown.png",
+      "sha256": "d1b26de561ac29818f55e8d560808d681fea6cf6c76c4610aea0c2c765df6f38",
+      "viewport": [
+        360,
+        800
+      ],
+      "input": "touch",
+      "locale": "zh-Hant",
+      "state": "battle-single-countdown"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-PHONE-S.battle-dual-countdown",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-PHONE-S-battle-dual-countdown.png",
+      "sha256": "0fa0e39fb04773a72f0e357589a6aa54c55269f342b0dba69e48390782efd220",
+      "viewport": [
+        360,
+        800
+      ],
+      "input": "touch",
+      "locale": "zh-Hant",
+      "state": "battle-dual-countdown"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-PHONE-S.battle-dual-qte",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-PHONE-S-battle-dual-qte.png",
+      "sha256": "cd3a280fb67222e1e5bb7678c771a8a37e0d25c0a11d8900eef8369415e717e5",
+      "viewport": [
+        360,
+        800
+      ],
+      "input": "touch",
+      "locale": "zh-Hant",
+      "state": "battle-dual-qte"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-PHONE-S.dojo-single-qte",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-PHONE-S-dojo-single-qte.png",
+      "sha256": "fb2bcbf3b57409b94bb4d320a3eb447768b6ba21d02d4b1f14753920f1395a53",
+      "viewport": [
+        360,
+        800
+      ],
+      "input": "touch",
+      "locale": "zh-Hant",
+      "state": "dojo-single-qte"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-PHONE-S.dojo-dual-qte",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-PHONE-S-dojo-dual-qte.png",
+      "sha256": "8ccfa612836cd5b5c888f73b42db583d3248a2c59dd0162cd7165315bb5a86d1",
+      "viewport": [
+        360,
+        800
+      ],
+      "input": "touch",
+      "locale": "zh-Hant",
+      "state": "dojo-dual-qte"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-PHONE-M.home-default",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-PHONE-M-home-default.png",
+      "sha256": "05c89d7e7ec4dd08df5d58b7885ff39d1f55e3118feea3c83b1698c570a15337",
+      "viewport": [
+        390,
+        844
+      ],
+      "input": "touch",
+      "locale": "zh-Hant",
+      "state": "home-default"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-PHONE-M.home-footer-end",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-PHONE-M-home-footer-end.png",
+      "sha256": "fe669b7f6bc67abc8322779fec70b100934c9840560578bed8be65db736ea913",
+      "viewport": [
+        390,
+        844
+      ],
+      "input": "touch",
+      "locale": "zh-Hant",
+      "state": "home-footer-end"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-PHONE-M.save-long",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-PHONE-M-save-long.png",
+      "sha256": "47a000434d667224fafcd5337c8173e8696277a491a161b0164a2429abf9c834",
+      "viewport": [
+        390,
+        844
+      ],
+      "input": "touch",
+      "locale": "zh-Hant",
+      "state": "save-long"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-PHONE-M.battle-single-countdown",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-PHONE-M-battle-single-countdown.png",
+      "sha256": "f7083aadf3d9901c12d28163acbdb45142ab1598799deeb3ba23dd848079898e",
+      "viewport": [
+        390,
+        844
+      ],
+      "input": "touch",
+      "locale": "zh-Hant",
+      "state": "battle-single-countdown"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-PHONE-M.battle-dual-countdown",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-PHONE-M-battle-dual-countdown.png",
+      "sha256": "3fe02d62612eda5179b3d824a2830c8782b43b1c2db4de2212c1245e7228cbe7",
+      "viewport": [
+        390,
+        844
+      ],
+      "input": "touch",
+      "locale": "zh-Hant",
+      "state": "battle-dual-countdown"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-PHONE-M.battle-dual-qte",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-PHONE-M-battle-dual-qte.png",
+      "sha256": "a85caad8a63dd90bc6baad093c77c0a4db14fd9b8cb7b31d499d75a94f4cb18c",
+      "viewport": [
+        390,
+        844
+      ],
+      "input": "touch",
+      "locale": "zh-Hant",
+      "state": "battle-dual-qte"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-PHONE-M.dojo-single-qte",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-PHONE-M-dojo-single-qte.png",
+      "sha256": "eb3eb67a3b54dabae7530ba130d3e47d26f58521f95c284becd50146a67a6e5a",
+      "viewport": [
+        390,
+        844
+      ],
+      "input": "touch",
+      "locale": "zh-Hant",
+      "state": "dojo-single-qte"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-PHONE-M.dojo-dual-qte",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-PHONE-M-dojo-dual-qte.png",
+      "sha256": "e462d88b2e2f23fe8d80494b594ed1fa4471aabb76029020403c21ca85568324",
+      "viewport": [
+        390,
+        844
+      ],
+      "input": "touch",
+      "locale": "zh-Hant",
+      "state": "dojo-dual-qte"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-TABLET-S.home-default",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-TABLET-S-home-default.png",
+      "sha256": "5db04aff03ce2fd472c37280db691cb99e5b3c545a5d3ecc5731fa7f8218422f",
+      "viewport": [
+        768,
+        1024
+      ],
+      "input": "touch",
+      "locale": "zh-Hant",
+      "state": "home-default"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-TABLET-S.home-footer-end",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-TABLET-S-home-footer-end.png",
+      "sha256": "81d1a670420c7fcfefa6a437956e43ae7f76008eb9d67b01e1f5682d360ccedd",
+      "viewport": [
+        768,
+        1024
+      ],
+      "input": "touch",
+      "locale": "zh-Hant",
+      "state": "home-footer-end"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-TABLET-S.save-long",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-TABLET-S-save-long.png",
+      "sha256": "57147ad1d156c851bf8571c7d983c1810140ca4b4ef946d25a7375749124fe65",
+      "viewport": [
+        768,
+        1024
+      ],
+      "input": "touch",
+      "locale": "zh-Hant",
+      "state": "save-long"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-TABLET-S.battle-single-countdown",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-TABLET-S-battle-single-countdown.png",
+      "sha256": "5577831439513fa73ac6e05aa89e9a5a0b700b7fec74e6bb654bb6cd8d3ab974",
+      "viewport": [
+        768,
+        1024
+      ],
+      "input": "touch",
+      "locale": "zh-Hant",
+      "state": "battle-single-countdown"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-TABLET-S.battle-dual-countdown",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-TABLET-S-battle-dual-countdown.png",
+      "sha256": "bdc919691fc21a57cf9d371f0f0e55345b9d43d2fb2de8ce9242fb422e8df216",
+      "viewport": [
+        768,
+        1024
+      ],
+      "input": "touch",
+      "locale": "zh-Hant",
+      "state": "battle-dual-countdown"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-TABLET-S.battle-dual-qte",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-TABLET-S-battle-dual-qte.png",
+      "sha256": "a2f4970b977e52ec508cd093544b82e19a7275bc23d20489e83cb4746fbd851c",
+      "viewport": [
+        768,
+        1024
+      ],
+      "input": "touch",
+      "locale": "zh-Hant",
+      "state": "battle-dual-qte"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-TABLET-S.dojo-single-qte",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-TABLET-S-dojo-single-qte.png",
+      "sha256": "7720ce3dec4448b971953cf59f1ebc6febf8dde2db53a35821830543146f9479",
+      "viewport": [
+        768,
+        1024
+      ],
+      "input": "touch",
+      "locale": "zh-Hant",
+      "state": "dojo-single-qte"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-TABLET-S.dojo-dual-qte",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-TABLET-S-dojo-dual-qte.png",
+      "sha256": "769c1dfae9cc909a5a6651c08df262286f8d44a07b704196246c8cc6cd59bd10",
+      "viewport": [
+        768,
+        1024
+      ],
+      "input": "touch",
+      "locale": "zh-Hant",
+      "state": "dojo-dual-qte"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-DESKTOP-M.home-default",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-DESKTOP-M-home-default.png",
+      "sha256": "48d139a6a292876592d0f7b57d26c126fc19987ef7c96c6c9767b1822b53f4e4",
+      "viewport": [
+        1440,
+        900
+      ],
+      "input": "mouse-keyboard",
+      "locale": "zh-Hant",
+      "state": "home-default"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-DESKTOP-M.home-footer-end",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-DESKTOP-M-home-footer-end.png",
+      "sha256": "d97c8a2b49406e427616efb1a8fb114349c28d35d9f6676ee4604ba1d99563cc",
+      "viewport": [
+        1440,
+        900
+      ],
+      "input": "mouse-keyboard",
+      "locale": "zh-Hant",
+      "state": "home-footer-end"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-DESKTOP-M.save-long",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-DESKTOP-M-save-long.png",
+      "sha256": "c2c43790721a471c7e15ed74c433462ded158e87327240fc1e797383c57e0f2f",
+      "viewport": [
+        1440,
+        900
+      ],
+      "input": "mouse-keyboard",
+      "locale": "zh-Hant",
+      "state": "save-long"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-DESKTOP-M.battle-single-countdown",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-DESKTOP-M-battle-single-countdown.png",
+      "sha256": "e808c5e1e19b8d14d66fe28b27fa69dfee04907af4d68641a4057ee67239b08a",
+      "viewport": [
+        1440,
+        900
+      ],
+      "input": "mouse-keyboard",
+      "locale": "zh-Hant",
+      "state": "battle-single-countdown"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-DESKTOP-M.battle-dual-countdown",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-DESKTOP-M-battle-dual-countdown.png",
+      "sha256": "4b789f31bdff5c7397bc0a3f7ffd2da987c664d6bcb785a042cb95ce1ee69a51",
+      "viewport": [
+        1440,
+        900
+      ],
+      "input": "mouse-keyboard",
+      "locale": "zh-Hant",
+      "state": "battle-dual-countdown"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-DESKTOP-M.battle-dual-qte",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-DESKTOP-M-battle-dual-qte.png",
+      "sha256": "3df63fa5dbd931ca87d2886d2075944999bdf56c77383de2d0db06dd4be75c0d",
+      "viewport": [
+        1440,
+        900
+      ],
+      "input": "mouse-keyboard",
+      "locale": "zh-Hant",
+      "state": "battle-dual-qte"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-DESKTOP-M.dojo-single-qte",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-DESKTOP-M-dojo-single-qte.png",
+      "sha256": "ee460b23ffe9811053df527f61b83c2f7be641be58bcd646c53b0166c9bf26bd",
+      "viewport": [
+        1440,
+        900
+      ],
+      "input": "mouse-keyboard",
+      "locale": "zh-Hant",
+      "state": "dojo-single-qte"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-DESKTOP-M.dojo-dual-qte",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-DESKTOP-M-dojo-dual-qte.png",
+      "sha256": "8aabc4250dc3fc68102f6aacc38a67bb5a4b56a5adf4d192fd42c291ed5021f9",
+      "viewport": [
+        1440,
+        900
+      ],
+      "input": "mouse-keyboard",
+      "locale": "zh-Hant",
+      "state": "dojo-dual-qte"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-DESKTOP-L.home-default",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-DESKTOP-L-home-default.png",
+      "sha256": "731d4d546e62e7d928dea38be71f161a161e15715c2cc8e6bde2ce28f2731f30",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "input": "mouse-keyboard",
+      "locale": "zh-Hant",
+      "state": "home-default"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-DESKTOP-L.home-footer-end",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-DESKTOP-L-home-footer-end.png",
+      "sha256": "4d1dea6972550db362e1df3ec13a03bff5aa6be62676b781a7df6a13c0ceb5b6",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "input": "mouse-keyboard",
+      "locale": "zh-Hant",
+      "state": "home-footer-end"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-DESKTOP-L.save-long",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-DESKTOP-L-save-long.png",
+      "sha256": "7b45adb1ccb7dafe2a7679a414eae6de19d830dc600e6b26574f25c148454e69",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "input": "mouse-keyboard",
+      "locale": "zh-Hant",
+      "state": "save-long"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-DESKTOP-L.battle-single-countdown",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-DESKTOP-L-battle-single-countdown.png",
+      "sha256": "23f05d704b84b6ba4f56a19e78c42ad1f6fce37cddce31be86264863309a021b",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "input": "mouse-keyboard",
+      "locale": "zh-Hant",
+      "state": "battle-single-countdown"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-DESKTOP-L.battle-dual-countdown",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-DESKTOP-L-battle-dual-countdown.png",
+      "sha256": "dd21b2b648b9ee44700ce82c9ba2d377a3a4bb35e7107943044e9e53cd3925ae",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "input": "mouse-keyboard",
+      "locale": "zh-Hant",
+      "state": "battle-dual-countdown"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-DESKTOP-L.battle-dual-qte",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-DESKTOP-L-battle-dual-qte.png",
+      "sha256": "9217bc97c61f66577226f2c1db34d9fc9e6b898283d7b660bf4ddd2e067469c2",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "input": "mouse-keyboard",
+      "locale": "zh-Hant",
+      "state": "battle-dual-qte"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-DESKTOP-L.dojo-single-qte",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-DESKTOP-L-dojo-single-qte.png",
+      "sha256": "e7131455eafaa6db58fe167ca36f9e2d25b84f34660e68362bfa7e8c67988ae3",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "input": "mouse-keyboard",
+      "locale": "zh-Hant",
+      "state": "dojo-single-qte"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-DESKTOP-L.dojo-dual-qte",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-DESKTOP-L-dojo-dual-qte.png",
+      "sha256": "e268e11a1ca1a6d5a8ef50380806b1006de416fc389a53be56b5e7c33b131fe9",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "input": "mouse-keyboard",
+      "locale": "zh-Hant",
+      "state": "dojo-dual-qte"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-PHONE-M.stages-end",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-PHONE-M-stages-end.png",
+      "sha256": "2fbbf251265b72649e7bd8a285044d532a5a6f90f0854d3d0bd190a06533f035",
+      "viewport": [
+        390,
+        844
+      ],
+      "input": "touch",
+      "locale": "zh-Hant",
+      "state": "stages-end",
+      "pixelTolerance": {
+        "maxDiffPixels": 1700
+      }
+    },
+    {
+      "id": "RWD-G010.candidate.SHORT-LANDSCAPE.stages-end",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-SHORT-LANDSCAPE-stages-end.png",
+      "sha256": "606d2d6db61fd5258e91d0390208401f09ea1da462876ad99ad1b6ca6c54e9f2",
+      "viewport": [
+        844,
+        390
+      ],
+      "input": "touch",
+      "locale": "zh-Hant",
+      "state": "stages-end"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-DESKTOP-M.stages-end",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-DESKTOP-M-stages-end.png",
+      "sha256": "eb8c47d338f6704353ce3c431334d8b24565bfee8c66857a216ec97730e07d24",
+      "viewport": [
+        1440,
+        900
+      ],
+      "input": "mouse",
+      "locale": "zh-Hant",
+      "state": "stages-end"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-PHONE-M.growth-end",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-PHONE-M-growth-end.png",
+      "sha256": "8f1ebe46df95cb2130e8daf3e13354549e6181a3e684c65cd423bdac8feb1379",
+      "viewport": [
+        390,
+        844
+      ],
+      "input": "touch",
+      "locale": "zh-Hant",
+      "state": "growth-end"
+    },
+    {
+      "id": "RWD-G010.candidate.SHORT-LANDSCAPE.growth-end",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-SHORT-LANDSCAPE-growth-end.png",
+      "sha256": "7157f9b1c44996147dd5ab4b89c2b81e75d365f72b842fedec5a1efee546348d",
+      "viewport": [
+        844,
+        390
+      ],
+      "input": "touch",
+      "locale": "zh-Hant",
+      "state": "growth-end"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-DESKTOP-M.growth-end",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-DESKTOP-M-growth-end.png",
+      "sha256": "0a92bc7b4989b4b9b2e4c1b75bd3060d7d319fc53c95f29b211640ea1121afda",
+      "viewport": [
+        1440,
+        900
+      ],
+      "input": "mouse",
+      "locale": "zh-Hant",
+      "state": "growth-end"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-PHONE-M.equipment-end",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-PHONE-M-equipment-end.png",
+      "sha256": "008b7f88d0e6f48f51445d8ce0f76f4809221595ca1f8ae7130b9fffe3dcaeab",
+      "viewport": [
+        390,
+        844
+      ],
+      "input": "touch",
+      "locale": "zh-Hant",
+      "state": "equipment-end"
+    },
+    {
+      "id": "RWD-G010.candidate.SHORT-LANDSCAPE.equipment-end",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-SHORT-LANDSCAPE-equipment-end.png",
+      "sha256": "d2ba7b1a4e88e2fa522ce9a6a1da65ac20cbf0140b1212662c07b4a08eecf14f",
+      "viewport": [
+        844,
+        390
+      ],
+      "input": "touch",
+      "locale": "zh-Hant",
+      "state": "equipment-end"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-DESKTOP-M.equipment-end",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-DESKTOP-M-equipment-end.png",
+      "sha256": "09ee266ae85529129ffdaa1b1e8acf25d3d63d6e41894f797ee9e0ab5478e63e",
+      "viewport": [
+        1440,
+        900
+      ],
+      "input": "mouse",
+      "locale": "zh-Hant",
+      "state": "equipment-end"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-PHONE-M.shop-end",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-PHONE-M-shop-end.png",
+      "sha256": "9c4b1f4b74f2043e9dbaa1351ddf4436bd584f8d5a0f32a2d359c02de87b92fa",
+      "viewport": [
+        390,
+        844
+      ],
+      "input": "touch",
+      "locale": "zh-Hant",
+      "state": "shop-end"
+    },
+    {
+      "id": "RWD-G010.candidate.SHORT-LANDSCAPE.shop-end",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-SHORT-LANDSCAPE-shop-end.png",
+      "sha256": "7dcaa9b94ff87dd5bfef3f402f0ddefdee07ab5a732fcee5c2d97b7841640bf2",
+      "viewport": [
+        844,
+        390
+      ],
+      "input": "touch",
+      "locale": "zh-Hant",
+      "state": "shop-end"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-DESKTOP-M.shop-end",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-DESKTOP-M-shop-end.png",
+      "sha256": "3d2e9e904f27370ec16db633d013eeede6e13f81f11167db74a8a83b99cc9b7b",
+      "viewport": [
+        1440,
+        900
+      ],
+      "input": "mouse",
+      "locale": "zh-Hant",
+      "state": "shop-end",
+      "pixelTolerance": {
+        "maxDiffPixels": 3000
+      }
+    },
+    {
+      "id": "RWD-G010.candidate.VP-PHONE-M.records-end",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-PHONE-M-records-end.png",
+      "sha256": "4014db852bd88e4397dad659ce752bb171f2a293c5076ca51fd2ed57b6521910",
+      "viewport": [
+        390,
+        844
+      ],
+      "input": "touch",
+      "locale": "zh-Hant",
+      "state": "records-end"
+    },
+    {
+      "id": "RWD-G010.candidate.SHORT-LANDSCAPE.records-end",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-SHORT-LANDSCAPE-records-end.png",
+      "sha256": "71b9d1c2809f71bc3aa300ab0e87a3f5934c8d0d4edecc00224386d3210030a9",
+      "viewport": [
+        844,
+        390
+      ],
+      "input": "touch",
+      "locale": "zh-Hant",
+      "state": "records-end"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-DESKTOP-M.records-end",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-DESKTOP-M-records-end.png",
+      "sha256": "5c4fefff3267ef2a5ec5a6733e048639428fefac780bed6c9b598122e66ddfc1",
+      "viewport": [
+        1440,
+        900
+      ],
+      "input": "mouse",
+      "locale": "zh-Hant",
+      "state": "records-end"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-PHONE-M.gallery-end",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-PHONE-M-gallery-end.png",
+      "sha256": "6586e9a9c7f29b9a8839f850f8340fbe2c37c906073480057f0440106b7fbaaa",
+      "viewport": [
+        390,
+        844
+      ],
+      "input": "touch",
+      "locale": "zh-Hant",
+      "state": "gallery-end"
+    },
+    {
+      "id": "RWD-G010.candidate.SHORT-LANDSCAPE.gallery-end",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-SHORT-LANDSCAPE-gallery-end.png",
+      "sha256": "0829feae14dcd1a84307117af67b3315156874943b8d7337e9771571b7418a87",
+      "viewport": [
+        844,
+        390
+      ],
+      "input": "touch",
+      "locale": "zh-Hant",
+      "state": "gallery-end"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-DESKTOP-M.gallery-end",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-DESKTOP-M-gallery-end.png",
+      "sha256": "5d0fad2126e3996ed2d51a2ca61ef93fba9c31605600cfedba2f6c8a83bf992e",
+      "viewport": [
+        1440,
+        900
+      ],
+      "input": "mouse",
+      "locale": "zh-Hant",
+      "state": "gallery-end"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-PHONE-M.guide-end",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-PHONE-M-guide-end.png",
+      "sha256": "fd40f3f00156a52b8be89508255e1e406522abae3bbfbce9befab12eb74de58a",
+      "viewport": [
+        390,
+        844
+      ],
+      "input": "touch",
+      "locale": "zh-Hant",
+      "state": "guide-end"
+    },
+    {
+      "id": "RWD-G010.candidate.SHORT-LANDSCAPE.guide-end",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-SHORT-LANDSCAPE-guide-end.png",
+      "sha256": "ca1e200a13c547736c418d2458c9904036143410b176f6a2492722345c305b05",
+      "viewport": [
+        844,
+        390
+      ],
+      "input": "touch",
+      "locale": "zh-Hant",
+      "state": "guide-end"
+    },
+    {
+      "id": "RWD-G010.candidate.VP-DESKTOP-M.guide-end",
+      "file": "e2e/rwd/baselines/chromium/RWD-G010-candidate-VP-DESKTOP-M-guide-end.png",
+      "sha256": "2ce3c636366d14d6cb6861c46fc0f7bbf1ef6b4a1bbf8690a90b5066cecaf06f",
+      "viewport": [
+        1440,
+        900
+      ],
+      "input": "mouse",
+      "locale": "zh-Hant",
+      "state": "guide-end"
+    }
+  ]
+}

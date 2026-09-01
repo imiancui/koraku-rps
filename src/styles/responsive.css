@@ -40,8 +40,8 @@
   .round-oracle {
     top: clamp(82px, 12vh, 106px);
     left: 50%;
-    width: min(44vw, 420px);
-    padding: 10px 16px 12px;
+    width: min(40vw, 360px);
+    padding: 7px 12px 8px;
     transform: translateX(-50%);
   }
 
@@ -60,8 +60,8 @@
   }
 
   .battle-character-wrap.is-dual-stage {
-    left: 58%;
-    width: min(66vw, 760px);
+    left: 54%;
+    width: min(72vw, 820px);
     bottom: clamp(90px, 13vh, 160px);
     height: 80%;
   }
@@ -113,9 +113,9 @@
   .round-oracle {
     top: 140px !important;
     left: 50% !important;
-    width: min(72vw, 420px) !important;
+    width: min(64vw, 360px) !important;
     transform: translateX(-50%) !important;
-    padding: 8px 16px 10px !important;
+    padding: 6px 12px 7px !important;
   }
 
   .battle-damage-log {
@@ -134,11 +134,11 @@
   }
 
   .battle-character-wrap.is-dual-stage {
-    left: 50% !important;
+    left: 56% !important;
     top: clamp(210px, 20vh, 250px) !important;
     bottom: auto !important;
-    width: min(92vw, 740px) !important;
-    height: clamp(280px, 32vh, 380px) !important;
+    width: min(94vw, 780px) !important;
+    height: clamp(300px, 35vh, 410px) !important;
     transform: translateX(-50%) !important;
   }
 
@@ -151,12 +151,21 @@
   }
 
   .battle-left-cluster {
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    bottom: clamp(96px, 10.5vh, 120px) !important;
-    width: min(88vw, 420px) !important;
+    left: 18px !important;
+    transform: none !important;
+    bottom: clamp(108px, 11.5vh, 128px) !important;
+    width: min(31vw, 260px) !important;
     z-index: 25 !important;
     gap: 8px !important;
+  }
+
+  .hand-selector {
+    position: fixed !important;
+    right: 18px !important;
+    left: auto !important;
+    bottom: clamp(108px, 11.5vh, 128px) !important;
+    width: min(31vw, 260px) !important;
+    z-index: 35 !important;
   }
 
   .hand-button {
@@ -234,13 +243,13 @@
     top: clamp(80px, 11.5vh, 92px);
     left: 50%;
     transform: translateX(-50%);
-    width: min(38vw, 380px);
-    padding: 6px 14px 8px;
+    width: min(34vw, 340px);
+    padding: 4px 10px 5px;
   }
 
   .battle-left-cluster {
     left: clamp(14px, 2.2vw, 28px);
-    bottom: 96px;
+    bottom: 108px;
     width: min(32vw, 300px);
     gap: 6px;
   }
@@ -263,16 +272,16 @@
   .battle-character-wrap {
     left: 54%;
     width: min(44vw, 530px);
-    bottom: clamp(10px, 2vh, 36px);
-    height: clamp(58%, 70vh, 78%);
+    bottom: 80px;
+    height: clamp(54%, 64vh, 70%);
     transform: translateX(-50%);
   }
 
   .battle-character-wrap.is-dual-stage {
-    left: 58%;
-    width: min(62vw, 680px);
-    bottom: clamp(10px, 2vh, 36px);
-    height: clamp(58%, 70vh, 78%);
+    left: 54%;
+    width: min(70vw, 760px);
+    bottom: 80px;
+    height: clamp(56%, 66vh, 72%);
     transform: translateX(-50%);
   }
 
@@ -287,6 +296,100 @@
 
   .slot-content small {
     display: none;
+  }
+}
+
+@media (min-width: 781px) and (max-height: 900px) {
+  .home-copy {
+    margin-top: clamp(18px, 3vh, 30px);
+  }
+
+  .home-copy h1 {
+    margin-block: 4px 8px;
+  }
+
+  .main-menu {
+    margin-top: clamp(10px, 1.8vh, 16px);
+    gap: 4px;
+  }
+
+  .menu-command {
+    min-height: 50px;
+    padding-block: 5px;
+  }
+
+  .home-record,
+  .home-admin-actions {
+    margin-top: 10px;
+  }
+}
+
+@media (min-width: 781px) and (max-width: 1280px) and (orientation: landscape) {
+  .round-oracle {
+    top: 106px;
+    width: min(34vw, 340px);
+    padding: 5px 10px 6px;
+  }
+
+  .round-countdown {
+    width: 54px;
+    height: 54px;
+    right: -22px;
+  }
+
+  .battle-character-wrap,
+  .battle-character-wrap.is-dual-stage {
+    bottom: 130px;
+  }
+
+  .battle-character-wrap.is-dual-stage {
+    left: 56%;
+    width: min(76vw, 860px);
+  }
+}
+
+@media (min-width: 1101px) and (max-width: 1440px) {
+  .battle-character-wrap.is-dual-stage {
+    left: 57%;
+  }
+}
+
+@media (min-width: 1281px) and (max-width: 1440px) {
+  .battle-character-wrap.is-dual-stage .character-dual-slot.is-right {
+    transform: translateX(-18px);
+  }
+
+  .round-oracle {
+    top: 108px;
+    width: min(88vw, 400px);
+    padding: 10px 14px 12px;
+  }
+
+  .round-countdown {
+    right: -22px;
+    width: 52px;
+    height: 52px;
+  }
+
+  .round-countdown i {
+    inset: 4px;
+    border-width: 2px;
+  }
+
+  .round-countdown b {
+    font-size: 19px;
+  }
+}
+
+@media (min-width: 1441px) {
+  .enemy-hud {
+    left: 49%;
+    top: 30px;
+  }
+
+  .round-oracle {
+    left: 49%;
+    top: 112px;
   }
 }
 
@@ -421,11 +524,13 @@
     z-index: 10;
     width: auto;
     margin: 12px 10px 20px;
-    padding-bottom: calc(max(44px, env(safe-area-inset-bottom)) + 36px) !important;
+    padding-bottom: calc(max(44px, env(safe-area-inset-bottom)) + 60px) !important;
   }
 
   .home-copy h1 span {
     font-size: clamp(40px, 13vw, 68px);
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
 
   .home-copy h1 em {
@@ -489,10 +594,10 @@
   .home-character {
     position: absolute;
     z-index: 15 !important;
-    right: -12vw;
+    right: max(6px, env(safe-area-inset-right, 0px));
     bottom: 0;
-    width: 82vw;
-    max-width: 380px;
+    width: 72vw;
+    max-width: 420px;
     height: 75vh;
     opacity: 0.95 !important;
     pointer-events: none;
@@ -518,7 +623,8 @@
     position: absolute;
     z-index: 22 !important;
     right: 12px;
-    bottom: clamp(340px, 48vh, 460px);
+    top: auto;
+    bottom: clamp(240px, 34vh, 320px);
     width: min(54vw, 220px);
     padding: 8px 12px 10px 14px;
     border: 1.5px solid rgba(216, 182, 106, 0.75);
@@ -573,6 +679,9 @@
      -------------------------------------------------------------------------- */
   .page-screen {
     padding: 16px 12px calc(max(32px, env(safe-area-inset-bottom)) + 24px) !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior-y: contain;
   }
 
   .page-heading {
@@ -767,13 +876,13 @@
      -------------------------------------------------------------------------- */
   .chapter-tag {
     left: 10px !important;
-    top: 58px !important;
+    top: 12px !important;
     z-index: 35 !important;
   }
 
   .battle-exit {
     right: 10px !important;
-    top: 56px !important;
+    top: 14px !important;
     z-index: 35 !important;
   }
 
@@ -793,7 +902,7 @@
   }
 
   .dual-enemy-card {
-    padding: 4px 6px !important;
+    padding: 4px 6px 6px !important;
     border-radius: 4px !important;
     background: rgba(14, 18, 28, 0.92) !important;
     border: 1px solid rgba(216, 182, 106, 0.4) !important;
@@ -808,9 +917,9 @@
     grid-template-columns: 20px 1fr auto !important;
     grid-template-rows: auto auto !important;
     align-items: center !important;
-    gap: 1px 3px !important;
+    gap: 2px 3px !important;
     width: 100% !important;
-    margin-bottom: 1px !important;
+    margin-bottom: 5px !important;
   }
 
   .dual-enemy-card .fox-mark {
@@ -875,9 +984,9 @@
   /* Round oracle placed cleanly below Boss HP bar */
   .round-oracle {
     left: 50% !important;
-    top: 136px !important;
-    width: min(86vw, 290px) !important;
-    padding: 3px 8px 4px !important;
+    top: 154px !important;
+    width: min(84vw, 270px) !important;
+    padding: 2px 7px 3px !important;
     border: 1px solid rgba(216, 182, 106, 0.4) !important;
     border-radius: 6px !important;
     background: linear-gradient(135deg, rgba(12, 15, 24, 0.96), rgba(22, 26, 38, 0.92)) !important;
@@ -938,7 +1047,7 @@
   /* Battle Log (3-Tier Interactive FIFO - Mobile Optimized) */
   .battle-damage-log {
     right: 8px !important;
-    top: 195px !important;
+    top: 220px !important;
     left: auto !important;
     bottom: auto !important;
     padding: 4px 6px !important;
@@ -994,10 +1103,10 @@
   }
 
   .battle-character-wrap.is-dual-stage {
-    top: 220px !important;
+    top: 250px !important;
     bottom: auto !important;
-    width: min(94vw, 380px) !important;
-    height: clamp(220px, 34vh, 290px) !important;
+    width: min(104vw, 440px) !important;
+    height: clamp(270px, 40vh, 350px) !important;
     z-index: 10 !important;
   }
 
@@ -1030,6 +1139,7 @@
     display: flex !important;
     flex-direction: column !important;
     left: 8px !important;
+    transform: none !important;
     bottom: calc(62px + env(safe-area-inset-bottom, 0px)) !important;
     width: min(46vw, 175px) !important;
     gap: 4px !important;
@@ -1166,8 +1276,12 @@
   }
 
   .player-meter {
-    height: 8px !important;
+    height: 10px !important;
     margin-bottom: 3px !important;
+  }
+
+  .player-hud .ornate-meter {
+    padding: 1px !important;
   }
 
   .resource-row {
@@ -1185,7 +1299,7 @@
   }
 
   .resource-row .mp-meter {
-    height: 6px !important;
+    height: 8px !important;
     flex: 1 1 auto !important;
   }
 
@@ -1264,8 +1378,8 @@
   }
 
   .dual-hand-sub-column {
-    display: flex !important;
-    flex-direction: column !important;
+    display: grid !important;
+    grid-template-rows: auto repeat(3, 34px) !important;
     gap: 3px !important;
   }
 
@@ -1281,7 +1395,8 @@
     display: grid !important;
     grid-template-columns: 18px 1fr !important;
     align-items: center !important;
-    min-height: 28px !important;
+    min-height: 34px !important;
+    height: 34px !important;
     padding: 2px 4px !important;
     border-radius: 4px !important;
     background: rgba(12, 15, 24, 0.95) !important;
@@ -1404,6 +1519,10 @@
   .dual-qte-slot .qte-sequence {
     gap: 4px;
     margin: 4px 0;
+  }
+
+  .dual-qte-slot .qte-input-hint {
+    margin: 6px 0 4px;
   }
 
   .dual-qte-slot .qte-arrow {
@@ -1572,6 +1691,307 @@
   }
 }
 
+/* The existing 601–780 overlap needs tablet composition after the phone rules. */
+@media (min-width: 601px) and (max-width: 780px) and (orientation: portrait) {
+  .battle-character-wrap {
+    top: clamp(230px, 24vh, 260px) !important;
+    bottom: auto !important;
+    width: min(68vw, 520px) !important;
+    height: clamp(360px, 42vh, 450px) !important;
+  }
+
+  .battle-character-wrap.is-dual-stage {
+    top: clamp(230px, 24vh, 260px) !important;
+    width: min(90vw, 700px) !important;
+    height: clamp(340px, 40vh, 430px) !important;
+  }
+
+  .battle-left-cluster,
+  .hand-selector {
+    width: min(31vw, 230px) !important;
+  }
+
+  .battle-left-cluster {
+    left: 14px !important;
+  }
+
+  .hand-selector {
+    right: 14px !important;
+  }
+}
+
+/* Required short-landscape fallback: keep timed controls in the battle viewport. */
+@media (max-height: 480px) and (min-width: 601px) {
+  .avg-dialogue {
+    bottom: 4px;
+    min-height: 44px;
+    max-height: 52px;
+    padding: 9px 30px 5px 44px;
+  }
+
+  .avg-dialogue > span {
+    left: 10px;
+    top: -8px;
+    min-width: 44px;
+    padding: 2px 8px;
+    font-size: 9px;
+  }
+
+  .avg-dialogue p {
+    max-height: 30px;
+    overflow: hidden;
+    font-size: 10px;
+    line-height: 1.35;
+  }
+
+  .battle-left-cluster {
+    left: 8px;
+    bottom: 58px;
+    width: min(25vw, 210px);
+    gap: 3px;
+    transform: none;
+  }
+
+  .hand-selector {
+    position: fixed;
+    right: 8px;
+    bottom: 58px;
+    width: min(25vw, 210px);
+    z-index: 35;
+  }
+
+  .hand-selector-group,
+  .dual-hand-sub-column {
+    gap: 3px;
+  }
+
+  .hand-selector-dual {
+    gap: 4px;
+  }
+
+  .hand-button,
+  .dual-hand-sub-column .hand-button {
+    min-height: 40px;
+    padding: 2px 6px;
+  }
+
+  .slot-grid {
+    grid-template: repeat(3, 30px) / repeat(3, 30px);
+  }
+
+  .soul-slot {
+    width: 26px;
+    height: 26px;
+    margin: 1px;
+  }
+
+  .slot-content {
+    inset: -6px;
+  }
+
+  .slot-content i {
+    font-size: 11px;
+  }
+
+  .slot-content small,
+  .slot-content b {
+    font-size: 7px;
+  }
+
+  .battle-character-wrap,
+  .battle-character-wrap.is-dual-stage {
+    left: 50%;
+    top: 112px;
+    bottom: 54px;
+    width: min(46vw, 420px);
+    height: auto;
+    transform: translateX(-50%);
+  }
+
+  .battle-character-wrap.is-dual-stage {
+    width: min(58vw, 540px);
+  }
+
+  .round-oracle {
+    top: 96px;
+    width: min(28vw, 220px);
+    padding: 1px 6px 2px;
+  }
+
+  .round-label {
+    margin-bottom: 1px;
+    font-size: 6px;
+    letter-spacing: 0.14em;
+  }
+
+  .round-label b {
+    font-size: 8px;
+  }
+
+  .hand-versus {
+    grid-template-columns: 1fr 20px 1fr;
+    gap: 0 2px;
+  }
+
+  .hand-versus > div {
+    gap: 0 2px;
+  }
+
+  .dual-hand-wrap {
+    gap: 4px;
+  }
+
+  .hand-versus small {
+    font-size: 5.5px;
+    letter-spacing: 0.08em;
+  }
+
+  .hand-versus strong {
+    font-size: 16px;
+  }
+
+  .hand-versus b {
+    font-size: 8px;
+  }
+
+  .hand-versus > span {
+    width: 22px;
+    height: 22px;
+    font-size: 10px;
+  }
+
+  .round-countdown {
+    right: -12px;
+    width: 34px;
+    height: 34px;
+  }
+
+  .round-countdown i {
+    inset: 3px;
+    border-width: 2px;
+  }
+
+  .round-countdown b {
+    font-size: 13px;
+  }
+
+  .round-countdown small {
+    bottom: -12px;
+    font-size: 6px;
+  }
+
+  .screen-dojo-qte {
+    justify-content: flex-start;
+    padding: 6px 10px;
+  }
+
+  .dojo-qte-content {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    grid-template-rows: auto 1fr;
+    align-items: stretch;
+    gap: 6px 10px;
+    max-width: 100%;
+    height: 100%;
+  }
+
+  .dojo-qte-header {
+    grid-column: 1 / -1;
+    padding-bottom: 4px;
+  }
+
+  .dojo-qte-title-group h2 {
+    margin-top: 1px;
+    font-size: 17px;
+  }
+
+  .dojo-exit-btn {
+    min-height: 40px;
+  }
+
+  .dojo-metrics-bar {
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    align-content: start;
+  }
+
+  .dojo-metric-card {
+    padding: 4px 6px;
+  }
+
+  .dojo-metric-card b {
+    font-size: 15px;
+  }
+
+  .dojo-qte-track-container {
+    min-height: 0;
+    padding: 6px 8px;
+  }
+
+  .dojo-sequence {
+    margin: 4px 0 6px;
+  }
+
+  .dojo-qte-track-container .qte-pad {
+    grid-template: repeat(3, 40px) / repeat(3, minmax(40px, 1fr));
+    gap: 3px;
+    width: min(100%, 320px);
+    margin: 4px auto 0;
+  }
+
+  .dojo-qte-track-container .qte-pad button {
+    min-height: 40px;
+    height: 40px;
+  }
+
+  .qte-panel {
+    max-height: calc(100% - 8px);
+    padding: 8px 12px;
+  }
+
+  .qte-panel h2 {
+    margin: 1px 0;
+    font-size: 21px;
+  }
+
+  .qte-panel-dual .dual-qte-split-grid {
+    margin: 4px 0;
+  }
+
+  .qte-panel-dual .dual-qte-slot {
+    padding: 5px 7px;
+  }
+
+  .qte-panel-dual .slot-header {
+    margin-bottom: 2px;
+    padding-bottom: 2px;
+  }
+
+  .qte-panel-dual .dual-qte-touch-controls {
+    margin-top: 4px;
+  }
+
+  .qte-panel-dual .is-dual-touch-pad button {
+    min-height: 40px !important;
+    height: 40px !important;
+  }
+}
+
+/* Compact portrait QTEs at the declared 780px height boundary without scrolling gameplay. */
+@media (max-width: 780px) and (max-height: 780px) {
+  .screen-dojo-qte {
+    padding-block: 10px;
+  }
+
+  .dojo-qte-content {
+    gap: 8px;
+  }
+
+  .dojo-qte-track-container {
+    padding-block: 14px;
+  }
+}
+
 @media (max-width: 480px) {
   .brand-copy strong {
     font-size: 12px;
@@ -1628,6 +2048,47 @@
     right: 6px;
     width: min(285px, calc(100% - 12px));
     top: 50px;
+  }
+}
+
+@media (max-width: 600px) {
+  .home-copy h1 span {
+    font-size: clamp(34px, 10.5vw, 50px);
+    letter-spacing: 0.08em;
+  }
+
+  .menu-command,
+  .home-record {
+    max-width: min(56vw, 250px);
+  }
+
+  .home-dialogue {
+    right: 8px;
+    bottom: clamp(220px, 33vh, 285px);
+    width: min(42vw, 180px);
+  }
+
+  .home-character {
+    right: -6px;
+  }
+
+  .dual-qte-slot .qte-arrow {
+    width: 28px;
+    height: 28px;
+    flex: 0 0 28px;
+  }
+
+  .dual-qte-slot > .qte-input-hint {
+    min-width: 60px;
+    margin-left: 3px;
+  }
+}
+
+@media (min-width: 601px) and (max-width: 780px) and (orientation: portrait) {
+  .home-dialogue {
+    right: 26vw;
+    bottom: clamp(360px, 40vh, 420px);
+    width: min(29vw, 220px);
   }
 }
 
@@ -1821,8 +2282,13 @@ body.has-touch .dual-qte-touch-controls {
   justify-content: space-between !important;
   align-items: flex-end !important;
   gap: 10px !important;
-  width: 100% !important;
+  width: var(--dojo-dual-pad-width, 100%) !important;
   margin-top: 10px !important;
+}
+
+html.has-touch .dual-qte-touch-controls[hidden],
+body.has-touch .dual-qte-touch-controls[hidden] {
+  display: none !important;
 }
 
 html.has-touch .dual-touch-col,
@@ -1846,8 +2312,8 @@ html.has-touch .is-dual-touch-pad button,
 body.has-touch .is-dual-touch-pad button {
   width: 100% !important;
   min-width: 0 !important;
-  height: 42px !important;
-  min-height: 42px !important;
+  height: var(--dojo-dual-touch-size, 42px) !important;
+  min-height: var(--dojo-dual-touch-size, 42px) !important;
   font-size: 16px !important;
   border-radius: 4px !important;
   display: grid !important;
@@ -1857,8 +2323,8 @@ body.has-touch .is-dual-touch-pad button {
 
 html.has-touch .is-dual-touch-pad button .qte-dir-svg,
 body.has-touch .is-dual-touch-pad button .qte-dir-svg {
-  width: 18px !important;
-  height: 18px !important;
+  width: var(--dojo-dual-touch-icon-size, 18px) !important;
+  height: var(--dojo-dual-touch-icon-size, 18px) !important;
 }
 
 @media (pointer: coarse), (any-pointer: coarse) {
@@ -1890,8 +2356,12 @@ body.has-touch .is-dual-touch-pad button .qte-dir-svg {
     justify-content: space-between !important;
     align-items: flex-end !important;
     gap: 10px !important;
-    width: 100% !important;
+    width: var(--dojo-dual-pad-width, 100%) !important;
     margin-top: 10px !important;
+  }
+
+  .dual-qte-touch-controls[hidden] {
+    display: none !important;
   }
 
   .dual-touch-col {
@@ -1912,8 +2382,8 @@ body.has-touch .is-dual-touch-pad button .qte-dir-svg {
   .is-dual-touch-pad button {
     width: 100% !important;
     min-width: 0 !important;
-    height: 42px !important;
-    min-height: 42px !important;
+    height: var(--dojo-dual-touch-size, 42px) !important;
+    min-height: var(--dojo-dual-touch-size, 42px) !important;
     font-size: 16px !important;
     border-radius: 4px !important;
     display: grid !important;
@@ -1922,8 +2392,8 @@ body.has-touch .is-dual-touch-pad button .qte-dir-svg {
   }
 
   .is-dual-touch-pad button .qte-dir-svg {
-    width: 18px !important;
-    height: 18px !important;
+    width: var(--dojo-dual-touch-icon-size, 18px) !important;
+    height: var(--dojo-dual-touch-icon-size, 18px) !important;
   }
 }
 
@@ -1932,3 +2402,216 @@ body.has-physical-keyboard .keyboard-only {
   display: inline !important;
 }
 
+html.has-touch .dojo-qte-track-container .qte-pad:not(.is-dual-touch-pad),
+body.has-touch .dojo-qte-track-container .qte-pad:not(.is-dual-touch-pad) {
+  width: min(100%, 290px) !important;
+}
+
+/* Capability rules above are shared; short landscape keeps their controls compact. */
+@media (max-height: 480px) and (min-width: 601px) {
+  .qte-panel {
+    overflow: hidden;
+  }
+
+  .qte-panel .eyebrow,
+  .qte-panel > p:not(.eyebrow),
+  .qte-panel > small {
+    font-size: 9px;
+    line-height: 1.25;
+  }
+
+  .qte-panel .qte-sequence {
+    gap: 3px;
+    margin: 3px 0;
+  }
+
+  .qte-panel .qte-arrow {
+    width: 34px;
+    height: 34px;
+    font-size: 18px;
+  }
+
+  .qte-panel .qte-input-hint {
+    min-height: 22px;
+    margin: 3px 0;
+  }
+
+  .qte-panel-dual .dual-qte-slot {
+    height: 62px;
+    padding: 3px 6px;
+  }
+
+  .qte-panel-dual .slot-header {
+    min-height: 19px;
+    margin-bottom: 0;
+    padding-bottom: 1px;
+  }
+
+  .qte-panel-dual .dual-qte-slot .qte-sequence {
+    margin: 2px 0 0;
+  }
+
+  .qte-panel-dual .dual-qte-slot .qte-arrow {
+    width: 30px;
+    height: 30px;
+  }
+
+  .qte-panel-dual .dual-qte-slot .qte-input-hint {
+    min-height: 16px;
+    margin: 2px 0 0 4px;
+    font-size: 8px;
+    min-width: 72px;
+  }
+
+  .qte-panel-dual .dual-qte-touch-controls {
+    margin-top: 2px !important;
+    position: relative;
+    top: -2px;
+  }
+
+  html.has-touch .qte-panel .qte-pad:not(.is-dual-touch-pad),
+  body.has-touch .qte-panel .qte-pad:not(.is-dual-touch-pad),
+  .qte-panel .qte-pad:not(.is-dual-touch-pad) {
+    grid-template-columns: repeat(3, 40px) !important;
+    gap: 3px !important;
+    width: 126px !important;
+    margin: 3px auto 0 !important;
+  }
+
+  html.has-touch .dojo-qte-track-container .qte-pad:not(.is-dual-touch-pad),
+  body.has-touch .dojo-qte-track-container .qte-pad:not(.is-dual-touch-pad),
+  .dojo-qte-track-container .qte-pad:not(.is-dual-touch-pad) {
+    grid-template-columns: repeat(3, 40px) !important;
+    gap: 3px !important;
+    width: 126px !important;
+    margin: 3px auto 0 !important;
+  }
+
+  html.has-touch .dojo-qte-track-container .qte-pad:not(.is-dual-touch-pad) button,
+  body.has-touch .dojo-qte-track-container .qte-pad:not(.is-dual-touch-pad) button,
+  .dojo-qte-track-container .qte-pad:not(.is-dual-touch-pad) button {
+    min-height: 40px !important;
+    height: 40px !important;
+  }
+
+  html.has-touch .qte-panel .qte-pad:not(.is-dual-touch-pad) button,
+  body.has-touch .qte-panel .qte-pad:not(.is-dual-touch-pad) button,
+  .qte-panel .qte-pad:not(.is-dual-touch-pad) button {
+    min-height: 40px !important;
+    height: 40px !important;
+  }
+
+  .dojo-qte-content {
+    position: relative;
+  }
+
+  #dojo-qte-single-container,
+  #dojo-qte-dual-container {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  #dojo-dual-qte-pad-wrap:not([hidden]) {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: calc(66.666% - 4px) !important;
+    margin: 0 !important;
+  }
+
+  #dojo-qte-dual-container:not([hidden]) {
+    height: 100px;
+    padding: 4px 6px;
+  }
+
+  #dojo-qte-dual-container .dual-qte-slot {
+    height: 90px;
+    padding: 3px 5px;
+  }
+
+  #dojo-qte-dual-container .dual-qte-slot .qte-arrow {
+    width: 28px;
+    height: 28px;
+  }
+
+  #dojo-qte-dual-container .dual-qte-slot > .qte-input-hint {
+    min-width: 68px;
+    margin-left: 3px;
+  }
+
+  #dojo-dual-qte-pad-wrap .is-dual-touch-pad button {
+    min-height: 40px !important;
+    height: 40px !important;
+  }
+
+  .dual-touch-col > small {
+    display: none;
+  }
+}
+
+@media (min-width: 1280px) {
+  .screen-dojo-qte {
+    --dojo-dual-pad-width: min(100%, 1040px);
+    --dojo-dual-touch-size: 52px;
+    --dojo-dual-touch-icon-size: 24px;
+  }
+
+  .screen-dojo-qte .dojo-qte-content {
+    width: 100%;
+    max-width: none;
+  }
+
+  .screen-dojo-qte .dojo-qte-header {
+    align-self: flex-start;
+    width: min(100%, 820px);
+  }
+
+  .screen-dojo-qte .dojo-metrics-bar,
+  .screen-dojo-qte .dojo-qte-track-container {
+    width: min(100%, 1040px);
+  }
+
+  .screen-dojo-qte #dojo-qte-single-container .qte-sequence {
+    gap: 14px;
+    margin: 24px 0 18px;
+  }
+
+  .screen-dojo-qte #dojo-qte-single-container .qte-arrow {
+    width: 80px;
+    height: 80px;
+    flex: 0 0 80px;
+    font-size: 44px;
+  }
+
+  .screen-dojo-qte #dojo-qte-single-container .qte-arrow .qte-dir-svg {
+    width: 36px;
+    height: 36px;
+  }
+
+  .screen-dojo-qte #dojo-qte-single-container .qte-timer {
+    width: min(100%, 640px);
+  }
+
+  .screen-dojo-qte #dojo-qte-dual-container {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    padding-inline: 20px;
+  }
+
+  .screen-dojo-qte #dojo-qte-dual-container .dual-qte-slot {
+    min-width: 0;
+    padding: 16px 14px 12px;
+  }
+
+  .screen-dojo-qte #dojo-qte-dual-container .qte-arrow {
+    width: 52px;
+    height: 52px;
+    flex: 0 0 52px;
+    font-size: 30px;
+  }
+
+  .screen-dojo-qte #dojo-qte-dual-container .qte-arrow .qte-dir-svg {
+    width: 30px;
+    height: 30px;
+  }
+}

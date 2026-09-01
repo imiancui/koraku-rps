@@ -74,6 +74,18 @@ test("DualQTESystem 左側輸入推進左序列、右側輸入推進右序列且
   timers.clearAll();
 });
 
+test("DualQTESystem 的 left/right 方向不會被誤判為 slot", () => {
+  const dualQte = new DualQTESystem(new EventBus(), new TimerRegistry());
+  dualQte.start({ length: 1, durationMs: 10000, maxErrors: 1 });
+  dualQte.left.sequence = ["right"];
+  dualQte.right.sequence = ["left"];
+
+  assert.equal(dualQte.input("right", "left"), true);
+  assert.equal(dualQte.left.index, 1);
+  assert.equal(dualQte.input("left", "right"), true);
+  assert.equal(dualQte.right.index, 1);
+});
+
 test("WASD 與 方向鍵分流按鍵獨立運作", () => {
   assert.equal(wasdDirectionFromKey("w"), "up");
   assert.equal(wasdDirectionFromKey("A"), "left");
@@ -249,5 +261,4 @@ test("DualQTESystem 在 maxErrors=1 時按錯單鍵立即標記該側 slot 失�
   dualQte.stop();
   timers.clearAll();
 });
-
 
