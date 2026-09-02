@@ -1550,6 +1550,16 @@ img.is-silhouette {
   background: linear-gradient(135deg, rgba(11, 13, 21, 0.94), rgba(25, 28, 41, 0.88));
   box-shadow: 0 18px 46px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.04);
   transform: translateX(-50%);
+  touch-action: none;
+  cursor: grab;
+  user-select: none;
+}
+
+.round-oracle.is-dragging {
+  cursor: grabbing !important;
+  z-index: 200 !important;
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.9), 0 0 20px rgba(216, 182, 106, 0.5) !important;
+  opacity: 0.96;
 }
 
 .round-label {
@@ -2449,6 +2459,70 @@ body.has-touch .dual-qte-touch-controls {
   opacity: 1;
 }
 
+/* 結算畫面立繪欣賞開關按鈕 (Floating Standee View Button) */
+.settlement-toggle-ui-btn {
+  position: absolute;
+  top: clamp(20px, 3.5vh, 40px);
+  right: clamp(20px, 3.5vw, 50px);
+  z-index: 100;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border: 1px solid rgba(216, 182, 106, 0.45);
+  border-radius: 20px;
+  background: rgba(14, 16, 26, 0.88);
+  backdrop-filter: blur(8px);
+  color: var(--paper);
+  font: 500 13px/1 var(--serif);
+  letter-spacing: 0.08em;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5), 0 0 10px rgba(216, 182, 106, 0.2);
+  cursor: pointer;
+  pointer-events: auto;
+  transition: all 220ms ease;
+}
+
+.settlement-toggle-ui-btn:hover {
+  border-color: var(--gold-bright);
+  background: rgba(26, 30, 48, 0.95);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.6), 0 0 16px rgba(216, 182, 106, 0.4);
+  transform: translateY(-2px);
+}
+
+.settlement-toggle-ui-btn svg {
+  color: var(--gold);
+  flex-shrink: 0;
+}
+
+/* 結算介面隱藏模式 (100% 原色高亮欣賞小樂立繪，完全移除遮罩與卡片) */
+.result-overlay.is-ui-hidden .settlement-toggle-ui-btn {
+  border-color: rgba(56, 189, 248, 0.75);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.65), 0 0 16px rgba(56, 189, 248, 0.45);
+  background: rgba(10, 15, 30, 0.94);
+}
+
+.result-overlay.is-ui-hidden .settlement-toggle-ui-btn svg {
+  color: #38bdf8;
+}
+
+.result-overlay.is-ui-hidden .result-card {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: scale(0.96) translateY(28px) !important;
+  transition: opacity 250ms ease, transform 250ms ease;
+}
+
+.battle-arena:has(.result-overlay.is-ui-hidden),
+.battle-arena.is-settlement:has(.result-overlay.is-ui-hidden) {
+  background: transparent !important;
+}
+
+.battle-arena:has(.result-overlay.is-ui-hidden) .battle-character-wrap,
+.battle-arena.is-settlement:has(.result-overlay.is-ui-hidden) .battle-character-wrap {
+  filter: drop-shadow(0 20px 50px rgba(0, 0, 0, 0.8)) !important;
+  opacity: 1 !important;
+}
+
 .result-card {
   position: relative;
   z-index: 3;
@@ -2458,6 +2532,7 @@ body.has-touch .dual-qte-touch-controls {
   background: linear-gradient(90deg, rgba(13, 15, 24, 0.96), rgba(19, 22, 33, 0.82));
   box-shadow: 22px 25px 70px rgba(0, 0, 0, 0.43);
   pointer-events: auto;
+  transition: opacity 250ms ease, transform 250ms ease;
 }
 
 /* 結算畫面過渡：手動結算時隱藏對局中的 HUD，並確保小樂立繪鮮明呈現不被半透明遮罩遮蔽 */
@@ -3855,6 +3930,17 @@ body.has-touch .dual-qte-touch-controls {
   font-size: 12px;
   color: var(--paper);
   animation: bannerPulse 2s infinite ease-in-out;
+  touch-action: none;
+  cursor: grab;
+  user-select: none;
+}
+
+.auto-battle-hud-banner.is-dragging {
+  cursor: grabbing !important;
+  z-index: 200 !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9), 0 0 22px rgba(255, 190, 60, 0.8) !important;
+  animation: none !important;
+  opacity: 0.96;
 }
 
 @keyframes bannerPulse {
@@ -4555,13 +4641,26 @@ body.has-touch .dual-qte-touch-controls {
    ========================================================================== */
 .floating-autobattle-watermelon {
   position: absolute;
-  top: clamp(65px, 9vh, 95px);
+  top: clamp(180px, 24vh, 220px);
   right: clamp(14px, 2.2vw, 32px);
   z-index: 95;
   width: min(330px, calc(100% - 28px));
   pointer-events: auto;
   animation: floatFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   transition: opacity 0.2s ease, transform 0.2s ease;
+  touch-action: none;
+}
+
+.floating-autobattle-watermelon.is-dragging {
+  cursor: grabbing !important;
+  z-index: 200 !important;
+  transition: none !important;
+  opacity: 0.96;
+}
+
+.floating-autobattle-watermelon.is-dragging .floating-watermelon-card {
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.9), 0 0 25px rgba(230, 80, 120, 0.5) !important;
+  border-color: rgba(255, 200, 80, 0.9) !important;
 }
 
 .floating-autobattle-watermelon[hidden] {
@@ -4597,6 +4696,8 @@ body.has-touch .dual-qte-touch-controls {
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   padding-bottom: 6px;
   margin-bottom: 6px;
+  cursor: grab;
+  user-select: none;
 }
 
 .floating-watermelon-title {

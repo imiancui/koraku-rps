@@ -863,6 +863,49 @@
             <p style="margin-top:8px;"><strong>中央雙欄劇場級置中</strong>：左側卡片與右側立繪包裹於中央置中舞台，消除 4K 下兩側發散的巨大黑洞，呈現極具魄力的 ACGN 結算大賞。</p>
           </div>
         </div>
+      <!-- Section 21: Gameplay Polish & QTE Input Precision -->
+      <section id="section-gameplay-polish" class="section-card">
+        <h2 class="section-title">✨ QTE 實體鍵位精準解析、結算立繪全景欣賞與導航防誤觸 (v0.0.16)</h2>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">
+              <span>QTE 實體鍵位解析與嚴格錯誤判定</span>
+              <span class="badge badge-crimson">輸入法防卡鍵</span>
+            </div>
+            <p><strong>event.code 物理鍵位綁定</strong>：優先使用 event.code 判定 WASD 與方向鍵，徹底消除 Windows 輸入法（注音/拼音組字 Process 狀態）與 Shift 鍵大小寫轉換帶來的卡鍵與響應延遲。</p>
+            <p style="margin-top:8px;"><strong>無效按鍵嚴格失誤扣次</strong>：QTE 期間若按下非方向動作鍵（如 F/Space/J 等）嚴格判定為失誤並累計錯誤次數，容錯耗盡即判定失敗。</p>
+          </div>
+          <div class="card">
+            <div class="card-title">
+              <span>結算與切西瓜立繪欣賞開關</span>
+              <span class="badge badge-gold">無遮罩 100% 高亮</span>
+            </div>
+            <p><strong>欣賞立繪一鍵收起介面</strong>：於勝利結算、泳裝展示與切西瓜畫面右上角新增「欣賞立繪」開關，點擊後隱藏結算卡片與半透明黑幕遮罩，以 100% 原始色彩與亮度全景展示小樂立繪。</p>
+            <p style="margin-top:8px;"><strong>能力成長淺藍呼吸外發光</strong>：當角色升等後持有未分配之能力或技能點數時，首頁「02 能力成長」按鈕邊緣發出優雅的淺藍色呼吸光暈。</p>
+          </div>
+        </div>
+      </section>
+      <!-- Section 22: Draggable Battle HUD Widgets -->
+      <section id="section-draggable-hud" class="section-card">
+        <h2 class="section-title">✨ 戰鬥 HUD 自由拖曳擺放、非衝突預設生成佈局與邊界約束 (v0.0.17)</h2>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">
+              <span>四大戰鬥 HUD 自由拖曳擺放</span>
+              <span class="badge badge-crimson">Pointer Events 跨平台</span>
+            </div>
+            <p><strong>自由擺放位置</strong>：戰鬥紀錄、回合倒數神諭、自動刷關控制條、自動刷關切西瓜累計卡片全面支援滑鼠與觸控自由拖曳擺放，滿足各解析度與操作習慣之客製化需求。</p>
+            <p style="margin-top:8px;"><strong>邊界安全約束</strong>：拖曳範圍受視窗 8px 邊界安全約束（防拖出螢幕）；設定 4px 移動門檻防止點擊按鈕（如暫停、縮放、切西瓜）誤觸拖曳。</p>
+          </div>
+          <div class="card">
+            <div class="card-title">
+              <span>無衝突生成佈局與座標記憶</span>
+              <span class="badge badge-gold">持久化與雙擊重設</span>
+            </div>
+            <p><strong>無衝突預設生成原則</strong>：重構各介面初始生成座標，自動刷關切西瓜卡片預設停靠於戰鬥紀錄下方（top: 180~220px），根除生成互相重疊遮擋問題。</p>
+            <p style="margin-top:8px;"><strong>座標記憶與雙擊重設</strong>：自訂座標自動儲存於 localStorage（<code>koraku_hud_positions_v1</code>）跨對局持久化；雙擊標題列或手柄即可一鍵重設回預設位置。</p>
+          </div>
+        </div>
       </section>
     </main>
   </div>

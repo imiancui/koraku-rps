@@ -459,6 +459,21 @@ $$\text{Theoretical DPS} = \frac{(\text{Base DMG} \times \text{Greatsword Mult} 
   - 手勢分發事件獨立隔離驗證遊戲手勢處理（`trusted: false`）。
 - **嚴格驗收守護**：四向裁切、元素遮擋、必要控制項到達性與動畫時序穩定性均受自動化回歸門檻嚴格防護。
 
+---
+
+## 21. 戰鬥 HUD 自由拖曳擺放與非衝突生成佈局 (Battle HUD Dragging & Layout)
+
+### 21.1 局內四大 HUD 自由拖曳 (Draggable Widgets)
+- **支援元件**：戰鬥紀錄 (`#battle-damage-log`)、回合倒數神諭 (`#round-oracle`)、自動刷關控制條 (`#auto-battle-hud-banner`)、自動刷關切西瓜累計卡片 (`#floating-autobattle-watermelon`)。
+- **跨平台輸入**：全面採用 Pointer Events，完美相容滑鼠拖曳與行動端觸控拖曳。
+- **防誤觸門檻**：設定 4px 移動門檻，防止點擊內部按鈕（如暫停刷關、切西瓜、切換縮放）時誤觸拖曳行為。
+- **視窗邊界約束**：拖曳範圍嚴格限制於螢幕安全區域內（邊緣保留 8px 安全餘裕），杜絕拖出視窗無法拉回。
+
+### 21.2 無衝突預設生成佈局原則 (Non-Overlapping Spawn Principle)
+- **預設座標重構**：各介面預設生成時永不重疊遮擋。自動刷關切西瓜卡片預設停靠於戰鬥紀錄下方（`top: clamp(180px, 24vh, 220px); right: clamp(14px, 2.2vw, 32px);`），根除生成互相覆蓋問題。
+- **座標持久化記憶**：玩家自訂拖曳座標自動記錄於 `localStorage`（`koraku_hud_positions_v1`），跨回合與對局無縫保持。
+- **雙擊一鍵重設**：雙擊任何 HUD 標題列或拖曳手柄，即可瞬間還原至原廠預設佈局座標。
+
 
 
 

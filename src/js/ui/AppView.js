@@ -10,6 +10,7 @@ import {
   QTEKeyboardInput,
   wasdDirectionFromKey
 } from "../systems/QTEInputSystem.js";
+import { HUDDragController } from "./HUDDragController.js";
 
 const $ = (selector) => document.querySelector(selector);
 const clampPercent = (value, max) => Math.max(0, Math.min(100, max ? (value / max) * 100 : 0));
@@ -148,6 +149,7 @@ export class AppView {
 
     if (this.battleDamageLog) {
       this.battleDamageLog.addEventListener("click", () => {
+        if (this.hudDragController?.suppressClick) return;
         this.battleLogTier = (this.battleLogTier % 3) + 1;
         this.updateDamageLogDisplay();
       });
@@ -158,6 +160,24 @@ export class AppView {
           this.updateDamageLogDisplay();
         }
       });
+    }
+
+    this.hudDragController = new HUDDragController({
+      root: document,
+      storage: (typeof window !== "undefined" ? window.localStorage : null)
+    });
+    if (this.battleDamageLog) {
+      this.hudDragController.register("damageLog", this.battleDamageLog, { handleSelector: ".damage-log-header" });
+    }
+    if (this.roundOracle) {
+      this.hudDragController.register("roundOracle", this.roundOracle);
+    }
+    const autoBattleBanner = $("#auto-battle-hud-banner");
+    if (autoBattleBanner) {
+      this.hudDragController.register("autobattleBar", autoBattleBanner);
+    }
+    if (this.floatingWatermelon) {
+      this.hudDragController.register("watermelon", this.floatingWatermelon, { handleSelector: ".floating-watermelon-header" });
     }
   }
 
@@ -479,28 +499,43 @@ export class AppView {
       const targetScreen = event.state?.screen || (window.location.hash ? window.location.hash.replace(/^#/, "") : "home");
       if (this.currentScreen === targetScreen) return;
 
+      if (this.currentScreen === "battle" && (this.battleState?.active || this.battle.autoBattle?.active)) {
+        if (typeof window !== "undefined" && window.history) {
+          window.history.pushState({ screen: "battle" }, "", "#battle");
+        }
+        this.promptAbandonBattle(targetScreen);
+        return;
+      }
+
       if (this.currentScreen === "battle") {
         this.hideFloatingWatermelon();
         this.postBattle?.closeAutoWatermelon?.();
         this.battleArena?.classList.remove("is-settlement");
-        if (this.battleState?.active) {
-          this.battle.stopAutoBattle();
-          this.battle.abandon();
-        } else if (this.battle.autoBattle?.active) {
-          this.battle.stopAutoBattle();
-        }
+        this.resultOverlay?.classList.remove("is-ui-hidden");
       }
       this.navigate(targetScreen, { pushHistory: false });
     });
 
     // Mouse Navigation Buttons (Back: button 3, Forward: button 4)
     window.addEventListener("mouseup", (event) => {
-      if (event.button === 3) {
+      if (event.button === 3 || event.button === 4) {
+        if (this.currentScreen === "battle" && (this.battleState?.active || this.battle.autoBattle?.active)) {
+          event.preventDefault();
+          this.promptAbandonBattle("home");
+          return;
+        }
         event.preventDefault();
-        window.history.back();
-      } else if (event.button === 4) {
+        if (event.button === 3) window.history.back();
+        else window.history.forward();
+      }
+    });
+
+    // Prevent accidental page close or refresh during active battle without warning
+    window.addEventListener("beforeunload", (event) => {
+      if (this.currentScreen === "battle" && (this.battleState?.active || this.battle.autoBattle?.active)) {
         event.preventDefault();
-        window.history.forward();
+        event.returnValue = "";
+        return "";
       }
     });
 
@@ -1068,6 +1103,30 @@ export class AppView {
       return;
     }
 
+    if (event.target.closest("#btn-confirm-abandon")) {
+      this.confirmAbandonBattle();
+      return;
+    }
+
+    if (event.target.closest("#btn-cancel-abandon")) {
+      this.closeAbandonModal();
+      return;
+    }
+
+    if (event.target.closest("#btn-toggle-settlement-ui")) {
+      const isHidden = this.resultOverlay.classList.toggle("is-ui-hidden");
+      const btn = $("#btn-toggle-settlement-ui");
+      if (btn) {
+        const eyeOpen = btn.querySelector(".icon-eye-open");
+        const eyeClosed = btn.querySelector(".icon-eye-closed");
+        const label = btn.querySelector("#settlement-toggle-ui-text");
+        if (eyeOpen) eyeOpen.style.display = isHidden ? "none" : "";
+        if (eyeClosed) eyeClosed.style.display = isHidden ? "" : "none";
+        if (label) label.textContent = isHidden ? I18n.t("ui.showSettlementUi") : I18n.t("ui.hideSettlementUi");
+      }
+      return;
+    }
+
     if (event.target.closest("#watermelon-strike")) {
       this.postBattle.strike();
       return;
@@ -1168,6 +1227,12 @@ export class AppView {
     if (typeof document !== "undefined") {
       document.documentElement.classList.add("has-physical-keyboard");
       if (document.body) document.body.classList.add("has-physical-keyboard");
+    }
+
+    const abandonModal = $("#battle-abandon-modal");
+    if (event.key === "Escape" && abandonModal && !abandonModal.hidden) {
+      this.closeAbandonModal();
+      return;
     }
 
     if (event.key === "Escape" && this.changelogModal && !this.changelogModal.hidden) {
@@ -1624,6 +1689,12 @@ export class AppView {
     $("#record-losses").textContent = state.records.losses;
     $("#record-stage").textContent = state.records.bestStage ? I18n.getLocalizedStage(STAGES.find(s => s.id === state.records.bestStage) || { chapter: "第 " + state.records.bestStage + " 章" }).chapter : "—";
     
+    const growthNavBtn = document.querySelector('.menu-command[data-nav="growth"]');
+    if (growthNavBtn) {
+      const hasPendingPoints = Boolean((state.profile?.skillPoints > 0) || (state.profile?.statPoints > 0));
+      growthNavBtn.classList.toggle("has-pending-points", hasPendingPoints);
+    }
+
     const isMusicMuted = Boolean(state.settings?.musicMuted);
     const isSfxMuted = Boolean(state.settings?.sfxMuted ?? state.settings?.muted);
 
@@ -2620,6 +2691,40 @@ export class AppView {
     this.changelogModal.setAttribute("aria-hidden", "true");
   }
 
+  promptAbandonBattle(targetScreen = "home") {
+    this.pendingAbandonTarget = targetScreen;
+    const modal = $("#battle-abandon-modal");
+    if (modal) {
+      modal.hidden = false;
+      modal.setAttribute("aria-hidden", "false");
+    }
+  }
+
+  closeAbandonModal() {
+    this.pendingAbandonTarget = null;
+    const modal = $("#battle-abandon-modal");
+    if (modal) {
+      modal.hidden = true;
+      modal.setAttribute("aria-hidden", "true");
+    }
+  }
+
+  confirmAbandonBattle() {
+    const target = this.pendingAbandonTarget || "home";
+    this.closeAbandonModal();
+    this.hideFloatingWatermelon();
+    this.postBattle?.closeAutoWatermelon?.();
+    this.battleArena?.classList.remove("is-settlement");
+    this.resultOverlay?.classList.remove("is-ui-hidden");
+    if (this.battleState?.active) {
+      this.battle.stopAutoBattle();
+      this.battle.abandon();
+    } else if (this.battle.autoBattle?.active) {
+      this.battle.stopAutoBattle();
+    }
+    this.navigate(target, { pushHistory: false });
+  }
+
   renderChangelog() {
     const listEl = $("#changelog-modal-list");
     if (!listEl) return;
@@ -2834,6 +2939,8 @@ export class AppView {
           battleMpPotionUsed: this.battle?.battleMpPotionUsed,
           battleHpRestored: this.battle?.battleHpRestored,
           battleMpRestored: this.battle?.battleMpRestored,
+          countdownRemainingMs: this.battle?.countdownDeadline ? Math.max(0, this.battle.countdownDeadline - performance.now()) : (state.countdown ? state.countdown * 1000 : null),
+          roundExpiresAt: this.battle?.countdownDeadline ? (Date.now() + Math.max(0, this.battle.countdownDeadline - performance.now())) : (state.countdown ? Date.now() + state.countdown * 1000 : null),
           recentDamageLog: this.recentDamageLog
         };
         window.localStorage?.setItem("koraku_active_battle_state", JSON.stringify(battleSnapshot));
@@ -3559,6 +3666,7 @@ export class AppView {
 
     floating.hidden = false;
     floating.setAttribute("aria-hidden", "false");
+    this.hudDragController?.applyPosition("watermelon");
     floating.classList.toggle("is-zoomed", Boolean(this.isWatermelonZoomed));
 
     const zoomBtn = $("#btn-toggle-watermelon-zoom");

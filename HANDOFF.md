@@ -2,10 +2,10 @@
 
 > 文件用途：AI 代理人與開發者快速上手、架構交接與開發合約指引  
 > 專案根目錄：`D:\game-dev\New-game-project-4`  
-> 當前版本：`v0.0.15`（顯示於首頁頁腳最左側 `0.0.15`，自最後一位遞增，每 100 個版本進一位：`0.0.100` -> `0.1.0`）  
+> 當前版本：`v0.0.17`（顯示於首頁頁腳最左側 `0.0.17`，自最後一位遞增，每 100 個版本進一位：`0.0.100` -> `0.1.0`）  
 > 最新更新日期：2026-09-02  
 > 基準規範：`OPENSPEC.md` 與 `AGENTS.md`  
-> 測試狀態：`npm test` 108/108 全部通過 (100% Pass)；RWD 2,286 跨引擎驗證全數通過，4K / Ultra-Wide 佈局校準完成
+> 測試狀態：`npm test` 119/119 全部通過 (100% Pass)；RWD 2,286 跨引擎驗證全數通過，四大戰鬥 HUD 拖曳擺放與非重疊生成佈局上線
 
 ---
 
@@ -14,7 +14,7 @@
 本專案為純原生（Vanilla ES Modules / HTML5 / CSS3 / Web Audio API）架構的日式 ACGN 猜拳 RPG 對決遊戲。無前端框架、無外部執行期套件相依，可直接於本機或透過 GitHub Pages / 自訂網域（`https://koraku.app/`）部署運行。
 
 ### 1.1 核心命令
-- **執行測試**：`npm test`（Node.js 原生測試執行器，101 項測試）
+- **執行測試**：`npm test`（Node.js 原生測試執行器，119 項測試）
 - **打包發布**：`npm run build` 或 `node scripts/build.mjs`（生成 `src/js/bundle.js`）
 - **產生 Excel 規格**：`npm run specs:excel`
 - **線上網址**：`https://koraku.app/`
@@ -47,6 +47,7 @@ src/
 │   │   └── SoundSystem.js      # Web Audio API 音效合成（拳擊、撫摸、勝利、失敗）
 │   ├── ui/
 │   │   ├── AppView.js          # DOM 渲染、畫面導航、紙娃娃、修練場、傷害日誌、浮動切西瓜
+│   │   ├── HUDDragController.js # 局內四大 HUD 自由拖曳、邊界約束、持久化與雙擊重設控制器
 │   │   └── DialogueController.js # AVG 逐字打字機台詞與角色說話跳動動態
 │   ├── main.js                 # 系統組裝與進入點
 │   └── bundle.js               # 打包產物

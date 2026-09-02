@@ -129,6 +129,15 @@ export function directionFromSwipe(dx, dy, minDistance = 24) {
   return null;
 }
 
+export function isUnmappedActionKey(key, code = null) {
+  const isModifier = ["Shift", "Control", "Alt", "Meta", "CapsLock", "Tab", "Escape", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12"].includes(key) ||
+                     (code && ["ShiftLeft", "ShiftRight", "ControlLeft", "ControlRight", "AltLeft", "AltRight", "MetaLeft", "MetaRight", "CapsLock", "Tab", "Escape"].includes(code));
+  if (isModifier) return false;
+  // If it's a valid direction key for any QTE mode (WASD, Arrows, Numpad, or Diagonals), it's not unmapped
+  if (directionFromKey(key, code)) return false;
+  return true;
+}
+
 export class QTEKeyboardInput {
   constructor(mapper = directionFromKey) {
     this.mapper = mapper;
@@ -137,7 +146,13 @@ export class QTEKeyboardInput {
 
   keyDown(key, expectedDirection, repeat = false, code = null) {
     const direction = this.mapper(key, code);
-    if (!direction) return { handled: false, direction: null };
+    if (!direction) {
+      if (isUnmappedActionKey(key, code) && !repeat) {
+        this.held.clear();
+        return { handled: true, direction: "invalid" };
+      }
+      return { handled: false, direction: null };
+    }
 
     if (isDiagonalDirection(direction)) {
       if (repeat && direction !== expectedDirection) {

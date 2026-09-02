@@ -18,6 +18,7 @@ const modulesInOrder = [
   "src/js/systems/BattleSystem.js",
   "src/js/systems/PostBattleSystem.js",
   "src/js/systems/SoundSystem.js",
+  "src/js/ui/HUDDragController.js",
   "src/js/ui/DialogueController.js",
   "src/js/ui/AppView.js",
   "src/js/main.js"

@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.0.15";
+export const APP_VERSION = "0.0.17";
 
 export const DOJO_CONFIG = Object.freeze({
   defaultHp: 10000,

@@ -4,7 +4,7 @@
   "use strict";
 
 // --- src/js/config/gameConfig.js ---
-const APP_VERSION = "0.0.15";
+const APP_VERSION = "0.0.17";
 
 const DOJO_CONFIG = Object.freeze({
   defaultHp: 10000,
@@ -508,6 +508,72 @@ const DEFAULT_LOCALE = "en";
 const LOCALE_STORAGE_KEY = "koraku-rps-locale";
 
 const CHANGELOG_DATA = [
+  {
+    version: "0.0.17",
+    date: "2026-09-02",
+    tag: "Battle HUD Drag-and-Drop & Non-Overlapping Spawn Layout",
+    changes: {
+      "zh-Hant": [
+        "【局內四大 HUD 自由拖曳擺放】戰鬥紀錄、回合倒數看板、自動刷關控制條、自動刷關切西瓜累計卡片全面支援滑鼠與觸控自由拖曳擺放。",
+        "【無衝突預設生成佈局】重構各介面初始生成座標，自動刷關切西瓜卡片預設停靠於戰鬥紀錄下方，根除生成重疊遮擋問題。",
+        "【視窗邊界約束與防誤觸】拖曳範圍嚴格限制於可視區域內（防拖出螢幕），設定 4px 移動門檻防止點擊按鈕誤觸拖曳。",
+        "【座標記憶與雙擊重設】自訂座標自動儲存於 localStorage 跨對局持久化保持，雙擊標題列/手柄即可一鍵重設回預設位置。"
+      ],
+      "zh-Hans": [
+        "【局内四大 HUD 自由拖曳摆放】战斗记录、回合倒数看板、自动刷关控制条、自动刷关切西瓜累计卡片全面支持鼠标与触控自由拖曳摆放。",
+        "【无冲突默认生成布局】重构各界面初始生成坐标，自动刷关切西瓜卡片默认停靠于战斗记录下方，根除生成重叠遮挡问题。",
+        "【视窗边界约束与防误触】拖曳范围严格限制于可视区域内（防拖出屏幕），设定 4px 移动门槛防止点击按钮误触拖曳。",
+        "【坐标记忆与双击重设】自定义坐标自动保存于 localStorage 跨对局持久化保持，双击标题栏/手柄即可一键重设回默认位置。"
+      ],
+      "en": [
+        "【Draggable Battle HUD Widgets】Battle Damage Log, Round Oracle, Auto-Battle Bar, and Auto-Watermelon Widget are now freely draggable across desktop and mobile screens.",
+        "【Non-Overlapping Default Spawn Layout】Redesigned default spawn coordinates so the floating watermelon widget spawns below the battle damage log, permanently preventing overlaps.",
+        "【Viewport Bounds Clamping & Click Guards】Keeps widgets safely within visible screen boundaries and enforces a 4px drag threshold to prevent accidental clicks.",
+        "【Position Persistence & Double-Click Reset】Custom positions are saved in localStorage across battles and page reloads; double-clicking any drag handle instantly resets it to default."
+      ],
+      "ja": [
+        "【戦闘HUDの自由ドラッグ配置】戦闘ダメージログ、ラウンド神託、自動周回バー、自動スイカ割りウィジェットがマウスおよびタッチ操作で自由にドラッグ配置可能に。",
+        "【非干渉デフォルト生成レイアウト】初期生成座標を刷新し、スイカ割りカードがダメージログの下部に整列生成されることで、重なりによる視認性低下を根絶。",
+        "【画面境界クランプ＆誤タップ防止】ウィジェットが画面外に出ないよう安全境界を維持し、4pxの移動しきい値によりボタン操作の誤ドラッグを防止。",
+        "【座標永続化＆ダブルクリック初期化】カスタム位置をlocalStorageに保存し対戦を跨いで維持。ヘッダーのダブルクリックで即座に初期位置へ復元可能。"
+      ]
+    }
+  },
+  {
+    version: "0.0.16",
+    date: "2026-09-02",
+    tag: "QTE Input Precision, Standee Appreciation Mode & Battle Navigation Guards",
+    changes: {
+      "zh-Hant": [
+        "【能力成長未分配點數淺藍光暈】當角色升等持有剩餘能力或技能點數時，首頁「能力成長」按鈕邊緣呈現優雅的淺藍色呼吸外發光提示。",
+        "【結算與切西瓜立繪全景欣賞開關】結算畫面新增「欣賞立繪」開關，可一鍵隱藏卡片與半透明遮罩，以 100% 原始色彩與亮度全景展示小樂立繪與泳裝差分。",
+        "【對戰局內防誤觸離場確認彈窗】攔截瀏覽器上一頁、滑鼠側鍵（上下頁）與頁面關閉事件，彈出和風確認視窗，防止意外退出損失進度與獎勵。",
+        "【戰鬥回合倒數時間戳持久化】修復刷新網頁 (F5) 回合倒數秒數重置的問題，以絕對時間戳精確繼承剩餘秒數，杜絕刷新漏洞。",
+        "【QTE 實體鍵位解析與嚴格錯誤判定】優先採用 event.code 物理鍵位解析，徹底消除 Windows 輸入法組字與 Shift 鍵卡頓；非方向鍵（如 F/Space/J 等）嚴格判定為失誤並扣除容錯次數。"
+      ],
+      "zh-Hans": [
+        "【能力成长未分配点数浅蓝光晕】当角色升等持有剩余能力或技能点数时，首页“能力成长”按钮边缘呈现优雅的浅蓝色呼吸外发光提示。",
+        "【结算与切西瓜立绘全景欣赏开关】结算画面新增“欣赏立绘”开关，可一键隐藏卡片与半透明遮罩，以 100% 原始色彩与亮度全景展示小乐立绘与泳装差分。",
+        "【对战局内防误触离场确认弹窗】拦截浏览器上一页、鼠标侧键（上下页）与页面关闭事件，弹出和风确认弹窗，防止意外退出损失进度与奖励。",
+        "【战斗回合倒数时间戳持久化】修复刷新网页 (F5) 回合倒数秒数重置的问题，以绝对时间戳精确继承剩余秒数，杜绝刷新漏洞。",
+        "【QTE 实体键位解析与严格错误判定】优先采用 event.code 物理键位解析，彻底消除 Windows 输入法组字与 Shift 键卡顿；非方向键（如 F/Space/J 等）严格判定为失误并扣除容错次数。"
+      ],
+      "en": [
+        "【Growth Button Pending Points Cyan Glow】When unallocated stat or skill points are available upon leveling up, the Home 'Growth' button illuminates with a soft cyan pulsing glow.",
+        "【Settlement Standee Appreciation Mode】Added a 'View Standee' toggle button to victory and watermelon screens, instantly hiding UI cards and dark masks to display Little Raku in full brightness.",
+        "【In-Battle Navigation & Accidental Exit Guards】Intercepts browser back/forward history, mouse side buttons, and page unload with a shrine-themed confirmation dialog to prevent accidental progress loss.",
+        "【Battle Countdown Timestamp Persistence】Fixed an issue where refreshing the page (F5) would reset round timers; remaining seconds are now preserved across reloads with absolute timestamps.",
+        "【QTE Physical Code Mapping & Strict Error Detection】Directly binds event.code to eliminate Windows IME composition and Shift lag; unmapped action keys (e.g. F, Space, J) are strictly penalized as strikes."
+      ],
+      "ja": [
+        "【能力成長未割り当てポイント水色発光】レベルアップ時に未使用のステータス・スキルポイントがある場合、ホーム画面の「能力成長」ボタンが水色の呼吸発光で通知します。",
+        "【リザルト立ち絵鑑賞モード】勝利およびスイカ割り画面に「立ち絵鑑賞」切り替えボタンを新設。UIカードと半透明マスクを非表示にし、小楽の立ち絵・水着差分を100%の明るさで表示可能に。",
+        "【対局離脱防止確認モーダル】ブラウザの戻る/進む、マウスサイドボタン、ページ更新を検知し、進行状況と報酬の損失を防ぐ和風確認モーダルを実装。",
+        "【戦闘カウントダウンタイムスタンプ永続化】ページ更新(F5)でラウンド残り秒数がリセットされる不具合を修正し、絶対タイムスタンプで正確に残り時間を継承。",
+        "【QTE物理キー解析＆無効キー厳格判定】event.codeによる直接判定を導入し、Windows日本語入力(IME)やShiftキーによる引っ掛かりを解消。方向以外の無効キー入力も即座にエラーとして判定。"
+      ]
+    }
+  },
   {
     version: "0.0.15",
     date: "2026-09-02",
@@ -1352,6 +1418,13 @@ const DICTIONARY = {
       pauseModalDesc: "戰鬥與 QTE 計時已完全暫停。您可以隨時繼續對局，或放棄本場戰鬥返回大廳。",
       btnResumeBattle: "繼續戰鬥",
       btnAbandonBattle: "放棄對局 (返回大廳)",
+      abandonBattleModalTitle: "⚠️ 離開對局確認",
+      abandonBattleModalDesc: "確定要離開對戰嗎？離開將會失去當前戰鬥進度與未結算的獎勵！",
+      btnConfirmAbandon: "確定離開",
+      btnCancelAbandon: "繼續戰鬥",
+      toggleSettlementUi: "欣賞立繪",
+      hideSettlementUi: "欣賞立繪",
+      showSettlementUi: "顯示介面",
       selectLanguage: "切換語系",
       homeRecordsTitle: "戦績と獲得リソース統計",
       homeRecordsDesc: "小楽との対決履歴、手動勝敗、自動周回実績、累計獲得リソースの記録。",
@@ -1916,6 +1989,13 @@ const DICTIONARY = {
       pauseModalDesc: "战斗与 QTE 计时已完全暂停。您可以随时继续对局，或放弃本场战斗返回大厅。",
       btnResumeBattle: "继续战斗",
       btnAbandonBattle: "放弃对局 (返回大厅)",
+      abandonBattleModalTitle: "⚠️ 离开对局确认",
+      abandonBattleModalDesc: "确定要离开对战吗？离开将会失去当前战斗进度与未结算的奖励！",
+      btnConfirmAbandon: "确定离开",
+      btnCancelAbandon: "继续战斗",
+      toggleSettlementUi: "欣赏立绘",
+      hideSettlementUi: "欣赏立绘",
+      showSettlementUi: "显示界面",
       selectLanguage: "切换语言",
     },
     hands: {
@@ -2427,6 +2507,13 @@ const DICTIONARY = {
       pauseModalDesc: "Battle and QTE timers are paused. You can resume at any time or abandon the battle to return home.",
       btnResumeBattle: "Resume Battle",
       btnAbandonBattle: "Abandon Battle (Return Home)",
+      abandonBattleModalTitle: "⚠️ Leave Battle Confirmation",
+      abandonBattleModalDesc: "Are you sure you want to leave? Current battle progress and uncollected rewards will be lost!",
+      btnConfirmAbandon: "Leave Battle",
+      btnCancelAbandon: "Continue",
+      toggleSettlementUi: "View Standee",
+      hideSettlementUi: "View Standee",
+      showSettlementUi: "Show UI",
       selectLanguage: "Language",
     },
     hands: {
@@ -2939,6 +3026,13 @@ const DICTIONARY = {
       pauseModalDesc: "バトルとQTEタイマーが停止中です。いつでも対局を再開、または対局を破棄して戻ることができます。",
       btnResumeBattle: "対戦再開",
       btnAbandonBattle: "対局破棄 (ロビーへ戻る)",
+      abandonBattleModalTitle: "⚠️ 対戦離脱の確認",
+      abandonBattleModalDesc: "対戦を離脱しますか？現在の進行状況と未精算の報酬は破棄されます。",
+      btnConfirmAbandon: "離脱する",
+      btnCancelAbandon: "戦闘を続ける",
+      toggleSettlementUi: "立ち絵鑑賞",
+      hideSettlementUi: "立ち絵鑑賞",
+      showSettlementUi: "UIを表示",
       selectLanguage: "言語切替"
     },
     hands: {
@@ -3785,6 +3879,15 @@ function directionFromSwipe(dx, dy, minDistance = 24) {
   return null;
 }
 
+function isUnmappedActionKey(key, code = null) {
+  const isModifier = ["Shift", "Control", "Alt", "Meta", "CapsLock", "Tab", "Escape", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12"].includes(key) ||
+                     (code && ["ShiftLeft", "ShiftRight", "ControlLeft", "ControlRight", "AltLeft", "AltRight", "MetaLeft", "MetaRight", "CapsLock", "Tab", "Escape"].includes(code));
+  if (isModifier) return false;
+  // If it's a valid direction key for any QTE mode (WASD, Arrows, Numpad, or Diagonals), it's not unmapped
+  if (directionFromKey(key, code)) return false;
+  return true;
+}
+
 class QTEKeyboardInput {
   constructor(mapper = directionFromKey) {
     this.mapper = mapper;
@@ -3793,7 +3896,13 @@ class QTEKeyboardInput {
 
   keyDown(key, expectedDirection, repeat = false, code = null) {
     const direction = this.mapper(key, code);
-    if (!direction) return { handled: false, direction: null };
+    if (!direction) {
+      if (isUnmappedActionKey(key, code) && !repeat) {
+        this.held.clear();
+        return { handled: true, direction: "invalid" };
+      }
+      return { handled: false, direction: null };
+    }
 
     if (isDiagonalDirection(direction)) {
       if (repeat && direction !== expectedDirection) {
@@ -5413,13 +5522,23 @@ class BattleSystem {
     const totalEnemyHp = enemies.reduce((sum, e) => sum + (e.alive ? e.hp : 0), 0);
     const totalEnemyMaxHp = enemies.reduce((sum, e) => sum + e.maxHp, 0);
 
-    const currentRound = Math.max(0, Number(savedState.round || 1) - 1);
+    const roundNumber = Math.max(1, Number(savedState.round || 1));
+    const currentRound = Math.max(0, roundNumber - 1);
+    
+    let remainingCountdownMs = null;
+    if (savedState.roundExpiresAt) {
+      remainingCountdownMs = Math.max(200, savedState.roundExpiresAt - Date.now());
+    } else if (typeof savedState.countdownRemainingMs === "number" && savedState.countdownRemainingMs > 0) {
+      remainingCountdownMs = Math.max(200, savedState.countdownRemainingMs);
+    } else if (typeof savedState.countdown === "number" && savedState.countdown > 0) {
+      remainingCountdownMs = Math.max(200, savedState.countdown * 1000);
+    }
 
     this.state = {
       active: true,
       stage,
       phase: "countdown",
-      round: currentRound,
+      round: remainingCountdownMs ? roundNumber : currentRound,
       playerHp: Math.min(stats.maxHp, Math.max(1, Number(savedState.playerHp ?? stats.maxHp))),
       playerMaxHp: stats.maxHp,
       playerMp: Math.min(stats.maxMp, Math.max(0, Number(savedState.playerMp ?? stats.maxMp))),
@@ -5434,7 +5553,7 @@ class BattleSystem {
       selectedHands: savedState.selectedHands || { left: "rock", right: "rock" },
       opponentHand: null,
       enemyWinningEmoji: null,
-      countdown: stage.roundSeconds || BATTLE_RULES.roundSeconds,
+      countdown: remainingCountdownMs ? Math.ceil(remainingCountdownMs / 1000) : (stage.roundSeconds || BATTLE_RULES.roundSeconds),
       reactionRemaining: 0,
       morphUsed: false,
       morphActive: false,
@@ -5445,7 +5564,7 @@ class BattleSystem {
     };
 
     this.emitState();
-    this.scheduleRound();
+    this.scheduleRound(remainingCountdownMs);
     return true;
   }
 
@@ -5593,10 +5712,14 @@ class BattleSystem {
     this.bus.emit("dialogue", { speaker: speaker || I18n.t("dialogue.speakerKohaku"), text });
   }
 
-  scheduleRound() {
+  scheduleRound(customMs = null) {
     if (!this.state?.active) return;
-    const roundSeconds = this.state.stage.roundSeconds || BATTLE_RULES.roundSeconds;
-    this.state.round += 1;
+    const defaultRoundSeconds = this.state.stage.roundSeconds || BATTLE_RULES.roundSeconds;
+    const totalDurationMs = customMs ? customMs : defaultRoundSeconds * 1000;
+    const roundSeconds = Math.ceil(totalDurationMs / 1000);
+    if (!customMs) {
+      this.state.round += 1;
+    }
     this.state.phase = "countdown";
     this.state.opponentHand = null;
     this.state.enemyWinningEmoji = null;
@@ -5606,7 +5729,7 @@ class BattleSystem {
     this.state.morphActive = false;
     this.state.lastChant = null;
     this.state.isPaused = false;
-    this.countdownDeadline = performance.now() + roundSeconds * 1000;
+    this.countdownDeadline = performance.now() + totalDurationMs;
     this.emitState();
 
     this.countdownId = this.timers.interval(() => {
@@ -7709,6 +7832,390 @@ class SoundSystem {
   }
 }
 
+// --- src/js/ui/HUDDragController.js ---
+/**
+ * HUDDragController.js
+ * 戰鬥局內 HUD 自由拖曳管理控制器
+ * 支援四大元件自由拖曳、安全邊界約束、localStorage 座標持久化與雙擊重設。
+ */
+
+const HUD_STORAGE_KEY = "koraku_hud_positions_v1";
+const DRAG_THRESHOLD_PX = 4;
+const BOUNDS_MARGIN_PX = 8;
+
+class HUDDragController {
+  /**
+   * @param {Object} options
+   * @param {HTMLElement|Document} [options.root]
+   * @param {Storage} [options.storage]
+   */
+  constructor({ root = null, storage = null } = {}) {
+    this.root = root || (typeof document !== "undefined" ? document : null);
+    this.storage = storage || (typeof window !== "undefined" ? window.localStorage : null);
+    this.widgets = new Map();
+    this.activeDrag = null;
+    this.lastTapTime = 0;
+    this.lastTapId = null;
+    this.suppressClick = false;
+
+    this.onPointerMove = this.onPointerMove.bind(this);
+    this.onPointerUp = this.onPointerUp.bind(this);
+    this.onPointerCancel = this.onPointerCancel.bind(this);
+    this.onWindowResize = this.onWindowResize.bind(this);
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("pointermove", this.onPointerMove, { passive: false });
+      window.addEventListener("pointerup", this.onPointerUp, { passive: false });
+      window.addEventListener("pointercancel", this.onPointerCancel, { passive: false });
+      window.addEventListener("resize", this.onWindowResize, { passive: true });
+    }
+  }
+
+  /**
+   * 註冊可拖曳的 HUD 元件
+   * @param {string} id
+   * @param {HTMLElement|string} elementOrSelector
+   * @param {Object} [options]
+   * @param {string} [options.handleSelector] - 指定拖曳手柄選擇器（若無則全元件可拖曳）
+   */
+  register(id, elementOrSelector, { handleSelector = null } = {}) {
+    const element = typeof elementOrSelector === "string" 
+      ? this.root.querySelector(elementOrSelector) 
+      : elementOrSelector;
+
+    if (!element) return;
+
+    const pointerDownHandler = (e) => this.handlePointerDown(e, id);
+    element.addEventListener("pointerdown", pointerDownHandler);
+
+    this.widgets.set(id, {
+      id,
+      element,
+      handleSelector,
+      pointerDownHandler
+    });
+
+    // 嘗試套用已儲存之座標
+    this.applyPosition(id);
+  }
+
+  /**
+   * 取消註冊
+   * @param {string} id
+   */
+  unregister(id) {
+    const widget = this.widgets.get(id);
+    if (!widget) return;
+
+    if (widget.element && widget.pointerDownHandler) {
+      widget.element.removeEventListener("pointerdown", widget.pointerDownHandler);
+    }
+    this.widgets.delete(id);
+  }
+
+  /**
+   * 指針按下事件
+   */
+  handlePointerDown(e, id) {
+    // 僅響應主要按鍵（滑鼠左鍵或觸控）
+    if (e.button !== undefined && e.button !== 0) return;
+
+    const widget = this.widgets.get(id);
+    if (!widget || !widget.element) return;
+
+    // 排除互動元素（按鈕、輸入框、連結、關閉鈕等）
+    const target = e.target;
+    if (
+      target.closest("button") ||
+      target.closest("input") ||
+      target.closest("select") ||
+      target.closest("textarea") ||
+      target.closest("a") ||
+      target.closest(".modal-close-btn") ||
+      target.closest(".floating-close-btn") ||
+      target.closest(".floating-zoom-btn") ||
+      target.closest(".btn-toggle-autobattle")
+    ) {
+      return;
+    }
+
+    // 若指定了手柄選擇器，點擊處必須在手柄內
+    if (widget.handleSelector && !target.closest(widget.handleSelector)) {
+      return;
+    }
+
+    // 雙擊 / 雙點擊判定（350ms 內連續點擊同一元件即重設回預設位置）
+    const now = Date.now();
+    if (this.lastTapId === id && now - this.lastTapTime < 350) {
+      this.resetPosition(id);
+      this.lastTapTime = 0;
+      this.lastTapId = null;
+      return;
+    }
+    this.lastTapTime = now;
+    this.lastTapId = id;
+
+    const rect = widget.element.getBoundingClientRect();
+    const parent = widget.element.offsetParent || document.body;
+    const parentRect = parent.getBoundingClientRect();
+
+    // 元素當前相對於其 offsetParent 的 left/top
+    const elemLeft = rect.left - parentRect.left;
+    const elemTop = rect.top - parentRect.top;
+
+    this.activeDrag = {
+      id,
+      pointerId: e.pointerId,
+      startX: e.clientX,
+      startY: e.clientY,
+      elemStartX: elemLeft,
+      elemStartY: elemTop,
+      offsetX: e.clientX - rect.left,
+      offsetY: e.clientY - rect.top,
+      element: widget.element,
+      width: rect.width,
+      height: rect.height,
+      parentRect,
+      isDragging: false
+    };
+
+    if (typeof widget.element.setPointerCapture === "function") {
+      try {
+        widget.element.setPointerCapture(e.pointerId);
+      } catch (_) {}
+    }
+  }
+
+  /**
+   * 指針移動事件
+   */
+  onPointerMove(e) {
+    if (!this.activeDrag || this.activeDrag.pointerId !== e.pointerId) return;
+
+    const drag = this.activeDrag;
+    const dx = e.clientX - drag.startX;
+    const dy = e.clientY - drag.startY;
+
+    if (!drag.isDragging && Math.hypot(dx, dy) > DRAG_THRESHOLD_PX) {
+      drag.isDragging = true;
+      this.suppressClick = true;
+      drag.element.classList.add("is-dragging");
+    }
+
+    if (drag.isDragging) {
+      e.preventDefault();
+
+      const viewportWidth = (typeof window !== "undefined" ? window.innerWidth : 1920);
+      const viewportHeight = (typeof window !== "undefined" ? window.innerHeight : 1080);
+
+      // 目標視窗座標
+      const targetScreenLeft = e.clientX - drag.offsetX;
+      const targetScreenTop = e.clientY - drag.offsetY;
+
+      // 安全夾取於視窗可見區域
+      const minLeft = BOUNDS_MARGIN_PX;
+      const maxLeft = Math.max(minLeft, viewportWidth - drag.width - BOUNDS_MARGIN_PX);
+      const minTop = BOUNDS_MARGIN_PX;
+      const maxTop = Math.max(minTop, viewportHeight - drag.height - BOUNDS_MARGIN_PX);
+
+      const clampedLeft = Math.max(minLeft, Math.min(maxLeft, targetScreenLeft));
+      const clampedTop = Math.max(minTop, Math.min(maxTop, targetScreenTop));
+
+      // 轉換為相對於 offsetParent 的座標
+      const finalLeft = clampedLeft - drag.parentRect.left;
+      const finalTop = clampedTop - drag.parentRect.top;
+
+      drag.element.style.left = `${finalLeft}px`;
+      drag.element.style.top = `${finalTop}px`;
+      drag.element.style.right = "auto";
+      drag.element.style.bottom = "auto";
+      drag.element.style.transform = "none";
+    }
+  }
+
+  /**
+   * 指針抬起事件
+   */
+  onPointerUp(e) {
+    if (!this.activeDrag || this.activeDrag.pointerId !== e.pointerId) return;
+
+    const drag = this.activeDrag;
+    if (drag.isDragging) {
+      drag.element.classList.remove("is-dragging");
+
+      // 儲存當前座標
+      const left = parseFloat(drag.element.style.left);
+      const top = parseFloat(drag.element.style.top);
+      if (!isNaN(left) && !isNaN(top)) {
+        this.savePosition(drag.id, { left, top });
+      }
+
+      // 短暫攔截 click 事件避免誤觸內部按鈕
+      if (typeof window !== "undefined") {
+        const preventClickCapture = (evt) => {
+          evt.stopPropagation();
+          evt.preventDefault();
+          window.removeEventListener("click", preventClickCapture, true);
+        };
+        window.addEventListener("click", preventClickCapture, true);
+        setTimeout(() => {
+          window.removeEventListener("click", preventClickCapture, true);
+          this.suppressClick = false;
+        }, 80);
+      }
+    }
+
+    if (typeof drag.element.releasePointerCapture === "function") {
+      try {
+        drag.element.releasePointerCapture(e.pointerId);
+      } catch (_) {}
+    }
+
+    this.activeDrag = null;
+  }
+
+  /**
+   * 指針取消事件
+   */
+  onPointerCancel(e) {
+    this.onPointerUp(e);
+  }
+
+  /**
+   * 載入已儲存之座標
+   * @returns {Object}
+   */
+  loadPositions() {
+    if (!this.storage) return {};
+    try {
+      const raw = this.storage.getItem(HUD_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch (_) {
+      return {};
+    }
+  }
+
+  /**
+   * 儲存特定元件之座標
+   * @param {string} id
+   * @param {{left: number, top: number}} pos
+   */
+  savePosition(id, pos) {
+    if (!this.storage) return;
+    try {
+      const all = this.loadPositions();
+      all[id] = { left: Math.round(pos.left), top: Math.round(pos.top) };
+      this.storage.setItem(HUD_STORAGE_KEY, JSON.stringify(all));
+    } catch (_) {}
+  }
+
+  /**
+   * 套用特定元件之已存座標
+   * @param {string} id
+   */
+  applyPosition(id) {
+    const widget = this.widgets.get(id);
+    if (!widget || !widget.element) return;
+
+    const all = this.loadPositions();
+    const pos = all[id];
+    if (!pos || typeof pos.left !== "number" || typeof pos.top !== "number") return;
+
+    const viewportWidth = (typeof window !== "undefined" ? window.innerWidth : 1920);
+    const viewportHeight = (typeof window !== "undefined" ? window.innerHeight : 1080);
+    const rect = widget.element.getBoundingClientRect();
+    const width = rect.width || 180;
+    const height = rect.height || 100;
+
+    const minLeft = BOUNDS_MARGIN_PX;
+    const maxLeft = Math.max(minLeft, viewportWidth - width - BOUNDS_MARGIN_PX);
+    const minTop = BOUNDS_MARGIN_PX;
+    const maxTop = Math.max(minTop, viewportHeight - height - BOUNDS_MARGIN_PX);
+
+    const safeLeft = Math.max(minLeft, Math.min(maxLeft, pos.left));
+    const safeTop = Math.max(minTop, Math.min(maxTop, pos.top));
+
+    widget.element.style.left = `${safeLeft}px`;
+    widget.element.style.top = `${safeTop}px`;
+    widget.element.style.right = "auto";
+    widget.element.style.bottom = "auto";
+    widget.element.style.transform = "none";
+  }
+
+  /**
+   * 套用所有已註冊元件之已存座標
+   */
+  applyAllPositions() {
+    for (const id of this.widgets.keys()) {
+      this.applyPosition(id);
+    }
+  }
+
+  /**
+   * 重設特定元件至原廠預設座標
+   * @param {string} id
+   */
+  resetPosition(id) {
+    const widget = this.widgets.get(id);
+    if (!widget || !widget.element) return;
+
+    widget.element.style.left = "";
+    widget.element.style.top = "";
+    widget.element.style.right = "";
+    widget.element.style.bottom = "";
+    widget.element.style.transform = "";
+
+    if (this.storage) {
+      try {
+        const all = this.loadPositions();
+        delete all[id];
+        this.storage.setItem(HUD_STORAGE_KEY, JSON.stringify(all));
+      } catch (_) {}
+    }
+  }
+
+  /**
+   * 重設所有元件
+   */
+  resetAllPositions() {
+    for (const id of this.widgets.keys()) {
+      this.resetPosition(id);
+    }
+    if (this.storage) {
+      try {
+        this.storage.removeItem(HUD_STORAGE_KEY);
+      } catch (_) {}
+    }
+  }
+
+  /**
+   * 視窗大小改變時重新安全校驗
+   */
+  onWindowResize() {
+    const all = this.loadPositions();
+    for (const [id, widget] of this.widgets.entries()) {
+      if (all[id] && widget.element && widget.element.style.left) {
+        this.applyPosition(id);
+      }
+    }
+  }
+
+  /**
+   * 清理並移除全域監聽器
+   */
+  destroy() {
+    if (typeof window !== "undefined") {
+      window.removeEventListener("pointermove", this.onPointerMove);
+      window.removeEventListener("pointerup", this.onPointerUp);
+      window.removeEventListener("pointercancel", this.onPointerCancel);
+      window.removeEventListener("resize", this.onWindowResize);
+    }
+    for (const id of this.widgets.keys()) {
+      this.unregister(id);
+    }
+  }
+}
+
 // --- src/js/ui/DialogueController.js ---
 class DialogueController {
   constructor(bus) {
@@ -7896,6 +8403,7 @@ class AppView {
 
     if (this.battleDamageLog) {
       this.battleDamageLog.addEventListener("click", () => {
+        if (this.hudDragController?.suppressClick) return;
         this.battleLogTier = (this.battleLogTier % 3) + 1;
         this.updateDamageLogDisplay();
       });
@@ -7906,6 +8414,24 @@ class AppView {
           this.updateDamageLogDisplay();
         }
       });
+    }
+
+    this.hudDragController = new HUDDragController({
+      root: document,
+      storage: (typeof window !== "undefined" ? window.localStorage : null)
+    });
+    if (this.battleDamageLog) {
+      this.hudDragController.register("damageLog", this.battleDamageLog, { handleSelector: ".damage-log-header" });
+    }
+    if (this.roundOracle) {
+      this.hudDragController.register("roundOracle", this.roundOracle);
+    }
+    const autoBattleBanner = $("#auto-battle-hud-banner");
+    if (autoBattleBanner) {
+      this.hudDragController.register("autobattleBar", autoBattleBanner);
+    }
+    if (this.floatingWatermelon) {
+      this.hudDragController.register("watermelon", this.floatingWatermelon, { handleSelector: ".floating-watermelon-header" });
     }
   }
 
@@ -8227,28 +8753,43 @@ class AppView {
       const targetScreen = event.state?.screen || (window.location.hash ? window.location.hash.replace(/^#/, "") : "home");
       if (this.currentScreen === targetScreen) return;
 
+      if (this.currentScreen === "battle" && (this.battleState?.active || this.battle.autoBattle?.active)) {
+        if (typeof window !== "undefined" && window.history) {
+          window.history.pushState({ screen: "battle" }, "", "#battle");
+        }
+        this.promptAbandonBattle(targetScreen);
+        return;
+      }
+
       if (this.currentScreen === "battle") {
         this.hideFloatingWatermelon();
         this.postBattle?.closeAutoWatermelon?.();
         this.battleArena?.classList.remove("is-settlement");
-        if (this.battleState?.active) {
-          this.battle.stopAutoBattle();
-          this.battle.abandon();
-        } else if (this.battle.autoBattle?.active) {
-          this.battle.stopAutoBattle();
-        }
+        this.resultOverlay?.classList.remove("is-ui-hidden");
       }
       this.navigate(targetScreen, { pushHistory: false });
     });
 
     // Mouse Navigation Buttons (Back: button 3, Forward: button 4)
     window.addEventListener("mouseup", (event) => {
-      if (event.button === 3) {
+      if (event.button === 3 || event.button === 4) {
+        if (this.currentScreen === "battle" && (this.battleState?.active || this.battle.autoBattle?.active)) {
+          event.preventDefault();
+          this.promptAbandonBattle("home");
+          return;
+        }
         event.preventDefault();
-        window.history.back();
-      } else if (event.button === 4) {
+        if (event.button === 3) window.history.back();
+        else window.history.forward();
+      }
+    });
+
+    // Prevent accidental page close or refresh during active battle without warning
+    window.addEventListener("beforeunload", (event) => {
+      if (this.currentScreen === "battle" && (this.battleState?.active || this.battle.autoBattle?.active)) {
         event.preventDefault();
-        window.history.forward();
+        event.returnValue = "";
+        return "";
       }
     });
 
@@ -8816,6 +9357,30 @@ class AppView {
       return;
     }
 
+    if (event.target.closest("#btn-confirm-abandon")) {
+      this.confirmAbandonBattle();
+      return;
+    }
+
+    if (event.target.closest("#btn-cancel-abandon")) {
+      this.closeAbandonModal();
+      return;
+    }
+
+    if (event.target.closest("#btn-toggle-settlement-ui")) {
+      const isHidden = this.resultOverlay.classList.toggle("is-ui-hidden");
+      const btn = $("#btn-toggle-settlement-ui");
+      if (btn) {
+        const eyeOpen = btn.querySelector(".icon-eye-open");
+        const eyeClosed = btn.querySelector(".icon-eye-closed");
+        const label = btn.querySelector("#settlement-toggle-ui-text");
+        if (eyeOpen) eyeOpen.style.display = isHidden ? "none" : "";
+        if (eyeClosed) eyeClosed.style.display = isHidden ? "" : "none";
+        if (label) label.textContent = isHidden ? I18n.t("ui.showSettlementUi") : I18n.t("ui.hideSettlementUi");
+      }
+      return;
+    }
+
     if (event.target.closest("#watermelon-strike")) {
       this.postBattle.strike();
       return;
@@ -8916,6 +9481,12 @@ class AppView {
     if (typeof document !== "undefined") {
       document.documentElement.classList.add("has-physical-keyboard");
       if (document.body) document.body.classList.add("has-physical-keyboard");
+    }
+
+    const abandonModal = $("#battle-abandon-modal");
+    if (event.key === "Escape" && abandonModal && !abandonModal.hidden) {
+      this.closeAbandonModal();
+      return;
     }
 
     if (event.key === "Escape" && this.changelogModal && !this.changelogModal.hidden) {
@@ -9372,6 +9943,12 @@ class AppView {
     $("#record-losses").textContent = state.records.losses;
     $("#record-stage").textContent = state.records.bestStage ? I18n.getLocalizedStage(STAGES.find(s => s.id === state.records.bestStage) || { chapter: "第 " + state.records.bestStage + " 章" }).chapter : "—";
     
+    const growthNavBtn = document.querySelector('.menu-command[data-nav="growth"]');
+    if (growthNavBtn) {
+      const hasPendingPoints = Boolean((state.profile?.skillPoints > 0) || (state.profile?.statPoints > 0));
+      growthNavBtn.classList.toggle("has-pending-points", hasPendingPoints);
+    }
+
     const isMusicMuted = Boolean(state.settings?.musicMuted);
     const isSfxMuted = Boolean(state.settings?.sfxMuted ?? state.settings?.muted);
 
@@ -10368,6 +10945,40 @@ class AppView {
     this.changelogModal.setAttribute("aria-hidden", "true");
   }
 
+  promptAbandonBattle(targetScreen = "home") {
+    this.pendingAbandonTarget = targetScreen;
+    const modal = $("#battle-abandon-modal");
+    if (modal) {
+      modal.hidden = false;
+      modal.setAttribute("aria-hidden", "false");
+    }
+  }
+
+  closeAbandonModal() {
+    this.pendingAbandonTarget = null;
+    const modal = $("#battle-abandon-modal");
+    if (modal) {
+      modal.hidden = true;
+      modal.setAttribute("aria-hidden", "true");
+    }
+  }
+
+  confirmAbandonBattle() {
+    const target = this.pendingAbandonTarget || "home";
+    this.closeAbandonModal();
+    this.hideFloatingWatermelon();
+    this.postBattle?.closeAutoWatermelon?.();
+    this.battleArena?.classList.remove("is-settlement");
+    this.resultOverlay?.classList.remove("is-ui-hidden");
+    if (this.battleState?.active) {
+      this.battle.stopAutoBattle();
+      this.battle.abandon();
+    } else if (this.battle.autoBattle?.active) {
+      this.battle.stopAutoBattle();
+    }
+    this.navigate(target, { pushHistory: false });
+  }
+
   renderChangelog() {
     const listEl = $("#changelog-modal-list");
     if (!listEl) return;
@@ -10582,6 +11193,8 @@ class AppView {
           battleMpPotionUsed: this.battle?.battleMpPotionUsed,
           battleHpRestored: this.battle?.battleHpRestored,
           battleMpRestored: this.battle?.battleMpRestored,
+          countdownRemainingMs: this.battle?.countdownDeadline ? Math.max(0, this.battle.countdownDeadline - performance.now()) : (state.countdown ? state.countdown * 1000 : null),
+          roundExpiresAt: this.battle?.countdownDeadline ? (Date.now() + Math.max(0, this.battle.countdownDeadline - performance.now())) : (state.countdown ? Date.now() + state.countdown * 1000 : null),
           recentDamageLog: this.recentDamageLog
         };
         window.localStorage?.setItem("koraku_active_battle_state", JSON.stringify(battleSnapshot));
@@ -11307,6 +11920,7 @@ class AppView {
 
     floating.hidden = false;
     floating.setAttribute("aria-hidden", "false");
+    this.hudDragController?.applyPosition("watermelon");
     floating.classList.toggle("is-zoomed", Boolean(this.isWatermelonZoomed));
 
     const zoomBtn = $("#btn-toggle-watermelon-zoom");
@@ -11860,7 +12474,7 @@ new DialogueController(bus);
 const view = new AppView({ bus, store, battle, postBattle, sound });
 view.init();
 
-if (new URLSearchParams(window.location.search).has("debug")) {
+if (typeof window !== "undefined" && (new URLSearchParams(window.location.search).has("debug") || window.location.hash.includes("debug") || window.localStorage?.getItem("koraku_debug") === "true")) {
   window.__KORAKU_DEBUG__ = { bus, store, battle, postBattle, view };
   const panel = document.createElement("details");
   panel.className = "debug-panel";

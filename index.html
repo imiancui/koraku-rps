@@ -25,12 +25,12 @@
         } catch (_) {}
       })();
     </script>
-    <link rel="stylesheet" href="./src/styles/tokens.css?v=202609021905">
-    <link rel="stylesheet" href="./src/styles/base.css?v=202609021905">
-    <link rel="stylesheet" href="./src/styles/components.css?v=202609021905">
-    <link rel="stylesheet" href="./src/styles/screens.css?v=202609021905">
-    <link rel="stylesheet" href="./src/styles/animations.css?v=202609021905">
-    <link rel="stylesheet" href="./src/styles/responsive.css?v=202609021905">
+    <link rel="stylesheet" href="./src/styles/tokens.css?v=202609022020">
+    <link rel="stylesheet" href="./src/styles/base.css?v=202609022020">
+    <link rel="stylesheet" href="./src/styles/components.css?v=202609022020">
+    <link rel="stylesheet" href="./src/styles/screens.css?v=202609022020">
+    <link rel="stylesheet" href="./src/styles/animations.css?v=202609022020">
+    <link rel="stylesheet" href="./src/styles/responsive.css?v=202609022020">
   </head>
   <body>
     <div id="app" class="app-shell" data-screen="home">
@@ -152,7 +152,7 @@
               </button>
               <footer class="home-footer" aria-label="頁腳資訊">
                 <button type="button" class="footer-version-btn" id="footer-app-version-btn" title="查看更新日誌 (Changelog)" aria-label="查看更新日誌">
-                  <span class="footer-version" id="footer-app-version">0.0.15</span>
+                  <span class="footer-version" id="footer-app-version">0.0.17</span>
                 </button>
                 <span class="footer-plain-sep">/</span>
                 <a href="https://store.steampowered.com/app/1425000" target="_blank" rel="noopener noreferrer" class="footer-plain-link">Endless Alice</a>
@@ -782,7 +782,7 @@
               <output id="damage-number" class="damage-number" aria-live="polite"></output>
             </div>
 
-            <section class="round-oracle" aria-label="本回合狀態">
+            <section id="round-oracle" class="round-oracle" aria-label="本回合狀態">
               <span class="round-label">ROUND <b id="round-number">1</b></span>
               <div class="hand-versus">
                 <div id="player-hand-wrap-single">
@@ -1003,6 +1003,17 @@
             </section>
 
             <section id="result-overlay" class="result-overlay" aria-hidden="true">
+              <button id="btn-toggle-settlement-ui" class="settlement-toggle-ui-btn" type="button" title="欣賞立繪 (隱藏/顯示介面)" aria-label="欣賞立繪，隱藏或顯示結算介面">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-eye-open" aria-hidden="true">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-eye-closed" aria-hidden="true" style="display: none;">
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                  <line x1="1" y1="1" x2="23" y2="23"></line>
+                </svg>
+                <span id="settlement-toggle-ui-text" data-i18n="ui.toggleSettlementUi">欣賞立繪</span>
+              </button>
               <div class="result-card">
                 <p id="result-kicker" class="eyebrow">BATTLE COMPLETE</p>
                 <h2 id="result-title">勝負已分</h2>
@@ -1318,6 +1329,22 @@
         </div>
       </div>
 
+      <!-- Battle Abandon Intercept Confirmation Modal -->
+      <div id="battle-abandon-modal" class="modal-overlay abandon-modal-overlay" hidden aria-hidden="true">
+        <div class="modal-card pause-modal-card">
+          <header class="modal-header">
+            <h3><span data-i18n="ui.abandonBattleModalTitle">⚠️ 離開對局確認</span></h3>
+          </header>
+          <div class="pause-content">
+            <p class="pause-message" data-i18n="ui.abandonBattleModalDesc">確定要離開對戰嗎？離開將會失去當前戰鬥進度與未結算的獎勵！</p>
+            <div class="pause-actions">
+              <button type="button" class="button-primary pause-action-btn" id="btn-cancel-abandon">▶ <span data-i18n="ui.btnCancelAbandon">繼續戰鬥</span></button>
+              <button type="button" class="button-secondary pause-action-btn" id="btn-confirm-abandon">🏳️ <span data-i18n="ui.btnConfirmAbandon">確定離開</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Auto Battle Config Modal -->
       <div id="auto-battle-modal" class="modal-overlay" hidden aria-hidden="true">
         <div class="modal-card auto-battle-card">
@@ -1575,6 +1602,6 @@
       <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
     </div>
-    <script src="./src/js/bundle.js?v=202609021905"></script>
+    <script src="./src/js/bundle.js?v=202609022020"></script>
   </body>
 </html>

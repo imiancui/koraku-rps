@@ -287,13 +287,23 @@ export class BattleSystem {
     const totalEnemyHp = enemies.reduce((sum, e) => sum + (e.alive ? e.hp : 0), 0);
     const totalEnemyMaxHp = enemies.reduce((sum, e) => sum + e.maxHp, 0);
 
-    const currentRound = Math.max(0, Number(savedState.round || 1) - 1);
+    const roundNumber = Math.max(1, Number(savedState.round || 1));
+    const currentRound = Math.max(0, roundNumber - 1);
+    
+    let remainingCountdownMs = null;
+    if (savedState.roundExpiresAt) {
+      remainingCountdownMs = Math.max(200, savedState.roundExpiresAt - Date.now());
+    } else if (typeof savedState.countdownRemainingMs === "number" && savedState.countdownRemainingMs > 0) {
+      remainingCountdownMs = Math.max(200, savedState.countdownRemainingMs);
+    } else if (typeof savedState.countdown === "number" && savedState.countdown > 0) {
+      remainingCountdownMs = Math.max(200, savedState.countdown * 1000);
+    }
 
     this.state = {
       active: true,
       stage,
       phase: "countdown",
-      round: currentRound,
+      round: remainingCountdownMs ? roundNumber : currentRound,
       playerHp: Math.min(stats.maxHp, Math.max(1, Number(savedState.playerHp ?? stats.maxHp))),
       playerMaxHp: stats.maxHp,
       playerMp: Math.min(stats.maxMp, Math.max(0, Number(savedState.playerMp ?? stats.maxMp))),
@@ -308,7 +318,7 @@ export class BattleSystem {
       selectedHands: savedState.selectedHands || { left: "rock", right: "rock" },
       opponentHand: null,
       enemyWinningEmoji: null,
-      countdown: stage.roundSeconds || BATTLE_RULES.roundSeconds,
+      countdown: remainingCountdownMs ? Math.ceil(remainingCountdownMs / 1000) : (stage.roundSeconds || BATTLE_RULES.roundSeconds),
       reactionRemaining: 0,
       morphUsed: false,
       morphActive: false,
@@ -319,7 +329,7 @@ export class BattleSystem {
     };
 
     this.emitState();
-    this.scheduleRound();
+    this.scheduleRound(remainingCountdownMs);
     return true;
   }
 
@@ -467,10 +477,14 @@ export class BattleSystem {
     this.bus.emit("dialogue", { speaker: speaker || I18n.t("dialogue.speakerKohaku"), text });
   }
 
-  scheduleRound() {
+  scheduleRound(customMs = null) {
     if (!this.state?.active) return;
-    const roundSeconds = this.state.stage.roundSeconds || BATTLE_RULES.roundSeconds;
-    this.state.round += 1;
+    const defaultRoundSeconds = this.state.stage.roundSeconds || BATTLE_RULES.roundSeconds;
+    const totalDurationMs = customMs ? customMs : defaultRoundSeconds * 1000;
+    const roundSeconds = Math.ceil(totalDurationMs / 1000);
+    if (!customMs) {
+      this.state.round += 1;
+    }
     this.state.phase = "countdown";
     this.state.opponentHand = null;
     this.state.enemyWinningEmoji = null;
@@ -480,7 +494,7 @@ export class BattleSystem {
     this.state.morphActive = false;
     this.state.lastChant = null;
     this.state.isPaused = false;
-    this.countdownDeadline = performance.now() + roundSeconds * 1000;
+    this.countdownDeadline = performance.now() + totalDurationMs;
     this.emitState();
 
     this.countdownId = this.timers.interval(() => {

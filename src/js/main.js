@@ -22,7 +22,7 @@ new DialogueController(bus);
 const view = new AppView({ bus, store, battle, postBattle, sound });
 view.init();
 
-if (new URLSearchParams(window.location.search).has("debug")) {
+if (typeof window !== "undefined" && (new URLSearchParams(window.location.search).has("debug") || window.location.hash.includes("debug") || window.localStorage?.getItem("koraku_debug") === "true")) {
   window.__KORAKU_DEBUG__ = { bus, store, battle, postBattle, view };
   const panel = document.createElement("details");
   panel.className = "debug-panel";
