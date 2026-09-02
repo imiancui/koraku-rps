@@ -5,11 +5,17 @@
 
 import test from "node:test";
 import assert from "node:assert/strict";
+import fs from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
 import { EventBus } from "../../src/js/core/EventBus.js";
 import { GameStore } from "../../src/js/core/GameStore.js";
 import { BattleSystem } from "../../src/js/systems/BattleSystem.js";
 import { getRandomHand, compareHands, evaluateDualRps } from "../../src/js/systems/rpsRules.js";
 import { STAGES } from "../../src/js/config/gameConfig.js";
+import { Commands } from "../../src/js/kernel/protocol.js";
+import { JsonStorage } from "../../server/storage/JsonStorage.js";
+import { GameSession } from "../../server/core/GameSession.js";
 import {
   createSeededRandom,
   MemoryPersistence
@@ -236,3 +242,65 @@ test("Tier 4 - F6: 戰鬥重放日誌序列化與反序列化還原（JSON Repla
   assert.equal(parsed.commandLog.length, 3);
   assert.deepEqual(parsed.initialProfile, replayBundle.initialProfile);
 });
+
+test("Tier 4 - F6: GameSession 全迴路戰鬥重放（打完一場 -> saveBattleReplay -> getBattleReplay 讀回 -> dispatchCommand 重放 -> 結果一致）", async () => {
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "koraku-replay-test-"));
+  const storage = new JsonStorage({ dataDir: tmpDir });
+  await storage.init();
+
+  const accountId = "acc_replay_full_test";
+  const session = new GameSession({ accountId, storage });
+  await session.load();
+
+  // 1. GameSession 打完一場戰鬥
+  const startRes = await session.executeCommand({
+    cmdId: "replay_start_1",
+    command: Commands.BATTLE_START,
+    payload: { stageId: 1 }
+  });
+  assert.equal(startRes.ack, true);
+  const battleId = session.activeBattle.battleId;
+  const originalSeed = session.activeBattle.seed;
+
+  await session.executeCommand({
+    cmdId: "replay_hand_1",
+    command: Commands.BATTLE_SELECT_HAND,
+    payload: { hand: "rock" }
+  });
+
+  await session.executeCommand({
+    cmdId: "replay_abandon_1",
+    command: Commands.BATTLE_ABANDON
+  });
+
+  const originalState = session.battle.snapshot();
+
+  // 2. 從 JsonStorage 讀回重放包
+  const savedReplay = await storage.getBattleReplay(accountId, battleId);
+  assert.ok(savedReplay, "儲存層必須讀出戰鬥重放資料包");
+  assert.equal(savedReplay.battleId, battleId);
+  assert.equal(savedReplay.seed, originalSeed);
+  assert.ok(Array.isArray(savedReplay.commandLog), "重放包必須包含 commandLog");
+  assert.ok(savedReplay.commandLog.length > 0, "commandLog 必須非空");
+
+  // 3. 在全新的 BattleSystem 實例中注入相同 Seed 與 dispatchCommand 重放
+  const replayBus = new EventBus();
+  const replayStore = new GameStore(replayBus, new MemoryPersistence());
+  const replayRandom = createSeededRandom(savedReplay.seed);
+  const replayBattle = new BattleSystem(replayBus, replayStore, replayRandom, () => 1000);
+
+  replayBattle.start(savedReplay.stageId, { seed: savedReplay.seed });
+  for (const cmd of savedReplay.commandLog) {
+    replayBattle.dispatchCommand(cmd);
+  }
+
+  // 4. 斷言結果 100% 確定性一致
+  const replaySnapshot = replayBattle.snapshot();
+  assert.equal(replaySnapshot.phase, originalState.phase, "重放階段必須一致");
+  assert.equal(replaySnapshot.playerHp, originalState.playerHp, "玩家生命值必須一致");
+  assert.equal(replaySnapshot.round, originalState.round, "回合數必須一致");
+  assert.equal(replaySnapshot.commandLog.length, originalState.commandLog.length, "指令日誌長度必須一致");
+
+  await fs.rm(tmpDir, { recursive: true, force: true });
+});
+

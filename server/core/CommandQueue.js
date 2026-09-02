@@ -3,8 +3,22 @@
 export class CommandQueue {
   constructor(options = {}) {
     this.maxCachedCmdIds = options.maxCachedCmdIds || 500;
+    this.cacheTtlMs = options.cacheTtlMs || 5 * 60 * 1000; // 5 minutes TTL
     this._queues = new Map(); // accountId -> Promise chain
-    this._idempotencyCache = new Map(); // accountId -> Map(cmdId -> result)
+    this._idempotencyCache = new Map(); // accountId -> Map(cmdId -> { result, cachedAt })
+  }
+
+  _getCachedResult(accountCache, cmdId) {
+    if (!cmdId || !accountCache.has(cmdId)) return undefined;
+    const entry = accountCache.get(cmdId);
+    if (entry && typeof entry === "object" && "cachedAt" in entry && "result" in entry) {
+      if (Date.now() - entry.cachedAt > this.cacheTtlMs) {
+        accountCache.delete(cmdId);
+        return undefined;
+      }
+      return entry.result;
+    }
+    return entry;
   }
 
   /**
@@ -28,9 +42,9 @@ export class CommandQueue {
       this._idempotencyCache.set(accountId, accountCache);
     }
 
-    if (cmdId && accountCache.has(cmdId)) {
-      // Return cached idempotent result
-      return accountCache.get(cmdId);
+    const cachedEarly = this._getCachedResult(accountCache, cmdId);
+    if (cachedEarly !== undefined) {
+      return cachedEarly;
     }
 
     // Chain onto the account's existing queue
@@ -40,15 +54,30 @@ export class CommandQueue {
       .catch(() => {}) // Do not let previous failures break the queue chain
       .then(async () => {
         // Double check cache after waiting in queue
-        if (cmdId && accountCache.has(cmdId)) {
-          return accountCache.get(cmdId);
+        const cachedInQueue = this._getCachedResult(accountCache, cmdId);
+        if (cachedInQueue !== undefined) {
+          return cachedInQueue;
         }
 
         const result = await handler(envelope);
 
+        // Do not permanently cache transient / rate-limited / retryable rejections
+        const isTransient = result && result.ack === false && (
+          result.error === "RATE_LIMITED" ||
+          result.error === "INTERNAL_ERROR" ||
+          result.temporary === true ||
+          result.retryable === true
+        );
+
         // Cache successful or settled result
-        if (cmdId) {
-          accountCache.set(cmdId, result);
+        if (cmdId && !isTransient) {
+          const now = Date.now();
+          for (const [id, entry] of accountCache.entries()) {
+            if (now - entry.cachedAt > this.cacheTtlMs) {
+              accountCache.delete(id);
+            }
+          }
+          accountCache.set(cmdId, { result, cachedAt: now });
           if (accountCache.size > this.maxCachedCmdIds) {
             // Evict oldest entry
             const firstKey = accountCache.keys().next().value;

@@ -12,6 +12,7 @@ export class JsonStorage extends StorageAdapter {
     this.accountsDir = path.join(this.dataDir, "accounts");
     this.ledgersDir = path.join(this.dataDir, "ledgers");
     this.transfersDir = path.join(this.dataDir, "transfers");
+    this.replaysDir = path.join(this.dataDir, "replays");
     this._initialized = false;
   }
 
@@ -20,31 +21,53 @@ export class JsonStorage extends StorageAdapter {
     await fs.mkdir(this.accountsDir, { recursive: true });
     await fs.mkdir(this.ledgersDir, { recursive: true });
     await fs.mkdir(this.transfersDir, { recursive: true });
+    await fs.mkdir(this.replaysDir, { recursive: true });
     this._initialized = true;
   }
 
+  _sanitizeId(id) {
+    if (typeof id === "string" && /^[a-zA-Z0-9_-]+$/.test(id)) {
+      return id;
+    }
+    const clean = String(id || "").replace(/[^a-zA-Z0-9_-]/g, "_");
+    const hash = crypto.createHash("sha256").update(String(id || "")).digest("hex").slice(0, 12);
+    return `${clean}_${hash}`;
+  }
+
   _accountPath(accountId) {
-    const safeId = accountId.replace(/[^a-zA-Z0-9_-]/g, "");
+    const safeId = this._sanitizeId(accountId);
     return path.join(this.accountsDir, `${safeId}.json`);
   }
 
   _ledgerPath(accountId) {
-    const safeId = accountId.replace(/[^a-zA-Z0-9_-]/g, "");
+    const safeId = this._sanitizeId(accountId);
     return path.join(this.ledgersDir, `${safeId}.jsonl`);
   }
 
   _transferPath(code) {
-    const safeCode = code.replace(/[^a-zA-Z0-9_-]/g, "");
+    const safeCode = this._sanitizeId(code);
     return path.join(this.transfersDir, `${safeCode}.json`);
   }
 
+  _replayPath(accountId, battleId) {
+    const safeAccount = this._sanitizeId(accountId);
+    const safeBattle = this._sanitizeId(battleId);
+    return path.join(this.replaysDir, `${safeAccount}_${safeBattle}.json`);
+  }
+
   /**
-   * Atomic file write using a unique temporary file followed by rename
+   * Atomic file write using a unique temporary file, fsync, followed by rename
    */
   async _atomicWrite(targetPath, content) {
     await this.init();
     const tmpPath = `${targetPath}.${crypto.randomBytes(6).toString("hex")}.tmp`;
-    await fs.writeFile(tmpPath, content, "utf8");
+    const handle = await fs.open(tmpPath, "w");
+    try {
+      await handle.writeFile(content, "utf8");
+      await handle.sync();
+    } finally {
+      await handle.close();
+    }
     await fs.rename(tmpPath, targetPath);
   }
 
@@ -81,7 +104,30 @@ export class JsonStorage extends StorageAdapter {
       if (err.code !== "ENOENT") throw err;
     }
 
+    // GDPR Right to Erasure with Economic Integrity:
+    // Retain economic ledger for audit trail, but permanently anonymize accountId
+    // with irreversible HMAC-SHA256(accountId, serverSalt)
+    const salt = this.anonSalt || SERVER_CONFIG.anonSalt;
+    const anonId = "anon_" + crypto.createHmac("sha256", salt).update(accountId).digest("hex").slice(0, 24);
+
     try {
+      const content = await fs.readFile(ledgerFile, "utf8");
+      const lines = content.split("\n").filter(Boolean);
+      const anonymizedLines = lines.map((line) => {
+        try {
+          const parsed = JSON.parse(line);
+          if (parsed.accountId === accountId) {
+            parsed.accountId = anonId;
+            parsed.anonymizedAt = Date.now();
+          }
+          return JSON.stringify(parsed);
+        } catch {
+          return line;
+        }
+      });
+
+      const anonLedgerPath = this._ledgerPath(anonId);
+      await fs.appendFile(anonLedgerPath, anonymizedLines.join("\n") + "\n", "utf8");
       await fs.unlink(ledgerFile);
     } catch (err) {
       if (err.code !== "ENOENT") throw err;
@@ -201,6 +247,25 @@ export class JsonStorage extends StorageAdapter {
       accountData: account,
       economicLedger: ledger
     };
+  }
+
+  async saveBattleReplay(accountId, replayData) {
+    await this.init();
+    const filePath = this._replayPath(accountId, replayData.battleId);
+    await this._atomicWrite(filePath, JSON.stringify(replayData, null, 2));
+    return replayData;
+  }
+
+  async getBattleReplay(accountId, battleId) {
+    await this.init();
+    const filePath = this._replayPath(accountId, battleId);
+    try {
+      const raw = await fs.readFile(filePath, "utf8");
+      return JSON.parse(raw);
+    } catch (err) {
+      if (err.code === "ENOENT") return null;
+      throw err;
+    }
   }
 
   async listAllAccounts() {

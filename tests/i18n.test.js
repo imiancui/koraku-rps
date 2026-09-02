@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { I18n, I18nService, LOCALES, LOCALE_ORDER } from "../src/js/services/I18n.js";
+import { I18n, I18nService, LOCALES, LOCALE_ORDER, DICTIONARY } from "../src/js/services/I18n.js";
 import { STAGES, EQUIPMENT_ITEMS, SKILLS, ITEMS, GALLERY_ITEMS } from "../src/js/config/gameConfig.js";
 
 test("I18nService 預設語系與支援語系列表檢查", () => {
@@ -320,7 +320,41 @@ test("I18n 完整性檢查：所有 52 個系統與戰鬥提示/對話鍵在 4 �
     // Save
     "save.invalidCode",
     "save.corruptCode",
-    "save.imported"
+    "save.imported",
+    // Connection
+    "connection.connecting",
+    "connection.online",
+    "connection.offline",
+    "connection.reconnecting",
+    "connection.disconnected",
+    "connection.highLatency",
+    "connection.kickedByNewConnection",
+    "connection.disconnectCountdown",
+    "connection.bannerConnecting",
+    "connection.bannerOnline",
+    "connection.bannerOffline",
+    "connection.bannerReconnecting",
+    "connection.bannerDisconnected",
+    // BattleLog
+    "battleLog.rpsWin",
+    "battleLog.rpsLoss",
+    "battleLog.rpsDraw",
+    "battleLog.morphSuccess",
+    "battleLog.morphFailed",
+    "battleLog.qteCounterSuccess",
+    "battleLog.qteCounterFail",
+    "battleLog.momoProc",
+    "battleLog.momoDodged",
+    "battleLog.burnDamage",
+    "battleLog.reflectDamage",
+    "battleLog.thunderDamage",
+    "battleLog.frostFreeze",
+    "battleLog.shadowDodge",
+    "battleLog.mpRegen",
+    "battleLog.potionUsed",
+    "battleLog.roundTimeout",
+    "battleLog.battleDisconnectedSettled",
+    "battleLog.battlePauseCount"
   ];
 
   for (const locale of LOCALE_ORDER) {
@@ -333,11 +367,41 @@ test("I18n 完整性檢查：所有 52 個系統與戰鬥提示/對話鍵在 4 �
         damage: 10,
         hand: "Rock",
         slotName: "Weapon",
-        level: 5
+        level: 5,
+        seconds: 10,
+        remaining: 2,
+        amount: 20,
+        item: "Potion",
+        stat: "HP"
       });
       assert.ok(translated, `Key '${key}' is empty in locale '${locale}'`);
       assert.notEqual(translated, key, `Key '${key}' is untranslated/missing in locale '${locale}'`);
     }
+  }
+});
+
+test("四語系 key-set 結構等價：zh-Hant, zh-Hans, en, ja 鍵值集合完全一致", () => {
+  function getFlatKeys(obj, prefix = "") {
+    const keys = [];
+    for (const [k, v] of Object.entries(obj)) {
+      const full = prefix ? `${prefix}.${k}` : k;
+      if (v && typeof v === "object" && !Array.isArray(v)) {
+        keys.push(...getFlatKeys(v, full));
+      } else {
+        keys.push(full);
+      }
+    }
+    return keys;
+  }
+
+  const hantKeys = new Set(getFlatKeys(DICTIONARY["zh-Hant"]));
+  for (const locale of ["zh-Hans", "en", "ja"]) {
+    const locKeys = new Set(getFlatKeys(DICTIONARY[locale]));
+    const missing = [...hantKeys].filter((k) => !locKeys.has(k));
+    const extra = [...locKeys].filter((k) => !hantKeys.has(k));
+    assert.deepEqual(missing, [], `語系 '${locale}' 缺少以下鍵值: ${missing.join(", ")}`);
+    assert.deepEqual(extra, [], `語系 '${locale}' 包含多餘鍵值: ${extra.join(", ")}`);
+    assert.equal(locKeys.size, hantKeys.size, `語系 '${locale}' 鍵值總數 (${locKeys.size}) 與 zh-Hant (${hantKeys.size}) 不一致`);
   }
 });
 

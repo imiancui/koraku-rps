@@ -11,7 +11,7 @@ import {
   wasdDirectionFromKey
 } from "../systems/QTEInputSystem.js";
 import { HUDDragController } from "./HUDDragController.js";
-import { Commands, Events, ConnectionStates } from "../kernel/protocol.js";
+import { Commands, Events, ConnectionStates, ErrorCodes } from "../kernel/protocol.js";
 
 const $ = (selector) => document.querySelector(selector);
 const clampPercent = (value, max) => Math.max(0, Math.min(100, max ? (value / max) * 100 : 0));
@@ -96,94 +96,60 @@ export class AppView {
     this.bindEvents();
   }
 
+  isMutationLocked() {
+    const battle = this.client?.battle?.snapshot
+      ? this.client.battle.snapshot()
+      : (this.client?.battle?.state || (typeof this.battle?.snapshot === "function" ? this.battle.snapshot() : this.battle?.state));
+    if (!battle || !battle.active) {
+      return false;
+    }
+    const policy = (typeof this.client?.getServerConfig === "function" && this.client.getServerConfig()?.battleLockPolicy)
+      ? this.client.getServerConfig().battleLockPolicy
+      : "always"; // 離線模式或未通報時一律視為 always
+
+    if (policy === "never") {
+      return false;
+    }
+    if (policy === "always") {
+      return true;
+    }
+    if (policy === "countdown") {
+      const phase = battle.phase;
+      return phase === "reaction" || phase === "qte";
+    }
+    return true;
+  }
+
   async sendCommand(command, payload = {}) {
     if (this.client && typeof this.client.send === "function") {
       try {
         const res = await this.client.send(command, payload);
+        if (res?.errorCode === ErrorCodes.BATTLE_IN_PROGRESS_LOCKED || res?.error === ErrorCodes.BATTLE_IN_PROGRESS_LOCKED || res?.error === "BATTLE_IN_PROGRESS_LOCKED") {
+          this.showToast(I18n.t("battle.lockedDuringBattle"), "danger");
+        }
         return res;
       } catch (err) {
-        console.error(`[AppView] Command failed (${command}):`, err);
-        return { ok: false, error: err.message, message: err.message };
+        if (err?.code === ErrorCodes.BATTLE_IN_PROGRESS_LOCKED || err?.code === "BATTLE_IN_PROGRESS_LOCKED" || err?.message === "BATTLE_IN_PROGRESS_LOCKED" || err?.key === "battle.lockedDuringBattle") {
+          this.showToast(I18n.t("battle.lockedDuringBattle"), "danger");
+        } else {
+          console.error(`[AppView] Command failed (${command}):`, err);
+        }
+        return { ok: false, error: err.code || err.message, errorCode: err.code, key: err.key, message: err.message };
       }
     }
-    return this._executeLegacyFallback(command, payload);
-  }
-
-  _executeLegacyFallback(command, payload) {
-    switch (command) {
-      case Commands.BUY_ITEM:
-        return this.store?.buyItem ? this.store.buyItem(payload.itemId || payload.id) : { ok: false };
-      case Commands.BUY_EQUIPMENT:
-        return this.store?.buyEquipment ? this.store.buyEquipment(payload.typeId || payload.itemId) : { ok: false };
-      case Commands.EQUIP_ITEM:
-        return this.store?.equipItem ? this.store.equipItem(payload.uid || payload.typeId || payload.itemId) : { ok: false };
-      case Commands.UNEQUIP_ITEM:
-        return this.store?.unequipItem ? this.store.unequipItem(payload.slot) : { ok: false };
-      case Commands.ALLOCATE_STAT:
-        return this.store?.allocateStat ? this.store.allocateStat(payload.stat) : { ok: false };
-      case Commands.ALLOCATE_SKILL:
-        return this.store?.allocateSkill ? this.store.allocateSkill(payload.skill) : { ok: false };
-      case Commands.BATTLE_START:
-        return this.battle?.start ? { ok: this.battle.start(payload.stageId, payload.options) } : { ok: false };
-      case Commands.BATTLE_SELECT_HAND:
-        return this.battle?.selectHand ? { ok: this.battle.selectHand(payload.hand, payload.slot) } : { ok: false };
-      case Commands.BATTLE_SELECT_TARGET:
-        return this.battle?.selectTarget ? { ok: this.battle.selectTarget(payload.target) } : { ok: false };
-      case Commands.BATTLE_USE_MORPH:
-        return this.battle?.useMorph ? this.battle.useMorph() : { ok: false };
-      case Commands.BATTLE_USE_ITEM:
-        return this.battle?.useItem ? this.battle.useItem(payload.itemId) : { ok: false };
-      case Commands.BATTLE_INPUT_QTE:
-        return this.battle?.inputQte ? { ok: this.battle.inputQte(payload.direction, payload.slot) } : { ok: false };
-      case Commands.BATTLE_PAUSE:
-        return this.battle?.pause ? { ok: this.battle.pause() } : (this.battle?.togglePause ? { ok: this.battle.togglePause() } : { ok: false });
-      case Commands.BATTLE_RESUME:
-        return this.battle?.resume ? { ok: this.battle.resume() } : { ok: false };
-      case Commands.BATTLE_ABANDON:
-        return this.battle?.abandon ? { ok: this.battle.abandon() } : { ok: false };
-      case Commands.AUTO_BATTLE_START:
-        return this.battle?.startAutoBattle ? { ok: this.battle.startAutoBattle(payload.stageId, payload.rounds) } : { ok: false };
-      case Commands.AUTO_BATTLE_STOP:
-        return this.battle?.stopAutoBattle ? { ok: this.battle.stopAutoBattle() } : { ok: false };
-      case Commands.POST_BATTLE_REQUEST_SWIMSUIT:
-        return this.postBattle?.requestSwimsuit ? { ok: this.postBattle.requestSwimsuit() } : { ok: false };
-      case Commands.POST_BATTLE_START_WATERMELON:
-        return this.postBattle?.startWatermelon ? { ok: this.postBattle.startWatermelon() } : { ok: false };
-      case Commands.POST_BATTLE_STRIKE_WATERMELON:
-        return this.postBattle?.strike ? { ok: this.postBattle.strike() } : { ok: false };
-      case Commands.ACCOUNT_EXPORT_JSON:
-        return { ok: true, data: this.store?.snapshot ? this.store.snapshot() : {} };
-      case Commands.ACCOUNT_DELETE:
-        if (this.store?.reset) this.store.reset();
-        return { ok: true };
-      case Commands.ACCOUNT_ISSUE_TRANSFER_CODE:
-        return { ok: true, code: this.store?.exportSaveCode ? this.store.exportSaveCode() : "" };
-      case Commands.ACCOUNT_CLAIM_TRANSFER_CODE:
-        return this.store?.importSaveCode ? this.store.importSaveCode(payload.code) : { ok: false };
-      case Commands.CHEAT_SET_STATS:
-        return this.store?.cheatSetValues ? this.store.cheatSetValues(payload) : { ok: false };
-      case Commands.CHEAT_UNLOCK_ALL:
-        if (payload.gallery) return this.store?.cheatUnlockGallery ? this.store.cheatUnlockGallery() : { ok: false };
-        return this.store?.cheatUnlockAll ? this.store.cheatUnlockAll() : { ok: false };
-      case Commands.CHEAT_ADD_COINS:
-        if (this.store?.state) {
-          this.store.state.coins = (this.store.state.coins || 0) + (payload.amount || 1000);
-          this.store.commit("cheat-add-coins");
-          return { ok: true };
-        }
-        return { ok: false };
-      default:
-        return { ok: false };
-    }
+    throw new Error(`[AppView] sendCommand called without an active game client: ${command}`);
   }
 
   getStoreSnapshot() {
+    if (this.store && typeof this.store.snapshot === "function") {
+      return this.store.snapshot();
+    }
+    if (this.client?.store && typeof this.client.store.snapshot === "function") {
+      return this.client.store.snapshot();
+    }
     if (this.client && typeof this.client.getState === "function") {
       const st = this.client.getState();
       if (st && Object.keys(st).length > 0) return st;
-    }
-    if (this.store && typeof this.store.snapshot === "function") {
-      return this.store.snapshot();
     }
     return {
       profile: { level: 1, xp: 0, skillPoints: 0, allocations: { hp: 0, mp: 0, damage: 0 }, skills: { momo: 0, dualHand: 0 } },
@@ -267,8 +233,8 @@ export class AppView {
         } else {
           this._stopDisconnectCountdown();
           bannerText.textContent = state === ConnectionStates.RECONNECTING
-            ? (I18n.t("connection.bannerReconnecting") !== "connection.bannerReconnecting" ? I18n.t("connection.bannerReconnecting") : "與伺服器連線中斷，正在嘗試重新建立連線...")
-            : (I18n.t("connection.bannerDisconnected") !== "connection.bannerDisconnected" ? I18n.t("connection.bannerDisconnected") : "已與伺服器斷開連線，請檢查網路狀態。");
+            ? I18n.t("connection.bannerReconnecting")
+            : I18n.t("connection.bannerDisconnected");
         }
       } else {
         this._stopDisconnectCountdown();
@@ -327,19 +293,9 @@ export class AppView {
   }
 
   getConnectionLabel(state) {
-    const locale = I18n.getLocale ? I18n.getLocale() : "zh-Hant";
     const key = `connection.${state}`;
     const translated = I18n.t(key);
-    if (translated && translated !== key) return translated;
-
-    const labels = {
-      online: { "zh-Hant": "線上連線", "zh-Hans": "在线连接", "en": "Online", "ja": "オンライン" },
-      connecting: { "zh-Hant": "連線中...", "zh-Hans": "连接中...", "en": "Connecting...", "ja": "接続中..." },
-      reconnecting: { "zh-Hant": "重連中...", "zh-Hans": "重连中...", "en": "Reconnecting...", "ja": "再接続中..." },
-      offline: { "zh-Hant": "離線沙盒", "zh-Hans": "离线沙盒", "en": "Offline", "ja": "オフライン" },
-      disconnected: { "zh-Hant": "已斷線", "zh-Hans": "已断开", "en": "Disconnected", "ja": "切断" }
-    };
-    return labels[state]?.[locale] || labels[state]?.["zh-Hant"] || state;
+    return (translated && translated !== key) ? translated : state;
   }
 
   cacheElements() {
@@ -803,8 +759,25 @@ export class AppView {
       this.client.on("connection:ping", (ping) => this.handlePingUpdate(ping));
     }
 
-    this.bus.on("store:changed", ({ state }) => this.renderStore(state));
+    this.bus.on("store:changed", (data) => this.renderStore(data?.state || data));
     this.bus.on("battle:state", (state) => this.renderBattle(state));
+    const handleMutationLockUpdate = () => {
+      if (this.currentScreen === "growth") {
+        this.renderGrowth(this.getStoreSnapshot());
+      } else if (this.currentScreen === "equipment") {
+        this.renderEquipment(this.getStoreSnapshot());
+      } else if (this.currentScreen === "shop") {
+        this.renderShop(this.getStoreSnapshot());
+      }
+    };
+    this.bus.on("battle:state", handleMutationLockUpdate);
+    this.bus.on("battle:ended", handleMutationLockUpdate);
+    this.bus.on("battle:start", handleMutationLockUpdate);
+    if (this.client && typeof this.client.on === "function") {
+      this.client.on("battle:state", handleMutationLockUpdate);
+      this.client.on("battle:ended", handleMutationLockUpdate);
+      this.client.on("battle:start", handleMutationLockUpdate);
+    }
     this.bus.on("battle:countdown-beat", (beat) => this.handleCountdownBeat(beat));
     this.bus.on("battle:effect", (effect) => this.playBattleEffect(effect));
     this.bus.on("battle:damage-logged", (event) => this.addDamageLogEntry(event));
@@ -1095,6 +1068,10 @@ export class AppView {
 
     const bagItemBtn = event.target.closest("[data-equip-bag-item]");
     if (bagItemBtn) {
+      if (this.isMutationLocked()) {
+        this.showToast(I18n.t("battle.lockedDuringBattle"), "danger");
+        return;
+      }
       const result = await this.sendCommand(Commands.EQUIP_ITEM, { uid: bagItemBtn.dataset.equipBagItem, typeId: bagItemBtn.dataset.equipBagItem });
       if (result?.message) this.showToast(result.message, result.ok ? "success" : "danger");
       if (result?.ok) this.bus.emit("sound", { name: "skill" });
@@ -1104,6 +1081,10 @@ export class AppView {
 
     const shopEquipBtn = event.target.closest("[data-shop-equip]");
     if (shopEquipBtn) {
+      if (this.isMutationLocked()) {
+        this.showToast(I18n.t("battle.lockedDuringBattle"), "danger");
+        return;
+      }
       const itemId = shopEquipBtn.dataset.shopEquip;
       const result = await this.sendCommand(Commands.EQUIP_ITEM, { uid: itemId, typeId: itemId });
       if (result?.message) this.showToast(result.message, result.ok ? "success" : "danger");
@@ -1114,6 +1095,10 @@ export class AppView {
 
     const shopUnequipBtn = event.target.closest("[data-shop-unequip]");
     if (shopUnequipBtn) {
+      if (this.isMutationLocked()) {
+        this.showToast(I18n.t("battle.lockedDuringBattle"), "danger");
+        return;
+      }
       const slotKey = shopUnequipBtn.dataset.shopUnequip;
       const result = await this.sendCommand(Commands.UNEQUIP_ITEM, { slot: slotKey });
       if (result?.message) this.showToast(result.message, result.ok ? "success" : "danger");
@@ -1140,6 +1125,10 @@ export class AppView {
 
     const slotBtn = event.target.closest("[data-slot]");
     if (slotBtn) {
+      if (this.isMutationLocked()) {
+        this.showToast(I18n.t("battle.lockedDuringBattle"), "danger");
+        return;
+      }
       const slotKey = slotBtn.dataset.slot;
       const snapshot = this.getStoreSnapshot();
       if (snapshot.equipment?.[slotKey]) {
@@ -1244,6 +1233,10 @@ export class AppView {
 
     const allocateButton = event.target.closest("[data-allocate]");
     if (allocateButton) {
+      if (this.isMutationLocked()) {
+        this.showToast(I18n.t("battle.lockedDuringBattle"), "danger");
+        return;
+      }
       const result = await this.sendCommand(Commands.ALLOCATE_STAT, { stat: allocateButton.dataset.allocate });
       if (result?.message) this.showToast(result.message, result.ok ? "success" : "danger");
       if (result?.ok) this.bus.emit("sound", { name: "skill" });
@@ -1252,6 +1245,10 @@ export class AppView {
 
     const allocateSkillButton = event.target.closest("[data-allocate-skill]");
     if (allocateSkillButton) {
+      if (this.isMutationLocked()) {
+        this.showToast(I18n.t("battle.lockedDuringBattle"), "danger");
+        return;
+      }
       const result = await this.sendCommand(Commands.ALLOCATE_SKILL, { skill: allocateSkillButton.dataset.allocateSkill });
       if (result?.message) this.showToast(result.message, result.ok ? "success" : "danger");
       if (result?.ok) this.bus.emit("sound", { name: "skill" });
@@ -1866,14 +1863,19 @@ export class AppView {
     await this.sendCommand(Commands.AUTO_BATTLE_START, { stageId, rounds });
   }
 
-  renderStore(state) {
-    $("#header-level").textContent = String(state.profile.level).padStart(2, "0");
-    $("#header-coins").textContent = state.coins.toLocaleString("zh-TW");
-    $("#header-xp").textContent = state.profile.xp + " / " + state.xpToNext;
-    $("#header-xp-fill").style.width = clampPercent(state.profile.xp, state.xpToNext) + "%";
-    $("#record-wins").textContent = state.records.wins;
-    $("#record-losses").textContent = state.records.losses;
-    $("#record-stage").textContent = state.records.bestStage ? I18n.getLocalizedStage(STAGES.find(s => s.id === state.records.bestStage) || { chapter: "第 " + state.records.bestStage + " 章" }).chapter : "—";
+  renderStore(rawState) {
+    const fallback = this.getStoreSnapshot();
+    const state = rawState?.profile ? rawState : (rawState?.state?.profile ? rawState.state : fallback) || fallback;
+    if (!state?.profile) return;
+    $("#header-level").textContent = String(state.profile.level || 1).padStart(2, "0");
+    $("#header-coins").textContent = (state.coins || 0).toLocaleString("zh-TW");
+    $("#header-xp").textContent = (state.profile.xp || 0) + " / " + (state.xpToNext || 0);
+    $("#header-xp-fill").style.width = clampPercent(state.profile.xp || 0, state.xpToNext || 1) + "%";
+    if (state.records) {
+      $("#record-wins").textContent = state.records.wins || 0;
+      $("#record-losses").textContent = state.records.losses || 0;
+      $("#record-stage").textContent = state.records.bestStage ? I18n.getLocalizedStage(STAGES.find(s => s.id === state.records.bestStage) || { chapter: "第 " + state.records.bestStage + " 章" }).chapter : "—";
+    }
     
     const growthNavBtn = document.querySelector('.menu-command[data-nav="growth"]');
     if (growthNavBtn) {
@@ -2393,7 +2395,8 @@ export class AppView {
 
           let equipBtn = "";
           if (bagCount > 0) {
-            equipBtn = '<button type="button" class="button-secondary shop-btn-equip" data-shop-equip="' + item.id + '" style="padding:6px 12px;font-size:12px;">' + I18n.t("ui.equipNow") + '</button>';
+            const equipDisabled = this.isMutationLocked() ? ' disabled aria-disabled="true"' : "";
+            equipBtn = '<button type="button" class="button-secondary shop-btn-equip" data-shop-equip="' + item.id + '"' + equipDisabled + ' style="padding:6px 12px;font-size:12px;">' + I18n.t("ui.equipNow") + '</button>';
           }
 
           const buyBtn = '<button type="button" class="button-primary" data-buy-equip="' + item.id + '"' +
@@ -2419,18 +2422,36 @@ export class AppView {
     shopGrid.innerHTML = html;
   }
 
-  renderGrowth(state) {
-    $("#skill-points").textContent = state.profile.skillPoints;
-    $("#growth-level").textContent = "Lv. " + state.profile.level;
-    $("#growth-xp-text").textContent = state.profile.xp + " / " + state.xpToNext + " EXP";
-    $("#growth-xp-fill").style.width = clampPercent(state.profile.xp, state.xpToNext) + "%";
+  renderGrowth(rawState) {
+    const isLocked = this.isMutationLocked();
+    const growthLockNotice = $("#growth-lock-notice");
+    if (growthLockNotice) {
+      if (isLocked) {
+        growthLockNotice.textContent = I18n.t("battle.lockedDuringBattle");
+        growthLockNotice.style.display = "block";
+      } else {
+        growthLockNotice.textContent = "";
+        growthLockNotice.style.display = "none";
+      }
+    }
+
+    const fallback = this.getStoreSnapshot();
+    const state = rawState?.playerStats ? rawState : (rawState?.state?.playerStats ? rawState.state : fallback) || fallback;
+    const profile = state?.profile || fallback?.profile || { level: 1, xp: 0, skillPoints: 0, skills: {} };
+    const playerStats = state?.playerStats || fallback?.playerStats || { damage: 15, maxHp: 100, maxMp: 50 };
+    const xpToNext = state?.xpToNext || fallback?.xpToNext || 100;
+
+    $("#skill-points").textContent = profile.skillPoints || 0;
+    $("#growth-level").textContent = "Lv. " + (profile.level || 1);
+    $("#growth-xp-text").textContent = (profile.xp || 0) + " / " + xpToNext + " EXP";
+    $("#growth-xp-fill").style.width = clampPercent(profile.xp || 0, xpToNext) + "%";
     const cards = [
       {
         id: "damage",
         label: I18n.t("ui.statDamage"),
         code: "DAMAGE",
         glyph: "刃",
-        value: state.playerStats.damage,
+        value: playerStats.damage,
         unit: I18n.t("ui.unitDamage"),
         text: I18n.t("ui.statAllocDmgDesc")
       },
@@ -2439,7 +2460,7 @@ export class AppView {
         label: I18n.t("ui.statHp"),
         code: "VITALITY",
         glyph: "命",
-        value: state.playerStats.maxHp,
+        value: playerStats.maxHp,
         unit: I18n.t("ui.unitMaxHp"),
         text: I18n.t("ui.statAllocHpDesc")
       },
@@ -2448,14 +2469,14 @@ export class AppView {
         label: I18n.t("ui.statMp"),
         code: "ARCANA",
         glyph: "魔",
-        value: state.playerStats.maxMp,
+        value: playerStats.maxMp,
         unit: I18n.t("ui.unitMaxMp"),
         text: I18n.t("ui.statAllocMpDesc")
       }
     ];
     if (this.growthGrid) {
       this.growthGrid.innerHTML = cards.map((card) => {
-        const disabled = state.profile.skillPoints <= 0 ? " disabled" : "";
+        const disabled = (state.profile.skillPoints <= 0 || isLocked) ? ' disabled aria-disabled="true"' : "";
         return '<article class="growth-card" data-glyph="' + card.glyph + '"><small>' + card.code +
           "</small><h3>" + card.label + '</h3><div class="stat-value"><b>' + card.value +
           "</b><span>" + card.unit + "</span></div><p>" + card.text +
@@ -2493,6 +2514,9 @@ export class AppView {
           buttonText = I18n.t("ui.skillCostSp", { sp: skill.costPerLevel }) + " (" + I18n.t("ui.insufficientCoins") + ")";
           disabled = true;
         }
+        if (isLocked) {
+          disabled = true;
+        }
 
         const nextTip = (!isMax && unlocked && skill.id === "momo")
           ? '<br><small style="color:var(--azure-bright);display:block;margin-top:4px;">' + I18n.t("ui.nextLevelRate", { chance: nextChance }) + '</small>'
@@ -2504,7 +2528,7 @@ export class AppView {
           statValueHtml +
           "<p>" + locSkill.description + nextTip + "</p>" +
           '<button type="button" class="button-primary" data-allocate-skill="' + skill.id + '"' +
-          (disabled ? " disabled" : "") + ">" + buttonText + "</button></article>";
+          (disabled ? ' disabled aria-disabled="true"' : "") + ">" + buttonText + "</button></article>";
       }).join("");
     }
   }
@@ -2672,10 +2696,24 @@ export class AppView {
     });
   }
 
-  renderEquipment(state) {
+  renderEquipment(rawState) {
+    const fallback = this.getStoreSnapshot();
+    const state = rawState?.playerStats ? rawState : (rawState?.state?.playerStats ? rawState.state : fallback) || fallback;
     if (!state) return;
+    const isLocked = this.isMutationLocked();
     const equip = state.equipment || {};
     const bag = state.inventoryEquipment || [];
+
+    const lockNotice = $("#equipment-lock-notice");
+    if (lockNotice) {
+      if (isLocked) {
+        lockNotice.textContent = I18n.t("battle.lockedDuringBattle");
+        lockNotice.style.display = "block";
+      } else {
+        lockNotice.textContent = "";
+        lockNotice.style.display = "none";
+      }
+    }
 
     if ($("#equipment-coins")) $("#equipment-coins").textContent = state.coins.toLocaleString("zh-TW");
     if ($("#bag-count")) $("#bag-count").textContent = `${bag.length} ` + I18n.t("ui.menuEquipment");
@@ -2692,6 +2730,14 @@ export class AppView {
       const locSlot = I18n.getLocalizedEquipmentSlot(slotKey);
 
       document.querySelectorAll(`[data-slot="${slotKey}"]`).forEach((slotBtn) => {
+        if (isLocked) {
+          slotBtn.setAttribute("disabled", "true");
+          slotBtn.setAttribute("aria-disabled", "true");
+        } else {
+          slotBtn.removeAttribute("disabled");
+          slotBtn.removeAttribute("aria-disabled");
+        }
+
         const box = slotBtn.querySelector(".slot-box");
         const tag = slotBtn.querySelector(".slot-tag");
         if (tag && locSlot) tag.textContent = locSlot.label;
@@ -2722,10 +2768,11 @@ export class AppView {
 
     // Render stats summary for both panels
     const theoDps = this.getTheoreticalDPS(state);
+    const stats = state.playerStats || fallback?.playerStats || { maxHp: 100, maxMp: 50, damage: 15 };
     const statsHtml = `
-      <span>${I18n.t("ui.statHp")}<b>${state.playerStats.maxHp}</b></span>
-      <span>${I18n.t("ui.statMp")}<b>${state.playerStats.maxMp}</b></span>
-      <span>${I18n.t("ui.statDamage")}<b>${state.playerStats.damage}</b></span>
+      <span>${I18n.t("ui.statHp")}<b>${stats.maxHp}</b></span>
+      <span>${I18n.t("ui.statMp")}<b>${stats.maxMp}</b></span>
+      <span>${I18n.t("ui.statDamage")}<b>${stats.damage}</b></span>
       <span style="color:var(--gold-bright);">${I18n.t("ui.theoreticalDps")}<b>${theoDps}</b></span>
     `;
     if ($("#paperdoll-stats-summary")) $("#paperdoll-stats-summary").innerHTML = statsHtml;
@@ -2743,7 +2790,7 @@ export class AppView {
           const locItem = I18n.getLocalizedEquipment(item);
           const locSlot = I18n.getLocalizedEquipmentSlot(item.slotType);
           return `
-            <button type="button" class="bag-item-card rarity-${item.rarity}" data-equip-bag-item="${item.id}" data-equip-tooltip-id="${item.id}">
+            <button type="button" class="bag-item-card rarity-${item.rarity}" data-equip-bag-item="${item.id}" data-equip-tooltip-id="${item.id}"${isLocked ? ' disabled aria-disabled="true"' : ""}>
               <span class="bag-item-icon">${item.icon}</span>
               <div class="bag-item-info">
                 <span class="bag-item-name">${locItem.name}</span>
@@ -4218,15 +4265,23 @@ export class AppView {
     }
   }
 
-  startDojoSandbox({ isDual, customHp, customDamage }) {
+  async startDojoSandbox({ isDual, customHp, customDamage }) {
     this.hideFloatingWatermelon();
     this.postBattle?.closeAutoWatermelon?.();
-    this.battle.stopAutoBattle();
+    if (this.battle?.stopAutoBattle) {
+      this.battle.stopAutoBattle();
+    } else {
+      await this.sendCommand(Commands.AUTO_BATTLE_STOP);
+    }
     try {
       window.localStorage?.removeItem("koraku_active_postbattle");
       sessionStorage.removeItem("koraku_active_postbattle");
     } catch (_) {}
-    if (!this.battle.start(null, { isDojo: true, isDual, customHp, customDamage, isSilhouette: true })) return;
+    const startRes = await this.sendCommand(Commands.BATTLE_START, {
+      stageId: null,
+      options: { isDojo: true, isDual, customHp, customDamage, isSilhouette: true }
+    });
+    if (!startRes || startRes.ok === false) return;
     this.postState = null;
     this.battleArena?.classList.remove("is-settlement");
     this.resultOverlay.classList.remove("is-active");

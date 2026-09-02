@@ -110,7 +110,7 @@ To eliminate packet-sniffing, DOM-peeking, or memory-inspection cheats:
     │                                                                   │
     │  ─── 1. BATTLE_START (stageId) ────────────────────────────────► │
     │                                                                   │ [Initializes Battle & Seed]
-    │  ◄── 2. BATTLE_STATE (round=1, phase="countdown", deadline) ──── │ [Generates handCommitDeadline]
+    │  ◄── 2. BATTLE_STATE (round=1, phase="countdown", deadline) ──── │ [Generates revealDeadline]
     │                                                                   │
     │  ─── 3. BATTLE_SELECT_HAND (hand="rock", cmdId) ───────────────► │
     │                                                                   │ [Verifies T_arrive <= deadline + 150ms]
@@ -126,7 +126,7 @@ To eliminate packet-sniffing, DOM-peeking, or memory-inspection cheats:
 
 #### 3.2.2 Zero-Leakage Guarantee
 - **No Early Emission**: The server NEVER emits `opponentHand` or `opponentHands` during the `countdown` phase.
-- **Strict Deadline Enforcement**: Any `battle.selectHand` arriving after $T_{\text{handCommitDeadline}} + 150\text{ms}$ is rejected with `ErrorCodes.SECRET_COMMITMENT_EXPIRED`. If no hand was committed before deadline, the server auto-commits the player's previously selected hand or defaults to `"rock"`.
+- **Strict Deadline Enforcement**: Any `battle.selectHand` arriving after $T_{\text{revealDeadline}} + 150\text{ms}$ is rejected with `ErrorCodes.SECRET_COMMITMENT_EXPIRED`. If no hand was committed before deadline, the server auto-commits the player's previously selected hand or defaults to `"rock"`.
 - **Cryptographic Independence**: The opponent hand is generated dynamically from the crypto-seeded PRNG only at the moment of phase transition into `reaction`.
 
 ---

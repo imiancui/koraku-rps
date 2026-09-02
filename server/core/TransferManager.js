@@ -8,9 +8,26 @@ export class TransferManager {
    * @param {import('../storage/StorageAdapter.js').StorageAdapter} params.storage
    * @param {number} [params.ttlMs]
    */
-  constructor({ storage, ttlMs }) {
+  constructor({ storage, authManager, ttlMs } = {}) {
     this.storage = storage;
+    this.authManager = authManager || null;
     this.ttlMs = ttlMs || SERVER_CONFIG.transferCodeTtlMs;
+    this._claimLocks = new Map();
+  }
+
+  async _withLock(key, fn) {
+    while (this._claimLocks.has(key)) {
+      await this._claimLocks.get(key);
+    }
+    let resolve;
+    const promise = new Promise((r) => { resolve = r; });
+    this._claimLocks.set(key, promise);
+    try {
+      return await fn();
+    } finally {
+      this._claimLocks.delete(key);
+      resolve();
+    }
   }
 
   /**
@@ -41,77 +58,94 @@ export class TransferManager {
     }
 
     const transferCode = this._generateCode();
-    const now = Date.now();
-    const expiresAt = now + this.ttlMs;
+    const expiresAt = Date.now() + this.ttlMs;
 
-    const data = {
-      transferCode,
+    await this.storage.saveTransferCode(transferCode, {
+      code: transferCode,
       accountId,
-      createdAt: now,
+      issuedAt: Date.now(),
       expiresAt,
-      used: false,
-      claimedAt: null,
-      claimedByDeviceId: null
-    };
-
-    await this.storage.saveTransferCode(transferCode, data);
+      used: false
+    });
 
     return {
       transferCode,
       expiresAt,
-      ttlSeconds: Math.floor(this.ttlMs / 1000)
+      ttlSeconds: Math.round(this.ttlMs / 1000)
     };
   }
 
   /**
-   * Claim and consume an issued transfer code from another device
+   * Claim and migrate an account using a transfer code
+   * Atomically serialized per-code with mutex to prevent double-claim races.
    * @param {string} transferCode
-   * @param {string} deviceId
-   * @returns {Promise<{ success: boolean, accountId?: string, error?: string, message?: string }>}
+   * @param {string} [deviceId]
+   * @returns {Promise<{ success: boolean, accountId?: string, account?: object, token?: string, error?: string, key?: string, message?: string }>}
    */
   async claimTransferCode(transferCode, deviceId) {
     if (!transferCode || typeof transferCode !== "string") {
       return {
         success: false,
         error: ErrorCodes.INVALID_TRANSFER_CODE,
+        key: "save.transferCodeRequired",
         message: "Transfer code is required."
       };
     }
 
     const cleanCode = transferCode.trim().toUpperCase();
-    const record = await this.storage.getTransferCode(cleanCode);
+    return this._withLock(cleanCode, async () => {
+      const record = await this.storage.getTransferCode(cleanCode);
 
-    if (!record) {
+      if (!record) {
+        return {
+          success: false,
+          error: ErrorCodes.INVALID_TRANSFER_CODE,
+          key: "save.transferCodeNotFound",
+          message: "Transfer code not found."
+        };
+      }
+
+      if (record.used) {
+        return {
+          success: false,
+          error: ErrorCodes.INVALID_TRANSFER_CODE,
+          key: "save.transferCodeAlreadyClaimed",
+          message: "Transfer code has already been claimed."
+        };
+      }
+
+      if (Date.now() > record.expiresAt) {
+        return {
+          success: false,
+          error: ErrorCodes.INVALID_TRANSFER_CODE,
+          key: "save.transferCodeExpired",
+          message: "Transfer code has expired."
+        };
+      }
+
+      // Atomically mark code as used
+      await this.storage.markTransferCodeUsed(cleanCode, { deviceId });
+
+      // Retrieve full migrated account state
+      const targetAccount = await this.storage.getAccount(record.accountId);
+
+      // Issue signed session token for target device if authManager is available
+      let token = null;
+      if (this.authManager && typeof this.authManager.issueToken === "function") {
+        token = this.authManager.issueToken({
+          accountId: record.accountId,
+          deviceId: deviceId || "device_transferred",
+          devEntitlement: targetAccount?.devEntitlement || false
+        });
+      }
+
       return {
-        success: false,
-        error: ErrorCodes.INVALID_TRANSFER_CODE,
-        message: "Transfer code not found."
+        success: true,
+        accountId: record.accountId,
+        account: targetAccount,
+        token
       };
-    }
-
-    if (record.used) {
-      return {
-        success: false,
-        error: ErrorCodes.INVALID_TRANSFER_CODE,
-        message: "Transfer code has already been claimed."
-      };
-    }
-
-    if (Date.now() > record.expiresAt) {
-      return {
-        success: false,
-        error: ErrorCodes.INVALID_TRANSFER_CODE,
-        message: "Transfer code has expired."
-      };
-    }
-
-    // Atomically mark code as used
-    await this.storage.markTransferCodeUsed(cleanCode, { deviceId });
-
-    return {
-      success: true,
-      accountId: record.accountId
-    };
+    });
   }
 }
 

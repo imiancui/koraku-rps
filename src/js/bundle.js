@@ -4,7 +4,7 @@
   "use strict";
 
 // --- src/js/config/gameConfig.js ---
-const APP_VERSION = "0.0.18";
+const APP_VERSION = "0.0.21";
 
 const DOJO_CONFIG = Object.freeze({
   defaultHp: 10000,
@@ -1022,6 +1022,51 @@ const DICTIONARY = {
       lead: "五秒定一手。看穿她的指尖，在敗勢裡抓住唯一的反擊。"
     },
     ui: {
+      playerProfile: "玩家資料",
+      switchLanguage: "切換語系",
+      toggleBgm: "切換背景音樂",
+      toggleSfx: "切換遊戲音效",
+      mainMenu: "主選單",
+      battleRecords: "戰績",
+      footerInfo: "頁腳資訊",
+      changelog: "查看更新日誌",
+      galleryZoom: "放大查看全圖",
+      galleryZoomTitle: "放大鑑賞 (High-Res)",
+      rpsBattle: "猜拳戰鬥",
+      toggleAutoBattle: "暫停或繼續自動刷關",
+      kohakuHp: "小樂生命值",
+      battleLogToggle: "戰鬥紀錄（點擊切換顯示規模）",
+      battleLogToggleTitle: "點擊切換顯示規模：最新1筆 / 近5筆 / 全紀錄",
+      roundStatus: "本回合狀態",
+      playerHpMp: "玩家生命與魔力",
+      selectHand: "選擇出拳",
+      itemSkillBar: "道具與技能快捷欄",
+      counterQte: "反制 QTE",
+      directionInput: "方向輸入",
+      toggleUiVisibility: "欣賞立繪，隱藏或顯示結算介面",
+      toggleUiVisibilityTitle: "欣賞立繪 (隱藏/顯示介面)",
+      togglePanelSize: "放大或縮小面板",
+      togglePanelSizeTitle: "放大/縮小面板",
+      closeOverlay: "收起浮層",
+      dojoQtePractice: "修練場 QTE 練習",
+      closeModal: "關閉視窗",
+      clickSelectAll: "點擊全選",
+      openOriginalImage: "在新分頁開啟原圖 (支援雙指縮放與下載)",
+      closeGalleryZoom: "關閉放大視圖",
+      closeGalleryZoomTitle: "關閉 (ESC)",
+      selectRockKey: "選擇石頭 (熱鍵: 1)",
+      selectPaperKey: "選擇布 (熱鍵: 2)",
+      selectScissorsKey: "選擇剪刀 (熱鍵: 3)",
+      selectLeftRockKey: "左手石頭 (熱鍵: 1 或 Q)",
+      selectLeftPaperKey: "左手布 (熱鍵: 2 或 W)",
+      selectLeftScissorsKey: "左手剪刀 (熱鍵: 3 或 E)",
+      selectRightRockKey: "右手石頭 (熱鍵: 7 或 J 或 Num1)",
+      selectRightPaperKey: "右手布 (熱鍵: 8 或 K 或 Num2)",
+      selectRightScissorsKey: "右手剪刀 (熱鍵: 9 或 L 或 Num3)",
+      useHpPotionKey: "使用 HP 藥水 (熱鍵: 4 或 Q)",
+      useMorphKey: "一秒內變拳 (熱鍵: F)",
+      useMpPotionKey: "使用 MP 藥水 (熱鍵: 5 或 E)",
+
       home: "首頁",
       level: "等級",
       xp: "經驗",
@@ -1158,92 +1203,8 @@ const DICTIONARY = {
       menuGuideSub: "HOW TO PLAY",
       menuEquipment: "玩家裝備",
       menuEquipmentSub: "EQUIPMENT & BAG",
-      menuRecords: "戦績統計",
+      menuRecords: "戰績統計",
       menuRecordsSub: "RECORDS & STATS",
-      homeRecordsTitle: "旅の記録と戦闘分析",
-      homeRecordsDesc: "全章の戦績、実戦DPS、装備構成、成長記録の詳細分析。",
-      theoreticalDps: "理論DPS",
-      combatDps: "実戦DPS",
-      currentEquipment: "現在の装備構成",
-      currentLevelXp: "冒険レベルと経験値",
-      consumablesUsed: "消費アイテム使用累計",
-      morphSuccesses: "後出し変化成功",
-      momoStats: "なでなで発動",
-      watermelonCutAnalysis: "スイカ割り段階別命中分析",
-      strikeStage: "第 {index} 刀",
-      strikeTotal: "三刀合計",
-      successRate: "成功率",
-      damageDealt: "与ダメージ",
-      damageTaken: "被ダメージ",
-      qteSuccessRate: "QTE 成功率",
-      rewardsEarned: "獲得報酬",
-      recentBattlesTitle: "直近100局の対戦記録",
-      battleDuration: "戦闘時間",
-      stageDamageDealt: "累計与ダメージ",
-      stageDamageTaken: "累計被ダメージ",
-      hpPotionCountUsed: "HPポーション使用: {count}本",
-      mpPotionCountUsed: "MPポーション使用: {count}本",
-      strikeAttempts: "{attempts} 回 ({successes} 命中 / {failures} 失敗)",
-      resultWin: "勝利",
-      resultLoss: "敗北",
-      modeAuto: "自動",
-      modeManual: "手動",
-      homeRecordsTitle: "Journey Records & Combat Analysis",
-      homeRecordsDesc: "Detailed records of your combat performance, gear loadout, and growth statistics across all chapters.",
-      theoreticalDps: "Theoretical DPS",
-      combatDps: "Combat DPS",
-      currentEquipment: "Current Equipment Loadout",
-      currentLevelXp: "Level & EXP Progress",
-      consumablesUsed: "Consumables Used",
-      morphSuccesses: "Morph Reversals",
-      momoStats: "Momo Petting Procs",
-      watermelonCutAnalysis: "Watermelon Slicing Stage Analysis",
-      strikeStage: "Strike {index}",
-      strikeTotal: "All 3 Strikes",
-      successRate: "Success Rate",
-      damageDealt: "Damage Dealt",
-      damageTaken: "Damage Taken",
-      qteSuccessRate: "QTE Success Rate",
-      rewardsEarned: "Rewards Earned",
-      recentBattlesTitle: "Recent 100 Battles Log",
-      battleDuration: "Duration",
-      stageDamageDealt: "Total Damage Dealt",
-      stageDamageTaken: "Total Damage Taken",
-      hpPotionCountUsed: "HP Potions Used: {count}",
-      mpPotionCountUsed: "MP Potions Used: {count}",
-      strikeAttempts: "{attempts} strikes ({successes} hit / {failures} miss)",
-      resultWin: "WIN",
-      resultLoss: "LOSS",
-      modeAuto: "Auto",
-      modeManual: "Manual",
-      homeRecordsTitle: "旅程纪录与战斗分析",
-      homeRecordsDesc: "详细记录您在各章节的战绩、实战输出表现、装备配置与各项成长统计。",
-      theoreticalDps: "理论 DPS",
-      combatDps: "实战 DPS",
-      currentEquipment: "当前穿戴装备",
-      currentLevelXp: "冒险等级与经验",
-      consumablesUsed: "消耗品使用累计",
-      morphSuccesses: "变拳逆转成功",
-      momoStats: "偷摸发动",
-      watermelonCutAnalysis: "切西瓜阶段命中分析",
-      strikeStage: "第 {index} 刀",
-      strikeTotal: "三刀加总",
-      successRate: "成功率",
-      damageDealt: "造成伤害",
-      damageTaken: "承受伤害",
-      qteSuccessRate: "QTE 成功率",
-      rewardsEarned: "获取奖励",
-      recentBattlesTitle: "最近 100 局对战纪录",
-      battleDuration: "战斗耗时",
-      stageDamageDealt: "总造成伤害",
-      stageDamageTaken: "总承受伤害",
-      hpPotionCountUsed: "HP 药水使用: {count} 瓶",
-      mpPotionCountUsed: "MP 药水使用: {count} 瓶",
-      strikeAttempts: "{attempts} 刀 ({successes} 中 / {failures} 空)",
-      resultWin: "胜利",
-      resultLoss: "战败",
-      modeAuto: "自动",
-      modeManual: "手动",
       homeRecordsTitle: "旅程紀錄與戰鬥分析",
       homeRecordsDesc: "詳細記錄您在各章節的戰績、實戰輸出表現、裝備配置與各項成長統計。",
       theoreticalDps: "理論 DPS",
@@ -1272,12 +1233,6 @@ const DICTIONARY = {
       resultLoss: "戰敗",
       modeAuto: "自動",
       modeManual: "手動",
-      menuRecords: "Records & Stats",
-      menuRecordsSub: "RECORDS & STATS",
-      menuRecords: "战绩统计",
-      menuRecordsSub: "RECORDS & STATS",
-      menuRecords: "戰績統計",
-      menuRecordsSub: "RECORDS & STATS",
       // Screens headings
       stagesTitle: "選擇章節",
       stagesSubtitle: "小樂會隨章節變得更有耐力。提升等級後，新的鏡界便會開啟。",
@@ -1469,45 +1424,6 @@ const DICTIONARY = {
       hideSettlementUi: "欣賞立繪",
       showSettlementUi: "顯示介面",
       selectLanguage: "切換語系",
-      homeRecordsTitle: "戦績と獲得リソース統計",
-      homeRecordsDesc: "小楽との対決履歴、手動勝敗、自動周回実績、累計獲得リソースの記録。",
-      statTotalCoinsEarned: "累計獲得星砂",
-      statTotalXpEarned: "累計獲得経験値",
-      statTotalBattles: "総対局数",
-      statManualRecord: "手動対決戦績",
-      statAutoRecord: "自動周回戦績",
-      statWatermelonHits: "スイカ命中累計",
-      stageAttempts: "挑戦 {total} 回",
-      stageRecordBadge: "自動勝 {autoWins} / 手動敗 {manualLosses}",
-      stageStatsBreakdownTitle: "各章挑戦統計",
-      footerEndlessAliceLink: "Steam で『Endless Alice』をチェック",
-      times: "回",
-      homeRecordsTitle: "Records & Resource Statistics",
-      homeRecordsDesc: "Tracking every match, manual performance, auto-battle outcomes, and all cumulative resources.",
-      statTotalCoinsEarned: "Total Star Sand Earned",
-      statTotalXpEarned: "Total EXP Earned",
-      statTotalBattles: "Total Battles",
-      statManualRecord: "Manual Record",
-      statAutoRecord: "Auto Battle Record",
-      statWatermelonHits: "Watermelon Slices Hit",
-      stageAttempts: "Attempts: {total}",
-      stageRecordBadge: "Auto Win: {autoWins} / Manual Loss: {manualLosses}",
-      stageStatsBreakdownTitle: "Chapter Statistics Breakdown",
-      footerEndlessAliceLink: "Explore 'Endless Alice' on Steam",
-      times: "times",
-      homeRecordsTitle: "战绩与资源统计",
-      homeRecordsDesc: "记录您与小乐的每一场对局、手动战绩、自动刷关成果及累计获取的所有资源。",
-      statTotalCoinsEarned: "累计获得星砂",
-      statTotalXpEarned: "累计获得经验",
-      statTotalBattles: "总对战场次",
-      statManualRecord: "手动对决战绩",
-      statAutoRecord: "自动刷关战绩",
-      statWatermelonHits: "西瓜切中累计",
-      stageAttempts: "挑战 {total} 次",
-      stageRecordBadge: "自动胜 {autoWins} / 手动败 {manualLosses}",
-      stageStatsBreakdownTitle: "各章节挑战统计",
-      footerEndlessAliceLink: "前往 Steam 探索《Endless Alice》",
-      times: "次",
       homeRecordsTitle: "戰績與資源統計",
       homeRecordsDesc: "紀錄您與小樂的每一場對局、手動戰績、自動刷關成果及累計獲取的所有資源。",
       statTotalCoinsEarned: "累計獲得星砂",
@@ -1733,6 +1649,8 @@ const DICTIONARY = {
       }
     },
     dialogue: {
+      watermelonNotAim: "西瓜遊戲尚未進入瞄準階段。",
+
       speakerPlayer: "旅人",
       speakerKohaku: "小樂",
       speakerPlatinumKohaku: "白金小樂",
@@ -1828,11 +1746,19 @@ const DICTIONARY = {
       unlockedGallery: "已解鎖全部圖鑑立繪！"
     },
     save: {
+      transferCodeRequired: "請輸入轉移代碼。",
+      transferCodeNotFound: "找不到此轉移代碼。",
+      transferCodeAlreadyClaimed: "此轉移代碼已被使用。",
+      transferCodeExpired: "轉移代碼已過期。",
+      transferClaimFailed: "轉移代碼兌換失敗。",
+
       invalidCode: "請輸入有效的種子碼。",
       corruptCode: "無效或損毀的存檔種子碼。",
       imported: "存檔已成功載入！"
     },
     connection: {
+      newConnectionEstablished: "此帳號已從另一裝置連線，您已被登出。",
+
       connecting: "連線中",
       online: "線上連線",
       offline: "離線模式",
@@ -1847,7 +1773,17 @@ const DICTIONARY = {
       bannerReconnecting: "連線中斷，正在嘗試重新連線...",
       bannerDisconnected: "已與伺服器斷開連線"
     },
+    battle: {
+      lockedDuringBattle: "戰鬥進行中已鎖定換裝與配點。"
+    },
     battleLog: {
+      lockedDuringBattle: "戰鬥進行中已鎖定換裝與配點。",
+      battleInProgress: "戰鬥正在進行中。",
+      battleStartFailed: "無法開始戰鬥。",
+      noActiveBattle: "目前沒有進行中的戰鬥。",
+      invalidPhasePause: "只能在倒數階段暫停。",
+      useItemFailed: "道具使用失敗。",
+
       rpsWin: "猜拳【{hand}】獲勝，對 {target} 造成 {damage} 點傷害！",
       rpsLoss: "猜拳【{hand}】惜敗，受到 {damage} 點傷害！",
       rpsDraw: "雙方皆出【{hand}】，平手！",
@@ -1879,6 +1815,92 @@ const DICTIONARY = {
       lead: "五秒定一手。看穿她的指尖，在败势中抓住唯一的反击。"
     },
     ui: {
+      playerProfile: "玩家资料",
+      switchLanguage: "切换语言",
+      toggleBgm: "切换背景音乐",
+      toggleSfx: "切换游戏音效",
+      mainMenu: "主菜单",
+      battleRecords: "战绩",
+      footerInfo: "页脚信息",
+      changelog: "查看更新日志",
+      galleryZoom: "放大查看全图",
+      galleryZoomTitle: "放大鉴赏 (High-Res)",
+      rpsBattle: "猜拳战斗",
+      toggleAutoBattle: "暂停或继续自动刷关",
+      kohakuHp: "小乐生命值",
+      battleLogToggle: "战斗纪录（点击切换显示规模）",
+      battleLogToggleTitle: "点击切换显示规模：最新1条 / 近5条 / 全记录",
+      roundStatus: "本回合状态",
+      playerHpMp: "玩家生命与魔力",
+      selectHand: "选择出拳",
+      itemSkillBar: "道具与技能快捷栏",
+      counterQte: "反制 QTE",
+      directionInput: "方向输入",
+      toggleUiVisibility: "欣赏立绘，隐藏或显示结算界面",
+      toggleUiVisibilityTitle: "欣赏立绘 (隐藏/显示界面)",
+      togglePanelSize: "放大或缩小面板",
+      togglePanelSizeTitle: "放大/缩小面板",
+      closeOverlay: "收起浮层",
+      dojoQtePractice: "修练场 QTE 练习",
+      closeModal: "关闭窗口",
+      clickSelectAll: "点击全选",
+      openOriginalImage: "在新标签页打开原图 (支持双指缩放与下载)",
+      closeGalleryZoom: "关闭放大视图",
+      closeGalleryZoomTitle: "关闭 (ESC)",
+      selectRockKey: "选择石头 (热键: 1)",
+      selectPaperKey: "选择布 (热键: 2)",
+      selectScissorsKey: "选择剪刀 (热键: 3)",
+      selectLeftRockKey: "左手石头 (热键: 1 或 Q)",
+      selectLeftPaperKey: "左手布 (热键: 2 或 W)",
+      selectLeftScissorsKey: "左手剪刀 (热键: 3 或 E)",
+      selectRightRockKey: "右手石头 (热键: 7 或 J 或 Num1)",
+      selectRightPaperKey: "右手布 (热键: 8 或 K 或 Num2)",
+      selectRightScissorsKey: "右手剪刀 (热键: 9 或 L 或 Num3)",
+      useHpPotionKey: "使用 HP 药水 (热键: 4 或 Q)",
+      useMorphKey: "一秒内变拳 (热键: F)",
+      useMpPotionKey: "使用 MP 药水 (热键: 5 或 E)",
+
+      menuRecords: "战绩统计",
+      menuRecordsSub: "RECORDS & STATS",
+      homeRecordsTitle: "旅程纪录与战斗分析",
+      homeRecordsDesc: "详细记录您在各章节的战绩、实战输出表现、装备配置与各项成长统计。",
+      theoreticalDps: "理论 DPS",
+      combatDps: "实战 DPS",
+      currentEquipment: "当前穿戴装备",
+      currentLevelXp: "冒险等级与经验",
+      consumablesUsed: "消耗品使用累计",
+      morphSuccesses: "变拳逆转成功",
+      momoStats: "偷摸发动",
+      watermelonCutAnalysis: "切西瓜阶段命中分析",
+      strikeStage: "第 {index} 刀",
+      strikeTotal: "三刀加总",
+      successRate: "成功率",
+      damageDealt: "造成伤害",
+      damageTaken: "承受伤害",
+      qteSuccessRate: "QTE 成功率",
+      rewardsEarned: "获取奖励",
+      recentBattlesTitle: "最近 100 局对战纪录",
+      battleDuration: "战斗耗时",
+      stageDamageDealt: "总造成伤害",
+      stageDamageTaken: "总承受伤害",
+      hpPotionCountUsed: "HP 药水使用: {count} 瓶",
+      mpPotionCountUsed: "MP 药水使用: {count} 瓶",
+      strikeAttempts: "{attempts} 刀 ({successes} 中 / {failures} 空)",
+      resultWin: "胜利",
+      resultLoss: "战败",
+      modeAuto: "自动",
+      modeManual: "手动",
+      statTotalCoinsEarned: "累计获得星砂",
+      statTotalXpEarned: "累计获得经验",
+      statTotalBattles: "总对战场次",
+      statManualRecord: "手动对决战绩",
+      statAutoRecord: "自动刷关战绩",
+      statWatermelonHits: "西瓜切中累计",
+      stageAttempts: "挑战 {total} 次",
+      stageRecordBadge: "自动胜 {autoWins} / 手动败 {manualLosses}",
+      stageStatsBreakdownTitle: "各章节挑战统计",
+      footerEndlessAliceLink: "前往 Steam 探索《Endless Alice》",
+      times: "次",
       home: "首页",
       level: "等级",
       xp: "经验",
@@ -2407,6 +2429,8 @@ const DICTIONARY = {
       }
     },
     dialogue: {
+      watermelonNotAim: "西瓜游戏尚未进入瞄准阶段。",
+
       speakerPlayer: "旅人",
       speakerKohaku: "小乐",
       speakerPlatinumKohaku: "白金小乐",
@@ -2502,11 +2526,19 @@ const DICTIONARY = {
       unlockedGallery: "已解锁全部图鉴立绘！"
     },
     save: {
+      transferCodeRequired: "请输入转移代码。",
+      transferCodeNotFound: "找不到此转移代码。",
+      transferCodeAlreadyClaimed: "此转移代码已被使用。",
+      transferCodeExpired: "转移代码已过期。",
+      transferClaimFailed: "转移代码兑换失败。",
+
       invalidCode: "请输入有效的种子码。",
       corruptCode: "无效或损坏的存档种子码。",
       imported: "存档已成功加载！"
     },
     connection: {
+      newConnectionEstablished: "此账号已从另一设备连接，您已被登出。",
+
       connecting: "连接中",
       online: "在线连接",
       offline: "离线模式",
@@ -2521,7 +2553,17 @@ const DICTIONARY = {
       bannerReconnecting: "连接中断，正在尝试重新连接...",
       bannerDisconnected: "已与服务器断开连接"
     },
+    battle: {
+      lockedDuringBattle: "战斗进行中已锁定换装与配点。"
+    },
     battleLog: {
+      lockedDuringBattle: "战斗进行中已锁定换装与配点。",
+      battleInProgress: "战斗正在进行中。",
+      battleStartFailed: "无法开始战斗。",
+      noActiveBattle: "当前没有进行中的战斗。",
+      invalidPhasePause: "只能在倒数阶段暂停。",
+      useItemFailed: "道具使用失败。",
+
       rpsWin: "猜拳【{hand}】获胜，对 {target} 造成 {damage} 点伤害！",
       rpsLoss: "猜拳【{hand}】惜败，受到 {damage} 点伤害！",
       rpsDraw: "双方皆出【{hand}】，平手！",
@@ -2547,11 +2589,98 @@ const DICTIONARY = {
   "en": {
     meta: {
       title: "Kohaku: Bond of RPS",
+      titleEm: "Endless Koraku",
       subtitle: "KORAKU NO SHŌBU",
       eyebrow: "Janken: Tales of Foxfire",
       lead: "Decide your hand in five seconds. Read her fingertip tells and seize the only counterattack in defeat."
     },
     ui: {
+      playerProfile: "Player Profile",
+      switchLanguage: "Switch Language",
+      toggleBgm: "Toggle BGM",
+      toggleSfx: "Toggle SFX",
+      mainMenu: "Main Menu",
+      battleRecords: "Battle Records",
+      footerInfo: "Footer Information",
+      changelog: "View Changelog",
+      galleryZoom: "View Full Size",
+      galleryZoomTitle: "Zoom (High-Res)",
+      rpsBattle: "RPS Battle",
+      toggleAutoBattle: "Pause or Resume Auto Battle",
+      kohakuHp: "Kohaku HP",
+      battleLogToggle: "Battle Log (Click to toggle size)",
+      battleLogToggleTitle: "Click to toggle log size: latest 1 / recent 5 / all records",
+      roundStatus: "Current Round Status",
+      playerHpMp: "Player HP and MP",
+      selectHand: "Select Hand",
+      itemSkillBar: "Item & Skill Bar",
+      counterQte: "Counter QTE",
+      directionInput: "Direction Input",
+      toggleUiVisibility: "Toggle UI Visibility",
+      toggleUiVisibilityTitle: "Appreciate Artwork (Toggle UI)",
+      togglePanelSize: "Toggle Panel Size",
+      togglePanelSizeTitle: "Toggle Panel Size",
+      closeOverlay: "Close Overlay",
+      dojoQtePractice: "Dojo QTE Practice",
+      closeModal: "Close Dialog",
+      clickSelectAll: "Click to Select All",
+      openOriginalImage: "Open original image in new tab",
+      closeGalleryZoom: "Close Zoom View",
+      closeGalleryZoomTitle: "Close (ESC)",
+      selectRockKey: "Select Rock (Hotkey: 1)",
+      selectPaperKey: "Select Paper (Hotkey: 2)",
+      selectScissorsKey: "Select Scissors (Hotkey: 3)",
+      selectLeftRockKey: "Left Rock (Hotkey: 1 or Q)",
+      selectLeftPaperKey: "Left Paper (Hotkey: 2 or W)",
+      selectLeftScissorsKey: "Left Scissors (Hotkey: 3 or E)",
+      selectRightRockKey: "Right Rock (Hotkey: 7 or J or Num1)",
+      selectRightPaperKey: "Right Paper (Hotkey: 8 or K or Num2)",
+      selectRightScissorsKey: "Right Scissors (Hotkey: 9 or L or Num3)",
+      useHpPotionKey: "Use HP Potion (Hotkey: 4 or Q)",
+      useMorphKey: "Morph within 1s (Hotkey: F)",
+      useMpPotionKey: "Use MP Potion (Hotkey: 5 or E)",
+
+      menuRecords: "Records & Stats",
+      menuRecordsSub: "RECORDS & STATS",
+      homeRecordsTitle: "Journey Records & Combat Analysis",
+      homeRecordsDesc: "Detailed records of your combat performance, gear loadout, and growth statistics across all chapters.",
+      theoreticalDps: "Theoretical DPS",
+      combatDps: "Combat DPS",
+      currentEquipment: "Current Equipment Loadout",
+      currentLevelXp: "Level & EXP Progress",
+      consumablesUsed: "Consumables Used",
+      morphSuccesses: "Morph Reversals",
+      momoStats: "Momo Petting Procs",
+      watermelonCutAnalysis: "Watermelon Slicing Stage Analysis",
+      strikeStage: "Strike {index}",
+      strikeTotal: "All 3 Strikes",
+      successRate: "Success Rate",
+      damageDealt: "Damage Dealt",
+      damageTaken: "Damage Taken",
+      qteSuccessRate: "QTE Success Rate",
+      rewardsEarned: "Rewards Earned",
+      recentBattlesTitle: "Recent 100 Battles Log",
+      battleDuration: "Duration",
+      stageDamageDealt: "Total Damage Dealt",
+      stageDamageTaken: "Total Damage Taken",
+      hpPotionCountUsed: "HP Potions Used: {count}",
+      mpPotionCountUsed: "MP Potions Used: {count}",
+      strikeAttempts: "{attempts} strikes ({successes} hit / {failures} miss)",
+      resultWin: "WIN",
+      resultLoss: "LOSS",
+      modeAuto: "Auto",
+      modeManual: "Manual",
+      statTotalCoinsEarned: "Total Star Sand Earned",
+      statTotalXpEarned: "Total EXP Earned",
+      statTotalBattles: "Total Battles",
+      statManualRecord: "Manual Record",
+      statAutoRecord: "Auto Battle Record",
+      statWatermelonHits: "Watermelon Slices Hit",
+      stageAttempts: "Attempts: {total}",
+      stageRecordBadge: "Auto Win: {autoWins} / Manual Loss: {manualLosses}",
+      stageStatsBreakdownTitle: "Chapter Statistics Breakdown",
+      footerEndlessAliceLink: "Explore 'Endless Alice' on Steam",
+      times: "times",
       home: "Home",
       level: "Level",
       xp: "EXP",
@@ -3080,6 +3209,8 @@ const DICTIONARY = {
       }
     },
     dialogue: {
+      watermelonNotAim: "Watermelon game not in aim phase.",
+
       speakerPlayer: "Traveler",
       speakerKohaku: "Kohaku",
       speakerPlatinumKohaku: "Platinum Kohaku",
@@ -3175,11 +3306,19 @@ const DICTIONARY = {
       unlockedGallery: "Unlocked all gallery illustrations!"
     },
     save: {
+      transferCodeRequired: "Transfer code is required.",
+      transferCodeNotFound: "Transfer code not found.",
+      transferCodeAlreadyClaimed: "Transfer code has already been claimed.",
+      transferCodeExpired: "Transfer code has expired.",
+      transferClaimFailed: "Transfer code claim failed.",
+
       invalidCode: "Please enter a valid save code.",
       corruptCode: "Invalid or corrupted save code.",
       imported: "Save data successfully imported!"
     },
     connection: {
+      newConnectionEstablished: "Another connection for this account was established. You have been disconnected.",
+
       connecting: "Connecting",
       online: "Online",
       offline: "Offline",
@@ -3194,7 +3333,17 @@ const DICTIONARY = {
       bannerReconnecting: "Connection lost. Reconnecting...",
       bannerDisconnected: "Disconnected from server"
     },
+    battle: {
+      lockedDuringBattle: "Equipment and stat allocation are locked during active battle."
+    },
     battleLog: {
+      lockedDuringBattle: "Equipment and stat allocation are locked during active battle.",
+      battleInProgress: "Battle already in progress.",
+      battleStartFailed: "Failed to start battle.",
+      noActiveBattle: "No active battle session.",
+      invalidPhasePause: "Pause is only allowed during countdown phase.",
+      useItemFailed: "Failed to use item.",
+
       rpsWin: "RPS [{hand}] Win! Dealt {damage} damage to {target}!",
       rpsLoss: "RPS [{hand}] Loss! Took {damage} damage!",
       rpsDraw: "Both showed [{hand}], Draw!",
@@ -3226,6 +3375,92 @@ const DICTIONARY = {
       lead: "五秒で一手。彼女の指先を見極め、劣勢の中で唯一の反撃を掴み取れ。"
     },
     ui: {
+      playerProfile: "プレイヤー情報",
+      switchLanguage: "言語切替",
+      toggleBgm: "BGM切替",
+      toggleSfx: "効果音切替",
+      mainMenu: "メインメニュー",
+      battleRecords: "戦績",
+      footerInfo: "フッター情報",
+      changelog: "更新履歴を見る",
+      galleryZoom: "全画面で見る",
+      galleryZoomTitle: "高解像度鑑賞",
+      rpsBattle: "じゃんけんバトル",
+      toggleAutoBattle: "自動周回の一時停止／再開",
+      kohakuHp: "コハクのHP",
+      battleLogToggle: "戦闘ログ（クリックで表示切替）",
+      battleLogToggleTitle: "表示切替：最新1件／直近5件／全記録",
+      roundStatus: "現在のラウンド状況",
+      playerHpMp: "プレイヤーHP・MP",
+      selectHand: "手を選ぶ",
+      itemSkillBar: "アイテム・スキルバー",
+      counterQte: "反撃QTE",
+      directionInput: "方向入力",
+      toggleUiVisibility: "UI表示切替",
+      toggleUiVisibilityTitle: "立ち絵鑑賞（UI表示切替）",
+      togglePanelSize: "パネルサイズ切替",
+      togglePanelSizeTitle: "拡大／縮小",
+      closeOverlay: "オーバーレイを閉じる",
+      dojoQtePractice: "道場QTE練習",
+      closeModal: "閉じる",
+      clickSelectAll: "クリックして全選択",
+      openOriginalImage: "新しいタブで原寸画像を開く",
+      closeGalleryZoom: "拡大表示を閉じる",
+      closeGalleryZoomTitle: "閉じる (ESC)",
+      selectRockKey: "グーを選択 (キー: 1)",
+      selectPaperKey: "パーを選択 (キー: 2)",
+      selectScissorsKey: "チョキを選択 (キー: 3)",
+      selectLeftRockKey: "左手グー (キー: 1 または Q)",
+      selectLeftPaperKey: "左手パー (キー: 2 または W)",
+      selectLeftScissorsKey: "左手チョキ (キー: 3 または E)",
+      selectRightRockKey: "右手グー (キー: 7 または J または Num1)",
+      selectRightPaperKey: "右手パー (キー: 8 または K または Num2)",
+      selectRightScissorsKey: "右手チョキ (キー: 9 または L または Num3)",
+      useHpPotionKey: "HPポーション使用 (キー: 4 または Q)",
+      useMorphKey: "1秒以内に手を変える (キー: F)",
+      useMpPotionKey: "MPポーション使用 (キー: 5 または E)",
+
+      menuRecords: "戦績統計",
+      menuRecordsSub: "RECORDS & STATS",
+      homeRecordsTitle: "旅の記録と戦闘分析",
+      homeRecordsDesc: "全章の戦績、実戦DPS、装備構成、成長記録の詳細分析。",
+      theoreticalDps: "理論DPS",
+      combatDps: "実戦DPS",
+      currentEquipment: "現在の装備構成",
+      currentLevelXp: "冒険レベルと経験値",
+      consumablesUsed: "消費アイテム使用累計",
+      morphSuccesses: "後出し変化成功",
+      momoStats: "なでなで発動",
+      watermelonCutAnalysis: "スイカ割り段階別命中分析",
+      strikeStage: "第 {index} 刀",
+      strikeTotal: "三刀合計",
+      successRate: "成功率",
+      damageDealt: "与ダメージ",
+      damageTaken: "被ダメージ",
+      qteSuccessRate: "QTE 成功率",
+      rewardsEarned: "獲得報酬",
+      recentBattlesTitle: "直近100局の対戦記録",
+      battleDuration: "戦闘時間",
+      stageDamageDealt: "累計与ダメージ",
+      stageDamageTaken: "累計被ダメージ",
+      hpPotionCountUsed: "HPポーション使用: {count}本",
+      mpPotionCountUsed: "MPポーション使用: {count}本",
+      strikeAttempts: "{attempts} 回 ({successes} 命中 / {failures} 失敗)",
+      resultWin: "勝利",
+      resultLoss: "敗北",
+      modeAuto: "自動",
+      modeManual: "手動",
+      statTotalCoinsEarned: "累計獲得星砂",
+      statTotalXpEarned: "累計獲得経験値",
+      statTotalBattles: "総対局数",
+      statManualRecord: "手動対決戦績",
+      statAutoRecord: "自動周回戦績",
+      statWatermelonHits: "スイカ命中累計",
+      stageAttempts: "挑戦 {total} 回",
+      stageRecordBadge: "自動勝 {autoWins} / 手動敗 {manualLosses}",
+      stageStatsBreakdownTitle: "各章挑戦統計",
+      footerEndlessAliceLink: "Steam で『Endless Alice』をチェック",
+      times: "回",
       home: "ホーム",
       level: "レベル",
       xp: "経験値",
@@ -3754,6 +3989,8 @@ const DICTIONARY = {
       }
     },
     dialogue: {
+      watermelonNotAim: "スイカ割りゲームはまだ照準段階に入っていません。",
+
       speakerPlayer: "旅人",
       speakerKohaku: "コハク",
       speakerPlatinumKohaku: "白金コハク",
@@ -3849,11 +4086,19 @@ const DICTIONARY = {
       unlockedGallery: "図鑑の全立ち絵イラストを解放しました！"
     },
     save: {
+      transferCodeRequired: "引き継ぎコードを入力してください。",
+      transferCodeNotFound: "引き継ぎコードが見つかりません。",
+      transferCodeAlreadyClaimed: "この引き継ぎコードは既に使用されています。",
+      transferCodeExpired: "引き継ぎコードの有効期限が切れています。",
+      transferClaimFailed: "引き継ぎコードの受け取りに失敗しました。",
+
       invalidCode: "有効なセーブコードを入力してください。",
       corruptCode: "無効または破損したセーブコードです。",
       imported: "セーブデータを正常に読み込みました！"
     },
     connection: {
+      newConnectionEstablished: "このアカウントで別の接続が確立されたため切断されました。",
+
       connecting: "接続中",
       online: "オンライン",
       offline: "オフライン",
@@ -3868,7 +4113,17 @@ const DICTIONARY = {
       bannerReconnecting: "接続が切断されました。再接続を試みています...",
       bannerDisconnected: "サーバーから切断されました"
     },
+    battle: {
+      lockedDuringBattle: "戦闘中は装備の変更および能力値の配分が固定されています。"
+    },
     battleLog: {
+      lockedDuringBattle: "戦闘中は装備の変更および能力値の配分が固定されています。",
+      battleInProgress: "戦闘が既に進行中です。",
+      battleStartFailed: "戦闘の開始に失敗しました。",
+      noActiveBattle: "アクティブな戦闘がありません。",
+      invalidPhasePause: "一時停止はカウントダウン中のみ可能です。",
+      useItemFailed: "アイテムの使用に失敗しました。",
+
       rpsWin: "じゃんけん【{hand}】で勝利！{target} に {damage} ダメージ！",
       rpsLoss: "じゃんけん【{hand}】で敗北... {damage} ダメージを受けた！",
       rpsDraw: "お互いに【{hand}】であいこ！",
@@ -4312,6 +4567,26 @@ function getCounterHand(opponentHand) {
   const counter = HAND_ORDER.find((hand) => HANDS[hand].beats === opponentHand);
   if (!counter) throw new Error("Unknown opponent hand");
   return counter;
+}
+
+function createSeededRandom(seed = 123456789) {
+  let s = typeof seed === "number" ? Math.floor(Math.abs(seed)) || 1 : hashSeedString(String(seed));
+  return function seededRandom() {
+    s |= 0;
+    s = (s + 0x6D2B79F5) | 0;
+    let t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t >>> 0) / 4294967296);
+  };
+}
+
+function hashSeedString(str) {
+  let hash = 5381;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) + hash) + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash) || 1;
 }
 
 function getRandomHand(random = Math.random) {
@@ -6169,6 +6444,17 @@ class BattleSystem {
         this.handleDualQteSlotSuccess(enemyId || slot);
       }
     });
+    this._isDispatching = false;
+  }
+
+  recordCommand(type, payload = {}, declaredAt = null, result = null) {
+    this.commandLog.push({
+      type,
+      payload,
+      declaredAt: declaredAt || this.now(),
+      executedAt: this.now(),
+      result
+    });
   }
 
   // --- Online Authority Policies & Assumptions ---
@@ -6221,57 +6507,62 @@ class BattleSystem {
   }
 
   dispatchCommand(cmd) {
-    const { type, payload, declaredAt, cmdId } = cmd;
+    this._isDispatching = true;
+    try {
+      const { type, payload, declaredAt, cmdId } = cmd;
 
-    // Check lock assumption
-    if ((type === "equip" || type === "unequip" || type === "allocate") && this.isBattleActive()) {
-      return {
-        ok: false,
-        cmdId,
-        reason: "locked_during_battle",
-        error: "ASSUMPTION: Equipment and stat allocations are locked during active battle"
-      };
+      // Check lock assumption
+      if ((type === "equip" || type === "unequip" || type === "allocate") && this.isBattleActive()) {
+        return {
+          ok: false,
+          cmdId,
+          reason: "locked_during_battle",
+          error: "ASSUMPTION: Equipment and stat allocations are locked during active battle"
+        };
+      }
+
+      let result = { ok: false, cmdId };
+      switch (type) {
+        case "select_hand":
+          result = this.selectHand(payload?.handId || payload?.hand, payload?.slot, declaredAt);
+          break;
+        case "use_morph":
+          result = this.useMorph(declaredAt);
+          break;
+        case "use_item":
+          result = this.useItem(payload?.itemId, declaredAt);
+          break;
+        case "input_qte":
+          result = { ok: Boolean(this.inputQte(payload?.directionId, payload?.slot, declaredAt)) };
+          break;
+        case "report_qte_batch":
+          result = this.state?.isDualQte
+            ? this.dualQte.auditInputs(payload?.inputs)
+            : this.qte.auditInputs(payload?.inputs);
+          break;
+        case "pause":
+          result = this.pause();
+          break;
+        case "resume":
+          result = this.resume();
+          break;
+        case "abandon":
+          this.abandon();
+          result = { ok: true };
+          break;
+        default:
+          result = { ok: false, reason: "unknown_command" };
+      }
+
+      this.commandLog.push({
+        ...cmd,
+        executedAt: this.now(),
+        result
+      });
+      return result;
+    } finally {
+      this._isDispatching = false;
     }
-
-    let result = { ok: false, cmdId };
-    switch (type) {
-      case "select_hand":
-        result = this.selectHand(payload?.handId, payload?.slot, declaredAt);
-        break;
-      case "use_morph":
-        result = this.useMorph(declaredAt);
-        break;
-      case "use_item":
-        result = this.useItem(payload?.itemId, declaredAt);
-        break;
-      case "input_qte":
-        result = { ok: Boolean(this.inputQte(payload?.directionId, payload?.slot, declaredAt)) };
-        break;
-      case "report_qte_batch":
-        result = this.state?.isDualQte
-          ? this.dualQte.auditInputs(payload?.inputs)
-          : this.qte.auditInputs(payload?.inputs);
-        break;
-      case "pause":
-        result = this.pause();
-        break;
-      case "resume":
-        result = this.resume();
-        break;
-      case "abandon":
-        this.abandon();
-        result = { ok: true };
-        break;
-      default:
-        result = { ok: false, reason: "unknown_command" };
-    }
-
-    this.commandLog.push({
-      ...cmd,
-      executedAt: this.now(),
-      result
-    });
-    return result;
   }
 
   getAllEquipEffects(effectType) {
@@ -6406,7 +6697,15 @@ class BattleSystem {
 
     this.stopClocks();
     this.pauseCount = 0;
-    this.battleSeed = options.seed ?? Math.floor(Math.random() * 1000000000);
+    this.battleSeed = typeof options.seed === "number"
+      ? options.seed
+      : (options.seed ? Number(options.seed) : Math.floor(Math.random() * 1000000000));
+    if (options.seed !== undefined && options.seed !== null) {
+      const seededRandom = createSeededRandom(this.battleSeed);
+      this.random = seededRandom;
+      if (this.qte) this.qte.random = seededRandom;
+      if (this.dualQte) this.dualQte.random = seededRandom;
+    }
     this.commandLog = [];
     this.battleStartTime = this.now();
     this.battleDamageDealt = 0;
@@ -6765,7 +7064,9 @@ class BattleSystem {
     this.countdownRemainingMs = Math.max(0, (this.countdownDeadline || 0) - this.now());
     this.clearCountdownClocks();
     this.emitState();
-    return { ok: true, pauseCount: this.pauseCount, remainingMs: this.countdownRemainingMs };
+    const res = { ok: true, pauseCount: this.pauseCount, remainingMs: this.countdownRemainingMs };
+    if (!this._isDispatching) this.recordCommand("pause", {}, null, res);
+    return res;
   }
 
   resume() {
@@ -6778,7 +7079,9 @@ class BattleSystem {
       this.scheduleRound(remainingMs);
     }
     this.emitState();
-    return { ok: true };
+    const res = { ok: true };
+    if (!this._isDispatching) this.recordCommand("resume", {}, null, res);
+    return res;
   }
 
   handleDisconnect() {
@@ -6937,7 +7240,9 @@ class BattleSystem {
     if (this.state.phase === "countdown") {
       // Secret commitment sealed before reveal
       if (arrival > this.countdownDeadline) {
-        return { ok: false, reason: "late_commitment" };
+        const res = { ok: false, reason: "late_commitment" };
+        if (!this._isDispatching) this.recordCommand("select_hand", { handId, slot }, declaredAt, res);
+        return res;
       }
       if (slot === "left") {
         this.state.selectedHands.left = handId;
@@ -6953,11 +7258,15 @@ class BattleSystem {
       }
       this.emitState();
       this.bus.emit("sound", { name: "select" });
-      return { ok: true, handId, slot };
+      const res = { ok: true, handId, slot };
+      if (!this._isDispatching) this.recordCommand("select_hand", { handId, slot }, declaredAt, res);
+      return res;
     } else if (this.state.phase === "reaction" && this.state.morphActive) {
       // 150ms grace check on morph reaction window
       if (arrival > this.reactionDeadline + 150) {
-        return { ok: false, reason: "morph_expired" };
+        const res = { ok: false, reason: "morph_expired" };
+        if (!this._isDispatching) this.recordCommand("select_hand", { handId, slot }, declaredAt, res);
+        return res;
       }
       if (slot === "left") {
         this.state.selectedHands.left = handId;
@@ -6976,7 +7285,9 @@ class BattleSystem {
       this.emitState();
       this.bus.emit("sound", { name: "select" });
       this.resolveRound();
-      return { ok: true, handId, slot };
+      const res = { ok: true, handId, slot };
+      if (!this._isDispatching) this.recordCommand("select_hand", { handId, slot }, declaredAt, res);
+      return res;
     }
     return false;
   }
@@ -7112,7 +7423,9 @@ class BattleSystem {
       this.state.morphActive = false;
       this.resolveRound();
     }, morphWindowMs);
-    return { ok: true };
+    const res = { ok: true };
+    if (!this._isDispatching) this.recordCommand("use_morph", {}, declaredAt, res);
+    return res;
   }
 
   resolveDraw() {
@@ -7410,10 +7723,13 @@ class BattleSystem {
 
   inputQte(directionId, slot = null, declaredAt = null) {
     if (this.state?.phase !== "qte") return false;
-    if (this.state.isDualQte) {
-      return this.dualQte.input(directionId, slot, declaredAt);
+    const res = this.state.isDualQte
+      ? this.dualQte.input(directionId, slot, declaredAt)
+      : this.qte.input(directionId, declaredAt);
+    if (!this._isDispatching) {
+      this.recordCommand("input_qte", { directionId, slot }, declaredAt, { ok: Boolean(res) });
     }
-    return this.qte.input(directionId, declaredAt);
+    return res;
   }
 
   handleDualQteSlotSuccess(slotOrEnemyId) {
@@ -7853,7 +8169,9 @@ class BattleSystem {
       },
       { key: "dialogue.speakerNarrator" }
     );
-    return { ok: true, restored, resource: item.resource };
+    const res = { ok: true, restored, resource: item.resource };
+    if (!this._isDispatching) this.recordCommand("use_item", { itemId }, declaredAt, res);
+    return res;
   }
 
   end(won) {
@@ -7954,6 +8272,7 @@ class BattleSystem {
       this.state.autoBattle = { ...this.autoBattle };
       this.emitState();
     }
+    if (!this._isDispatching) this.recordCommand("abandon", {}, null, { ok: true });
   }
 
   clearCountdownClocks() {
@@ -9455,7 +9774,12 @@ function createKernel(options = {}) {
         break;
 
       case Commands.BATTLE_SELECT_HAND:
-        result = battle.selectHand(payload.hand, payload.hand2);
+        if (payload.hand2 && !payload.slot) {
+          battle.selectHand(payload.hand, "left", payload.clientTime);
+          result = battle.selectHand(payload.hand2, "right", payload.clientTime);
+        } else {
+          result = battle.selectHand(payload.hand, payload.slot || null, payload.clientTime);
+        }
         break;
 
       case Commands.BATTLE_SELECT_TARGET:
@@ -9864,9 +10188,13 @@ LocalGameClient;
  */
 function resolveWebSocketUrl(customUrl) {
   if (customUrl) return customUrl;
-  if (typeof window !== "undefined" && window.location && window.location.host) {
-    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    return `${protocol}//${window.location.host}/ws`;
+  if (typeof window !== "undefined") {
+    if (window.KORAKU_SERVER_URL) return window.KORAKU_SERVER_URL;
+    if (window.__KORAKU_CONFIG__?.serverUrl) return window.__KORAKU_CONFIG__.serverUrl;
+    if (window.location && window.location.host) {
+      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      return `${protocol}//${window.location.host}/ws`;
+    }
   }
   return "ws://localhost:8080/ws";
 }
@@ -9925,11 +10253,14 @@ class RemoteGameClient extends GameClient {
     this._connectionState = ConnectionStates.OFFLINE;
     this._token = this.options.token;
     this._deviceId = this.options.deviceId;
-    this._eventBus = this.options.eventBus;
+    this._eventBus = this.options.eventBus || new EventBus();
     this._devEntitlement = Boolean(options.devEntitlement);
 
     // State snapshot cache
     this._state = {};
+    this._storeProxy = null;
+    this._battleProxy = null;
+    this._postBattleProxy = null;
 
     // Reconnection tracking
     this._reconnectAttempts = 0;
@@ -9949,9 +10280,194 @@ class RemoteGameClient extends GameClient {
     this._rtt = 0; // smoothed RTT in ms
     this._rttSamples = [];
 
+    // Server configuration from handshake
+    this._serverConfig = null;
+
     // Commands & ACK tracking
     this._pendingCommands = new Map(); // cmdId -> { envelope, resolve, reject, timer, retries, sentAt }
     this._commandQueue = []; // Array of cmdIds waiting to be dispatched when connection is ONLINE
+  }
+
+  get bus() {
+    return this._eventBus;
+  }
+
+  get store() {
+    if (!this._storeProxy) {
+      const client = this;
+      this._storeProxy = {
+        snapshot: () => {
+          const s = client.getState() || {};
+          const profile = s.profile || {};
+          const equip = s.equipment || {};
+          return {
+            ...s,
+            playerStats: computePlayerStats(profile, equip)
+          };
+        },
+        get state() {
+          return this.snapshot();
+        },
+        getTheoreticalDPS: () => {
+          const snap = client.store.snapshot();
+          const stats = snap.playerStats || {};
+          const damage = stats.damage || 10;
+          return Math.round(damage * 1.5);
+        },
+        toggleMusicMuted: () => {
+          const curr = Boolean(client._state?.settings?.musicMuted);
+          if (!client._state.settings) client._state.settings = {};
+          client._state.settings.musicMuted = !curr;
+          return client._state.settings.musicMuted;
+        },
+        toggleSfxMuted: () => {
+          const curr = Boolean(client._state?.settings?.sfxMuted);
+          if (!client._state.settings) client._state.settings = {};
+          client._state.settings.sfxMuted = !curr;
+          return client._state.settings.sfxMuted;
+        }
+      };
+    }
+    return this._storeProxy;
+  }
+
+  get battle() {
+    if (!this._battleProxy) {
+      const client = this;
+      this._battleProxy = {
+        get state() {
+          return client._state?.battle || null;
+        },
+        get autoBattle() {
+          return client._state?.battle?.autoBattle || { active: false, isPaused: false };
+        },
+        isBattleActive: () => {
+          const b = client._state?.battle;
+          return Boolean(b && b.active && b.phase !== "ended" && b.phase !== "abandoned");
+        },
+        snapshot: () => {
+          return client._state?.battle || null;
+        },
+        start: (stageId, options) => {
+          return client.send(Commands.BATTLE_START, { stageId, options });
+        },
+        selectHand: (hand, slot = null, declaredAt = Date.now()) => {
+          return client.send(Commands.BATTLE_SELECT_HAND, { hand, slot, declaredAt });
+        },
+        selectTarget: (target) => {
+          return client.send(Commands.BATTLE_SELECT_TARGET, { target });
+        },
+        abandon: () => {
+          return client.send(Commands.BATTLE_ABANDON);
+        },
+        useItem: (itemId) => {
+          return client.send(Commands.BATTLE_USE_ITEM, { itemId });
+        },
+        pause: () => {
+          return client.send(Commands.BATTLE_PAUSE);
+        },
+        resume: () => {
+          return client.send(Commands.BATTLE_RESUME);
+        },
+        stopAutoBattle: () => {
+          return client.send(Commands.AUTO_BATTLE_STOP);
+        },
+        startAutoBattle: (stageId, rounds) => {
+          return client.send(Commands.AUTO_BATTLE_START, { stageId, rounds });
+        },
+        end: (victory) => {
+          if (client._eventBus) {
+            client._eventBus.emit(Events.BATTLE_ENDED, {
+              won: Boolean(victory),
+              stageId: client._state?.battle?.stageId || 1
+            });
+          }
+        }
+      };
+    }
+    return this._battleProxy;
+  }
+
+  get postBattle() {
+    if (!this._postBattleProxy) {
+      const client = this;
+      this._postBattleProxy = {
+        open: (result) => {
+          if (!result) return;
+          if (result.isAuto) {
+            if (result.won) {
+              if (client._state?.records) client._state.records.unlockedSwimsuit = true;
+            }
+            client.postBattle.emitAutoWatermelon();
+            return;
+          }
+          const appearance = result.won
+            ? (result.stage?.final ? ASSETS.final : ASSETS.default)
+            : ASSETS.defeat;
+          const postState = {
+            ...result,
+            scene: result.won ? "victory" : "defeat",
+            appearance,
+            target: 0,
+            tolerance: 0.13,
+            strikeStartedAt: 0,
+            strikeDuration: 1800,
+            watermelon: {
+              attempts: 0,
+              maxAttempts: 3,
+              successes: 0,
+              lastCutSuccess: null,
+              rewardXp: 0,
+              levelsGained: 0
+            }
+          };
+          client._postBattleState = postState;
+          if (client._eventBus) {
+            client._eventBus.emit(Events.POSTBATTLE_STATE, postState);
+            client._eventBus.emit(Events.DIALOGUE_LINE, {
+              key: result.won ? "dialogue.postBattleWin" : "dialogue.postBattleLoss"
+            });
+          }
+        },
+        get state() {
+          return client._postBattleState || null;
+        },
+        snapshot: () => {
+          return client._postBattleState || null;
+        },
+        getMarkerPosition: () => {
+          const state = client._postBattleState;
+          if (!state || state.scene !== "watermelonAim" || !state.strikeStartedAt) return 0;
+          const elapsed = (Date.now() - state.strikeStartedAt) % state.strikeDuration;
+          const progress = elapsed / state.strikeDuration;
+          return progress <= 0.5 ? progress * 2 : (1 - progress) * 2;
+        },
+        getAutoMarkerPosition: () => {
+          return 0.5;
+        },
+        getWatermelonStock: () => {
+          return client._state?.records?.watermelonStock || 0;
+        },
+        closeAutoWatermelon: () => {},
+        emitAutoWatermelon: () => {
+          if (client._eventBus) {
+            client._eventBus.emit(Events.POSTBATTLE_AUTO_WATERMELON, {
+              stock: client.postBattle.getWatermelonStock()
+            });
+          }
+        },
+        requestSwimsuit: () => {
+          return client.send(Commands.POST_BATTLE_REQUEST_SWIMSUIT);
+        },
+        startWatermelon: () => {
+          return client.send(Commands.POST_BATTLE_START_WATERMELON);
+        },
+        strike: (time) => {
+          return client.send(Commands.POST_BATTLE_STRIKE_WATERMELON, { declaredAt: time });
+        }
+      };
+    }
+    return this._postBattleProxy;
   }
 
   /**
@@ -10141,14 +10657,18 @@ class RemoteGameClient extends GameClient {
     if (!msg || typeof msg !== "object") return;
 
     // 1. Handshake response
-    if (msg.type === "handshake_ack" || msg.type === "handshake") {
-      this._handleHandshakeAck(msg);
+    if (
+      msg.type === "handshake_ack" ||
+      msg.type === "handshake" ||
+      (msg.event === Events.CONNECTION_STATE && (msg.payload?.state === ConnectionStates.ONLINE || msg.state === ConnectionStates.ONLINE))
+    ) {
+      this._handleHandshakeAck(msg.payload || msg);
       return;
     }
 
     // 2. Pong heartbeat response
-    if (msg.type === "pong") {
-      this._handlePong(msg);
+    if (msg.type === "pong" || msg.event === "pong" || msg.payload?.type === "pong") {
+      this._handlePong(msg.payload || msg);
       return;
     }
 
@@ -10211,7 +10731,7 @@ class RemoteGameClient extends GameClient {
 
       if (this._ws) {
         try {
-          this._ws.close(4001, ErrorCodes.VERSION_MISMATCH);
+          this._ws.close(4002, ErrorCodes.VERSION_MISMATCH);
         } catch (_) {}
       }
 
@@ -10224,12 +10744,14 @@ class RemoteGameClient extends GameClient {
     // Handshake successful
     if (msg.token) this._token = msg.token;
     if (msg.devEntitlement !== undefined) this._devEntitlement = Boolean(msg.devEntitlement);
+    if (msg.serverConfig) this._serverConfig = msg.serverConfig;
     if (msg.state) this._state = msg.state;
 
     this._reconnectAttempts = 0;
     this._setConnectionState(ConnectionStates.ONLINE, {
       token: this._token,
-      devEntitlement: this._devEntitlement
+      devEntitlement: this._devEntitlement,
+      serverConfig: this._serverConfig
     });
 
     // Start heartbeat
@@ -10308,6 +10830,14 @@ class RemoteGameClient extends GameClient {
   }
 
   /**
+   * Get server configuration received during handshake
+   * @returns {object}
+   */
+  getServerConfig() {
+    return this._serverConfig || { battleLockPolicy: "always" };
+  }
+
+  /**
    * Handle command ACK
    * @private
    * @param {object} msg
@@ -10347,10 +10877,20 @@ class RemoteGameClient extends GameClient {
     const cmdId = msg.cmdId || msg.payload?.cmdId;
     const payload = msg.payload !== undefined ? msg.payload : msg;
     const code = msg.code || payload?.code || ErrorCodes.INTERNAL_ERROR;
-    const reason = msg.reason || msg.error || payload?.reason || payload?.error || "Command rejected by server";
+    const key = msg.key || payload?.key;
+    const params = msg.params || payload?.params || {};
+    let reason = msg.reason || msg.error || payload?.reason || payload?.error || "Command rejected by server";
+    if (key && typeof I18n !== "undefined" && typeof I18n.t === "function") {
+      const localized = I18n.t(key, params);
+      if (localized && localized !== key) {
+        reason = localized;
+      }
+    }
 
     const err = new Error(reason);
     err.code = code;
+    err.key = key;
+    err.params = params;
     err.payload = payload;
 
     const pending = cmdId ? this._pendingCommands.get(cmdId) : null;
@@ -10390,6 +10930,10 @@ class RemoteGameClient extends GameClient {
     } else if (eventName === Events.BATTLE_ENDED || eventName === "battle:ended") {
       if (this._state.battle) {
         delete this._state.battle;
+      }
+    } else if (eventName === Events.POSTBATTLE_STATE || eventName === "postbattle:state") {
+      if (payload) {
+        this._postBattleState = payload;
       }
     } else if (eventName === Events.CONNECTION_STATE || eventName === "connection:state") {
       if (payload?.reason === "NEW_CONNECTION_ESTABLISHED" || payload?.reason === "KICKED_BY_NEW_CONNECTION") {
@@ -10620,6 +11164,23 @@ class RemoteGameClient extends GameClient {
     if (this._handshakeTimer) {
       clearTimeout(this._handshakeTimer);
       this._handshakeTimer = null;
+    }
+
+    // Code 4001: NEW_CONNECTION_ESTABLISHED (single writer kickout)
+    // Code 4002: VERSION_MISMATCH
+    // Permanently halt reconnection to prevent ping-pong reconnect storms
+    if (event?.code === 4001 || event?.reason === "NEW_CONNECTION_ESTABLISHED" || event?.code === 4002 || event?.reason === ErrorCodes.VERSION_MISMATCH) {
+      this._isExplicitlyClosed = true;
+      if (this._reconnectTimer) {
+        clearTimeout(this._reconnectTimer);
+        this._reconnectTimer = null;
+      }
+      this._setConnectionState(ConnectionStates.DISCONNECTED, {
+        code: event?.code || 4001,
+        reason: event?.code === 4002 ? ErrorCodes.VERSION_MISMATCH : "NEW_CONNECTION_ESTABLISHED",
+        message: event?.code === 4002 ? "Client/server version mismatch." : "Another connection for this account was established."
+      });
+      return;
     }
 
     if (this._isExplicitlyClosed) {
@@ -11324,94 +11885,60 @@ class AppView {
     this.bindEvents();
   }
 
+  isMutationLocked() {
+    const battle = this.client?.battle?.snapshot
+      ? this.client.battle.snapshot()
+      : (this.client?.battle?.state || (typeof this.battle?.snapshot === "function" ? this.battle.snapshot() : this.battle?.state));
+    if (!battle || !battle.active) {
+      return false;
+    }
+    const policy = (typeof this.client?.getServerConfig === "function" && this.client.getServerConfig()?.battleLockPolicy)
+      ? this.client.getServerConfig().battleLockPolicy
+      : "always"; // 離線模式或未通報時一律視為 always
+
+    if (policy === "never") {
+      return false;
+    }
+    if (policy === "always") {
+      return true;
+    }
+    if (policy === "countdown") {
+      const phase = battle.phase;
+      return phase === "reaction" || phase === "qte";
+    }
+    return true;
+  }
+
   async sendCommand(command, payload = {}) {
     if (this.client && typeof this.client.send === "function") {
       try {
         const res = await this.client.send(command, payload);
+        if (res?.errorCode === ErrorCodes.BATTLE_IN_PROGRESS_LOCKED || res?.error === ErrorCodes.BATTLE_IN_PROGRESS_LOCKED || res?.error === "BATTLE_IN_PROGRESS_LOCKED") {
+          this.showToast(I18n.t("battle.lockedDuringBattle"), "danger");
+        }
         return res;
       } catch (err) {
-        console.error(`[AppView] Command failed (${command}):`, err);
-        return { ok: false, error: err.message, message: err.message };
+        if (err?.code === ErrorCodes.BATTLE_IN_PROGRESS_LOCKED || err?.code === "BATTLE_IN_PROGRESS_LOCKED" || err?.message === "BATTLE_IN_PROGRESS_LOCKED" || err?.key === "battle.lockedDuringBattle") {
+          this.showToast(I18n.t("battle.lockedDuringBattle"), "danger");
+        } else {
+          console.error(`[AppView] Command failed (${command}):`, err);
+        }
+        return { ok: false, error: err.code || err.message, errorCode: err.code, key: err.key, message: err.message };
       }
     }
-    return this._executeLegacyFallback(command, payload);
-  }
-
-  _executeLegacyFallback(command, payload) {
-    switch (command) {
-      case Commands.BUY_ITEM:
-        return this.store?.buyItem ? this.store.buyItem(payload.itemId || payload.id) : { ok: false };
-      case Commands.BUY_EQUIPMENT:
-        return this.store?.buyEquipment ? this.store.buyEquipment(payload.typeId || payload.itemId) : { ok: false };
-      case Commands.EQUIP_ITEM:
-        return this.store?.equipItem ? this.store.equipItem(payload.uid || payload.typeId || payload.itemId) : { ok: false };
-      case Commands.UNEQUIP_ITEM:
-        return this.store?.unequipItem ? this.store.unequipItem(payload.slot) : { ok: false };
-      case Commands.ALLOCATE_STAT:
-        return this.store?.allocateStat ? this.store.allocateStat(payload.stat) : { ok: false };
-      case Commands.ALLOCATE_SKILL:
-        return this.store?.allocateSkill ? this.store.allocateSkill(payload.skill) : { ok: false };
-      case Commands.BATTLE_START:
-        return this.battle?.start ? { ok: this.battle.start(payload.stageId, payload.options) } : { ok: false };
-      case Commands.BATTLE_SELECT_HAND:
-        return this.battle?.selectHand ? { ok: this.battle.selectHand(payload.hand, payload.slot) } : { ok: false };
-      case Commands.BATTLE_SELECT_TARGET:
-        return this.battle?.selectTarget ? { ok: this.battle.selectTarget(payload.target) } : { ok: false };
-      case Commands.BATTLE_USE_MORPH:
-        return this.battle?.useMorph ? this.battle.useMorph() : { ok: false };
-      case Commands.BATTLE_USE_ITEM:
-        return this.battle?.useItem ? this.battle.useItem(payload.itemId) : { ok: false };
-      case Commands.BATTLE_INPUT_QTE:
-        return this.battle?.inputQte ? { ok: this.battle.inputQte(payload.direction, payload.slot) } : { ok: false };
-      case Commands.BATTLE_PAUSE:
-        return this.battle?.pause ? { ok: this.battle.pause() } : (this.battle?.togglePause ? { ok: this.battle.togglePause() } : { ok: false });
-      case Commands.BATTLE_RESUME:
-        return this.battle?.resume ? { ok: this.battle.resume() } : { ok: false };
-      case Commands.BATTLE_ABANDON:
-        return this.battle?.abandon ? { ok: this.battle.abandon() } : { ok: false };
-      case Commands.AUTO_BATTLE_START:
-        return this.battle?.startAutoBattle ? { ok: this.battle.startAutoBattle(payload.stageId, payload.rounds) } : { ok: false };
-      case Commands.AUTO_BATTLE_STOP:
-        return this.battle?.stopAutoBattle ? { ok: this.battle.stopAutoBattle() } : { ok: false };
-      case Commands.POST_BATTLE_REQUEST_SWIMSUIT:
-        return this.postBattle?.requestSwimsuit ? { ok: this.postBattle.requestSwimsuit() } : { ok: false };
-      case Commands.POST_BATTLE_START_WATERMELON:
-        return this.postBattle?.startWatermelon ? { ok: this.postBattle.startWatermelon() } : { ok: false };
-      case Commands.POST_BATTLE_STRIKE_WATERMELON:
-        return this.postBattle?.strike ? { ok: this.postBattle.strike() } : { ok: false };
-      case Commands.ACCOUNT_EXPORT_JSON:
-        return { ok: true, data: this.store?.snapshot ? this.store.snapshot() : {} };
-      case Commands.ACCOUNT_DELETE:
-        if (this.store?.reset) this.store.reset();
-        return { ok: true };
-      case Commands.ACCOUNT_ISSUE_TRANSFER_CODE:
-        return { ok: true, code: this.store?.exportSaveCode ? this.store.exportSaveCode() : "" };
-      case Commands.ACCOUNT_CLAIM_TRANSFER_CODE:
-        return this.store?.importSaveCode ? this.store.importSaveCode(payload.code) : { ok: false };
-      case Commands.CHEAT_SET_STATS:
-        return this.store?.cheatSetValues ? this.store.cheatSetValues(payload) : { ok: false };
-      case Commands.CHEAT_UNLOCK_ALL:
-        if (payload.gallery) return this.store?.cheatUnlockGallery ? this.store.cheatUnlockGallery() : { ok: false };
-        return this.store?.cheatUnlockAll ? this.store.cheatUnlockAll() : { ok: false };
-      case Commands.CHEAT_ADD_COINS:
-        if (this.store?.state) {
-          this.store.state.coins = (this.store.state.coins || 0) + (payload.amount || 1000);
-          this.store.commit("cheat-add-coins");
-          return { ok: true };
-        }
-        return { ok: false };
-      default:
-        return { ok: false };
-    }
+    throw new Error(`[AppView] sendCommand called without an active game client: ${command}`);
   }
 
   getStoreSnapshot() {
+    if (this.store && typeof this.store.snapshot === "function") {
+      return this.store.snapshot();
+    }
+    if (this.client?.store && typeof this.client.store.snapshot === "function") {
+      return this.client.store.snapshot();
+    }
     if (this.client && typeof this.client.getState === "function") {
       const st = this.client.getState();
       if (st && Object.keys(st).length > 0) return st;
-    }
-    if (this.store && typeof this.store.snapshot === "function") {
-      return this.store.snapshot();
     }
     return {
       profile: { level: 1, xp: 0, skillPoints: 0, allocations: { hp: 0, mp: 0, damage: 0 }, skills: { momo: 0, dualHand: 0 } },
@@ -11495,8 +12022,8 @@ class AppView {
         } else {
           this._stopDisconnectCountdown();
           bannerText.textContent = state === ConnectionStates.RECONNECTING
-            ? (I18n.t("connection.bannerReconnecting") !== "connection.bannerReconnecting" ? I18n.t("connection.bannerReconnecting") : "與伺服器連線中斷，正在嘗試重新建立連線...")
-            : (I18n.t("connection.bannerDisconnected") !== "connection.bannerDisconnected" ? I18n.t("connection.bannerDisconnected") : "已與伺服器斷開連線，請檢查網路狀態。");
+            ? I18n.t("connection.bannerReconnecting")
+            : I18n.t("connection.bannerDisconnected");
         }
       } else {
         this._stopDisconnectCountdown();
@@ -11555,19 +12082,9 @@ class AppView {
   }
 
   getConnectionLabel(state) {
-    const locale = I18n.getLocale ? I18n.getLocale() : "zh-Hant";
     const key = `connection.${state}`;
     const translated = I18n.t(key);
-    if (translated && translated !== key) return translated;
-
-    const labels = {
-      online: { "zh-Hant": "線上連線", "zh-Hans": "在线连接", "en": "Online", "ja": "オンライン" },
-      connecting: { "zh-Hant": "連線中...", "zh-Hans": "连接中...", "en": "Connecting...", "ja": "接続中..." },
-      reconnecting: { "zh-Hant": "重連中...", "zh-Hans": "重连中...", "en": "Reconnecting...", "ja": "再接続中..." },
-      offline: { "zh-Hant": "離線沙盒", "zh-Hans": "离线沙盒", "en": "Offline", "ja": "オフライン" },
-      disconnected: { "zh-Hant": "已斷線", "zh-Hans": "已断开", "en": "Disconnected", "ja": "切断" }
-    };
-    return labels[state]?.[locale] || labels[state]?.["zh-Hant"] || state;
+    return (translated && translated !== key) ? translated : state;
   }
 
   cacheElements() {
@@ -12031,8 +12548,25 @@ class AppView {
       this.client.on("connection:ping", (ping) => this.handlePingUpdate(ping));
     }
 
-    this.bus.on("store:changed", ({ state }) => this.renderStore(state));
+    this.bus.on("store:changed", (data) => this.renderStore(data?.state || data));
     this.bus.on("battle:state", (state) => this.renderBattle(state));
+    const handleMutationLockUpdate = () => {
+      if (this.currentScreen === "growth") {
+        this.renderGrowth(this.getStoreSnapshot());
+      } else if (this.currentScreen === "equipment") {
+        this.renderEquipment(this.getStoreSnapshot());
+      } else if (this.currentScreen === "shop") {
+        this.renderShop(this.getStoreSnapshot());
+      }
+    };
+    this.bus.on("battle:state", handleMutationLockUpdate);
+    this.bus.on("battle:ended", handleMutationLockUpdate);
+    this.bus.on("battle:start", handleMutationLockUpdate);
+    if (this.client && typeof this.client.on === "function") {
+      this.client.on("battle:state", handleMutationLockUpdate);
+      this.client.on("battle:ended", handleMutationLockUpdate);
+      this.client.on("battle:start", handleMutationLockUpdate);
+    }
     this.bus.on("battle:countdown-beat", (beat) => this.handleCountdownBeat(beat));
     this.bus.on("battle:effect", (effect) => this.playBattleEffect(effect));
     this.bus.on("battle:damage-logged", (event) => this.addDamageLogEntry(event));
@@ -12323,6 +12857,10 @@ class AppView {
 
     const bagItemBtn = event.target.closest("[data-equip-bag-item]");
     if (bagItemBtn) {
+      if (this.isMutationLocked()) {
+        this.showToast(I18n.t("battle.lockedDuringBattle"), "danger");
+        return;
+      }
       const result = await this.sendCommand(Commands.EQUIP_ITEM, { uid: bagItemBtn.dataset.equipBagItem, typeId: bagItemBtn.dataset.equipBagItem });
       if (result?.message) this.showToast(result.message, result.ok ? "success" : "danger");
       if (result?.ok) this.bus.emit("sound", { name: "skill" });
@@ -12332,6 +12870,10 @@ class AppView {
 
     const shopEquipBtn = event.target.closest("[data-shop-equip]");
     if (shopEquipBtn) {
+      if (this.isMutationLocked()) {
+        this.showToast(I18n.t("battle.lockedDuringBattle"), "danger");
+        return;
+      }
       const itemId = shopEquipBtn.dataset.shopEquip;
       const result = await this.sendCommand(Commands.EQUIP_ITEM, { uid: itemId, typeId: itemId });
       if (result?.message) this.showToast(result.message, result.ok ? "success" : "danger");
@@ -12342,6 +12884,10 @@ class AppView {
 
     const shopUnequipBtn = event.target.closest("[data-shop-unequip]");
     if (shopUnequipBtn) {
+      if (this.isMutationLocked()) {
+        this.showToast(I18n.t("battle.lockedDuringBattle"), "danger");
+        return;
+      }
       const slotKey = shopUnequipBtn.dataset.shopUnequip;
       const result = await this.sendCommand(Commands.UNEQUIP_ITEM, { slot: slotKey });
       if (result?.message) this.showToast(result.message, result.ok ? "success" : "danger");
@@ -12368,6 +12914,10 @@ class AppView {
 
     const slotBtn = event.target.closest("[data-slot]");
     if (slotBtn) {
+      if (this.isMutationLocked()) {
+        this.showToast(I18n.t("battle.lockedDuringBattle"), "danger");
+        return;
+      }
       const slotKey = slotBtn.dataset.slot;
       const snapshot = this.getStoreSnapshot();
       if (snapshot.equipment?.[slotKey]) {
@@ -12472,6 +13022,10 @@ class AppView {
 
     const allocateButton = event.target.closest("[data-allocate]");
     if (allocateButton) {
+      if (this.isMutationLocked()) {
+        this.showToast(I18n.t("battle.lockedDuringBattle"), "danger");
+        return;
+      }
       const result = await this.sendCommand(Commands.ALLOCATE_STAT, { stat: allocateButton.dataset.allocate });
       if (result?.message) this.showToast(result.message, result.ok ? "success" : "danger");
       if (result?.ok) this.bus.emit("sound", { name: "skill" });
@@ -12480,6 +13034,10 @@ class AppView {
 
     const allocateSkillButton = event.target.closest("[data-allocate-skill]");
     if (allocateSkillButton) {
+      if (this.isMutationLocked()) {
+        this.showToast(I18n.t("battle.lockedDuringBattle"), "danger");
+        return;
+      }
       const result = await this.sendCommand(Commands.ALLOCATE_SKILL, { skill: allocateSkillButton.dataset.allocateSkill });
       if (result?.message) this.showToast(result.message, result.ok ? "success" : "danger");
       if (result?.ok) this.bus.emit("sound", { name: "skill" });
@@ -13094,14 +13652,19 @@ class AppView {
     await this.sendCommand(Commands.AUTO_BATTLE_START, { stageId, rounds });
   }
 
-  renderStore(state) {
-    $("#header-level").textContent = String(state.profile.level).padStart(2, "0");
-    $("#header-coins").textContent = state.coins.toLocaleString("zh-TW");
-    $("#header-xp").textContent = state.profile.xp + " / " + state.xpToNext;
-    $("#header-xp-fill").style.width = clampPercent(state.profile.xp, state.xpToNext) + "%";
-    $("#record-wins").textContent = state.records.wins;
-    $("#record-losses").textContent = state.records.losses;
-    $("#record-stage").textContent = state.records.bestStage ? I18n.getLocalizedStage(STAGES.find(s => s.id === state.records.bestStage) || { chapter: "第 " + state.records.bestStage + " 章" }).chapter : "—";
+  renderStore(rawState) {
+    const fallback = this.getStoreSnapshot();
+    const state = rawState?.profile ? rawState : (rawState?.state?.profile ? rawState.state : fallback) || fallback;
+    if (!state?.profile) return;
+    $("#header-level").textContent = String(state.profile.level || 1).padStart(2, "0");
+    $("#header-coins").textContent = (state.coins || 0).toLocaleString("zh-TW");
+    $("#header-xp").textContent = (state.profile.xp || 0) + " / " + (state.xpToNext || 0);
+    $("#header-xp-fill").style.width = clampPercent(state.profile.xp || 0, state.xpToNext || 1) + "%";
+    if (state.records) {
+      $("#record-wins").textContent = state.records.wins || 0;
+      $("#record-losses").textContent = state.records.losses || 0;
+      $("#record-stage").textContent = state.records.bestStage ? I18n.getLocalizedStage(STAGES.find(s => s.id === state.records.bestStage) || { chapter: "第 " + state.records.bestStage + " 章" }).chapter : "—";
+    }
     
     const growthNavBtn = document.querySelector('.menu-command[data-nav="growth"]');
     if (growthNavBtn) {
@@ -13621,7 +14184,8 @@ class AppView {
 
           let equipBtn = "";
           if (bagCount > 0) {
-            equipBtn = '<button type="button" class="button-secondary shop-btn-equip" data-shop-equip="' + item.id + '" style="padding:6px 12px;font-size:12px;">' + I18n.t("ui.equipNow") + '</button>';
+            const equipDisabled = this.isMutationLocked() ? ' disabled aria-disabled="true"' : "";
+            equipBtn = '<button type="button" class="button-secondary shop-btn-equip" data-shop-equip="' + item.id + '"' + equipDisabled + ' style="padding:6px 12px;font-size:12px;">' + I18n.t("ui.equipNow") + '</button>';
           }
 
           const buyBtn = '<button type="button" class="button-primary" data-buy-equip="' + item.id + '"' +
@@ -13647,18 +14211,36 @@ class AppView {
     shopGrid.innerHTML = html;
   }
 
-  renderGrowth(state) {
-    $("#skill-points").textContent = state.profile.skillPoints;
-    $("#growth-level").textContent = "Lv. " + state.profile.level;
-    $("#growth-xp-text").textContent = state.profile.xp + " / " + state.xpToNext + " EXP";
-    $("#growth-xp-fill").style.width = clampPercent(state.profile.xp, state.xpToNext) + "%";
+  renderGrowth(rawState) {
+    const isLocked = this.isMutationLocked();
+    const growthLockNotice = $("#growth-lock-notice");
+    if (growthLockNotice) {
+      if (isLocked) {
+        growthLockNotice.textContent = I18n.t("battle.lockedDuringBattle");
+        growthLockNotice.style.display = "block";
+      } else {
+        growthLockNotice.textContent = "";
+        growthLockNotice.style.display = "none";
+      }
+    }
+
+    const fallback = this.getStoreSnapshot();
+    const state = rawState?.playerStats ? rawState : (rawState?.state?.playerStats ? rawState.state : fallback) || fallback;
+    const profile = state?.profile || fallback?.profile || { level: 1, xp: 0, skillPoints: 0, skills: {} };
+    const playerStats = state?.playerStats || fallback?.playerStats || { damage: 15, maxHp: 100, maxMp: 50 };
+    const xpToNext = state?.xpToNext || fallback?.xpToNext || 100;
+
+    $("#skill-points").textContent = profile.skillPoints || 0;
+    $("#growth-level").textContent = "Lv. " + (profile.level || 1);
+    $("#growth-xp-text").textContent = (profile.xp || 0) + " / " + xpToNext + " EXP";
+    $("#growth-xp-fill").style.width = clampPercent(profile.xp || 0, xpToNext) + "%";
     const cards = [
       {
         id: "damage",
         label: I18n.t("ui.statDamage"),
         code: "DAMAGE",
         glyph: "刃",
-        value: state.playerStats.damage,
+        value: playerStats.damage,
         unit: I18n.t("ui.unitDamage"),
         text: I18n.t("ui.statAllocDmgDesc")
       },
@@ -13667,7 +14249,7 @@ class AppView {
         label: I18n.t("ui.statHp"),
         code: "VITALITY",
         glyph: "命",
-        value: state.playerStats.maxHp,
+        value: playerStats.maxHp,
         unit: I18n.t("ui.unitMaxHp"),
         text: I18n.t("ui.statAllocHpDesc")
       },
@@ -13676,14 +14258,14 @@ class AppView {
         label: I18n.t("ui.statMp"),
         code: "ARCANA",
         glyph: "魔",
-        value: state.playerStats.maxMp,
+        value: playerStats.maxMp,
         unit: I18n.t("ui.unitMaxMp"),
         text: I18n.t("ui.statAllocMpDesc")
       }
     ];
     if (this.growthGrid) {
       this.growthGrid.innerHTML = cards.map((card) => {
-        const disabled = state.profile.skillPoints <= 0 ? " disabled" : "";
+        const disabled = (state.profile.skillPoints <= 0 || isLocked) ? ' disabled aria-disabled="true"' : "";
         return '<article class="growth-card" data-glyph="' + card.glyph + '"><small>' + card.code +
           "</small><h3>" + card.label + '</h3><div class="stat-value"><b>' + card.value +
           "</b><span>" + card.unit + "</span></div><p>" + card.text +
@@ -13721,6 +14303,9 @@ class AppView {
           buttonText = I18n.t("ui.skillCostSp", { sp: skill.costPerLevel }) + " (" + I18n.t("ui.insufficientCoins") + ")";
           disabled = true;
         }
+        if (isLocked) {
+          disabled = true;
+        }
 
         const nextTip = (!isMax && unlocked && skill.id === "momo")
           ? '<br><small style="color:var(--azure-bright);display:block;margin-top:4px;">' + I18n.t("ui.nextLevelRate", { chance: nextChance }) + '</small>'
@@ -13732,7 +14317,7 @@ class AppView {
           statValueHtml +
           "<p>" + locSkill.description + nextTip + "</p>" +
           '<button type="button" class="button-primary" data-allocate-skill="' + skill.id + '"' +
-          (disabled ? " disabled" : "") + ">" + buttonText + "</button></article>";
+          (disabled ? ' disabled aria-disabled="true"' : "") + ">" + buttonText + "</button></article>";
       }).join("");
     }
   }
@@ -13900,10 +14485,24 @@ class AppView {
     });
   }
 
-  renderEquipment(state) {
+  renderEquipment(rawState) {
+    const fallback = this.getStoreSnapshot();
+    const state = rawState?.playerStats ? rawState : (rawState?.state?.playerStats ? rawState.state : fallback) || fallback;
     if (!state) return;
+    const isLocked = this.isMutationLocked();
     const equip = state.equipment || {};
     const bag = state.inventoryEquipment || [];
+
+    const lockNotice = $("#equipment-lock-notice");
+    if (lockNotice) {
+      if (isLocked) {
+        lockNotice.textContent = I18n.t("battle.lockedDuringBattle");
+        lockNotice.style.display = "block";
+      } else {
+        lockNotice.textContent = "";
+        lockNotice.style.display = "none";
+      }
+    }
 
     if ($("#equipment-coins")) $("#equipment-coins").textContent = state.coins.toLocaleString("zh-TW");
     if ($("#bag-count")) $("#bag-count").textContent = `${bag.length} ` + I18n.t("ui.menuEquipment");
@@ -13920,6 +14519,14 @@ class AppView {
       const locSlot = I18n.getLocalizedEquipmentSlot(slotKey);
 
       document.querySelectorAll(`[data-slot="${slotKey}"]`).forEach((slotBtn) => {
+        if (isLocked) {
+          slotBtn.setAttribute("disabled", "true");
+          slotBtn.setAttribute("aria-disabled", "true");
+        } else {
+          slotBtn.removeAttribute("disabled");
+          slotBtn.removeAttribute("aria-disabled");
+        }
+
         const box = slotBtn.querySelector(".slot-box");
         const tag = slotBtn.querySelector(".slot-tag");
         if (tag && locSlot) tag.textContent = locSlot.label;
@@ -13950,10 +14557,11 @@ class AppView {
 
     // Render stats summary for both panels
     const theoDps = this.getTheoreticalDPS(state);
+    const stats = state.playerStats || fallback?.playerStats || { maxHp: 100, maxMp: 50, damage: 15 };
     const statsHtml = `
-      <span>${I18n.t("ui.statHp")}<b>${state.playerStats.maxHp}</b></span>
-      <span>${I18n.t("ui.statMp")}<b>${state.playerStats.maxMp}</b></span>
-      <span>${I18n.t("ui.statDamage")}<b>${state.playerStats.damage}</b></span>
+      <span>${I18n.t("ui.statHp")}<b>${stats.maxHp}</b></span>
+      <span>${I18n.t("ui.statMp")}<b>${stats.maxMp}</b></span>
+      <span>${I18n.t("ui.statDamage")}<b>${stats.damage}</b></span>
       <span style="color:var(--gold-bright);">${I18n.t("ui.theoreticalDps")}<b>${theoDps}</b></span>
     `;
     if ($("#paperdoll-stats-summary")) $("#paperdoll-stats-summary").innerHTML = statsHtml;
@@ -13971,7 +14579,7 @@ class AppView {
           const locItem = I18n.getLocalizedEquipment(item);
           const locSlot = I18n.getLocalizedEquipmentSlot(item.slotType);
           return `
-            <button type="button" class="bag-item-card rarity-${item.rarity}" data-equip-bag-item="${item.id}" data-equip-tooltip-id="${item.id}">
+            <button type="button" class="bag-item-card rarity-${item.rarity}" data-equip-bag-item="${item.id}" data-equip-tooltip-id="${item.id}"${isLocked ? ' disabled aria-disabled="true"' : ""}>
               <span class="bag-item-icon">${item.icon}</span>
               <div class="bag-item-info">
                 <span class="bag-item-name">${locItem.name}</span>
@@ -15446,15 +16054,23 @@ class AppView {
     }
   }
 
-  startDojoSandbox({ isDual, customHp, customDamage }) {
+  async startDojoSandbox({ isDual, customHp, customDamage }) {
     this.hideFloatingWatermelon();
     this.postBattle?.closeAutoWatermelon?.();
-    this.battle.stopAutoBattle();
+    if (this.battle?.stopAutoBattle) {
+      this.battle.stopAutoBattle();
+    } else {
+      await this.sendCommand(Commands.AUTO_BATTLE_STOP);
+    }
     try {
       window.localStorage?.removeItem("koraku_active_postbattle");
       sessionStorage.removeItem("koraku_active_postbattle");
     } catch (_) {}
-    if (!this.battle.start(null, { isDojo: true, isDual, customHp, customDamage, isSilhouette: true })) return;
+    const startRes = await this.sendCommand(Commands.BATTLE_START, {
+      stageId: null,
+      options: { isDojo: true, isDual, customHp, customDamage, isSilhouette: true }
+    });
+    if (!startRes || startRes.ok === false) return;
     this.postState = null;
     this.battleArena?.classList.remove("is-settlement");
     this.resultOverlay.classList.remove("is-active");
@@ -15643,10 +16259,10 @@ const client = mode === "online"
 
 client.init();
 
-const bus = client.bus || new EventBus();
-const store = client.store || new GameStore(bus, persistence);
-const battle = client.battle || new BattleSystem(bus, store);
-const postBattle = client.postBattle || new PostBattleSystem(bus, store);
+const bus = client.bus;
+const store = client.store;
+const battle = client.battle;
+const postBattle = client.postBattle;
 const sound = new SoundSystem(store);
 
 bus.on("battle:ended", (result) => postBattle.open(result));
@@ -15673,8 +16289,8 @@ if (
     '<button type="button" data-debug="progress">Lv.10／500 星砂</button>';
   panel.addEventListener("click", async (event) => {
     const action = event.target.dataset.debug;
-    if (action === "victory" && battle.snapshot()?.active) battle.end(true);
-    if (action === "defeat" && battle.snapshot()?.active) battle.end(false);
+    if (action === "victory" && battle.snapshot()?.active) battle.end?.(true);
+    if (action === "defeat" && battle.snapshot()?.active) battle.end?.(false);
     if (action === "progress") {
       const state = client.getState();
       const currentLevel = state.profile?.level || 1;

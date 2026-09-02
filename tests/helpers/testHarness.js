@@ -16,30 +16,8 @@ import { GameClient } from "../../src/js/kernel/GameClient.js";
 import { LocalGameClient } from "../../src/js/kernel/LocalGameClient.js";
 import { RemoteGameClient } from "../../src/js/net/RemoteGameClient.js";
 
-/**
- * Seeded Mulberry32 Pseudo-Random Number Generator
- * @param {number|string} seed
- * @returns {() => number} Random float in [0, 1)
- */
-export function createSeededRandom(seed = 123456789) {
-  let s = typeof seed === "number" ? Math.floor(Math.abs(seed)) || 1 : hashString(String(seed));
-  return function random() {
-    s |= 0;
-    s = (s + 0x6D2B79F5) | 0;
-    let t = Math.imul(s ^ (s >>> 15), 1 | s);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t >>> 0) / 4294967296);
-  };
-}
-
-function hashString(str) {
-  let hash = 5381;
-  for (let i = 0; i < str.length; i++) {
-    hash = ((hash << 5) + hash) + str.charCodeAt(i);
-    hash |= 0;
-  }
-  return Math.abs(hash) || 1;
-}
+import { createSeededRandom } from "../../src/js/systems/rpsRules.js";
+export { createSeededRandom };
 
 /**
  * In-memory persistence adapter for testing

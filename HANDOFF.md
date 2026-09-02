@@ -2,10 +2,10 @@
 
 > **文件用途**：AI 代理人與開發者快速上手、架構交接、開發合約指引與校對基準  
 > **專案根目錄**：`D:\game-dev\New-game-project-4`  
-> **當前版本**：`v0.0.18`（顯示於首頁頁腳最左側 `0.0.18`，自最後一位遞增，每 100 個版本進一位：`0.0.100` -> `0.1.0`）  
+> **當前版本**：`v0.0.21`（顯示於首頁頁腳最左側 `0.0.21`，自最後一位遞增，每 100 個版本進一位：`0.0.100` -> `0.1.0`）  
 > **最新更新日期**：2026-09-03  
 > **基準規範**：`OPENSPEC.md` 與 `AGENTS.md`  
-> **測試狀態**：`npm test` 194/194、`npm run test:server` 11/11、`npm run test:rwd:smoke` 30/30 全部通過 (100% Pass)；雙端合約、反作弊專項、確定性重放、高延遲寬限審查、多開踢出保證全數綠燈上線。
+> **測試狀態**：`npm test` 213/213、`npm run test:server` 17/17、`npm run test:rwd:smoke` 30/30 全部通過 (100% Pass)；雙端合約、反作弊專項、確定性重放、高延遲寬限審查、多開踢出保證、Phase 4 Docker Staging 演練 (Server/Caddy/Client)、20 併發帳號負載煙霧、戰鬥中鎖定策略 (battleLockPolicy) 與 AppView 換裝配點鎖定灰化 UI (RWD-REG-009 跨 4 視口與雙語系驗證) 全數綠燈就位。
 
 ---
 
@@ -121,6 +121,9 @@ New-game-project-4/
    - 伺服器與 Kernel 不輸出任何面向玩家的硬編碼文字，所有日誌與台詞均為 `{ key, params }` 結構體；客戶端依據當前語系（`I18n.js`）完成即時渲染。
 7. **確定性戰鬥重放 (Deterministic Replay)**：
    - 每場戰鬥持久化 RNG 種子與有序指令日誌，透過 Mulberry32 PRNG 達成 100% 確定性軌跡重放。
+8. **GDPR 刪帳與經濟帳本匿名化保留策略**：
+   - 當玩家請求刪除帳號（`account.delete`）時，伺服器依 GDPR 抹除權銷毀該使用者的個人存檔（`accounts/<id>.json`）與所有未兌換轉移碼；
+   - 為保障經濟帳本不可篡改與資金守恆性，經濟帳本（.jsonl）**不作物理刪除**，而是透過不可逆之伺服器端鹽值雜湊（HMAC-SHA256(accountId, serverSalt)）將所有紀錄匿名化遷移至 `anon_<hash>.jsonl`，阻斷任何個人身份關聯。
 
 ---
 
@@ -209,14 +212,24 @@ New-game-project-4/
 
 ---
 
-## 7. 下一步演進規劃 (Roadmap & Next Steps)
+## 7. 演進里程碑與後續規劃 (Roadmap & Milestones)
 
-- **Phase 1 & Phase 2（已 100% 達成）**：
+- **Phase 1 ~ Phase 3.5（已 100% 達成）**：
   - 核心零 DOM 解耦、雙端 GameClient 抽象。
-  - 權威伺服器、三類裁決、150ms 寬限、單一連線踢出、15 分鐘轉移碼。
+  - 權威伺服器、三類裁決、150ms 寬限、單一連線踢出 (4001)、15 分鐘轉移碼原子互斥保證。
   - Schema v2 裝備實例與 Append-only 經濟帳本。
-  - 4 語系字典完整性與 194 項自動化測試全數通過。
-- **Phase 3（後續演進待辦）**：
+  - 確定性重放全迴路驗證（打完戰鬥 -> 存檔 Replay -> 讀回重放 100% 一致）。
+- **Phase 4：上線整備與規格化（已 100% 達成）**：
+  - **OpenSpec 規格化**：建立 `koraku-online-authority-formalization` 提案，正式化線上權威裁決、作弊面板權限與鎖定策略規格。
+  - **戰鬥中鎖定策略 (`battleLockPolicy`)**：伺服器支援 `always` / `countdown` / `never` 配置，集中式 `isMutationLocked()` 判斷，握手下發 `serverConfig`，專用四語系 `battle.lockedDuringBattle` 提示。
+  - **真實 WebSocket 線上整合**：`onlineBattleE2E.test.js` 涵蓋真實連線打完一場戰鬥、雙手出拳 left/right slot 映射、版本不相容 (VERSION_MISMATCH) 客戶端中斷與 Toast 提示。
+  - **Docker Staging 演練**：建立 `docs/ops/docker-compose.staging.yml`（Node 伺服器 + Caddy 反向代理 + 獨立 Origin 靜態客戶端），完成缺變數 fail-fast、Origin 拒絕/放行、WebSocket 閒置心跳、完整戰鬥、資料備份與還原、容器崩潰 restart:always、20 併發帳號負載煙霧（100% 成功，平均延遲 99ms）。實測全項留證於目錄 `%LOCALAPPDATA%\Temp\koraku-staging-evidence\20260903-0535\`。
+  - **上線整備文件**：產出 `docs/ops/go-live-checklist.md`（標明「僅真機驗證」）與 `docs/ops/deployment.md`（標明「Docker 已驗證 / 僅文件化」），落實 AGENTS.md 政策 16 之每日備份排程與還原 SOP。
+  - **動態 WSS 注入**：支援 `window.__KORAKU_CONFIG__.serverUrl` 與 `window.KORAKU_SERVER_URL`，保證正式主機名不寫死於程式碼。
+- **Phase 5（後續演進待辦）**：
   - 第三方帳號登入整合（Discord / Google OAuth2 與匿名裝置 Token 綁定遷移）。
   - 全球伺服器多節點部署與 Redis 分散式 Session 支援。
   - 玩家間即時 PVP 猜拳匹配擂台賽系統。
+
+### 已知待辦 (Known Technical Debt & Follow-ups)
+- `kernelFactory.js` 離線 kernel 四處 `BATTLE_IN_PROGRESS_LOCKED` 訊息為硬編碼中文，應改 `{ key }` 走 I18n。

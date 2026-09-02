@@ -394,6 +394,7 @@ test("GameSession: 權威戰鬥生命週期、暫停限制(最多3次/倒數階�
   });
   assert.equal(equipDuringBattle.ack, false);
   assert.equal(equipDuringBattle.error, ErrorCodes.BATTLE_IN_PROGRESS_LOCKED);
+  assert.equal(equipDuringBattle.key, "battle.lockedDuringBattle");
 
   // 7. Battle Pause (Max 3 times during countdown)
   const pause1 = await session.executeCommand({ cmdId: "p1", command: Commands.BATTLE_PAUSE });
@@ -485,5 +486,270 @@ test("KorakuServer: HTTP /health 端點與伺服器主程式啟動/關閉生命�
   assert.equal(authData.deviceId, "device_test_fetch");
 
   await server.close();
+  await fs.rm(tmpDir, { recursive: true, force: true });
+});
+
+test("Phase 3.5: 轉移碼併發兌換原子互斥保證 (Race Condition Prevention)", async () => {
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "koraku-test-transfer-lock-"));
+  const storage = new JsonStorage({ dataDir: tmpDir });
+  await storage.init();
+
+  const tm = new TransferManager({ storage, codeTtlMs: 60000 });
+  const issued = await tm.issueTransferCode("acc_donor");
+  assert.ok(issued.transferCode);
+
+  // Concurrently claim the same code using Promise.all from 3 devices
+  const results = await Promise.all([
+    tm.claimTransferCode(issued.transferCode, "dev_target_1"),
+    tm.claimTransferCode(issued.transferCode, "dev_target_2"),
+    tm.claimTransferCode(issued.transferCode, "dev_target_3")
+  ]);
+
+  const successes = results.filter(r => r.success);
+  const failures = results.filter(r => !r.success);
+
+  assert.equal(successes.length, 1, "同一轉移碼在高度併發下應恰好只有 1 筆成功兌換");
+  assert.equal(failures.length, 2, "其餘併發兌換必須全部失敗");
+  assert.equal(failures[0].error, ErrorCodes.INVALID_TRANSFER_CODE);
+  assert.equal(failures[0].key, "save.transferCodeAlreadyClaimed");
+
+  await fs.rm(tmpDir, { recursive: true, force: true });
+});
+
+test("Phase 3.5: RateLimiter 200ms 短視窗突發限制 (Burst Limiting)", () => {
+  const rl = new RateLimiter({
+    windowMs: 1000,
+    maxRequests: 50,
+    burstWindowMs: 200,
+    burstLimit: 5
+  });
+
+  const ip = "192.168.1.100";
+  // 5 requests within burst window should pass
+  for (let i = 0; i < 5; i++) {
+    const res = rl.check(ip);
+    assert.equal(res.allowed, true, "突發請求應被允許");
+  }
+
+  // 6th request within 200ms burst window should be blocked
+  const burstBlock = rl.check(ip);
+  assert.equal(burstBlock.allowed, false, "第 6 筆突發請求應觸發 200ms 短視窗速率限制");
+  assert.equal(burstBlock.isBurst, true);
+});
+
+test("Phase 3.5: Validator 嚴格 Origin 檢查與新增指令 Schema 檢驗", () => {
+  const v = new Validator({
+    allowedOrigins: ["https://koraku.app", "http://localhost:4173"],
+    allowEmptyOrigin: false
+  });
+
+  // WebSocket upgrade with empty origin should be rejected when allowEmptyOrigin is false
+  const emptyWsOrigin = v.validateOrigin(null, { isWsUpgrade: true });
+  assert.equal(emptyWsOrigin, false, "WS 握手無 Origin 且未開啟 allowEmptyOrigin 應被拒絕");
+
+  // Allowed origin
+  assert.equal(v.validateOrigin("https://koraku.app", { isWsUpgrade: true }), true);
+
+  // slicePercent out of range or NaN
+  const badSlice1 = v.validatePayload(Commands.POST_BATTLE_STRIKE_WATERMELON, { slicePercent: 1.5 });
+  assert.equal(badSlice1.valid, false, "slicePercent > 1 應被拒絕");
+
+  const badSlice2 = v.validatePayload(Commands.POST_BATTLE_STRIKE_WATERMELON, { slicePercent: -0.1 });
+  assert.equal(badSlice2.valid, false, "slicePercent < 0 應被拒絕");
+
+  const goodSlice = v.validatePayload(Commands.POST_BATTLE_STRIKE_WATERMELON, { slicePercent: 0.85 });
+  assert.equal(goodSlice.valid, true, "有效 slicePercent 應驗證通過");
+
+  // autoBattle start rounds upper bound
+  const bigRounds = v.validatePayload(Commands.AUTO_BATTLE_START, { stageId: 1, rounds: 200 });
+  assert.equal(bigRounds.valid, false, "rounds > 100 應被拒絕");
+
+  // cheat.unlockAll schema
+  const cheatValid = v.validatePayload(Commands.CHEAT_UNLOCK_ALL, {});
+  assert.equal(cheatValid.valid, true);
+});
+
+test("Phase 3.5: 雙手出拳線上裁決與戰鬥 Replay 保存", async () => {
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "koraku-test-replay-"));
+  const storage = new JsonStorage({ dataDir: tmpDir });
+  await storage.init();
+
+  const accountId = "acc_dual_replay";
+  await storage.saveAccount(accountId, {
+    version: 1,
+    coins: 1000,
+    profile: { level: 10, xp: 500, skills: { dualHand: 1 } },
+    inventory: {}
+  });
+
+  const session = new GameSession({
+    accountId,
+    deviceId: "dev_dual",
+    storage
+  });
+  await session.load();
+
+  // Start Stage 4 (Dual Boss)
+  await session.executeCommand({
+    cmdId: "start_s4",
+    command: Commands.BATTLE_START,
+    payload: { stageId: 4 }
+  });
+  assert.ok(session.activeBattle);
+  const battleId = session.activeBattle.battleId;
+
+  // Dual hand punch: hand + hand2
+  const punchRes = await session.executeCommand({
+    cmdId: "dual_punch_1",
+    command: Commands.BATTLE_SELECT_HAND,
+    payload: { hand: "rock", hand2: "paper" }
+  });
+  assert.equal(punchRes.ack, true);
+  assert.equal(session.activeBattle?.selectedHands?.left, "rock", "伺服器應將 hand 映射為 left slot");
+  assert.equal(session.activeBattle?.selectedHands?.right, "paper", "伺服器應將 hand2 映射為 right slot");
+  assert.equal(punchRes.battleState?.selectedHands?.left, "rock");
+  assert.equal(punchRes.battleState?.selectedHands?.right, "paper");
+
+  // Abandon battle to trigger BATTLE_ENDED & replay saving
+  await session.executeCommand({
+    cmdId: "aban_s4",
+    command: Commands.BATTLE_ABANDON
+  });
+
+  // Replay should have been saved to disk
+  const replay = await storage.getBattleReplay(accountId, battleId);
+  assert.ok(replay, "戰鬥結束後應在 storage 保存 Replay");
+  assert.equal(replay.battleId, battleId);
+  assert.equal(replay.stageId, 4);
+  assert.ok(Array.isArray(replay.commandLog), "Replay 應包含 commandLog");
+  assert.ok(typeof replay.seed === "number" || typeof replay.seed === "string", "Replay 應記錄 seed");
+
+  await fs.rm(tmpDir, { recursive: true, force: true });
+});
+
+test("Phase 4 - Step D: battleLockPolicy 非法值伺服器啟動時即拒絕 (Fail-fast validation)", () => {
+  assert.throws(
+    () => new KorakuServer({ battleLockPolicy: "invalid_mode" }),
+    /Invalid battleLockPolicy 'invalid_mode'/
+  );
+  assert.throws(
+    () => new KorakuServer({ battleLockPolicy: "sometimes" }),
+    /Invalid battleLockPolicy 'sometimes'/
+  );
+
+  assert.doesNotThrow(() => new KorakuServer({ battleLockPolicy: "always" }));
+  assert.doesNotThrow(() => new KorakuServer({ battleLockPolicy: "countdown" }));
+  assert.doesNotThrow(() => new KorakuServer({ battleLockPolicy: "never" }));
+});
+
+test("Phase 4 - Step D: GameSession battleLockPolicy 三種策略 (always / countdown / never) 覆蓋四種突變在各 phase 之判定", async () => {
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "koraku-lock-policy-"));
+  const storage = new JsonStorage({ dataDir: tmpDir });
+  const transferManager = new TransferManager({ storage });
+
+  async function createTestSession(policy) {
+    const session = new GameSession({
+      accountId: "acc_policy_" + policy + "_" + Date.now(),
+      storage,
+      transferManager,
+      battleLockPolicy: policy
+    });
+    await session.load();
+    session.state.profile.skillPoints = 10;
+    session.state.inventoryEquipment = ["sword_flame", "chest_samurai"];
+    return session;
+  }
+
+  // 1. 策略 'always': 倒數階段與出拳判定階段皆全面鎖定四種突變
+  {
+    const sessionAlways = await createTestSession("always");
+    await sessionAlways.executeCommand({ cmdId: "s1", command: Commands.BATTLE_START, payload: { stageId: 1 } });
+    assert.equal(sessionAlways.activeBattle.phase, "countdown");
+
+    // 四種突變在 countdown 階段皆被拒絕
+    const eq = await sessionAlways.executeCommand({ cmdId: "e1", command: Commands.EQUIP_ITEM, payload: { slot: "weapon", itemId: "sword_flame" } });
+    assert.equal(eq.ack, false);
+    assert.equal(eq.error, ErrorCodes.BATTLE_IN_PROGRESS_LOCKED);
+    assert.equal(eq.key, "battle.lockedDuringBattle");
+
+    const uneq = await sessionAlways.executeCommand({ cmdId: "ue1", command: Commands.UNEQUIP_ITEM, payload: { slot: "weapon" } });
+    assert.equal(uneq.ack, false);
+    assert.equal(uneq.error, ErrorCodes.BATTLE_IN_PROGRESS_LOCKED);
+    assert.equal(uneq.key, "battle.lockedDuringBattle");
+
+    const stat = await sessionAlways.executeCommand({ cmdId: "st1", command: Commands.ALLOCATE_STAT, payload: { stat: "damage", points: 1 } });
+    assert.equal(stat.ack, false);
+    assert.equal(stat.error, ErrorCodes.BATTLE_IN_PROGRESS_LOCKED);
+    assert.equal(stat.key, "battle.lockedDuringBattle");
+
+    const skill = await sessionAlways.executeCommand({ cmdId: "sk1", command: Commands.ALLOCATE_SKILL, payload: { skillId: "momo" } });
+    assert.equal(skill.ack, false);
+    assert.equal(skill.error, ErrorCodes.BATTLE_IN_PROGRESS_LOCKED);
+    assert.equal(skill.key, "battle.lockedDuringBattle");
+
+    // 推進至 reaction phase: 同樣被拒絕
+    sessionAlways.battle.state.phase = "reaction";
+    const eqReact = await sessionAlways.executeCommand({ cmdId: "e2", command: Commands.EQUIP_ITEM, payload: { slot: "weapon", itemId: "sword_flame" } });
+    assert.equal(eqReact.ack, false);
+    assert.equal(eqReact.key, "battle.lockedDuringBattle");
+
+    await sessionAlways.executeCommand({ cmdId: "ab1", command: Commands.BATTLE_ABANDON });
+  }
+
+  // 2. 策略 'countdown': 倒數與結算階段允許操作，reaction / qte 階段嚴格鎖定
+  {
+    const sessionCd = await createTestSession("countdown");
+    await sessionCd.executeCommand({ cmdId: "s2", command: Commands.BATTLE_START, payload: { stageId: 1 } });
+    assert.equal(sessionCd.activeBattle.phase, "countdown");
+
+    // 在 countdown 階段允許突變
+    assert.equal(sessionCd.isMutationLocked(), false);
+    const eqCd = await sessionCd.executeCommand({ cmdId: "e_cd", command: Commands.EQUIP_ITEM, payload: { slot: "weapon", itemId: "sword_flame" } });
+    assert.equal(eqCd.ack, true);
+
+    const statCd = await sessionCd.executeCommand({ cmdId: "st_cd", command: Commands.ALLOCATE_STAT, payload: { stat: "damage", points: 1 } });
+    assert.equal(statCd.ack, true);
+
+    // 切換至 reaction 階段：鎖定
+    sessionCd.battle.state.phase = "reaction";
+    assert.equal(sessionCd.isMutationLocked(), true);
+    const eqReact = await sessionCd.executeCommand({ cmdId: "e_react", command: Commands.UNEQUIP_ITEM, payload: { slot: "weapon" } });
+    assert.equal(eqReact.ack, false);
+    assert.equal(eqReact.key, "battle.lockedDuringBattle");
+
+    // 切換至 qte 階段：鎖定
+    sessionCd.battle.state.phase = "qte";
+    assert.equal(sessionCd.isMutationLocked(), true);
+    const skillQte = await sessionCd.executeCommand({ cmdId: "sk_qte", command: Commands.ALLOCATE_SKILL, payload: { skillId: "momo" } });
+    assert.equal(skillQte.ack, false);
+    assert.equal(skillQte.key, "battle.lockedDuringBattle");
+
+    // 切換至 result 階段：允許
+    sessionCd.battle.state.phase = "result";
+    assert.equal(sessionCd.isMutationLocked(), false);
+
+    await sessionCd.executeCommand({ cmdId: "ab2", command: Commands.BATTLE_ABANDON });
+  }
+
+  // 3. 策略 'never': 全階段均不鎖定
+  {
+    const sessionNever = await createTestSession("never");
+    await sessionNever.executeCommand({ cmdId: "s3", command: Commands.BATTLE_START, payload: { stageId: 1 } });
+
+    sessionNever.battle.state.phase = "countdown";
+    assert.equal(sessionNever.isMutationLocked(), false);
+
+    sessionNever.battle.state.phase = "reaction";
+    assert.equal(sessionNever.isMutationLocked(), false);
+
+    sessionNever.battle.state.phase = "qte";
+    assert.equal(sessionNever.isMutationLocked(), false);
+
+    const statNever = await sessionNever.executeCommand({ cmdId: "st_never", command: Commands.ALLOCATE_STAT, payload: { stat: "damage", points: 1 } });
+    assert.equal(statNever.ack, true);
+
+    await sessionNever.executeCommand({ cmdId: "ab3", command: Commands.BATTLE_ABANDON });
+  }
+
   await fs.rm(tmpDir, { recursive: true, force: true });
 });

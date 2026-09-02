@@ -9,7 +9,8 @@ const ALLOWED_ENVELOPE_FIELDS = new Set([
   "payload",
   "clientTime",
   "configVersion",
-  "token"
+  "token",
+  "type"
 ]);
 
 export class Validator {
@@ -17,25 +18,52 @@ export class Validator {
     this.allowedOrigins = options.allowedOrigins || SERVER_CONFIG.allowedOrigins;
     this.maxEnvelopeSizeBytes = options.maxEnvelopeSizeBytes || SERVER_CONFIG.maxEnvelopeSizeBytes;
     this.configVersion = options.configVersion || SERVER_CONFIG.configVersion;
+    this.allowEmptyOrigin = options.allowEmptyOrigin !== undefined ? options.allowEmptyOrigin : SERVER_CONFIG.allowEmptyOrigin;
   }
 
   /**
    * Validate WebSocket / HTTP Origin header
    * @param {string} origin
+   * @param {{ isWsUpgrade?: boolean }} [options]
    * @returns {boolean}
    */
-  validateOrigin(origin) {
-    if (!origin) return true; // Direct non-browser clients (tests, mobile app wrappers, curl)
-    const normalized = origin.trim().toLowerCase().replace(/\/+$/, "");
+  validateOrigin(origin, { isWsUpgrade = false } = {}) {
+    if (!origin) {
+      if (!isWsUpgrade) return true; // Direct non-WS HTTP calls
+      return Boolean(this.allowEmptyOrigin || process.env.ALLOW_EMPTY_ORIGIN === "true");
+    }
+    let originUrl;
+    try {
+      originUrl = new URL(origin);
+    } catch {
+      return false;
+    }
+    const originHost = originUrl.hostname.toLowerCase();
+    const originProtocol = originUrl.protocol;
 
     for (const allowed of this.allowedOrigins) {
-      const allowedNorm = allowed.trim().toLowerCase().replace(/\/+$/, "");
-      if (normalized === allowedNorm) {
-        return true;
+      const allowedTrimmed = allowed.trim().toLowerCase().replace(/\/+$/, "");
+      let allowedUrl;
+      try {
+        allowedUrl = new URL(allowedTrimmed.startsWith("http") ? allowedTrimmed : `https://${allowedTrimmed}`);
+      } catch {
+        continue;
       }
-      // Wildcard check
-      if (allowedNorm.startsWith("*.") && normalized.endsWith(allowedNorm.substring(1))) {
-        return true;
+
+      if (allowedTrimmed.startsWith("http://") || allowedTrimmed.startsWith("https://")) {
+        if (originUrl.origin.toLowerCase() === allowedUrl.origin.toLowerCase()) {
+          return true;
+        }
+      }
+
+      // Check wildcard hostname match, e.g. *.koraku.app
+      if (allowedUrl.hostname.startsWith("*.")) {
+        const domainSuffix = allowedUrl.hostname.slice(2);
+        if (originHost === domainSuffix || originHost.endsWith("." + domainSuffix)) {
+          if (originProtocol === allowedUrl.protocol) {
+            return true;
+          }
+        }
       }
     }
     return false;
@@ -213,7 +241,145 @@ export class Validator {
         if (!payload.transferCode || typeof payload.transferCode !== "string") {
           return { valid: false, code: ErrorCodes.INVALID_SCHEMA, error: "claimTransferCode requires string payload.transferCode." };
         }
+        for (const k of Object.keys(payload)) {
+          if (k !== "transferCode") {
+            return { valid: false, code: ErrorCodes.INVALID_SCHEMA, error: `account.claimTransferCode unexpected field: ${k}` };
+          }
+        }
         break;
+
+      case Commands.BATTLE_USE_ITEM:
+        if (!payload.itemId || typeof payload.itemId !== "string") {
+          return { valid: false, code: ErrorCodes.INVALID_SCHEMA, error: "battle.useItem requires string payload.itemId." };
+        }
+        for (const k of Object.keys(payload)) {
+          if (k !== "itemId") {
+            return { valid: false, code: ErrorCodes.INVALID_SCHEMA, error: `battle.useItem unexpected field: ${k}` };
+          }
+        }
+        break;
+
+      case Commands.BATTLE_INPUT_QTE: {
+        const allowedQteFields = new Set(["direction", "slot", "stepIndex", "declaredAt", "input", "key"]);
+        for (const k of Object.keys(payload)) {
+          if (!allowedQteFields.has(k)) {
+            return { valid: false, code: ErrorCodes.INVALID_SCHEMA, error: `battle.inputQte unexpected field: ${k}` };
+          }
+        }
+        const dir = payload.direction || payload.input || payload.key;
+        if (!dir || typeof dir !== "string") {
+          return { valid: false, code: ErrorCodes.INVALID_SCHEMA, error: "battle.inputQte requires string direction." };
+        }
+        break;
+      }
+
+      case Commands.BATTLE_USE_MORPH: {
+        const allowedMorphFields = new Set(["targetHand", "slot", "declaredAt"]);
+        for (const k of Object.keys(payload)) {
+          if (!allowedMorphFields.has(k)) {
+            return { valid: false, code: ErrorCodes.INVALID_SCHEMA, error: `battle.useMorph unexpected field: ${k}` };
+          }
+        }
+        break;
+      }
+
+      case Commands.BATTLE_SELECT_TARGET: {
+        const allowedTargetFields = new Set(["target"]);
+        for (const k of Object.keys(payload)) {
+          if (!allowedTargetFields.has(k)) {
+            return { valid: false, code: ErrorCodes.INVALID_SCHEMA, error: `battle.selectTarget unexpected field: ${k}` };
+          }
+        }
+        if (payload.target !== undefined && !["main", "left", "right"].includes(payload.target)) {
+          return { valid: false, code: ErrorCodes.INVALID_SCHEMA, error: "battle.selectTarget target must be 'main', 'left', or 'right'." };
+        }
+        break;
+      }
+
+      case Commands.AUTO_BATTLE_START: {
+        const allowedAutoFields = new Set(["stageId", "rounds"]);
+        for (const k of Object.keys(payload)) {
+          if (!allowedAutoFields.has(k)) {
+            return { valid: false, code: ErrorCodes.INVALID_SCHEMA, error: `autoBattle.start unexpected field: ${k}` };
+          }
+        }
+        if (payload.stageId !== undefined && (typeof payload.stageId !== "number" || !Number.isFinite(payload.stageId) || payload.stageId < 1 || payload.stageId > 4)) {
+          return { valid: false, code: ErrorCodes.INVALID_SCHEMA, error: "autoBattle.start stageId must be a number between 1 and 4." };
+        }
+        if (payload.rounds !== undefined && (typeof payload.rounds !== "number" || !Number.isInteger(payload.rounds) || payload.rounds < 1 || payload.rounds > 100)) {
+          return { valid: false, code: ErrorCodes.INVALID_SCHEMA, error: "autoBattle.start rounds must be an integer between 1 and 100." };
+        }
+        break;
+      }
+
+      case Commands.AUTO_BATTLE_STOP: {
+        if (Object.keys(payload).length > 0) {
+          return { valid: false, code: ErrorCodes.INVALID_SCHEMA, error: "autoBattle.stop does not accept payload fields." };
+        }
+        break;
+      }
+
+      case Commands.POST_BATTLE_REQUEST_SWIMSUIT: {
+        if (Object.keys(payload).length > 0) {
+          return { valid: false, code: ErrorCodes.INVALID_SCHEMA, error: "postBattle.requestSwimsuit does not accept payload fields." };
+        }
+        break;
+      }
+
+      case Commands.POST_BATTLE_STRIKE_WATERMELON: {
+        const allowedWatermelonFields = new Set(["slicePercent", "declaredAt"]);
+        for (const k of Object.keys(payload)) {
+          if (!allowedWatermelonFields.has(k)) {
+            return { valid: false, code: ErrorCodes.INVALID_SCHEMA, error: `postBattle.strikeWatermelon unexpected field: ${k}` };
+          }
+        }
+        if (payload.slicePercent !== undefined && (typeof payload.slicePercent !== "number" || !Number.isFinite(payload.slicePercent) || payload.slicePercent < 0 || payload.slicePercent > 1)) {
+          return { valid: false, code: ErrorCodes.INVALID_SCHEMA, error: "postBattle.strikeWatermelon slicePercent must be a number between 0 and 1." };
+        }
+        break;
+      }
+
+      case Commands.CHEAT_UNLOCK_ALL: {
+        const allowedUnlockFields = new Set(["gallery", "stages"]);
+        for (const k of Object.keys(payload)) {
+          if (!allowedUnlockFields.has(k)) {
+            return { valid: false, code: ErrorCodes.INVALID_SCHEMA, error: `cheat.unlockAll unexpected field: ${k}` };
+          }
+        }
+        break;
+      }
+
+      case Commands.CHEAT_ADD_COINS:
+        if (typeof payload.amount !== "number" || !Number.isFinite(payload.amount)) {
+          return { valid: false, code: ErrorCodes.INVALID_SCHEMA, error: "cheat.addCoins requires finite number payload.amount." };
+        }
+        for (const k of Object.keys(payload)) {
+          if (k !== "amount") {
+            return { valid: false, code: ErrorCodes.INVALID_SCHEMA, error: `cheat.addCoins unexpected field: ${k}` };
+          }
+        }
+        break;
+
+      case Commands.CHEAT_SET_STATS: {
+        if (!payload.stats || typeof payload.stats !== "object" || Array.isArray(payload.stats)) {
+          return { valid: false, code: ErrorCodes.INVALID_SCHEMA, error: "cheat.setStats requires object payload.stats." };
+        }
+        const allowedStatsFields = new Set(["hp", "mp", "damage", "level", "skillPoints"]);
+        for (const k of Object.keys(payload.stats)) {
+          if (!allowedStatsFields.has(k)) {
+            return { valid: false, code: ErrorCodes.INVALID_SCHEMA, error: `cheat.setStats unexpected stat field: ${k}` };
+          }
+          if (typeof payload.stats[k] !== "number" || !Number.isFinite(payload.stats[k])) {
+            return { valid: false, code: ErrorCodes.INVALID_SCHEMA, error: `cheat.setStats stat ${k} must be finite number.` };
+          }
+        }
+        for (const k of Object.keys(payload)) {
+          if (k !== "stats") {
+            return { valid: false, code: ErrorCodes.INVALID_SCHEMA, error: `cheat.setStats unexpected field: ${k}` };
+          }
+        }
+        break;
+      }
 
       default:
         break;

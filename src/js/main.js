@@ -1,8 +1,4 @@
-import { EventBus } from "./core/EventBus.js";
-import { GameStore } from "./core/GameStore.js";
 import { Persistence } from "./services/Persistence.js";
-import { BattleSystem } from "./systems/BattleSystem.js";
-import { PostBattleSystem } from "./systems/PostBattleSystem.js";
 import { SoundSystem } from "./systems/SoundSystem.js";
 import { AppView } from "./ui/AppView.js";
 import { DialogueController } from "./ui/DialogueController.js";
@@ -49,10 +45,10 @@ const client = mode === "online"
 
 client.init();
 
-const bus = client.bus || new EventBus();
-const store = client.store || new GameStore(bus, persistence);
-const battle = client.battle || new BattleSystem(bus, store);
-const postBattle = client.postBattle || new PostBattleSystem(bus, store);
+const bus = client.bus;
+const store = client.store;
+const battle = client.battle;
+const postBattle = client.postBattle;
 const sound = new SoundSystem(store);
 
 bus.on("battle:ended", (result) => postBattle.open(result));
@@ -79,8 +75,8 @@ if (
     '<button type="button" data-debug="progress">Lv.10／500 星砂</button>';
   panel.addEventListener("click", async (event) => {
     const action = event.target.dataset.debug;
-    if (action === "victory" && battle.snapshot()?.active) battle.end(true);
-    if (action === "defeat" && battle.snapshot()?.active) battle.end(false);
+    if (action === "victory" && battle.snapshot()?.active) battle.end?.(true);
+    if (action === "defeat" && battle.snapshot()?.active) battle.end?.(false);
     if (action === "progress") {
       const state = client.getState();
       const currentLevel = state.profile?.level || 1;

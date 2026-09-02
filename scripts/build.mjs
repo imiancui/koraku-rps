@@ -36,6 +36,7 @@ function transformModule(code) {
   // Replace export declarations
   transformed = transformed.replace(/^export\s+default\s+/gm, "");
   transformed = transformed.replace(/^export\s+(const|let|var|function|class)\s+/gm, "$1 ");
+  transformed = transformed.replace(/^export\s*\{[^}]*\}(?:\s*from\s*['"][^'"]+['"])?;?\r?\n?/gm, "");
   
   return transformed.trim();
 }

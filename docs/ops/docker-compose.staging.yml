@@ -1,0 +1,69 @@
+services:
+  server:
+    image: node:22-alpine
+    container_name: koraku-staging-server
+    working_dir: /app
+    volumes:
+      - ../..:/app:ro
+      - staging_server_data:/data
+      - staging_server_backups:/backups
+    environment:
+      - NODE_ENV=production
+      - PORT=8080
+      - HOST=0.0.0.0
+      - STORAGE_DIR=/data
+      - BACKUP_DIR=/backups
+      - JWT_SECRET=staging_super_secret_jwt_key_koraku_2026_test
+      - ANON_SALT=staging_super_secret_anon_salt_koraku_2026_test
+      - TRUST_PROXY=true
+      - ALLOWED_ORIGINS=https://localhost:8443,https://127.0.0.1:8443,https://localhost:8444,https://127.0.0.1:8444
+      - DEV_ADMIN_KEY=dev_staging_secret_key
+      - DEV_DEVICE_WHITELIST=dev_staging_device_1
+      - BATTLE_LOCK_POLICY=always
+      - RATE_LIMIT_MAX_REQUESTS=300
+      - RATE_LIMIT_BURST_LIMIT=100
+    command: ["node", "server/index.js"]
+    restart: always
+    networks:
+      - staging-net
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: koraku-staging-caddy
+    ports:
+      - "8443:8443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - staging_caddy_data:/data
+      - staging_caddy_config:/config
+    depends_on:
+      - server
+    restart: always
+    networks:
+      - staging-net
+
+  client:
+    image: caddy:2-alpine
+    container_name: koraku-staging-client
+    ports:
+      - "8444:8444"
+    volumes:
+      - ../..:/usr/share/caddy:ro
+      - ./Caddyfile.client:/etc/caddy/Caddyfile:ro
+      - staging_client_data:/data
+      - staging_client_config:/config
+    restart: always
+    networks:
+      - staging-net
+
+networks:
+  staging-net:
+    driver: bridge
+
+volumes:
+  staging_server_data:
+  staging_server_backups:
+  staging_caddy_data:
+  staging_caddy_config:
+  staging_client_data:
+  staging_client_config:

@@ -7,6 +7,7 @@ import { Persistence } from "../services/Persistence.js";
 import { BattleSystem } from "../systems/BattleSystem.js";
 import { PostBattleSystem } from "../systems/PostBattleSystem.js";
 import { Commands, ErrorCodes, CONFIG_VERSION } from "./protocol.js";
+import { resolveWebSocketUrl } from "../net/RemoteGameClient.js";
 
 /**
  * Create a new headless / server-ready or offline game kernel
@@ -122,7 +123,12 @@ export function createKernel(options = {}) {
         break;
 
       case Commands.BATTLE_SELECT_HAND:
-        result = battle.selectHand(payload.hand, payload.hand2);
+        if (payload.hand2 && !payload.slot) {
+          battle.selectHand(payload.hand, "left", payload.clientTime);
+          result = battle.selectHand(payload.hand2, "right", payload.clientTime);
+        } else {
+          result = battle.selectHand(payload.hand, payload.slot || null, payload.clientTime);
+        }
         break;
 
       case Commands.BATTLE_SELECT_TARGET:
@@ -276,4 +282,5 @@ export function createKernel(options = {}) {
   };
 }
 
+export { resolveWebSocketUrl };
 export default createKernel;

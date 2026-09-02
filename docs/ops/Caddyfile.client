@@ -1,0 +1,15 @@
+﻿{
+    auto_https disable_redirects
+}
+
+localhost:8444, 127.0.0.1:8444 {
+    tls internal
+    root * /usr/share/caddy
+    file_server
+
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        Referrer-Policy strict-origin-when-cross-origin
+    }
+}

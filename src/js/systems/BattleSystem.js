@@ -6,7 +6,8 @@ import {
   evaluateDualRps,
   getCounterHand,
   getQteCounterNarration,
-  getRandomHand
+  getRandomHand,
+  createSeededRandom
 } from "./rpsRules.js";
 
 export class BattleSystem {
@@ -53,6 +54,17 @@ export class BattleSystem {
       if (this.state?.active && this.state.phase === "qte" && this.state.isDualQte) {
         this.handleDualQteSlotSuccess(enemyId || slot);
       }
+    });
+    this._isDispatching = false;
+  }
+
+  recordCommand(type, payload = {}, declaredAt = null, result = null) {
+    this.commandLog.push({
+      type,
+      payload,
+      declaredAt: declaredAt || this.now(),
+      executedAt: this.now(),
+      result
     });
   }
 
@@ -106,57 +118,62 @@ export class BattleSystem {
   }
 
   dispatchCommand(cmd) {
-    const { type, payload, declaredAt, cmdId } = cmd;
+    this._isDispatching = true;
+    try {
+      const { type, payload, declaredAt, cmdId } = cmd;
 
-    // Check lock assumption
-    if ((type === "equip" || type === "unequip" || type === "allocate") && this.isBattleActive()) {
-      return {
-        ok: false,
-        cmdId,
-        reason: "locked_during_battle",
-        error: "ASSUMPTION: Equipment and stat allocations are locked during active battle"
-      };
+      // Check lock assumption
+      if ((type === "equip" || type === "unequip" || type === "allocate") && this.isBattleActive()) {
+        return {
+          ok: false,
+          cmdId,
+          reason: "locked_during_battle",
+          error: "ASSUMPTION: Equipment and stat allocations are locked during active battle"
+        };
+      }
+
+      let result = { ok: false, cmdId };
+      switch (type) {
+        case "select_hand":
+          result = this.selectHand(payload?.handId || payload?.hand, payload?.slot, declaredAt);
+          break;
+        case "use_morph":
+          result = this.useMorph(declaredAt);
+          break;
+        case "use_item":
+          result = this.useItem(payload?.itemId, declaredAt);
+          break;
+        case "input_qte":
+          result = { ok: Boolean(this.inputQte(payload?.directionId, payload?.slot, declaredAt)) };
+          break;
+        case "report_qte_batch":
+          result = this.state?.isDualQte
+            ? this.dualQte.auditInputs(payload?.inputs)
+            : this.qte.auditInputs(payload?.inputs);
+          break;
+        case "pause":
+          result = this.pause();
+          break;
+        case "resume":
+          result = this.resume();
+          break;
+        case "abandon":
+          this.abandon();
+          result = { ok: true };
+          break;
+        default:
+          result = { ok: false, reason: "unknown_command" };
+      }
+
+      this.commandLog.push({
+        ...cmd,
+        executedAt: this.now(),
+        result
+      });
+      return result;
+    } finally {
+      this._isDispatching = false;
     }
-
-    let result = { ok: false, cmdId };
-    switch (type) {
-      case "select_hand":
-        result = this.selectHand(payload?.handId, payload?.slot, declaredAt);
-        break;
-      case "use_morph":
-        result = this.useMorph(declaredAt);
-        break;
-      case "use_item":
-        result = this.useItem(payload?.itemId, declaredAt);
-        break;
-      case "input_qte":
-        result = { ok: Boolean(this.inputQte(payload?.directionId, payload?.slot, declaredAt)) };
-        break;
-      case "report_qte_batch":
-        result = this.state?.isDualQte
-          ? this.dualQte.auditInputs(payload?.inputs)
-          : this.qte.auditInputs(payload?.inputs);
-        break;
-      case "pause":
-        result = this.pause();
-        break;
-      case "resume":
-        result = this.resume();
-        break;
-      case "abandon":
-        this.abandon();
-        result = { ok: true };
-        break;
-      default:
-        result = { ok: false, reason: "unknown_command" };
-    }
-
-    this.commandLog.push({
-      ...cmd,
-      executedAt: this.now(),
-      result
-    });
-    return result;
   }
 
   getAllEquipEffects(effectType) {
@@ -291,7 +308,15 @@ export class BattleSystem {
 
     this.stopClocks();
     this.pauseCount = 0;
-    this.battleSeed = options.seed ?? Math.floor(Math.random() * 1000000000);
+    this.battleSeed = typeof options.seed === "number"
+      ? options.seed
+      : (options.seed ? Number(options.seed) : Math.floor(Math.random() * 1000000000));
+    if (options.seed !== undefined && options.seed !== null) {
+      const seededRandom = createSeededRandom(this.battleSeed);
+      this.random = seededRandom;
+      if (this.qte) this.qte.random = seededRandom;
+      if (this.dualQte) this.dualQte.random = seededRandom;
+    }
     this.commandLog = [];
     this.battleStartTime = this.now();
     this.battleDamageDealt = 0;
@@ -650,7 +675,9 @@ export class BattleSystem {
     this.countdownRemainingMs = Math.max(0, (this.countdownDeadline || 0) - this.now());
     this.clearCountdownClocks();
     this.emitState();
-    return { ok: true, pauseCount: this.pauseCount, remainingMs: this.countdownRemainingMs };
+    const res = { ok: true, pauseCount: this.pauseCount, remainingMs: this.countdownRemainingMs };
+    if (!this._isDispatching) this.recordCommand("pause", {}, null, res);
+    return res;
   }
 
   resume() {
@@ -663,7 +690,9 @@ export class BattleSystem {
       this.scheduleRound(remainingMs);
     }
     this.emitState();
-    return { ok: true };
+    const res = { ok: true };
+    if (!this._isDispatching) this.recordCommand("resume", {}, null, res);
+    return res;
   }
 
   handleDisconnect() {
@@ -822,7 +851,9 @@ export class BattleSystem {
     if (this.state.phase === "countdown") {
       // Secret commitment sealed before reveal
       if (arrival > this.countdownDeadline) {
-        return { ok: false, reason: "late_commitment" };
+        const res = { ok: false, reason: "late_commitment" };
+        if (!this._isDispatching) this.recordCommand("select_hand", { handId, slot }, declaredAt, res);
+        return res;
       }
       if (slot === "left") {
         this.state.selectedHands.left = handId;
@@ -838,11 +869,15 @@ export class BattleSystem {
       }
       this.emitState();
       this.bus.emit("sound", { name: "select" });
-      return { ok: true, handId, slot };
+      const res = { ok: true, handId, slot };
+      if (!this._isDispatching) this.recordCommand("select_hand", { handId, slot }, declaredAt, res);
+      return res;
     } else if (this.state.phase === "reaction" && this.state.morphActive) {
       // 150ms grace check on morph reaction window
       if (arrival > this.reactionDeadline + 150) {
-        return { ok: false, reason: "morph_expired" };
+        const res = { ok: false, reason: "morph_expired" };
+        if (!this._isDispatching) this.recordCommand("select_hand", { handId, slot }, declaredAt, res);
+        return res;
       }
       if (slot === "left") {
         this.state.selectedHands.left = handId;
@@ -861,7 +896,9 @@ export class BattleSystem {
       this.emitState();
       this.bus.emit("sound", { name: "select" });
       this.resolveRound();
-      return { ok: true, handId, slot };
+      const res = { ok: true, handId, slot };
+      if (!this._isDispatching) this.recordCommand("select_hand", { handId, slot }, declaredAt, res);
+      return res;
     }
     return false;
   }
@@ -997,7 +1034,9 @@ export class BattleSystem {
       this.state.morphActive = false;
       this.resolveRound();
     }, morphWindowMs);
-    return { ok: true };
+    const res = { ok: true };
+    if (!this._isDispatching) this.recordCommand("use_morph", {}, declaredAt, res);
+    return res;
   }
 
   resolveDraw() {
@@ -1295,10 +1334,13 @@ export class BattleSystem {
 
   inputQte(directionId, slot = null, declaredAt = null) {
     if (this.state?.phase !== "qte") return false;
-    if (this.state.isDualQte) {
-      return this.dualQte.input(directionId, slot, declaredAt);
+    const res = this.state.isDualQte
+      ? this.dualQte.input(directionId, slot, declaredAt)
+      : this.qte.input(directionId, declaredAt);
+    if (!this._isDispatching) {
+      this.recordCommand("input_qte", { directionId, slot }, declaredAt, { ok: Boolean(res) });
     }
-    return this.qte.input(directionId, declaredAt);
+    return res;
   }
 
   handleDualQteSlotSuccess(slotOrEnemyId) {
@@ -1738,7 +1780,9 @@ export class BattleSystem {
       },
       { key: "dialogue.speakerNarrator" }
     );
-    return { ok: true, restored, resource: item.resource };
+    const res = { ok: true, restored, resource: item.resource };
+    if (!this._isDispatching) this.recordCommand("use_item", { itemId }, declaredAt, res);
+    return res;
   }
 
   end(won) {
@@ -1839,6 +1883,7 @@ export class BattleSystem {
       this.state.autoBattle = { ...this.autoBattle };
       this.emitState();
     }
+    if (!this._isDispatching) this.recordCommand("abandon", {}, null, { ok: true });
   }
 
   clearCountdownClocks() {

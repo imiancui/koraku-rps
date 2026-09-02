@@ -5,8 +5,9 @@ export class RateLimiter {
   constructor(options = {}) {
     this.windowMs = options.windowMs || SERVER_CONFIG.rateLimit.windowMs;
     this.maxRequests = options.maxRequestsPerWindow || SERVER_CONFIG.rateLimit.maxRequestsPerWindow;
-    this.burstLimit = options.burstLimit || SERVER_CONFIG.rateLimit.burstLimit;
-    this._clients = new Map(); // key -> { count, windowStart }
+    this.burstWindowMs = options.burstWindowMs || SERVER_CONFIG.rateLimit.burstWindowMs || 200;
+    this.burstLimit = options.burstLimit || SERVER_CONFIG.rateLimit.burstLimit || 10;
+    this._clients = new Map(); // key -> { count, windowStart, burstCount, burstStart }
 
     // Periodic sweep of expired windows to prevent memory leakage
     this._cleanupTimer = setInterval(() => this._cleanup(), this.windowMs * 2);
@@ -18,7 +19,7 @@ export class RateLimiter {
   /**
    * Check if a request from key is allowed
    * @param {string} key - IP or accountId
-   * @returns {{ allowed: boolean, retryAfterMs?: number, currentCount: number }}
+   * @returns {{ allowed: boolean, retryAfterMs?: number, currentCount: number, isBurst?: boolean }}
    */
   check(key) {
     if (!key) return { allowed: true, currentCount: 0 };
@@ -26,18 +27,36 @@ export class RateLimiter {
     let record = this._clients.get(key);
 
     if (!record || now - record.windowStart >= this.windowMs) {
-      record = { count: 1, windowStart: now };
+      record = { count: 1, windowStart: now, burstCount: 1, burstStart: now };
       this._clients.set(key, record);
       return { allowed: true, currentCount: 1 };
     }
 
+    // Check short burst window (e.g. max 10 requests within 200ms)
+    if (now - record.burstStart >= this.burstWindowMs) {
+      record.burstCount = 1;
+      record.burstStart = now;
+    } else {
+      record.burstCount += 1;
+      if (record.burstCount > this.burstLimit) {
+        const retryAfterMs = Math.max(0, this.burstWindowMs - (now - record.burstStart));
+        return {
+          allowed: false,
+          retryAfterMs,
+          currentCount: record.count,
+          isBurst: true
+        };
+      }
+    }
+
     record.count += 1;
-    if (record.count > this.burstLimit) {
+    if (record.count > this.maxRequests) {
       const retryAfterMs = Math.max(0, this.windowMs - (now - record.windowStart));
       return {
         allowed: false,
         retryAfterMs,
-        currentCount: record.count
+        currentCount: record.count,
+        isBurst: false
       };
     }
 

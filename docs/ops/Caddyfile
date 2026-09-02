@@ -1,0 +1,31 @@
+﻿{
+    auto_https disable_redirects
+}
+
+localhost:8443, 127.0.0.1:8443 {
+    tls internal
+
+    # Health check endpoint
+    handle /health* {
+        reverse_proxy server:8080
+    }
+
+    # Anonymous authentication
+    handle /auth/* {
+        reverse_proxy server:8080
+    }
+
+    # Authoritative WebSocket reverse proxy
+    handle /ws* {
+        reverse_proxy server:8080 {
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-Proto https
+        }
+    }
+
+    # Fallback to server
+    handle {
+        reverse_proxy server:8080
+    }
+}

@@ -4,7 +4,8 @@ import {
   SERVER_CONFIG,
   Events,
   ConnectionStates,
-  ErrorCodes
+  ErrorCodes,
+  resolveBattleLockPolicy
 } from "./config.js";
 import { AuthManager } from "./core/Auth.js";
 import { JsonStorage } from "./storage/JsonStorage.js";
@@ -19,19 +20,24 @@ import { WsAdapter } from "./net/WsAdapter.js";
 export class KorakuServer {
   constructor(options = {}) {
     this.config = { ...SERVER_CONFIG, ...options };
+    if (options.battleLockPolicy) {
+      this.config.battleLockPolicy = resolveBattleLockPolicy(options.battleLockPolicy);
+    }
     this.storage = options.storage || new JsonStorage({ dataDir: this.config.dataDir });
     this.auth = options.auth || new AuthManager({ secret: this.config.jwtSecret, tokenTtlMs: this.config.tokenTtlMs });
     this.transferManager = options.transferManager || new TransferManager({ storage: this.storage, ttlMs: this.config.transferCodeTtlMs });
     this.connectionManager = options.connectionManager || new ConnectionManager({
       storage: this.storage,
       transferManager: this.transferManager,
-      idleTimeoutMs: this.config.idleSessionTimeoutMs
+      idleTimeoutMs: this.config.idleSessionTimeoutMs,
+      battleLockPolicy: this.config.battleLockPolicy
     });
     this.commandQueue = options.commandQueue || new CommandQueue();
     this.validator = options.validator || new Validator({
       allowedOrigins: this.config.allowedOrigins,
       maxEnvelopeSizeBytes: this.config.maxEnvelopeSizeBytes,
-      configVersion: this.config.configVersion
+      configVersion: this.config.configVersion,
+      allowEmptyOrigin: this.config.allowEmptyOrigin
     });
     this.rateLimiter = options.rateLimiter || new RateLimiter(this.config.rateLimit);
     this.entitlements = options.entitlements || new EntitlementManager();
@@ -57,7 +63,7 @@ export class KorakuServer {
 
       this.wsAdapter = new WsAdapter(this.httpServer, {
         verifyClient: ({ req, origin }, cb) => {
-          const isAllowed = this.validator.validateOrigin(origin || req.headers.origin);
+          const isAllowed = this.validator.validateOrigin(origin || req.headers.origin, { isWsUpgrade: true });
           if (!isAllowed) {
             cb(false, 403, "Forbidden Origin");
             return;
@@ -125,7 +131,14 @@ export class KorakuServer {
         try {
           const payload = body ? JSON.parse(body) : {};
           const deviceId = payload.deviceId;
-          const devEntitlement = Boolean(payload.devEntitlement);
+          // Dev entitlement can ONLY be granted by server whitelist or devAdminKey
+          // Client request body cannot self-declare devEntitlement
+          let devEntitlement = false;
+          if (this.config.devAdminKey && payload.devAdminKey && payload.devAdminKey === this.config.devAdminKey) {
+            devEntitlement = true;
+          } else if (this.config.devDeviceWhitelist?.length && deviceId && this.config.devDeviceWhitelist.includes(deviceId)) {
+            devEntitlement = true;
+          }
           const authData = this.auth.issueAnonymousToken(deviceId, devEntitlement);
           res.writeHead(200, { "Content-Type": "application/json" });
           res.end(JSON.stringify(authData));
@@ -141,12 +154,33 @@ export class KorakuServer {
     res.end(JSON.stringify({ error: "Not Found" }));
   }
 
+  _resolveClientIp(req) {
+    if (this.config.trustProxy || process.env.TRUST_PROXY === "true") {
+      const forwarded = req.headers["x-forwarded-for"];
+      if (forwarded) {
+        const firstIp = forwarded.split(",")[0].trim();
+        if (firstIp) return firstIp;
+      }
+      const realIp = req.headers["x-real-ip"];
+      if (realIp) return realIp.trim();
+    }
+    return req.socket.remoteAddress || "unknown_ip";
+  }
+
   /**
    * Handle incoming WebSocket connections
    */
   async _handleWsConnection(socket, req) {
     const parsedUrl = new URL(req.url, `http://${req.headers.host || "localhost"}`);
-    const clientIp = req.socket.remoteAddress;
+    const clientIp = this._resolveClientIp(req);
+
+    // Handshake IP rate limiter check
+    const ipHandshakeCheck = this.rateLimiter.check(`ip_${clientIp}`);
+    if (!ipHandshakeCheck.allowed) {
+      socket.close(1008, "Rate limit exceeded");
+      return;
+    }
+
     const tokenQuery = parsedUrl.searchParams.get("token");
     const deviceIdQuery = parsedUrl.searchParams.get("deviceId");
 
@@ -174,7 +208,7 @@ export class KorakuServer {
     }
 
     // Register with ConnectionManager (automatically kicks any older duplicate connection)
-    const session = this.connectionManager.registerConnection(accountId, socket);
+    const session = this.connectionManager.registerConnection(accountId, socket, undefined, deviceId);
     await session.load();
 
     // Send connection state handshake ACK
@@ -186,6 +220,9 @@ export class KorakuServer {
       devEntitlement,
       protocolVersion: this.config.protocolVersion,
       configVersion: this.config.configVersion,
+      serverConfig: {
+        battleLockPolicy: this.config.battleLockPolicy
+      },
       serverTime: Date.now()
     });
 
@@ -211,18 +248,39 @@ export class KorakuServer {
    * Handle incoming envelope message from a socket
    */
   async _handleSocketMessage(socket, accountId, devEntitlement, clientIp, rawMessage) {
-    // 1. Rate limiter check
-    const rateCheck = this.rateLimiter.check(accountId || clientIp);
-    if (!rateCheck.allowed) {
-      this.connectionManager.sendToSocket(socket, Events.COMMAND_REJECTED, {
-        code: ErrorCodes.RATE_LIMITED,
-        error: `Rate limit exceeded. Retry after ${rateCheck.retryAfterMs}ms.`,
-        retryAfterMs: rateCheck.retryAfterMs
+    // 1. Control frames (handshake / ping) - bypass command rate limits
+    let parsedObj = null;
+    try {
+      parsedObj = typeof rawMessage === "string" ? JSON.parse(rawMessage) : JSON.parse(rawMessage.toString("utf8"));
+    } catch (_) {}
+
+    if (parsedObj?.type === "handshake") {
+      return;
+    }
+    if (parsedObj?.type === "ping") {
+      this.connectionManager.sendToSocket(socket, "pong", {
+        type: "pong",
+        clientTime: parsedObj.clientTime,
+        t1: parsedObj.clientTime,
+        serverTime: Date.now()
       });
       return;
     }
 
-    // 2. Schema and envelope validation
+    // 2. Rate limiter check for commands (account-level and IP-level)
+    const rateCheck = this.rateLimiter.check(accountId || clientIp);
+    const ipMsgCheck = clientIp ? this.rateLimiter.check(`ip_${clientIp}`) : { allowed: true };
+    if (!rateCheck.allowed || !ipMsgCheck.allowed) {
+      const retryAfterMs = Math.max(rateCheck.retryAfterMs || 0, ipMsgCheck.retryAfterMs || 0) || 1000;
+      this.connectionManager.sendToSocket(socket, Events.COMMAND_REJECTED, {
+        code: ErrorCodes.RATE_LIMITED,
+        error: `Rate limit exceeded. Retry after ${retryAfterMs}ms.`,
+        retryAfterMs
+      });
+      return;
+    }
+
+    // 3. Schema and envelope validation
     const validation = this.validator.validateRawMessage(rawMessage);
     if (!validation.valid) {
       this.connectionManager.sendToSocket(socket, Events.COMMAND_REJECTED, {
@@ -266,7 +324,10 @@ export class KorakuServer {
           error: outcome.message || "Command execution failed"
         });
       } else {
-        this.connectionManager.sendToSocket(socket, Events.COMMAND_ACK, outcome);
+        this.connectionManager.sendToSocket(socket, Events.COMMAND_ACK, {
+          cmdId: envelope.cmdId,
+          ...outcome
+        });
       }
     } catch (err) {
       console.error(`[KorakuServer] Error processing command ${envelope.command} for ${accountId}:`, err);
@@ -303,6 +364,10 @@ export class KorakuServer {
         resolve();
       }
     });
+  }
+
+  async stop() {
+    return this.close();
   }
 }
 

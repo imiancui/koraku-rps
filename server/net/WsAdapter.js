@@ -130,7 +130,7 @@ export class WsAdapter extends EventEmitter {
     this.wss = null;
     this.nativeClients = new Set();
 
-    this._init();
+    this._setupNativeUpgrade();
   }
 
   async _init() {

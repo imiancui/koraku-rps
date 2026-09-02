@@ -16,6 +16,10 @@ import {
 } from "../../src/js/config/gameConfig.js";
 import { applyExperience, computePlayerStats } from "../../src/js/systems/progressionRules.js";
 import { compareHands, evaluateDualRps } from "../../src/js/systems/rpsRules.js";
+import { EventBus } from "../../src/js/core/EventBus.js";
+import { GameStore } from "../../src/js/core/GameStore.js";
+import { BattleSystem } from "../../src/js/systems/BattleSystem.js";
+import { PostBattleSystem } from "../../src/js/systems/PostBattleSystem.js";
 
 function getDefaultSaveData() {
   return {
@@ -111,16 +115,149 @@ export class GameSession {
    * @param {import('./TransferManager.js').TransferManager} params.transferManager
    * @param {Function} [params.emitFn] - Callback to send event to client connection
    */
-  constructor({ accountId, storage, transferManager, emitFn }) {
+  constructor({ accountId, deviceId = null, storage, transferManager, emitFn, battleLockPolicy = "always" }) {
     this.accountId = accountId;
+    this.deviceId = deviceId;
     this.storage = storage;
     this.transferManager = transferManager;
     this.emitFn = emitFn || (() => {});
+    this.battleLockPolicy = battleLockPolicy;
 
     this.state = null;
-    this.activeBattle = null;
+    this._currentBattleId = null;
+    this._systemsInitialized = false;
     this.lastActivityTime = Date.now();
     this.isDirty = false;
+  }
+
+  isMutationLocked() {
+    if (!this.activeBattle) {
+      return false;
+    }
+
+    const policy = this.battleLockPolicy || "always";
+    if (policy === "never") {
+      return false;
+    }
+
+    if (policy === "always") {
+      return true;
+    }
+
+    if (policy === "countdown") {
+      // In countdown policy, mutations are locked only during commitment (reaction) and QTE adjudication phases
+      const phase = this.activeBattle.phase;
+      if (phase === "reaction" || phase === "qte") {
+        return true;
+      }
+      return false;
+    }
+
+    return true;
+  }
+
+  get activeBattle() {
+    if (this.battle && this.battle.isBattleActive()) {
+      const snap = this.battle.snapshot();
+      if (snap) {
+        if (!snap.battleId) {
+          snap.battleId = this._currentBattleId || `bat_${this.battle.battleStartTime || Date.now()}_${(this.battle.battleSeed || 0).toString(16)}`;
+        }
+        const deadline = snap.countdownRemainingMs ? (Date.now() + snap.countdownRemainingMs) : (snap.revealDeadline || snap.deadline || this.battle.countdownDeadline || 0);
+        snap.revealDeadline = deadline;
+        snap.deadline = deadline;
+        snap.pauseCount = this.battle.pauseCount || 0;
+        snap.roundSeconds = snap.stage?.roundSeconds || 3;
+      }
+      return snap;
+    }
+    return null;
+  }
+
+  set activeBattle(val) {
+    if (val === null && this.battle?.state) {
+      this.battle.state.active = false;
+      this.battle.state.phase = "ended";
+    }
+  }
+
+  _initSystems() {
+    if (this._systemsInitialized) return;
+    this._systemsInitialized = true;
+
+    this.bus = new EventBus();
+    const persistenceAdapter = {
+      load: () => this.state || getDefaultSaveData(),
+      save: (state) => {
+        this.state = state;
+        this.isDirty = true;
+      }
+    };
+    const cryptoRandom = () => crypto.randomBytes(4).readUInt32LE(0) / 4294967296;
+
+    this.store = new GameStore(this.bus, persistenceAdapter, {
+      now: () => Date.now(),
+      random: cryptoRandom
+    });
+
+    this.battle = new BattleSystem(this.bus, this.store, cryptoRandom, () => Date.now());
+    this.postBattle = new PostBattleSystem(this.bus, this.store, cryptoRandom, () => Date.now());
+
+    this.bus.on("battle:ended", (result) => {
+      this._battleEndedPromise = (async () => {
+        this.postBattle.open(result);
+        try {
+          const stageId = result.stage?.id || 1;
+          const coins = result.reward?.coins || 0;
+          const xp = result.reward?.xp || 0;
+          await this.storage.appendLedger(this.accountId, {
+            source: result.won ? "battleVictory" : "battleDefeat",
+            delta: { coins, xp, stageId },
+            serverTime: Date.now()
+          });
+          if (this._currentBattleId && this.battle?.battleSeed) {
+            await this.storage.saveBattleReplay(this.accountId, {
+              battleId: this._currentBattleId,
+              seed: this.battle.battleSeed,
+              stageId,
+              commandLog: [...(this.battle.commandLog || [])],
+              result: {
+                won: result.won,
+                damageDealt: result.damageDealt,
+                damageTaken: result.damageTaken
+              },
+              recordedAt: Date.now()
+            });
+          }
+          await this.save();
+        } catch (err) {
+          console.error("[GameSession] Error recording battle outcome:", err);
+        }
+      })();
+    });
+
+    const forwardEvents = [
+      Events.STORE_CHANGED,
+      Events.BATTLE_STATE,
+      Events.BATTLE_EFFECT,
+      Events.BATTLE_DAMAGE_LOGGED,
+      Events.BATTLE_ENDED,
+      Events.QTE_UPDATE,
+      Events.POSTBATTLE_STATE,
+      Events.POSTBATTLE_AUTO_WATERMELON,
+      Events.AUTOBATTLE_STREAM_CHUNK,
+      Events.AUTOBATTLE_ROUND_COMPLETED,
+      Events.AUTOBATTLE_SUMMARY,
+      Events.DIALOGUE,
+      Events.TOAST,
+      "sound"
+    ];
+
+    for (const evt of forwardEvents) {
+      this.bus.on(evt, (payload) => {
+        this.emit(evt, payload);
+      });
+    }
   }
 
   async load() {
@@ -131,6 +268,7 @@ export class GameSession {
       this.state = getDefaultSaveData();
       await this.save();
     }
+    this._initSystems();
     this.lastActivityTime = Date.now();
     return this.state;
   }
@@ -167,6 +305,8 @@ export class GameSession {
 
     if (!this.state) {
       await this.load();
+    } else if (!this._systemsInitialized) {
+      this._initSystems();
     }
 
     let result;
@@ -203,6 +343,14 @@ export class GameSession {
         result = await this._handleBattleSelectHand(payload, envelope.clientTime);
         break;
 
+      case Commands.BATTLE_SELECT_TARGET:
+        result = await this._handleBattleSelectTarget(payload);
+        break;
+
+      case Commands.BATTLE_USE_MORPH:
+        result = await this._handleBattleUseMorph(payload, envelope.clientTime);
+        break;
+
       case Commands.BATTLE_PAUSE:
         result = await this._handleBattlePause();
         break;
@@ -221,6 +369,18 @@ export class GameSession {
 
       case Commands.BATTLE_INPUT_QTE:
         result = await this._handleBattleInputQte(payload, envelope.clientTime);
+        break;
+
+      case Commands.AUTO_BATTLE_START:
+        result = await this._handleAutoBattleStart(payload);
+        break;
+
+      case Commands.AUTO_BATTLE_STOP:
+        result = await this._handleAutoBattleStop();
+        break;
+
+      case Commands.POST_BATTLE_REQUEST_SWIMSUIT:
+        result = await this._handlePostBattleRequestSwimsuit();
         break;
 
       case Commands.POST_BATTLE_START_WATERMELON:
@@ -281,11 +441,11 @@ export class GameSession {
   async _handleBuyItem({ itemId }) {
     const itemDef = ITEMS[itemId];
     if (!itemDef) {
-      return { ack: false, error: ErrorCodes.NOT_FOUND, message: `Item ${itemId} not found.` };
+      return { ack: false, error: ErrorCodes.NOT_FOUND, key: "shop.itemNotFound", message: `Item ${itemId} not found.` };
     }
 
     if (this.state.coins < itemDef.price) {
-      return { ack: false, error: "INSUFFICIENT_COINS", message: "Not enough coins." };
+      return { ack: false, error: "INSUFFICIENT_COINS", key: "shop.insufficientCoins", message: "Not enough coins." };
     }
 
     this.state.coins -= itemDef.price;
@@ -304,11 +464,11 @@ export class GameSession {
   async _handleBuyEquipment({ itemId }) {
     const eqDef = EQUIPMENT_ITEMS[itemId];
     if (!eqDef) {
-      return { ack: false, error: ErrorCodes.NOT_FOUND, message: `Equipment ${itemId} not found.` };
+      return { ack: false, error: ErrorCodes.NOT_FOUND, key: "shop.itemNotFound", message: `Equipment ${itemId} not found.` };
     }
 
     if (this.state.coins < eqDef.price) {
-      return { ack: false, error: "INSUFFICIENT_COINS", message: "Not enough coins." };
+      return { ack: false, error: "INSUFFICIENT_COINS", key: "shop.insufficientCoins", message: "Not enough coins." };
     }
 
     this.state.coins -= eqDef.price;
@@ -325,8 +485,8 @@ export class GameSession {
   }
 
   async _handleEquipItem({ slot, itemId, inventoryIndex }) {
-    if (this.activeBattle) {
-      return { ack: false, error: ErrorCodes.BATTLE_IN_PROGRESS_LOCKED, message: "Cannot change equipment during active battle." };
+    if (this.isMutationLocked()) {
+      return { ack: false, error: ErrorCodes.BATTLE_IN_PROGRESS_LOCKED, key: "battle.lockedDuringBattle", message: "Equipment and stat allocation are locked during active battle." };
     }
 
     let targetItemId = itemId;
@@ -339,12 +499,12 @@ export class GameSession {
     }
 
     if (!targetItemId || removeIdx === -1) {
-      return { ack: false, error: ErrorCodes.NOT_FOUND, message: "Item not found in inventoryEquipment." };
+      return { ack: false, error: ErrorCodes.NOT_FOUND, key: "equip.notInInventory", message: "Item not found in inventoryEquipment." };
     }
 
     const itemDef = EQUIPMENT_ITEMS[targetItemId];
     if (!itemDef) {
-      return { ack: false, error: ErrorCodes.NOT_FOUND, message: "Unknown equipment definition." };
+      return { ack: false, error: ErrorCodes.NOT_FOUND, key: "equip.invalidItem", message: "Unknown equipment definition." };
     }
 
     // Unequip existing in slot
@@ -353,21 +513,24 @@ export class GameSession {
       this.state.inventoryEquipment.push(prevItem);
     }
 
-    // Remove from inventory
+    // Remove new item from inventory
     this.state.inventoryEquipment.splice(removeIdx, 1);
 
-    // Two-handed logic
-    if (itemDef.twoHanded && slot === "mainHand") {
-      const offHandItem = this.state.equipment.offHand;
-      if (offHandItem) {
-        this.state.inventoryEquipment.push(offHandItem);
-        this.state.equipment.offHand = null;
+    // Two-handed weapon logic: clears subWeapon
+    if (itemDef.twoHanded && slot === "weapon") {
+      const subItem = this.state.equipment.subWeapon;
+      if (subItem) {
+        this.state.inventoryEquipment.push(subItem);
+        this.state.equipment.subWeapon = null;
       }
-    } else if (slot === "offHand") {
-      const mainHandItem = this.state.equipment.mainHand;
-      if (mainHandItem && EQUIPMENT_ITEMS[mainHandItem]?.twoHanded) {
-        this.state.inventoryEquipment.push(mainHandItem);
-        this.state.equipment.mainHand = null;
+    }
+
+    // Equipping into subWeapon when two-handed weapon is equipped unequips the weapon
+    if (slot === "subWeapon" && this.state.equipment.weapon) {
+      const mainDef = EQUIPMENT_ITEMS[this.state.equipment.weapon];
+      if (mainDef?.twoHanded) {
+        this.state.inventoryEquipment.push(this.state.equipment.weapon);
+        this.state.equipment.weapon = null;
       }
     }
 
@@ -378,13 +541,13 @@ export class GameSession {
   }
 
   async _handleUnequipItem({ slot }) {
-    if (this.activeBattle) {
-      return { ack: false, error: ErrorCodes.BATTLE_IN_PROGRESS_LOCKED, message: "Cannot change equipment during active battle." };
+    if (this.isMutationLocked()) {
+      return { ack: false, error: ErrorCodes.BATTLE_IN_PROGRESS_LOCKED, key: "battle.lockedDuringBattle", message: "Equipment and stat allocation are locked during active battle." };
     }
 
     const current = this.state.equipment[slot];
     if (!current) {
-      return { ack: false, error: ErrorCodes.NOT_FOUND, message: `Slot ${slot} is empty.` };
+      return { ack: false, error: ErrorCodes.NOT_FOUND, key: "equip.slotEmpty", message: `Slot ${slot} is empty.` };
     }
 
     this.state.equipment[slot] = null;
@@ -395,12 +558,12 @@ export class GameSession {
   }
 
   async _handleAllocateStat({ stat, points = 1 }) {
-    if (this.activeBattle) {
-      return { ack: false, error: ErrorCodes.BATTLE_IN_PROGRESS_LOCKED, message: "Cannot allocate stats during active battle." };
+    if (this.isMutationLocked()) {
+      return { ack: false, error: ErrorCodes.BATTLE_IN_PROGRESS_LOCKED, key: "battle.lockedDuringBattle", message: "Equipment and stat allocation are locked during active battle." };
     }
 
     if (this.state.profile.skillPoints < points) {
-      return { ack: false, error: "INSUFFICIENT_POINTS", message: "Not enough skill points." };
+      return { ack: false, error: "INSUFFICIENT_POINTS", key: "growth.noPoints", message: "Not enough skill points." };
     }
 
     this.state.profile.skillPoints -= points;
@@ -411,27 +574,27 @@ export class GameSession {
   }
 
   async _handleAllocateSkill({ skillId }) {
-    if (this.activeBattle) {
-      return { ack: false, error: ErrorCodes.BATTLE_IN_PROGRESS_LOCKED, message: "Cannot allocate skills during active battle." };
+    if (this.isMutationLocked()) {
+      return { ack: false, error: ErrorCodes.BATTLE_IN_PROGRESS_LOCKED, key: "battle.lockedDuringBattle", message: "Equipment and stat allocation are locked during active battle." };
     }
 
     const skillDef = SKILLS[skillId];
     if (!skillDef) {
-      return { ack: false, error: ErrorCodes.NOT_FOUND, message: `Skill ${skillId} not found.` };
+      return { ack: false, error: ErrorCodes.NOT_FOUND, key: "growth.invalidSkill", message: `Skill ${skillId} not found.` };
     }
 
     if (this.state.profile.level < skillDef.unlockLevel) {
-      return { ack: false, error: "LEVEL_TOO_LOW", message: "Level too low to unlock skill." };
+      return { ack: false, error: "LEVEL_TOO_LOW", key: "growth.levelRequirementNotMet", message: "Level too low to unlock skill." };
     }
 
     const currentLvl = this.state.profile.skills[skillId] || 0;
     if (currentLvl >= skillDef.maxLevel) {
-      return { ack: false, error: "MAX_LEVEL_REACHED", message: "Skill is already at max level." };
+      return { ack: false, error: "MAX_LEVEL_REACHED", key: "growth.skillMaxLevel", message: "Skill is already at max level." };
     }
 
     const cost = skillDef.costPerLevel;
     if (this.state.profile.skillPoints < cost) {
-      return { ack: false, error: "INSUFFICIENT_POINTS", message: "Not enough skill points." };
+      return { ack: false, error: "INSUFFICIENT_POINTS", key: "growth.insufficientPoints", message: "Not enough skill points." };
     }
 
     this.state.profile.skillPoints -= cost;
@@ -443,174 +606,236 @@ export class GameSession {
 
   // --- Battle Lifecycle Handlers ---
 
-  async _handleBattleStart({ stageId = 1 }) {
-    const stage = STAGES.find((s) => s.id === stageId) || STAGES[0];
-    const playerStats = computePlayerStats(this.state.profile, this.state.equipment);
+  async _handleBattleStart({ stageId = 1, options = {} }) {
+    if (this.activeBattle) {
+      return {
+        ack: false,
+        error: ErrorCodes.BATTLE_IN_PROGRESS_LOCKED,
+        key: "battleLog.battleInProgress",
+        message: "Battle already in progress."
+      };
+    }
 
-    const battleSeed = crypto.randomBytes(16).toString("hex");
-    const serverTime = Date.now();
+    const battleOpts = { ...(options.options || {}), ...(options || {}) };
+    // Authority Policy #9: All outcome-affecting RNG is cryptographically generated by server
+    const seed = crypto.randomInt(1, 2147483647);
+    this._currentBattleId = `bat_${Date.now()}_${crypto.randomBytes(4).toString("hex")}`;
 
-    this.activeBattle = {
-      battleId: `bat_${serverTime}_${crypto.randomBytes(4).toString("hex")}`,
-      stageId: stage.id,
-      seed: battleSeed,
-      round: 1,
-      phase: "countdown",
-      pauseCount: 0,
-      playerHp: playerStats.maxHp,
-      playerMaxHp: playerStats.maxHp,
-      playerMp: playerStats.maxMp,
-      playerMaxMp: playerStats.maxMp,
-      enemyHp: stage.enemyHp,
-      enemyMaxHp: stage.enemyHp,
-      handCommitDeadline: serverTime + stage.roundSeconds * 1000,
-      enemies: stage.enemies ? JSON.parse(JSON.stringify(stage.enemies)) : [{ id: "main", hp: stage.enemyHp, maxHp: stage.enemyHp }],
-      startTime: serverTime,
-      log: []
-    };
+    const startOk = this.battle.start(stageId, { ...battleOpts, seed });
+    if (!startOk) {
+      return {
+        ack: false,
+        error: "BATTLE_START_FAILED",
+        key: "battleLog.battleStartFailed",
+        message: "Failed to start battle."
+      };
+    }
 
-    const battleStatePayload = {
-      battleId: this.activeBattle.battleId,
-      stageId: stage.id,
-      round: this.activeBattle.round,
-      phase: this.activeBattle.phase,
-      playerHp: this.activeBattle.playerHp,
-      playerMaxHp: this.activeBattle.playerMaxHp,
-      playerMp: this.activeBattle.playerMp,
-      playerMaxMp: this.activeBattle.playerMaxMp,
-      enemies: this.activeBattle.enemies,
-      handCommitDeadline: this.activeBattle.handCommitDeadline
-    };
-
-    this.emit(Events.BATTLE_STATE, battleStatePayload);
-    return { ack: true, battleState: battleStatePayload };
+    const snap = this.activeBattle;
+    return { ack: true, battleState: snap };
   }
 
-  async _handleBattleSelectHand({ hand }, clientTime) {
+  async _handleBattleSelectHand(payload = {}, clientTime) {
     if (!this.activeBattle) {
-      return { ack: false, error: ErrorCodes.NOT_FOUND, message: "No active battle session." };
+      return {
+        ack: false,
+        error: ErrorCodes.NOT_FOUND,
+        key: "battleLog.noActiveBattle",
+        message: "No active battle session."
+      };
     }
 
     const now = Date.now();
-    // Timing check: hand selection must reach server before reveal deadline + grace
-    if (now > this.activeBattle.handCommitDeadline + SERVER_CONFIG.timingGraceMs) {
+    const deadline = this.activeBattle.revealDeadline || 0;
+    if (deadline && now > deadline + SERVER_CONFIG.timingGraceMs) {
       return {
         ack: false,
         error: ErrorCodes.SECRET_COMMITMENT_EXPIRED,
+        key: "battleLog.roundTimeout",
         message: "Hand commitment arrived after round countdown expired."
       };
     }
 
-    this.activeBattle.playerHand = hand;
-    return { ack: true, round: this.activeBattle.round, committed: true };
+    const hand = payload.hand || payload.playerHand;
+    const slot = payload.slot || null;
+    const hand2 = payload.hand2 || null;
+    const declaredAt = payload.declaredAt || clientTime || now;
+    const boundedDeclaredAt = Math.min(declaredAt, now + SERVER_CONFIG.timingGraceMs);
+
+    let result;
+    if (hand2 && !slot) {
+      this.battle.selectHand(hand, "left", boundedDeclaredAt);
+      result = this.battle.selectHand(hand2, "right", boundedDeclaredAt);
+    } else {
+      result = this.battle.selectHand(hand, slot, boundedDeclaredAt);
+    }
+
+    if (this._battleEndedPromise && (!this.battle.state || !this.battle.state.active)) {
+      await this._battleEndedPromise;
+    }
+
+    return {
+      ack: true,
+      round: this.battle.state?.round || 1,
+      committed: true,
+      result,
+      battleState: this.activeBattle
+    };
+  }
+
+  async _handleBattleSelectTarget(payload = {}) {
+    if (!this.activeBattle) {
+      return {
+        ack: false,
+        error: ErrorCodes.NOT_FOUND,
+        key: "battleLog.noActiveBattle",
+        message: "No active battle session."
+      };
+    }
+    const target = payload.target || "left";
+    const ok = this.battle.selectTarget(target);
+    return {
+      ack: ok !== false,
+      target,
+      battleState: this.activeBattle
+    };
+  }
+
+  async _handleBattleUseMorph(payload = {}, clientTime) {
+    if (!this.activeBattle) {
+      return {
+        ack: false,
+        error: ErrorCodes.NOT_FOUND,
+        key: "battleLog.noActiveBattle",
+        message: "No active battle session."
+      };
+    }
+    const targetHand = payload.targetHand || null;
+    const res = this.battle.useMorph(targetHand);
+    return {
+      ack: res?.ok !== false,
+      result: res,
+      battleState: this.activeBattle
+    };
   }
 
   async _handleBattlePause() {
     if (!this.activeBattle) {
-      return { ack: false, error: ErrorCodes.NOT_FOUND, message: "No active battle session." };
+      return {
+        ack: false,
+        error: ErrorCodes.NOT_FOUND,
+        key: "battleLog.noActiveBattle",
+        message: "No active battle session."
+      };
     }
 
-    if (this.activeBattle.phase !== "countdown") {
+    if (this.battle.state?.phase !== "countdown") {
       return {
         ack: false,
         error: ErrorCodes.INVALID_PHASE_PAUSE,
+        key: "battleLog.invalidPhasePause",
         message: "Pause is only allowed during countdown phase."
       };
     }
 
-    if (this.activeBattle.pauseCount >= 3) {
+    if (this.battle.pauseCount >= 3) {
       return {
         ack: false,
         error: ErrorCodes.PAUSE_LIMIT_REACHED,
+        key: "battleLog.battlePauseCount",
+        params: { remaining: 0 },
         message: "Maximum 3 pauses per battle reached."
       };
     }
 
-    this.activeBattle.pauseCount += 1;
-    this.activeBattle.isPaused = true;
-    this.activeBattle.pauseStartTime = Date.now();
-
-    this.emit(Events.BATTLE_STATE, {
-      battleId: this.activeBattle.battleId,
+    const res = this.battle.pause();
+    return {
+      ack: res?.ok !== false,
       isPaused: true,
-      pauseCount: this.activeBattle.pauseCount
-    });
-
-    return { ack: true, isPaused: true, pauseCount: this.activeBattle.pauseCount };
+      pauseCount: this.battle.pauseCount,
+      battleState: this.activeBattle
+    };
   }
 
   async _handleBattleResume() {
-    if (!this.activeBattle || !this.activeBattle.isPaused) {
-      return { ack: false, error: ErrorCodes.NOT_FOUND, message: "Battle is not paused." };
+    if (!this.activeBattle || !this.battle.state?.isPaused) {
+      return {
+        ack: false,
+        error: ErrorCodes.NOT_FOUND,
+        key: "battleLog.noActiveBattle",
+        message: "Battle is not paused."
+      };
     }
 
-    const pausedDuration = Date.now() - (this.activeBattle.pauseStartTime || Date.now());
-    this.activeBattle.isPaused = false;
-    this.activeBattle.handCommitDeadline += pausedDuration;
-
-    this.emit(Events.BATTLE_STATE, {
-      battleId: this.activeBattle.battleId,
+    const res = this.battle.resume();
+    const deadline = this.activeBattle?.revealDeadline;
+    return {
+      ack: res?.ok !== false,
       isPaused: false,
-      handCommitDeadline: this.activeBattle.handCommitDeadline
-    });
-
-    return { ack: true, isPaused: false, handCommitDeadline: this.activeBattle.handCommitDeadline };
+      revealDeadline: deadline,
+      battleState: this.activeBattle
+    };
   }
 
   async _handleBattleAbandon() {
     if (!this.activeBattle) {
-      return { ack: false, error: ErrorCodes.NOT_FOUND, message: "No active battle session." };
+      return {
+        ack: false,
+        error: ErrorCodes.NOT_FOUND,
+        key: "battleLog.noActiveBattle",
+        message: "No active battle session."
+      };
     }
 
-    const stageId = this.activeBattle.stageId;
-    const stage = STAGES.find((s) => s.id === stageId) || STAGES[0];
+    const stageId = this.battle.state?.stage?.id || 1;
+    if (this._currentBattleId && this.battle?.battleSeed) {
+      try {
+        await this.storage.saveBattleReplay(this.accountId, {
+          battleId: this._currentBattleId,
+          seed: this.battle.battleSeed,
+          stageId,
+          commandLog: [...(this.battle.commandLog || [])],
+          result: {
+            won: false,
+            damageDealt: this.battle.battleDamageDealt || 0,
+            damageTaken: this.battle.battleDamageTaken || 0,
+            abandoned: true
+          },
+          recordedAt: Date.now()
+        });
+      } catch (err) {
+        console.error("[GameSession] Error saving battle replay on abandon:", err);
+      }
+    }
 
-    // Loss settlements
-    const lossCoins = stage.lossCoins || 0;
-    const lossXp = stage.xpLoss || 0;
-
-    this.state.coins += lossCoins;
-    this.state.records.losses += 1;
-    this.state.records.totalBattles += 1;
-
-    applyExperience(this.state.profile, lossXp);
-
-    await this.storage.appendLedger(this.accountId, {
-      source: "battleLossRewards",
-      delta: { coins: lossCoins, xp: lossXp, stageId },
-      serverTime: Date.now()
-    });
-
-    this.activeBattle = null;
-
-    this.emit(Events.BATTLE_ENDED, { outcome: "abandoned", stageId, coinsEarned: lossCoins, xpEarned: lossXp });
-    this.emit(Events.STORE_CHANGED, { coins: this.state.coins, profile: this.state.profile, records: this.state.records });
+    this.battle.end(false);
+    this.battle.abandon();
+    if (this._battleEndedPromise) {
+      await this._battleEndedPromise;
+    }
+    await this.save();
 
     return { ack: true, outcome: "abandoned" };
   }
 
   async _handleBattleUseItem({ itemId }) {
     if (!this.activeBattle) {
-      return { ack: false, error: ErrorCodes.NOT_FOUND, message: "No active battle session." };
+      return {
+        ack: false,
+        error: ErrorCodes.NOT_FOUND,
+        key: "battleLog.noActiveBattle",
+        message: "No active battle session."
+      };
     }
 
-    const count = this.state.inventory[itemId] || 0;
-    if (count <= 0) {
-      return { ack: false, error: "ITEM_EMPTY", message: `No ${itemId} left in inventory.` };
-    }
-
-    const itemDef = ITEMS[itemId];
-    if (!itemDef) {
-      return { ack: false, error: ErrorCodes.NOT_FOUND, message: `Unknown item ${itemId}.` };
-    }
-
-    this.state.inventory[itemId] -= 1;
-    this.state.records.consumablesUsed[itemId] = (this.state.records.consumablesUsed[itemId] || 0) + 1;
-
-    if (itemDef.resource === "hp") {
-      this.activeBattle.playerHp = Math.min(this.activeBattle.playerMaxHp, this.activeBattle.playerHp + itemDef.restore);
-    } else if (itemDef.resource === "mp") {
-      this.activeBattle.playerMp = Math.min(this.activeBattle.playerMaxMp, this.activeBattle.playerMp + itemDef.restore);
+    const res = this.battle.useItem(itemId);
+    if (!res || !res.ok) {
+      return {
+        ack: false,
+        error: res?.key || "USE_ITEM_FAILED",
+        key: res?.key || "battleLog.useItemFailed",
+        message: res?.message || "Failed to use item."
+      };
     }
 
     await this.storage.appendLedger(this.accountId, {
@@ -618,65 +843,126 @@ export class GameSession {
       delta: { items: { [itemId]: -1 } },
       serverTime: Date.now()
     });
+    await this.save();
 
-    this.emit(Events.STORE_CHANGED, { inventory: this.state.inventory });
-    this.emit(Events.BATTLE_STATE, {
-      playerHp: this.activeBattle.playerHp,
-      playerMp: this.activeBattle.playerMp
-    });
-
-    return { ack: true, itemId, playerHp: this.activeBattle.playerHp, playerMp: this.activeBattle.playerMp };
+    return {
+      ack: true,
+      itemId,
+      restored: res.restored,
+      playerHp: this.battle.state?.playerHp,
+      playerMp: this.battle.state?.playerMp,
+      battleState: this.activeBattle
+    };
   }
 
-  async _handleBattleInputQte({ direction, stepIndex }, clientTime) {
+  async _handleBattleInputQte(payload = {}, clientTime) {
     if (!this.activeBattle) {
-      return { ack: false, error: ErrorCodes.NOT_FOUND, message: "No active battle session." };
+      return {
+        ack: false,
+        error: ErrorCodes.NOT_FOUND,
+        key: "battleLog.noActiveBattle",
+        message: "No active battle session."
+      };
     }
 
-    // Timing claim audit: check packet arrival time
+    const direction = payload.direction || payload.input || payload.key;
+    const slot = payload.slot || null;
     const now = Date.now();
+    const declaredAt = payload.declaredAt || clientTime || now;
+    const boundedDeclaredAt = Math.min(declaredAt, now + SERVER_CONFIG.timingGraceMs);
+
+    const ok = this.battle.inputQte(direction, slot, boundedDeclaredAt);
+
     return {
       ack: true,
       audited: true,
       serverTime: now,
-      stepIndex,
-      direction
+      direction,
+      success: ok,
+      battleState: this.activeBattle
     };
   }
 
-  // --- Watermelon Minigame Handlers ---
+  // --- Auto Battle Handlers ---
+
+  async _handleAutoBattleStart({ stageId = 1, rounds = 10 }) {
+    const safeRounds = Math.max(1, Math.min(100, Math.floor(Number(rounds) || 10)));
+    this.battle.startAutoBattle(stageId, safeRounds);
+    return {
+      ack: true,
+      autoBattle: { ...this.battle.autoBattle }
+    };
+  }
+
+  async _handleAutoBattleStop() {
+    this.battle.stopAutoBattle();
+    return {
+      ack: true,
+      autoBattle: { ...this.battle.autoBattle }
+    };
+  }
+
+  // --- Post-Battle & Watermelon Minigame Handlers ---
+
+  async _handlePostBattleRequestSwimsuit() {
+    this.postBattle.requestSwimsuit();
+    await this.save();
+    return {
+      ack: true,
+      scene: this.postBattle.state?.scene,
+      appearance: this.postBattle.state?.appearance
+    };
+  }
 
   async _handleStartWatermelon() {
-    this.watermelonSession = {
-      stage: 1,
-      startTime: Date.now()
+    this.postBattle.startWatermelon();
+    return {
+      ack: true,
+      scene: this.postBattle.state?.scene,
+      target: this.postBattle.state?.target,
+      tolerance: this.postBattle.state?.tolerance,
+      watermelonStage: (this.postBattle.state?.watermelon?.attempts || 0) + 1
     };
-    return { ack: true, watermelonStage: 1 };
   }
 
-  async _handleStrikeWatermelon({ slicePercent }, clientTime) {
-    const stage = this.watermelonSession ? this.watermelonSession.stage : 1;
-    const extraXp = 100;
+  async _handleStrikeWatermelon(payload = {}, clientTime) {
+    if (!this.postBattle.state || this.postBattle.state.scene !== "watermelonAim") {
+      return {
+        ack: false,
+        error: "INVALID_STATE",
+        key: "dialogue.watermelonNotAim",
+        message: "Watermelon game not in aim phase."
+      };
+    }
 
-    this.state.records.watermelonSlices += 1;
-    this.state.records.watermelonStageStats[stage] = this.state.records.watermelonStageStats[stage] || { attempts: 0, successes: 0 };
-    this.state.records.watermelonStageStats[stage].attempts += 1;
-    this.state.records.watermelonStageStats[stage].successes += 1;
+    const now = Date.now();
+    const declaredAt = payload.declaredAt || clientTime || now;
+    const boundedTime = Math.min(declaredAt, now + SERVER_CONFIG.timingGraceMs);
 
-    applyExperience(this.state.profile, extraXp);
+    // Authoritative strike execution via PostBattleSystem
+    this.postBattle.strike(boundedTime);
+
+    const attempts = this.postBattle.state.watermelon.attempts;
+    const lastCutSuccess = this.postBattle.state.watermelon.lastCutSuccess;
+    const successes = this.postBattle.state.watermelon.successes;
 
     await this.storage.appendLedger(this.accountId, {
       source: "watermelonSlice",
-      delta: { xp: extraXp, stage },
-      serverTime: Date.now()
+      delta: { stage: attempts, success: lastCutSuccess },
+      serverTime: now
     });
+    await this.save();
 
-    if (this.watermelonSession) {
-      this.watermelonSession.stage += 1;
-    }
-
-    this.emit(Events.STORE_CHANGED, { profile: this.state.profile, records: this.state.records });
-    return { ack: true, slicePercent, extraXp, nextStage: this.watermelonSession?.stage || 1 };
+    return {
+      ack: true,
+      audited: true,
+      slicePercent: payload.slicePercent,
+      success: lastCutSuccess,
+      attempts,
+      successes,
+      scene: this.postBattle.state.scene,
+      nextStage: attempts + 1
+    };
   }
 
   // --- Dev Entitlement / Cheat Handlers ---
@@ -724,12 +1010,24 @@ export class GameSession {
     return { ack: true, ...result };
   }
 
-  async _handleClaimTransferCode({ transferCode }) {
-    const result = await this.transferManager.claimTransferCode(transferCode, this.accountId);
+  async _handleClaimTransferCode(payload = {}) {
+    const transferCode = payload.transferCode;
+    const deviceId = payload.deviceId || this.deviceId || null;
+    const result = await this.transferManager.claimTransferCode(transferCode, deviceId);
     if (!result.success) {
-      return { ack: false, error: result.error, message: result.message };
+      return {
+        ack: false,
+        error: result.error,
+        key: result.key || "save.transferClaimFailed",
+        message: result.message
+      };
     }
-    return { ack: true, targetAccountId: result.accountId };
+    return {
+      ack: true,
+      targetAccountId: result.accountId,
+      token: result.token,
+      account: result.account
+    };
   }
 
   async _handleExportJson() {

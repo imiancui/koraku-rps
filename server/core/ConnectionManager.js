@@ -9,10 +9,11 @@ export class ConnectionManager {
    * @param {import('./TransferManager.js').TransferManager} params.transferManager
    * @param {number} [params.idleTimeoutMs]
    */
-  constructor({ storage, transferManager, idleTimeoutMs }) {
+  constructor({ storage, transferManager, idleTimeoutMs, battleLockPolicy = "always" }) {
     this.storage = storage;
     this.transferManager = transferManager;
     this.idleTimeoutMs = idleTimeoutMs || SERVER_CONFIG.idleSessionTimeoutMs;
+    this.battleLockPolicy = battleLockPolicy;
 
     this.connections = new Map(); // accountId -> { socket, connectionId, connectedAt }
     this.sessions = new Map(); // accountId -> GameSession
@@ -33,7 +34,7 @@ export class ConnectionManager {
    * @param {string} [connectionId]
    * @returns {GameSession}
    */
-  registerConnection(accountId, socket, connectionId = `conn_${Date.now()}`) {
+  registerConnection(accountId, socket, connectionId = `conn_${Date.now()}`, deviceId = null) {
     if (!accountId || !socket) {
       throw new Error("accountId and socket are required.");
     }
@@ -45,6 +46,7 @@ export class ConnectionManager {
         this.sendToSocket(existing.socket, Events.CONNECTION_STATE, {
           state: ConnectionStates.DISCONNECTED,
           reason: "NEW_CONNECTION_ESTABLISHED",
+          key: "connection.newConnectionEstablished",
           message: "Another connection for this account was established. You have been disconnected."
         });
         if (typeof existing.socket.close === "function") {
@@ -61,6 +63,7 @@ export class ConnectionManager {
     this.connections.set(accountId, {
       socket,
       connectionId,
+      deviceId,
       connectedAt: Date.now()
     });
     this.socketToAccount.set(socket, accountId);
@@ -70,12 +73,16 @@ export class ConnectionManager {
     if (!session) {
       session = new GameSession({
         accountId,
+        deviceId,
         storage: this.storage,
         transferManager: this.transferManager,
+        battleLockPolicy: this.battleLockPolicy,
         emitFn: (event, payload) => this.sendToAccount(accountId, event, payload)
       });
       this.sessions.set(accountId, session);
     } else {
+      if (deviceId && !session.deviceId) session.deviceId = deviceId;
+      if (this.battleLockPolicy && !session.battleLockPolicy) session.battleLockPolicy = this.battleLockPolicy;
       // Update session emit callback in case it changed
       session.emitFn = (event, payload) => this.sendToAccount(accountId, event, payload);
     }
@@ -96,6 +103,7 @@ export class ConnectionManager {
         accountId,
         storage: this.storage,
         transferManager: this.transferManager,
+        battleLockPolicy: this.battleLockPolicy,
         emitFn: (event, payload) => this.sendToAccount(accountId, event, payload)
       });
       await session.load();

@@ -720,7 +720,8 @@ img.is-silhouette {
   align-items: center;
   gap: 7px;
   min-width: unset;
-  height: 38px;
+  min-height: 40px;
+  height: 40px;
   padding: 6px 14px;
   border-top: 0;
   border-right: 0;
@@ -740,34 +741,34 @@ img.is-silhouette {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #94a3b8;
+  background: var(--paper-dim);
   box-shadow: 0 0 5px currentColor;
   flex-shrink: 0;
   transition: background 0.25s ease, box-shadow 0.25s ease;
 }
 
 .connection-badge.is-online {
-  border-left-color: rgba(74, 222, 128, 0.4);
-  color: #bbf7d0;
-  background: rgba(16, 32, 24, 0.75);
+  border-left-color: var(--green);
+  color: var(--paper);
+  background: rgba(14, 27, 20, 0.75);
 }
 .connection-badge.is-online .connection-status-dot {
-  background: #4ade80;
-  color: #4ade80;
-  box-shadow: 0 0 7px #4ade80;
+  background: var(--green);
+  color: var(--green);
+  box-shadow: 0 0 7px var(--green);
 }
 
 .connection-badge.is-connecting,
 .connection-badge.is-reconnecting {
-  border-left-color: rgba(251, 191, 36, 0.4);
-  color: #fde68a;
-  background: rgba(32, 26, 16, 0.75);
+  border-left-color: var(--gold);
+  color: var(--gold-bright);
+  background: rgba(27, 22, 14, 0.75);
 }
 .connection-badge.is-connecting .connection-status-dot,
 .connection-badge.is-reconnecting .connection-status-dot {
-  background: #fbbf24;
-  color: #fbbf24;
-  box-shadow: 0 0 7px #fbbf24;
+  background: var(--gold);
+  color: var(--gold);
+  box-shadow: 0 0 7px var(--gold);
   animation: pulseConnectionDot 1.2s infinite ease-in-out;
 }
 
@@ -776,34 +777,34 @@ img.is-silhouette {
   color: var(--paper-dim);
 }
 .connection-badge.is-offline .connection-status-dot {
-  background: #94a3b8;
-  color: #94a3b8;
+  background: var(--paper-dim);
+  color: var(--paper-dim);
   box-shadow: none;
 }
 
 .connection-badge.is-disconnected {
-  border-left-color: rgba(239, 68, 68, 0.4);
-  color: #fca5a5;
-  background: rgba(36, 16, 18, 0.75);
+  border-left-color: var(--crimson);
+  color: var(--crimson-bright);
+  background: rgba(36, 14, 18, 0.75);
 }
 .connection-badge.is-disconnected .connection-status-dot {
-  background: #ef4444;
-  color: #ef4444;
-  box-shadow: 0 0 7px #ef4444;
+  background: var(--crimson-bright);
+  color: var(--crimson-bright);
+  box-shadow: 0 0 7px var(--crimson-bright);
 }
 
 .connection-badge.is-high-ping {
-  border-left-color: rgba(245, 158, 11, 0.7);
-  color: #fde68a;
+  border-left-color: var(--gold);
+  color: var(--gold-bright);
 }
 .connection-badge.is-high-ping .connection-status-dot {
-  background: #f59e0b;
-  color: #f59e0b;
-  box-shadow: 0 0 6px #f59e0b;
+  background: var(--gold);
+  color: var(--gold);
+  box-shadow: 0 0 6px var(--gold);
 }
 .connection-ping-badge {
   font-size: 10px;
-  color: #f59e0b;
+  color: var(--gold);
   margin-left: 3px;
   font-family: var(--font-mono, monospace);
   font-weight: 600;
@@ -870,18 +871,21 @@ img.is-silhouette {
 }
 
 .connection-banner-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: transparent;
   border: 0;
   color: var(--paper-dim);
-  font-size: 14px;
   cursor: pointer;
-  padding: 4px 8px;
-  min-height: 32px;
+  padding: 8px;
+  min-height: 40px;
+  min-width: 40px;
   transition: color 0.15s ease;
 }
 
 .connection-banner-close:hover {
-  color: var(--paper);
+  color: var(--gold-bright);
 }
 
 @keyframes slideDownBanner {

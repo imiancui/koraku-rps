@@ -190,6 +190,32 @@ Do not attribute a regression to Ponytail without evidence.
      - Settlement: wrapped layout in a centered stage (`padding-left: max(80px, calc(50vw - 960px));`), expanded card to `min(32vw, 720px)`, and shifted standee to `left: calc(50vw + 160px)` with `width: min(38vw, 1100px)`, creating a balanced 2220px centered dual-column stage.
 - Guard & Evidence: Verified via Playwright at 3840×2160 (`home-4k.png`, `victory-4k.png`, `swimsuit-4k.png`); `npm test` 108/108 pass; `npm run test:rwd:smoke` 30/30 pass.
 
+## RWD-REG-009 — In-Battle Mutation Lock State UI (Growth & Equipment)
+
+- Classification/status: Verified implementation & responsive protection; verified green in Playwright Chromium across 4 viewports, dynamic resize across 12-slot breakpoint, 2 locales (zh-Hant & en), and policy variants.
+- Date: 2026-09-03.
+- Surface: Growth screen (`#screen-growth`), Equipment screen (`#screen-equipment`), Shop screen (`#screen-shop`), and global Toast notifications.
+- Verified Invariants: RWD-G001, RWD-G003, RWD-G006, RWD-G008 in the [baseline](responsive-spec.md). Minimum button height >= 40px preserved; dark shrine palette and token `--crimson-bright` maintained; 12 paperdoll slots not displaced.
+- Viewports covered:
+  - 375×812 (Mobile portrait, touch=true)
+  - 768×1024 (Tablet portrait, touch=true)
+  - 1280×800 (Desktop compact, touch=false)
+  - 1920×1080 (Desktop full HD, touch=false)
+  - Dynamic runtime resize across equipment 12-slot breakpoint: 375 -> 768 -> 1280.
+- States verified:
+  - Non-battle: `#equipment-lock-notice` and `#growth-lock-notice` hidden (`display: none`), buttons active and enabled.
+  - Active battle (always policy): buttons disabled with `disabled` and `aria-disabled="true"`, notices display `battle.lockedDuringBattle`.
+  - Post-battle: notices hidden, buttons restored to active state.
+  - Countdown policy: unlocked during `countdown` phase, locked during `reaction` and `qte` phases.
+- Locales verified at 375px:
+  - `zh-Hant`: bounding rect `{ width: 313, height: 16 }` within 375px viewport, 0 overflow.
+  - `en`: bounding rect `{ width: 313, height: 32 }` within 375px viewport, wraps cleanly across 2 lines without clipping or displacing 12 equipment slots.
+- Input verified:
+  - Mouse click and Touch dispatch on locked buttons block command execution and trigger danger Toast with `battle.lockedDuringBattle`.
+- Browser console: 0 new errors across all test passes.
+- Automated guards: `tests/unit/appViewMutationLock.test.js` (5/5 pass), `npm test` (213/213 pass), `npm run test:server` (17/17 pass), `npm run test:rwd:smoke` (30/30 pass).
+- Visual evidence root: `C:\Users\Administrator\AppData\Local\Temp\koraku-staging-evidence\20260903-0535\rwd\` (25 PNG screenshots + `rwd_verification_report.json`).
+
 ## Entry Template
 
 For a new entry record:

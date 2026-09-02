@@ -21,7 +21,7 @@
    - In `src/js/kernel/protocol.js` (lines 11–48, 98–111), standard command enevlopes `createCommandEnvelope` include `cmdId`, `command`, `payload`, `clientTime`, `configVersion`, and `token`. Standard error codes include `SECRET_COMMITMENT_EXPIRED`, `TIMING_AUDIT_FAILED`, `BATTLE_IN_PROGRESS_LOCKED`, `INVALID_PHASE_PAUSE`, `PAUSE_LIMIT_REACHED`, and `UNAUTHORIZED_CHEAT`.
 
 3. **Server Implementation and Test Baseline**:
-   - In `server/core/GameSession.js` (lines 489–505), hand selection verifies `now <= handCommitDeadline + 150ms`. Lines 328–344 and 381–416 enforce locking equipment and stat allocation while `activeBattle` is active.
+   - In `server/core/GameSession.js` (lines 489–505), hand selection verifies `now <= revealDeadline + 150ms`. Lines 328–344 and 381–416 enforce locking equipment and stat allocation while `activeBattle` is active.
    - Running `npm test` executes 140 test cases across 27 suites. 138 tests pass. Two unit test mocks had minor interface updates (`this.store.notify` in `testHarness.js` and server test port binding), while all core game mechanics (i18n completeness, 12 equipment slots, dual QTE, watermelon slicing, progression rules) passed 100%.
 
 ---

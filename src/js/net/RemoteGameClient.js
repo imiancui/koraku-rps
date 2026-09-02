@@ -8,21 +8,30 @@ import {
   PROTOCOL_VERSION,
   CONFIG_VERSION,
   ConnectionStates,
+  Commands,
   Events,
   ErrorCodes,
   createCommandEnvelope
 } from "../kernel/protocol.js";
+import { EventBus } from "../core/EventBus.js";
+import { computePlayerStats } from "../systems/progressionRules.js";
+import { I18n } from "../services/I18n.js";
+import { ASSETS } from "../config/gameConfig.js";
 
 /**
  * Determine default WebSocket URL based on current runtime environment
  * @param {string} [customUrl]
  * @returns {string}
  */
-function resolveWebSocketUrl(customUrl) {
+export function resolveWebSocketUrl(customUrl) {
   if (customUrl) return customUrl;
-  if (typeof window !== "undefined" && window.location && window.location.host) {
-    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    return `${protocol}//${window.location.host}/ws`;
+  if (typeof window !== "undefined") {
+    if (window.KORAKU_SERVER_URL) return window.KORAKU_SERVER_URL;
+    if (window.__KORAKU_CONFIG__?.serverUrl) return window.__KORAKU_CONFIG__.serverUrl;
+    if (window.location && window.location.host) {
+      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      return `${protocol}//${window.location.host}/ws`;
+    }
   }
   return "ws://localhost:8080/ws";
 }
@@ -81,11 +90,14 @@ export class RemoteGameClient extends GameClient {
     this._connectionState = ConnectionStates.OFFLINE;
     this._token = this.options.token;
     this._deviceId = this.options.deviceId;
-    this._eventBus = this.options.eventBus;
+    this._eventBus = this.options.eventBus || new EventBus();
     this._devEntitlement = Boolean(options.devEntitlement);
 
     // State snapshot cache
     this._state = {};
+    this._storeProxy = null;
+    this._battleProxy = null;
+    this._postBattleProxy = null;
 
     // Reconnection tracking
     this._reconnectAttempts = 0;
@@ -105,9 +117,194 @@ export class RemoteGameClient extends GameClient {
     this._rtt = 0; // smoothed RTT in ms
     this._rttSamples = [];
 
+    // Server configuration from handshake
+    this._serverConfig = null;
+
     // Commands & ACK tracking
     this._pendingCommands = new Map(); // cmdId -> { envelope, resolve, reject, timer, retries, sentAt }
     this._commandQueue = []; // Array of cmdIds waiting to be dispatched when connection is ONLINE
+  }
+
+  get bus() {
+    return this._eventBus;
+  }
+
+  get store() {
+    if (!this._storeProxy) {
+      const client = this;
+      this._storeProxy = {
+        snapshot: () => {
+          const s = client.getState() || {};
+          const profile = s.profile || {};
+          const equip = s.equipment || {};
+          return {
+            ...s,
+            playerStats: computePlayerStats(profile, equip)
+          };
+        },
+        get state() {
+          return this.snapshot();
+        },
+        getTheoreticalDPS: () => {
+          const snap = client.store.snapshot();
+          const stats = snap.playerStats || {};
+          const damage = stats.damage || 10;
+          return Math.round(damage * 1.5);
+        },
+        toggleMusicMuted: () => {
+          const curr = Boolean(client._state?.settings?.musicMuted);
+          if (!client._state.settings) client._state.settings = {};
+          client._state.settings.musicMuted = !curr;
+          return client._state.settings.musicMuted;
+        },
+        toggleSfxMuted: () => {
+          const curr = Boolean(client._state?.settings?.sfxMuted);
+          if (!client._state.settings) client._state.settings = {};
+          client._state.settings.sfxMuted = !curr;
+          return client._state.settings.sfxMuted;
+        }
+      };
+    }
+    return this._storeProxy;
+  }
+
+  get battle() {
+    if (!this._battleProxy) {
+      const client = this;
+      this._battleProxy = {
+        get state() {
+          return client._state?.battle || null;
+        },
+        get autoBattle() {
+          return client._state?.battle?.autoBattle || { active: false, isPaused: false };
+        },
+        isBattleActive: () => {
+          const b = client._state?.battle;
+          return Boolean(b && b.active && b.phase !== "ended" && b.phase !== "abandoned");
+        },
+        snapshot: () => {
+          return client._state?.battle || null;
+        },
+        start: (stageId, options) => {
+          return client.send(Commands.BATTLE_START, { stageId, options });
+        },
+        selectHand: (hand, slot = null, declaredAt = Date.now()) => {
+          return client.send(Commands.BATTLE_SELECT_HAND, { hand, slot, declaredAt });
+        },
+        selectTarget: (target) => {
+          return client.send(Commands.BATTLE_SELECT_TARGET, { target });
+        },
+        abandon: () => {
+          return client.send(Commands.BATTLE_ABANDON);
+        },
+        useItem: (itemId) => {
+          return client.send(Commands.BATTLE_USE_ITEM, { itemId });
+        },
+        pause: () => {
+          return client.send(Commands.BATTLE_PAUSE);
+        },
+        resume: () => {
+          return client.send(Commands.BATTLE_RESUME);
+        },
+        stopAutoBattle: () => {
+          return client.send(Commands.AUTO_BATTLE_STOP);
+        },
+        startAutoBattle: (stageId, rounds) => {
+          return client.send(Commands.AUTO_BATTLE_START, { stageId, rounds });
+        },
+        end: (victory) => {
+          if (client._eventBus) {
+            client._eventBus.emit(Events.BATTLE_ENDED, {
+              won: Boolean(victory),
+              stageId: client._state?.battle?.stageId || 1
+            });
+          }
+        }
+      };
+    }
+    return this._battleProxy;
+  }
+
+  get postBattle() {
+    if (!this._postBattleProxy) {
+      const client = this;
+      this._postBattleProxy = {
+        open: (result) => {
+          if (!result) return;
+          if (result.isAuto) {
+            if (result.won) {
+              if (client._state?.records) client._state.records.unlockedSwimsuit = true;
+            }
+            client.postBattle.emitAutoWatermelon();
+            return;
+          }
+          const appearance = result.won
+            ? (result.stage?.final ? ASSETS.final : ASSETS.default)
+            : ASSETS.defeat;
+          const postState = {
+            ...result,
+            scene: result.won ? "victory" : "defeat",
+            appearance,
+            target: 0,
+            tolerance: 0.13,
+            strikeStartedAt: 0,
+            strikeDuration: 1800,
+            watermelon: {
+              attempts: 0,
+              maxAttempts: 3,
+              successes: 0,
+              lastCutSuccess: null,
+              rewardXp: 0,
+              levelsGained: 0
+            }
+          };
+          client._postBattleState = postState;
+          if (client._eventBus) {
+            client._eventBus.emit(Events.POSTBATTLE_STATE, postState);
+            client._eventBus.emit(Events.DIALOGUE_LINE, {
+              key: result.won ? "dialogue.postBattleWin" : "dialogue.postBattleLoss"
+            });
+          }
+        },
+        get state() {
+          return client._postBattleState || null;
+        },
+        snapshot: () => {
+          return client._postBattleState || null;
+        },
+        getMarkerPosition: () => {
+          const state = client._postBattleState;
+          if (!state || state.scene !== "watermelonAim" || !state.strikeStartedAt) return 0;
+          const elapsed = (Date.now() - state.strikeStartedAt) % state.strikeDuration;
+          const progress = elapsed / state.strikeDuration;
+          return progress <= 0.5 ? progress * 2 : (1 - progress) * 2;
+        },
+        getAutoMarkerPosition: () => {
+          return 0.5;
+        },
+        getWatermelonStock: () => {
+          return client._state?.records?.watermelonStock || 0;
+        },
+        closeAutoWatermelon: () => {},
+        emitAutoWatermelon: () => {
+          if (client._eventBus) {
+            client._eventBus.emit(Events.POSTBATTLE_AUTO_WATERMELON, {
+              stock: client.postBattle.getWatermelonStock()
+            });
+          }
+        },
+        requestSwimsuit: () => {
+          return client.send(Commands.POST_BATTLE_REQUEST_SWIMSUIT);
+        },
+        startWatermelon: () => {
+          return client.send(Commands.POST_BATTLE_START_WATERMELON);
+        },
+        strike: (time) => {
+          return client.send(Commands.POST_BATTLE_STRIKE_WATERMELON, { declaredAt: time });
+        }
+      };
+    }
+    return this._postBattleProxy;
   }
 
   /**
@@ -297,14 +494,18 @@ export class RemoteGameClient extends GameClient {
     if (!msg || typeof msg !== "object") return;
 
     // 1. Handshake response
-    if (msg.type === "handshake_ack" || msg.type === "handshake") {
-      this._handleHandshakeAck(msg);
+    if (
+      msg.type === "handshake_ack" ||
+      msg.type === "handshake" ||
+      (msg.event === Events.CONNECTION_STATE && (msg.payload?.state === ConnectionStates.ONLINE || msg.state === ConnectionStates.ONLINE))
+    ) {
+      this._handleHandshakeAck(msg.payload || msg);
       return;
     }
 
     // 2. Pong heartbeat response
-    if (msg.type === "pong") {
-      this._handlePong(msg);
+    if (msg.type === "pong" || msg.event === "pong" || msg.payload?.type === "pong") {
+      this._handlePong(msg.payload || msg);
       return;
     }
 
@@ -367,7 +568,7 @@ export class RemoteGameClient extends GameClient {
 
       if (this._ws) {
         try {
-          this._ws.close(4001, ErrorCodes.VERSION_MISMATCH);
+          this._ws.close(4002, ErrorCodes.VERSION_MISMATCH);
         } catch (_) {}
       }
 
@@ -380,12 +581,14 @@ export class RemoteGameClient extends GameClient {
     // Handshake successful
     if (msg.token) this._token = msg.token;
     if (msg.devEntitlement !== undefined) this._devEntitlement = Boolean(msg.devEntitlement);
+    if (msg.serverConfig) this._serverConfig = msg.serverConfig;
     if (msg.state) this._state = msg.state;
 
     this._reconnectAttempts = 0;
     this._setConnectionState(ConnectionStates.ONLINE, {
       token: this._token,
-      devEntitlement: this._devEntitlement
+      devEntitlement: this._devEntitlement,
+      serverConfig: this._serverConfig
     });
 
     // Start heartbeat
@@ -464,6 +667,14 @@ export class RemoteGameClient extends GameClient {
   }
 
   /**
+   * Get server configuration received during handshake
+   * @returns {object}
+   */
+  getServerConfig() {
+    return this._serverConfig || { battleLockPolicy: "always" };
+  }
+
+  /**
    * Handle command ACK
    * @private
    * @param {object} msg
@@ -503,10 +714,20 @@ export class RemoteGameClient extends GameClient {
     const cmdId = msg.cmdId || msg.payload?.cmdId;
     const payload = msg.payload !== undefined ? msg.payload : msg;
     const code = msg.code || payload?.code || ErrorCodes.INTERNAL_ERROR;
-    const reason = msg.reason || msg.error || payload?.reason || payload?.error || "Command rejected by server";
+    const key = msg.key || payload?.key;
+    const params = msg.params || payload?.params || {};
+    let reason = msg.reason || msg.error || payload?.reason || payload?.error || "Command rejected by server";
+    if (key && typeof I18n !== "undefined" && typeof I18n.t === "function") {
+      const localized = I18n.t(key, params);
+      if (localized && localized !== key) {
+        reason = localized;
+      }
+    }
 
     const err = new Error(reason);
     err.code = code;
+    err.key = key;
+    err.params = params;
     err.payload = payload;
 
     const pending = cmdId ? this._pendingCommands.get(cmdId) : null;
@@ -546,6 +767,10 @@ export class RemoteGameClient extends GameClient {
     } else if (eventName === Events.BATTLE_ENDED || eventName === "battle:ended") {
       if (this._state.battle) {
         delete this._state.battle;
+      }
+    } else if (eventName === Events.POSTBATTLE_STATE || eventName === "postbattle:state") {
+      if (payload) {
+        this._postBattleState = payload;
       }
     } else if (eventName === Events.CONNECTION_STATE || eventName === "connection:state") {
       if (payload?.reason === "NEW_CONNECTION_ESTABLISHED" || payload?.reason === "KICKED_BY_NEW_CONNECTION") {
@@ -776,6 +1001,23 @@ export class RemoteGameClient extends GameClient {
     if (this._handshakeTimer) {
       clearTimeout(this._handshakeTimer);
       this._handshakeTimer = null;
+    }
+
+    // Code 4001: NEW_CONNECTION_ESTABLISHED (single writer kickout)
+    // Code 4002: VERSION_MISMATCH
+    // Permanently halt reconnection to prevent ping-pong reconnect storms
+    if (event?.code === 4001 || event?.reason === "NEW_CONNECTION_ESTABLISHED" || event?.code === 4002 || event?.reason === ErrorCodes.VERSION_MISMATCH) {
+      this._isExplicitlyClosed = true;
+      if (this._reconnectTimer) {
+        clearTimeout(this._reconnectTimer);
+        this._reconnectTimer = null;
+      }
+      this._setConnectionState(ConnectionStates.DISCONNECTED, {
+        code: event?.code || 4001,
+        reason: event?.code === 4002 ? ErrorCodes.VERSION_MISMATCH : "NEW_CONNECTION_ESTABLISHED",
+        message: event?.code === 4002 ? "Client/server version mismatch." : "Another connection for this account was established."
+      });
+      return;
     }
 
     if (this._isExplicitlyClosed) {
