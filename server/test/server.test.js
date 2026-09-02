@@ -1,0 +1,489 @@
+// server/test/server.test.js
+import test from "node:test";
+import assert from "node:assert/strict";
+import fs from "node:fs/promises";
+import path from "node:path";
+import os from "node:os";
+import { AuthManager } from "../core/Auth.js";
+import { JsonStorage } from "../storage/JsonStorage.js";
+import { TransferManager } from "../core/TransferManager.js";
+import { CommandQueue } from "../core/CommandQueue.js";
+import { Validator } from "../core/Validator.js";
+import { RateLimiter } from "../core/RateLimiter.js";
+import { EntitlementManager } from "../core/Entitlements.js";
+import { ConnectionManager } from "../core/ConnectionManager.js";
+import { GameSession } from "../core/GameSession.js";
+import { KorakuServer, createKorakuServer } from "../server.js";
+import { createBackup, verifyBackupIntegrity, restoreBackup } from "../scripts/backup.js";
+import {
+  Commands,
+  Events,
+  ErrorCodes,
+  ConnectionStates,
+  CONFIG_VERSION
+} from "../config.js";
+
+test("AuthManager: 匿名裝置 Token 簽發與 HMAC-SHA256 驗證", () => {
+  const auth = new AuthManager({ secret: "test-secret-key-123" });
+
+  // Issue anonymous token
+  const issued = auth.issueAnonymousToken("device_alpha");
+  assert.ok(issued.token, "應簽發 token");
+  assert.ok(issued.accountId.startsWith("acc_"), "accountId 應有前綴");
+  assert.equal(issued.deviceId, "device_alpha");
+  assert.equal(issued.devEntitlement, false);
+
+  // Verify authentic token
+  const verified = auth.verifyToken(issued.token);
+  assert.equal(verified.valid, true);
+  assert.equal(verified.payload.accountId, issued.accountId);
+  assert.equal(verified.payload.deviceId, "device_alpha");
+  assert.equal(verified.payload.devEntitlement, false);
+
+  // Tampered signature should fail
+  const tamperedToken = issued.token.slice(0, -4) + "XXXX";
+  const tamperedResult = auth.verifyToken(tamperedToken);
+  assert.equal(tamperedResult.valid, false);
+  assert.equal(tamperedResult.error, "INVALID_SIGNATURE");
+
+  // Expired token should fail
+  const expiredToken = auth.issueToken({
+    accountId: "acc_expired",
+    deviceId: "dev_exp",
+    ttlMs: -1000 // Expired 1 second ago
+  });
+  const expiredResult = auth.verifyToken(expiredToken);
+  assert.equal(expiredResult.valid, false);
+  assert.equal(expiredResult.error, "TOKEN_EXPIRED");
+});
+
+test("JsonStorage: 帳號儲存、經濟帳本(Ledger)追加、GDPR導出與徹底刪除", async () => {
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "koraku-test-storage-"));
+  const storage = new JsonStorage({ dataDir: tmpDir });
+  await storage.init();
+
+  const accountId = "acc_test_storage_1";
+  const testData = {
+    version: 1,
+    coins: 500,
+    profile: { level: 2, xp: 100 }
+  };
+
+  // Save & Load
+  await storage.saveAccount(accountId, testData);
+  const loaded = await storage.getAccount(accountId);
+  assert.deepEqual(loaded, testData, "讀取帳號資料應與儲存一致");
+
+  // Append Ledger
+  await storage.appendLedger(accountId, {
+    source: "questReward",
+    delta: { coins: 100 },
+    serverTime: Date.now()
+  });
+  await storage.appendLedger(accountId, {
+    source: "buyItem",
+    delta: { coins: -50, items: { hpPotion: 1 } },
+    serverTime: Date.now()
+  });
+
+  const ledger = await storage.getLedger(accountId);
+  assert.equal(ledger.length, 2, "帳本應有 2 筆記錄");
+  assert.equal(ledger[0].source, "questReward");
+  assert.equal(ledger[1].source, "buyItem");
+
+  // GDPR Export
+  const exported = await storage.exportAllAccountData(accountId);
+  assert.ok(exported.exportMetadata, "應包含導出元數據");
+  assert.equal(exported.exportMetadata.accountId, accountId);
+  assert.deepEqual(exported.accountData, testData);
+  assert.equal(exported.economicLedger.length, 2);
+
+  // Delete Account
+  const deleted = await storage.deleteAccount(accountId);
+  assert.equal(deleted, true);
+  const afterDelete = await storage.getAccount(accountId);
+  assert.equal(afterDelete, null, "刪除後應無法取得帳號");
+  const ledgerAfterDelete = await storage.getLedger(accountId);
+  assert.equal(ledgerAfterDelete.length, 0, "刪除後帳本應清空");
+
+  await fs.rm(tmpDir, { recursive: true, force: true });
+});
+
+test("TransferManager: 一次性轉移碼簽發與跨裝置兌換", async () => {
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "koraku-test-transfer-"));
+  const storage = new JsonStorage({ dataDir: tmpDir });
+  const transferManager = new TransferManager({ storage, ttlMs: 60000 });
+
+  const accountId = "acc_transfer_target_1";
+  const issueResult = await transferManager.issueTransferCode(accountId);
+  assert.ok(issueResult.transferCode.startsWith("KORAKU-"), "轉移碼格式應正確");
+  assert.ok(issueResult.expiresAt > Date.now());
+
+  // Claim transfer code from another device
+  const claimResult = await transferManager.claimTransferCode(issueResult.transferCode, "device_beta");
+  assert.equal(claimResult.success, true);
+  assert.equal(claimResult.accountId, accountId);
+
+  // Second claim attempt should fail (single-use)
+  const secondClaim = await transferManager.claimTransferCode(issueResult.transferCode, "device_gamma");
+  assert.equal(secondClaim.success, false);
+  assert.equal(secondClaim.error, ErrorCodes.INVALID_TRANSFER_CODE);
+
+  // Non-existent code claim should fail
+  const invalidClaim = await transferManager.claimTransferCode("KORAKU-XXXX-YYYY", "device_beta");
+  assert.equal(invalidClaim.success, false);
+  assert.equal(invalidClaim.error, ErrorCodes.INVALID_TRANSFER_CODE);
+
+  await fs.rm(tmpDir, { recursive: true, force: true });
+});
+
+test("Validator: 來源 (Origin) 檢查、指令信封 Schema 驗證與版本檢查", () => {
+  const validator = new Validator({
+    allowedOrigins: ["http://localhost:4173", "https://koraku.app"],
+    configVersion: CONFIG_VERSION
+  });
+
+  // Origin check
+  assert.equal(validator.validateOrigin("http://localhost:4173"), true);
+  assert.equal(validator.validateOrigin("https://koraku.app"), true);
+  assert.equal(validator.validateOrigin("http://malicious-site.com"), false);
+
+  // Valid envelope
+  const validEnvelope = {
+    cmdId: "cmd_001",
+    command: Commands.BUY_ITEM,
+    payload: { itemId: "hpPotion" },
+    clientTime: Date.now(),
+    configVersion: CONFIG_VERSION
+  };
+  const validRes = validator.validateEnvelope(validEnvelope);
+  assert.equal(validRes.valid, true);
+
+  // Whitelist violation (extra unexpected field)
+  const injectedEnvelope = {
+    ...validEnvelope,
+    hackedField: "drop database"
+  };
+  const injectedRes = validator.validateEnvelope(injectedEnvelope);
+  assert.equal(injectedRes.valid, false);
+  assert.equal(injectedRes.code, ErrorCodes.INVALID_SCHEMA);
+
+  // Config version mismatch
+  const mismatchEnvelope = {
+    ...validEnvelope,
+    configVersion: "1999.01.01"
+  };
+  const mismatchRes = validator.validateEnvelope(mismatchEnvelope);
+  assert.equal(mismatchRes.valid, false);
+  assert.equal(mismatchRes.code, ErrorCodes.VERSION_MISMATCH);
+
+  // Size cap validation
+  const hugeString = JSON.stringify({
+    cmdId: "cmd_huge",
+    command: Commands.BUY_ITEM,
+    payload: { blob: "x".repeat(70000) }
+  });
+  const hugeRes = validator.validateRawMessage(hugeString);
+  assert.equal(hugeRes.valid, false);
+  assert.equal(hugeRes.code, ErrorCodes.INVALID_SCHEMA);
+});
+
+test("RateLimiter: 流量限制與突發請求保護", () => {
+  const limiter = new RateLimiter({
+    windowMs: 1000,
+    maxRequestsPerWindow: 5,
+    burstLimit: 5
+  });
+
+  const ip = "192.168.1.100";
+  for (let i = 0; i < 5; i++) {
+    const res = limiter.check(ip);
+    assert.equal(res.allowed, true, `第 ${i + 1} 次應允許`);
+  }
+
+  // 6th request should be rejected
+  const rejected = limiter.check(ip);
+  assert.equal(rejected.allowed, false, "超過上限應拒絕");
+  assert.ok(rejected.retryAfterMs > 0);
+
+  limiter.destroy();
+});
+
+test("EntitlementManager: 作弊指令需 Dev Entitlement 權限檢驗與審計日誌", () => {
+  const warnings = [];
+  const fakeLogger = {
+    warn: (msg) => warnings.push(msg)
+  };
+  const entitlements = new EntitlementManager({ logger: fakeLogger });
+
+  // Normal command without entitlement: allowed
+  const normalCheck = entitlements.checkEntitlement({
+    command: Commands.BUY_ITEM,
+    accountId: "acc_user",
+    devEntitlement: false
+  });
+  assert.equal(normalCheck.allowed, true);
+
+  // Cheat command without entitlement: rejected + logged
+  const unauthorizedCheat = entitlements.checkEntitlement({
+    command: Commands.CHEAT_ADD_COINS,
+    accountId: "acc_hacker",
+    devEntitlement: false,
+    ip: "10.0.0.1"
+  });
+  assert.equal(unauthorizedCheat.allowed, false);
+  assert.equal(unauthorizedCheat.error, ErrorCodes.UNAUTHORIZED_CHEAT);
+  assert.equal(warnings.length, 1, "應記錄未授權作弊安全日誌");
+  assert.ok(warnings[0].includes("[SECURITY AUDIT]"));
+
+  // Cheat command WITH entitlement: allowed
+  const authorizedCheat = entitlements.checkEntitlement({
+    command: Commands.CHEAT_ADD_COINS,
+    accountId: "acc_dev",
+    devEntitlement: true
+  });
+  assert.equal(authorizedCheat.allowed, true);
+});
+
+test("CommandQueue: 每帳號序列化佇列與 cmdId 冪等性防重複執行", async () => {
+  const queue = new CommandQueue();
+  const accountId = "acc_queue_test";
+
+  let executionCounter = 0;
+  const executionOrder = [];
+
+  const handler = async (envelope) => {
+    executionCounter += 1;
+    executionOrder.push(envelope.seq);
+    return { ack: true, seq: envelope.seq, counter: executionCounter };
+  };
+
+  // Enqueue 3 sequential commands
+  const p1 = queue.enqueue(accountId, { cmdId: "cmd_1", seq: 1 }, handler);
+  const p2 = queue.enqueue(accountId, { cmdId: "cmd_2", seq: 2 }, handler);
+  const p3 = queue.enqueue(accountId, { cmdId: "cmd_3", seq: 3 }, handler);
+
+  const [r1, r2, r3] = await Promise.all([p1, p2, p3]);
+  assert.deepEqual(executionOrder, [1, 2, 3], "應依序執行");
+  assert.equal(executionCounter, 3);
+
+  // Resending duplicate cmd_1 (idempotency check)
+  const duplicateP = await queue.enqueue(accountId, { cmdId: "cmd_1", seq: 1 }, handler);
+  assert.deepEqual(duplicateP, r1, "重複 cmdId 應回傳快取結果");
+  assert.equal(executionCounter, 3, "重複 cmdId 不應重複執行 handler");
+
+  queue.destroy();
+});
+
+test("ConnectionManager: 單一帳號連線管理（新連線踢出舊連線）與閒置 Session 釋放", async () => {
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "koraku-test-conn-"));
+  const storage = new JsonStorage({ dataDir: tmpDir });
+  const transferManager = new TransferManager({ storage });
+  const connManager = new ConnectionManager({ storage, transferManager, idleTimeoutMs: 50 });
+
+  const accountId = "acc_single_login_test";
+
+  const closedSockets = [];
+  const sentMessages = [];
+
+  const fakeSocket1 = {
+    readyState: 1,
+    send: (msg) => sentMessages.push({ socket: 1, msg: JSON.parse(msg) }),
+    close: (code, reason) => closedSockets.push({ socket: 1, code, reason })
+  };
+
+  const fakeSocket2 = {
+    readyState: 1,
+    send: (msg) => sentMessages.push({ socket: 2, msg: JSON.parse(msg) }),
+    close: (code, reason) => closedSockets.push({ socket: 2, code, reason })
+  };
+
+  // Register Connection 1
+  connManager.registerConnection(accountId, fakeSocket1, "conn_1");
+  assert.equal(connManager.isOnline(accountId), true);
+
+  // Register Connection 2 for same account -> socket 1 kicked
+  connManager.registerConnection(accountId, fakeSocket2, "conn_2");
+  assert.equal(closedSockets.length, 1);
+  assert.equal(closedSockets[0].socket, 1);
+  assert.equal(closedSockets[0].reason, "NEW_CONNECTION_ESTABLISHED");
+
+  // Idle session unloader
+  connManager.handleDisconnect(fakeSocket2);
+  assert.equal(connManager.isOnline(accountId), false);
+
+  // Wait for idle sweep (timeout set to 50ms in constructor)
+  await new Promise((r) => setTimeout(r, 80));
+  await connManager._sweepIdleSessions();
+  assert.equal(connManager.sessions.has(accountId), false, "閒置 Session 應從記憶體卸載落盤");
+
+  connManager.destroy();
+  await fs.rm(tmpDir, { recursive: true, force: true });
+});
+
+test("GameSession: 權威戰鬥生命週期、暫停限制(最多3次/倒數階段)、裝備鎖定與經濟突變", async () => {
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "koraku-test-session-"));
+  const storage = new JsonStorage({ dataDir: tmpDir });
+  const transferManager = new TransferManager({ storage });
+
+  const session = new GameSession({
+    accountId: "acc_session_authority",
+    storage,
+    transferManager
+  });
+  await session.load();
+
+  // 1. Initial State has 0 coins, buyItem should fail with INSUFFICIENT_COINS
+  const buyItemFail = await session.executeCommand({
+    cmdId: "cmd_buy_1",
+    command: Commands.BUY_ITEM,
+    payload: { itemId: "hpPotion" }
+  });
+  assert.equal(buyItemFail.ack, false);
+  assert.equal(buyItemFail.error, "INSUFFICIENT_COINS");
+
+  // 2. Add coins via cheat / initial setup
+  await session.executeCommand({
+    cmdId: "cmd_cheat_coins",
+    command: Commands.CHEAT_ADD_COINS,
+    payload: { amount: 1000 }
+  });
+  assert.equal(session.state.coins, 1000);
+
+  // 3. Buy Item and Equipment
+  const buyItemSuccess = await session.executeCommand({
+    cmdId: "cmd_buy_2",
+    command: Commands.BUY_ITEM,
+    payload: { itemId: "hpPotion" }
+  });
+  assert.equal(buyItemSuccess.ack, true);
+  assert.equal(session.state.coins, 900);
+  assert.equal(session.state.inventory.hpPotion, 2);
+
+  const buyEqSuccess = await session.executeCommand({
+    cmdId: "cmd_buy_eq",
+    command: Commands.BUY_EQUIPMENT,
+    payload: { itemId: "chest_samurai" }
+  });
+  assert.equal(buyEqSuccess.ack, true);
+  assert.equal(session.state.coins, 580); // 900 - 320
+
+  // 4. Equip Item
+  const equipRes = await session.executeCommand({
+    cmdId: "cmd_equip_1",
+    command: Commands.EQUIP_ITEM,
+    payload: { slot: "chest", itemId: "chest_samurai" }
+  });
+  assert.equal(equipRes.ack, true);
+  assert.equal(session.state.equipment.chest, "chest_samurai");
+
+  // 5. Start Battle
+  const battleStart = await session.executeCommand({
+    cmdId: "cmd_bat_start",
+    command: Commands.BATTLE_START,
+    payload: { stageId: 1 }
+  });
+  assert.equal(battleStart.ack, true);
+  assert.ok(session.activeBattle, "應建立活躍戰鬥");
+
+  // 6. Policy: Equipment & Stat Allocation Locked during Battle
+  const equipDuringBattle = await session.executeCommand({
+    cmdId: "cmd_equip_battle",
+    command: Commands.UNEQUIP_ITEM,
+    payload: { slot: "chest" }
+  });
+  assert.equal(equipDuringBattle.ack, false);
+  assert.equal(equipDuringBattle.error, ErrorCodes.BATTLE_IN_PROGRESS_LOCKED);
+
+  // 7. Battle Pause (Max 3 times during countdown)
+  const pause1 = await session.executeCommand({ cmdId: "p1", command: Commands.BATTLE_PAUSE });
+  assert.equal(pause1.ack, true);
+  assert.equal(pause1.pauseCount, 1);
+
+  await session.executeCommand({ cmdId: "res1", command: Commands.BATTLE_RESUME });
+
+  const pause2 = await session.executeCommand({ cmdId: "p2", command: Commands.BATTLE_PAUSE });
+  assert.equal(pause2.pauseCount, 2);
+  await session.executeCommand({ cmdId: "res2", command: Commands.BATTLE_RESUME });
+
+  const pause3 = await session.executeCommand({ cmdId: "p3", command: Commands.BATTLE_PAUSE });
+  assert.equal(pause3.pauseCount, 3);
+  await session.executeCommand({ cmdId: "res3", command: Commands.BATTLE_RESUME });
+
+  // 4th Pause attempt should fail
+  const pause4 = await session.executeCommand({ cmdId: "p4", command: Commands.BATTLE_PAUSE });
+  assert.equal(pause4.ack, false);
+  assert.equal(pause4.error, ErrorCodes.PAUSE_LIMIT_REACHED);
+
+  // 8. Battle Abandon
+  const abandon = await session.executeCommand({ cmdId: "cmd_aban", command: Commands.BATTLE_ABANDON });
+  assert.equal(abandon.ack, true);
+  assert.equal(session.activeBattle, null);
+
+  await fs.rm(tmpDir, { recursive: true, force: true });
+});
+
+test("backup.js: 建立資料目錄備份、SHA-256 雜湊 Manifest 驗證與還原", async () => {
+  const tmpDataDir = await fs.mkdtemp(path.join(os.tmpdir(), "koraku-test-data-"));
+  const tmpBackupDir = await fs.mkdtemp(path.join(os.tmpdir(), "koraku-test-backup-"));
+  const tmpRestoreDir = await fs.mkdtemp(path.join(os.tmpdir(), "koraku-test-restore-"));
+
+  // Create sample account and ledger files
+  await fs.mkdir(path.join(tmpDataDir, "accounts"), { recursive: true });
+  await fs.mkdir(path.join(tmpDataDir, "ledgers"), { recursive: true });
+  await fs.writeFile(path.join(tmpDataDir, "accounts", "acc_1.json"), JSON.stringify({ coins: 500 }), "utf8");
+  await fs.writeFile(path.join(tmpDataDir, "ledgers", "acc_1.jsonl"), JSON.stringify({ source: "init" }) + "\n", "utf8");
+
+  // Create backup
+  const backupRes = await createBackup({ dataDir: tmpDataDir, backupDir: tmpBackupDir });
+  assert.ok(backupRes.fileCount >= 2, "備份檔案數應 >= 2");
+
+  // Verify backup integrity
+  const verification = await verifyBackupIntegrity(backupRes.backupPath);
+  assert.equal(verification.valid, true, "備份雜湊比對應 100% 通過");
+
+  // Restore to new directory
+  const restoreRes = await restoreBackup(backupRes.backupPath, tmpRestoreDir);
+  assert.equal(restoreRes.restoredFiles, backupRes.fileCount);
+
+  // Verify restored file content
+  const restoredAccount = await fs.readFile(path.join(tmpRestoreDir, "accounts", "acc_1.json"), "utf8");
+  assert.deepEqual(JSON.parse(restoredAccount), { coins: 500 });
+
+  await fs.rm(tmpDataDir, { recursive: true, force: true });
+  await fs.rm(tmpBackupDir, { recursive: true, force: true });
+  await fs.rm(tmpRestoreDir, { recursive: true, force: true });
+});
+
+test("KorakuServer: HTTP /health 端點與伺服器主程式啟動/關閉生命週期", async () => {
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "koraku-test-server-"));
+  const server = createKorakuServer({
+    port: 0, // Port 0 chooses a free OS port
+    dataDir: tmpDir
+  });
+
+  await server.start();
+  const port = server.actualPort;
+  assert.ok(port > 0, "伺服器應綁定可用 Port");
+
+  // Query /health
+  const response = await fetch(`http://127.0.0.1:${port}/health`);
+  assert.equal(response.status, 200);
+  const health = await response.json();
+  assert.equal(health.status, "ok");
+  assert.equal(health.configVersion, CONFIG_VERSION);
+
+  // Query /auth/anonymous
+  const authResponse = await fetch(`http://127.0.0.1:${port}/auth/anonymous`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ deviceId: "device_test_fetch" })
+  });
+  assert.equal(authResponse.status, 200);
+  const authData = await authResponse.json();
+  assert.ok(authData.token);
+  assert.equal(authData.deviceId, "device_test_fetch");
+
+  await server.close();
+  await fs.rm(tmpDir, { recursive: true, force: true });
+});

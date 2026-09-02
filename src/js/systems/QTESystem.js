@@ -4,13 +4,15 @@ const CARDINAL_IDS = Object.freeze(["up", "down", "left", "right"]);
 const ALL_IDS = Object.freeze(DIRECTIONS.map((d) => d.id));
 
 export class QTESystem {
-  constructor(bus, timers, random = Math.random) {
+  constructor(bus, timers, random = Math.random, now = Date.now) {
     this.bus = bus;
     this.timers = timers;
-    this.random = random;
+    this.random = typeof random === "function" ? random : Math.random;
+    this.now = typeof now === "function" ? now : () => Date.now();
     this.active = false;
     this.sequence = [];
     this.index = 0;
+    this.startTime = 0;
     this.deadline = 0;
     this.durationMs = 0;
     this.errors = 0;
@@ -28,12 +30,12 @@ export class QTESystem {
     if (typeof lengthOrOptions === "object" && lengthOrOptions !== null) {
       length = lengthOrOptions.length ?? 5;
       duration = lengthOrOptions.durationMs ?? 5000;
-      directionMode = lengthOrOptions.directionMode ?? lengthOrOptions.qteDirections ?? "all";
+      directionMode = lengthOrOptions.directionMode ?? lengthOrOptions.qteDirections ?? lengthOrOptions.allowedDirections ?? "all";
       maxErrors = lengthOrOptions.maxErrors ?? Infinity;
     } else {
       length = lengthOrOptions ?? 5;
       duration = durationMs;
-      directionMode = options.directionMode ?? options.qteDirections ?? "all";
+      directionMode = options.directionMode ?? options.qteDirections ?? options.allowedDirections ?? "all";
       maxErrors = options.maxErrors ?? Infinity;
     }
 
@@ -42,12 +44,13 @@ export class QTESystem {
     this.errors = 0;
     this.maxErrors = maxErrors;
     this.durationMs = duration;
+    this.startTime = this.now();
+    this.deadline = this.startTime + duration;
 
     this.sequence = this.generateSequence(length, directionMode);
-    this.deadline = performance.now() + duration;
     this.emit();
     this.tickId = this.timers.interval(() => {
-      if (performance.now() >= this.deadline) {
+      if (this.now() >= this.deadline) {
         this.finish(false);
       } else {
         this.emit();
@@ -89,8 +92,17 @@ export class QTESystem {
     });
   }
 
-  input(directionId) {
+  input(directionId, declaredAt = null) {
     if (!this.active) return false;
+    const arrival = this.now();
+    const timestamp = declaredAt || arrival;
+
+    // Timing check with 150ms grace
+    if (timestamp > this.deadline + 150) {
+      this.finish(false);
+      return false;
+    }
+
     const expected = this.sequence[this.index];
     if (directionId !== expected) {
       this.errors += 1;
@@ -118,10 +130,42 @@ export class QTESystem {
     return true;
   }
 
+  auditInputs(inputs = []) {
+    if (!this.active) return { ok: false, active: false };
+    const results = [];
+    for (const item of inputs) {
+      const dir = item.directionId || item.direction || item.key;
+      const ts = item.timestamp || item.declaredAt || this.now();
+      if (ts < this.startTime - 150 || ts > this.deadline + 150) {
+        this.errors += 1;
+        results.push({ item, valid: false, reason: "timestamp_out_of_bounds" });
+        if (this.errors >= this.maxErrors) {
+          this.finish(false);
+          return { ok: false, success: false, errors: this.errors, results };
+        }
+        continue;
+      }
+      const ok = this.input(dir, ts);
+      results.push({ item, valid: ok });
+      if (!this.active) break;
+    }
+    return {
+      ok: true,
+      success: this.index >= this.sequence.length && this.errors < this.maxErrors,
+      errors: this.errors,
+      index: this.index,
+      results
+    };
+  }
+
+  reportBatch(inputs = []) {
+    return this.auditInputs(inputs);
+  }
+
   pause() {
     if (!this.active || this.isPaused) return;
     this.isPaused = true;
-    this.remainingOnPause = Math.max(0, this.deadline - performance.now());
+    this.remainingOnPause = Math.max(0, this.deadline - this.now());
     if (this.tickId !== null) {
       this.timers.clearInterval(this.tickId);
       this.tickId = null;
@@ -132,9 +176,9 @@ export class QTESystem {
   resume() {
     if (!this.active || !this.isPaused) return;
     this.isPaused = false;
-    this.deadline = performance.now() + (this.remainingOnPause || 0);
+    this.deadline = this.now() + (this.remainingOnPause || 0);
     this.tickId = this.timers.interval(() => {
-      if (performance.now() >= this.deadline) {
+      if (this.now() >= this.deadline) {
         this.finish(false);
       } else {
         this.emit();
@@ -144,7 +188,7 @@ export class QTESystem {
   }
 
   snapshot() {
-    const remainingMs = this.isPaused ? (this.remainingOnPause || 0) : Math.max(0, this.deadline - performance.now());
+    const remainingMs = this.isPaused ? (this.remainingOnPause || 0) : Math.max(0, this.deadline - this.now());
     return {
       active: this.active,
       isPaused: Boolean(this.isPaused),
@@ -152,6 +196,8 @@ export class QTESystem {
       index: this.index,
       errors: this.errors,
       maxErrors: this.maxErrors,
+      startTime: this.startTime,
+      deadline: this.deadline,
       remainingMs,
       progress: this.durationMs ? remainingMs / this.durationMs : 0
     };
@@ -189,13 +235,15 @@ export class QTESystem {
 }
 
 export class DualQTESystem {
-  constructor(bus, timers, random = Math.random) {
+  constructor(bus, timers, random = Math.random, now = Date.now) {
     this.bus = bus;
     this.timers = timers;
-    this.random = random;
+    this.random = typeof random === "function" ? random : Math.random;
+    this.now = typeof now === "function" ? now : () => Date.now();
     this.active = false;
     this.left = { sequence: [], index: 0, errors: 0, maxErrors: Infinity, completed: false, success: false, enemyId: "left" };
     this.right = { sequence: [], index: 0, errors: 0, maxErrors: Infinity, completed: false, success: false, enemyId: "right" };
+    this.startTime = 0;
     this.deadline = 0;
     this.durationMs = 0;
     this.tickId = null;
@@ -211,17 +259,19 @@ export class DualQTESystem {
     if (typeof lengthOrOptions === "object" && lengthOrOptions !== null) {
       length = lengthOrOptions.length ?? 7;
       duration = lengthOrOptions.durationMs ?? 7000;
-      directionMode = lengthOrOptions.directionMode ?? lengthOrOptions.qteDirections ?? "all";
+      directionMode = lengthOrOptions.directionMode ?? lengthOrOptions.qteDirections ?? lengthOrOptions.allowedDirections ?? "all";
       maxErrors = lengthOrOptions.maxErrors ?? 1;
     } else {
       length = lengthOrOptions ?? 7;
       duration = durationMs;
-      directionMode = options.directionMode ?? options.qteDirections ?? "all";
+      directionMode = options.directionMode ?? options.qteDirections ?? options.allowedDirections ?? "all";
       maxErrors = options.maxErrors ?? 1;
     }
 
     this.active = true;
     this.durationMs = duration;
+    this.startTime = this.now();
+    this.deadline = this.startTime + duration;
     this.left = {
       sequence: this.generateSequence(length, directionMode),
       index: 0,
@@ -241,10 +291,9 @@ export class DualQTESystem {
       enemyId: "right"
     };
 
-    this.deadline = performance.now() + duration;
     this.emit();
     this.tickId = this.timers.interval(() => {
-      if (performance.now() >= this.deadline) {
+      if (this.now() >= this.deadline) {
         this.finish();
       } else {
         this.emit();
@@ -272,8 +321,16 @@ export class DualQTESystem {
     return Array.from({ length }, () => ALL_IDS[Math.floor(this.random() * ALL_IDS.length)]);
   }
 
-  inputSlot(slotKey, directionId) {
+  inputSlot(slotKey, directionId, declaredAt = null) {
     if (!this.active) return false;
+    const arrival = this.now();
+    const timestamp = declaredAt || arrival;
+
+    if (timestamp > this.deadline + 150) {
+      this.finish();
+      return false;
+    }
+
     const slot = this[slotKey];
     if (!slot || slot.completed) return false;
 
@@ -317,7 +374,7 @@ export class DualQTESystem {
     return true;
   }
 
-  input(directionOrSlot, slotOrDirection = null) {
+  input(directionOrSlot, slotOrDirection = null, declaredAt = null) {
     if (!this.active) return false;
     let slot = "left";
     let direction = directionOrSlot;
@@ -331,21 +388,49 @@ export class DualQTESystem {
       if (!this.left.completed) slot = "left";
       else if (!this.right.completed) slot = "right";
     }
-    return this.inputSlot(slot, direction);
+    return this.inputSlot(slot, direction, declaredAt);
   }
 
-  inputLeft(directionId) {
-    return this.inputSlot("left", directionId);
+  inputLeft(directionId, declaredAt = null) {
+    return this.inputSlot("left", directionId, declaredAt);
   }
 
-  inputRight(directionId) {
-    return this.inputSlot("right", directionId);
+  inputRight(directionId, declaredAt = null) {
+    return this.inputSlot("right", directionId, declaredAt);
+  }
+
+  auditInputs(inputs = []) {
+    if (!this.active) return { ok: false, active: false };
+    const results = [];
+    for (const item of inputs) {
+      const slot = item.slot || (item.side === "right" ? "right" : "left");
+      const dir = item.directionId || item.direction || item.key;
+      const ts = item.timestamp || item.declaredAt || this.now();
+      if (ts < this.startTime - 150 || ts > this.deadline + 150) {
+        if (this[slot]) this[slot].errors += 1;
+        results.push({ item, valid: false, reason: "timestamp_out_of_bounds" });
+        continue;
+      }
+      const ok = this.inputSlot(slot, dir, ts);
+      results.push({ item, valid: ok });
+      if (!this.active) break;
+    }
+    return {
+      ok: true,
+      left: { completed: this.left.completed, success: this.left.success, errors: this.left.errors },
+      right: { completed: this.right.completed, success: this.right.success, errors: this.right.errors },
+      results
+    };
+  }
+
+  reportBatch(inputs = []) {
+    return this.auditInputs(inputs);
   }
 
   pause() {
     if (!this.active || this.isPaused) return;
     this.isPaused = true;
-    this.remainingOnPause = Math.max(0, this.deadline - performance.now());
+    this.remainingOnPause = Math.max(0, this.deadline - this.now());
     if (this.tickId !== null) {
       this.timers.clearInterval(this.tickId);
       this.tickId = null;
@@ -356,9 +441,9 @@ export class DualQTESystem {
   resume() {
     if (!this.active || !this.isPaused) return;
     this.isPaused = false;
-    this.deadline = performance.now() + (this.remainingOnPause || 0);
+    this.deadline = this.now() + (this.remainingOnPause || 0);
     this.tickId = this.timers.interval(() => {
-      if (performance.now() >= this.deadline) {
+      if (this.now() >= this.deadline) {
         this.finish();
       } else {
         this.emit();
@@ -368,13 +453,15 @@ export class DualQTESystem {
   }
 
   snapshot() {
-    const remainingMs = this.isPaused ? (this.remainingOnPause || 0) : Math.max(0, this.deadline - performance.now());
+    const remainingMs = this.isPaused ? (this.remainingOnPause || 0) : Math.max(0, this.deadline - this.now());
     return {
       mode: "dual",
       active: this.active,
       isPaused: Boolean(this.isPaused),
       left: { ...this.left, sequence: [...this.left.sequence] },
       right: { ...this.right, sequence: [...this.right.sequence] },
+      startTime: this.startTime,
+      deadline: this.deadline,
       remainingMs,
       progress: this.durationMs ? remainingMs / this.durationMs : 0
     };

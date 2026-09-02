@@ -338,6 +338,60 @@ xpNeededForLevel(level) = 100 + Math.max(0, level - 1) * 75
   - 手動分發 pointer/touch 事件僅驗證遊戲手勢處理（標記 `trusted: false`）。
 - **嚴格驗收防線**：任何四向裁切（Clipping）、元素遮擋（Occlusion）、必要控制可達性缺失或動畫抖動皆視為非零阻擋缺陷。
 
+---
+
+## 11. Online 權威架構與通訊協定規範 (Online Authority Architecture & Network Protocol Specification)
+
+### 11.1 十六大 Online 權威方針 (16 Online Authority Policies)
+1. **意圖傳遞原則 (Intent Only)**：前端客戶端僅向伺服器發送操作意圖指令（如選拳、出鍵、購裝、配點），嚴禁發送傷害數值、勝負結果、獎勵掉落或 RNG 隨機結果。所有戰鬥勝負與數值變更一律由運行於伺服器的 Kernel 核心權威計算。
+2. **三類判定模型 (Three-Class Adjudication)**：
+   - **時機類操作 (Timing Claims)**：QTE 輸入、變拳反應、切西瓜揮刀由客戶端先行樂觀反饋，伺服器依據封包抵達時間戳與 150ms 網路延遲寬限期進行事後嚴格審查。
+   - **秘密承諾 (Secret Commitments)**：猜拳手勢必須在倒數結束（Reveal 揭曉前）抵達伺服器封存；逾時抵達者自動作廢並判定棄權。
+   - **庫存與數值異動 (Inventory Mutations)**：藥水使用、裝備購買、穿脫、屬性配點為帶有 `cmdId` 的冪等指令，由伺服器驗證前置條件後套用。
+3. **宣告順序排序 (Declared Order)**：指令依玩家客戶端宣告之時間戳與流水序號進行排序緩衝處理，並受抵達時間上界約束，絕非單純依原始封包到達順序粗暴套用。
+4. **離線模式嚴格隔離 (Offline Sandbox Isolation)**：`?mode=offline` 離線模式使用同進程 `LocalGameClient`，為獨立單機沙盒，資料永不上傳伺服器，亦絕不回灌或污染線上帳號存檔。
+5. **戰鬥中狀態鎖定 (In-Battle Mutation Lock)**：戰鬥 Session 進行中時，嚴格鎖定裝備穿脫與屬性/技能配點指令（`BATTLE_IN_PROGRESS_LOCKED`），防止利用狀態切換漏洞獲取非法戰力 (`ASSUMPTION`)。
+6. **單一帳號單一寫入者 (One Writer Per Account)**：以最新連線為準（Newest Connection Wins），新連線登入時自動踢出舊連線 Session 並發送 `serverSessionReplaced` 事件；每帳號指令全數進入單一序列化佇列依序執行。
+7. **戰鬥暫停與斷線結算限制 (Pause Policy & Disconnect Grace)**：暫停操作僅允許在 `countdown` 出拳倒數階段發起，且單場戰鬥上限 3 次；`reaction` 與 `qte` 階段暫停無效且計時器照常運轉。戰鬥中斷線享有 10 秒寬限期保留狀態，逾時未連回時伺服器自動依當前狀態結算戰鬥。
+8. **伺服器純文字去化與多語系解耦 (Text-Free Server Emission)**：伺服器核心絕不直接下發包含硬編碼語言文字的字串。所有對話、系統廣播（Toast）與戰鬥日誌一律發送 `{ key, params }` 結構化資料，完全由前端客戶端 `I18n.js` 動態翻譯渲染；持久化紀錄僅儲存 ID 與數值。
+9. **伺服器權威 RNG 與確定性重放 (Authoritative RNG & Deterministic Replay)**：所有影響遊戲結果之隨機運算（Boss 出拳、爆擊、掉落、摸摸閃避）皆由伺服器注入之 Crypto-backed RNG 產生，種子永不下發客戶端。每場戰鬥於伺服器持久化初始種子與完整指令日誌，具備 100% 確定性重放審計能力。
+10. **經濟審計不可篡改帳本 (Economic Audit Ledger)**：每一筆星砂、經驗值、道具與裝備實例異動，皆在伺服器端寫入 Append-only 經濟流水帳本，記錄異動源、伺服器絕對時間戳與 `configVersion`。
+11. **伺服器絕對時間權威 (Authoritative Server Time)**：伺服器時間為全域唯一權威時鐘基準，存檔與對戰紀錄嚴禁信任並儲存客戶端 `Date.now()`。
+12. **嚴格架構驗證與來源防護 (Schema & Origin Validation)**：所有傳入伺服器之指令皆經過嚴格的 JSON Schema 驗證（白名單欄位、長度/大小限制、WSS 傳輸加密與 Origin 來源檢驗），非法或格式錯誤指令一律拒絕並記錄審計日誌。
+13. **作弊權限線上授權檢驗 (Cheat Dev Entitlements)**：除錯與作弊指令在線上模式下必須具備伺服器簽發之 Dev Entitlement（管理員憑證），一般玩家請求一律拒絕；離線模式除錯面板維持不變。
+14. **核心與適配器環境解耦 (Kernel & Adapter Separation)**：Kernel 核心邏輯（`src/js/kernel/`）為純 ES Modules，不使用任何 Node.js 專屬 API（如 `fs`, `sqlite`, `path`），確保未來可無縫遷移至 Cloudflare Workers / Durable Objects；WebSocket、儲存與時鐘適配器完全隔離於 `server/`，且 `server/` 目錄絕不進入前端打包 Bundle。
+15. **連線握手版本檢驗 (Config Version Handshake)**：客戶端與伺服器於 WebSocket 連線握手時互換 `configVersion`（當前為 `2026.09.03`），版本不相符時伺服器發送 `VERSION_MISMATCH` 並提示客戶端重新整理載入最新版本。
+16. **每日備份與復原演練契約 (Daily Backup & Restore Contract)**：線上系統於公開上線前必須建立自動化每日資料備份機制，並具備可驗證且經過實測的災難復原流程。
+
+### 11.2 雙模式客戶端抽象 (GameClient Layer)
+- **`GameClient` 抽象介面**：提供統一的 `send(command, payload)`、`on(event, handler)`、`getState()` 方法。
+- **`LocalGameClient` (離線沙盒模式)**：同進程實例化 Kernel 與本地持久化，供 `?mode=offline` 或單機沙盒環境運行，完全不連線伺服器且不回灌伺服器存檔。
+- **`RemoteGameClient` (線上權威模式)**：透過 WebSocket 與伺服器連線，負責序列化指令發送、`cmdId` 冪等確認、自動重連、時鐘同步（Clock Sync）與狀態事件接收。
+
+### 11.3 通訊協定規格 (`protocol.js` v2.0.0)
+- **Protocol Version**：`2.0.0`
+- **Config Version**：`2026.09.03`
+- **指令封包格式 (Command Envelope)**：`{ cmdId, command, payload, clientTime, configVersion, token }`
+- **指令集 (Commands)**：
+  - 經濟裝備：`buyItem`, `buyEquipment`, `equipItem`, `unequipItem`, `allocateStat`, `allocateSkill`
+  - 戰鬥操作：`battle.start`, `battle.selectHand`, `battle.selectTarget`, `battle.useMorph`, `battle.useItem`, `battle.inputQte`, `battle.pause`, `battle.resume`, `battle.abandon`
+  - 自動戰鬥與戰後：`autoBattle.start`, `autoBattle.stop`, `postBattle.requestSwimsuit`, `postBattle.startWatermelon`, `postBattle.strikeWatermelon`
+  - 帳號治理：`account.issueTransferCode`, `account.claimTransferCode`, `account.exportJson`, `account.delete`
+  - 作弊調試：`cheat.setStats`, `cheat.unlockAll`, `cheat.addCoins`
+- **事件集 (Events)**：
+  - 狀態模型：`store:changed`, `battle:state`, `battle:effect`, `battle:damage-logged`, `battle:ended`
+  - 計時與 QTE：`qte:update`
+  - 戰後與小遊戲：`postbattle:state`, `postbattle:auto-watermelon`, `auto-battle:round-completed`, `auto-battle:summary`
+  - 去純文字化推播：`dialogue` (`{ key, params }`), `toast` (`{ key, params, tone }`)
+  - 傳輸連線層：`connection:state`, `command:ack`, `command:rejected`
+
+### 11.4 連線狀態機 (Connection State Machine)
+```
+[offline] ◄──► [connecting] ──► [online] ──► [reconnecting] ──► [disconnected]
+```
+- 連線狀態定義於 `ConnectionStates`（`offline`, `connecting`, `online`, `reconnecting`, `disconnected`）。
+- 橫幅提示（Banner）與狀態標籤全面透過 `I18n.js` 四國語系（`zh-Hant`, `zh-Hans`, `en`, `ja`）在地化字典渲染。
+
 
 
 

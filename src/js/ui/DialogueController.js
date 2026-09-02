@@ -1,3 +1,5 @@
+import { I18n } from "../services/I18n.js";
+
 export class DialogueController {
   constructor(bus) {
     this.speakerElement = document.querySelector("#dialogue-speaker");
@@ -11,12 +13,35 @@ export class DialogueController {
     document.querySelector("#battle-dialogue")?.addEventListener("click", () => this.reveal());
   }
 
-  show({ speaker, text }) {
+  show(payload) {
+    if (!payload) return;
     window.clearInterval(this.timer);
     window.clearTimeout(this.stopTimer);
+
+    let speaker = "";
+    let text = "";
+
+    if (typeof payload === "string") {
+      text = payload;
+    } else if (payload.key) {
+      text = I18n.t(payload.key, payload.params || {});
+      if (payload.speakerKey) {
+        speaker = I18n.t(payload.speakerKey);
+      } else if (payload.speaker) {
+        speaker = payload.speaker;
+      }
+    } else {
+      speaker = payload.speaker || "";
+      text = payload.text || "";
+    }
+
     this.fullText = text;
-    this.speakerElement.textContent = speaker;
-    this.textElement.textContent = "";
+    if (this.speakerElement) {
+      this.speakerElement.textContent = speaker;
+    }
+    if (this.textElement) {
+      this.textElement.textContent = "";
+    }
     const characters = Array.from(text);
     let index = 0;
     const isSpeaking = Boolean(speaker && !["旁白", "Narrator", "ナレーション"].includes(speaker));
@@ -24,7 +49,9 @@ export class DialogueController {
 
     this.timer = window.setInterval(() => {
       index += 1;
-      this.textElement.textContent = characters.slice(0, index).join("");
+      if (this.textElement) {
+        this.textElement.textContent = characters.slice(0, index).join("");
+      }
       if (index >= characters.length) {
         window.clearInterval(this.timer);
         this.timer = null;
@@ -37,7 +64,9 @@ export class DialogueController {
     if (!this.timer) return;
     window.clearInterval(this.timer);
     this.timer = null;
-    this.textElement.textContent = this.fullText;
+    if (this.textElement) {
+      this.textElement.textContent = this.fullText;
+    }
     this.setSpeaking(false);
   }
 
@@ -45,3 +74,4 @@ export class DialogueController {
     this.characterElements.forEach((element) => element.classList.toggle("is-speaking", active));
   }
 }
+

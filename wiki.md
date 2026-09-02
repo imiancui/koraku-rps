@@ -17,11 +17,19 @@
 7. [等級成長與屬性配點公式](#7-等級成長與屬性配點公式)
 8. [12 格位裝備全目錄與紙娃娃系統](#8-12-格位裝備全目錄與紙娃娃系統)
 9. [消耗藥水與星砂經濟](#9-消耗藥水與星砂經濟)
-10. [蒙眼切西瓜小遊戲](#10-蒙眼切西瓜小遊戲)
+10. [蒙眼切西瓜小遊戲與自動刷關](#10-蒙眼切西瓜小遊戲與自動刷關)
 11. [歷程紀錄與 DPS 戰力分析](#11-歷程紀錄與-dps-戰力分析)
-12. [圖鑑系統與 CG 解鎖](#12-圖鑑系統與-cg-解鎖)
-13. [除錯作弊選單與隱藏指令](#13-除錯作弊選單與隱藏指令)
-14. [在地化翻譯與語系切換](#14-在地化翻譯與語系切換)
+12. [圖鑑系統與 CG 解鎖](#12-圖鑑系統與-cg-解鎖-gallery-system)
+13. [除錯作弊選單與隱藏指令](#13-除錯作弊選單與隱藏指令-debug--cheat-system)
+14. [行動端優化與 2020+ 自適應佈局](#14-行動端優化與-2020-自適應佈局-mobile-ux--modern-responsive-layout)
+15. [程序化和風 BGM 合成與獨立開關](#15-程序化和風-bgm-合成與獨立開關-web-audio-bgm--split-audio-controls)
+16. [在地化翻譯與語系切換](#16-在地化翻譯與語系切換)
+17. [存檔紀錄、種子碼跨裝置轉移與刪檔管理](#17-存檔紀錄種子碼跨裝置轉移與刪檔管理-save-records-seed-code--save-management)
+18. [戰鬥 ATK 資訊、最近 5 次傷害紀錄與修練場系統](#18-戰鬥-atk-資訊最近-5-次傷害紀錄與修練場系統-hud-atk-5-damage-log--training-dojo)
+19. [版本歷史更新日誌與戰鬥排版修復](#19-版本歷史更新日誌與戰鬥排版修復-v006)
+20. [響應式佈局強化、寬螢幕道場擴展與跨引擎回歸門檻](#20-響應式佈局強化寬螢幕道場擴展與跨引擎回歸門檻-v0014)
+21. [戰鬥 HUD 自由拖曳擺放與非衝突生成佈局](#21-戰鬥-hud-自由拖曳擺放與非衝突生成佈局-battle-hud-dragging--layout)
+22. [Online 權威架構與通訊協定手冊](#22-online-權威架構與通訊協定手冊-online-architecture--protocol)
 
 ---
 
@@ -473,6 +481,45 @@ $$\text{Theoretical DPS} = \frac{(\text{Base DMG} \times \text{Greatsword Mult} 
 - **預設座標重構**：各介面預設生成時永不重疊遮擋。自動刷關切西瓜卡片預設停靠於戰鬥紀錄下方（`top: clamp(180px, 24vh, 220px); right: clamp(14px, 2.2vw, 32px);`），根除生成互相覆蓋問題。
 - **座標持久化記憶**：玩家自訂拖曳座標自動記錄於 `localStorage`（`koraku_hud_positions_v1`），跨回合與對局無縫保持。
 - **雙擊一鍵重設**：雙擊任何 HUD 標題列或拖曳手柄，即可瞬間還原至原廠預設佈局座標。
+
+---
+
+## 22. Online 權威架構與通訊協定手冊 (Online Architecture & Protocol)
+
+### 22.1 十六大 Online 權威方針 (16 Online Authority Policies)
+1. **意圖傳遞 (Intent Only)**：客戶端僅發送操作意圖指令，勝負、傷害、獎勵與數值全由伺服器權威計算。
+2. **三類判定模型 (3-Class Adjudication)**：時機類操作具 150ms 網路延遲寬限期事後審查；猜拳秘密承諾必須在揭曉前抵達；道具與配點為冪等指令。
+3. **宣告順序 (Declared Order)**：指令依客戶端時間戳排序緩衝，受抵達時間上界約束。
+4. **離線模式隔離 (Offline Sandbox)**：`?mode=offline` 為獨立單機沙盒，永不上傳或污染伺服器資料。
+5. **戰鬥中鎖定 (In-Battle Lock)**：戰鬥進行中鎖定換裝與配點指令 (`BATTLE_IN_PROGRESS_LOCKED`)。
+6. **單一寫入者 (One Writer Per Account)**：最新連線勝出，自動踢除舊連線；指令序列化佇列依序執行。
+7. **暫停與斷線規則 (Pause & Disconnect Grace)**：僅倒數階段允許暫停且每場限 3 次；戰鬥斷線享有 10 秒寬限期，逾時未連回自動結算。
+8. **去純文字化 (Text-Free Server Emission)**：伺服器僅推播 `{ key, params }` 結構化資料，完全由客戶端 `I18n.js` 動態翻譯。
+9. **權威 RNG 與確定性重放 (Authoritative RNG & Deterministic Replay)**：伺服器 Crypto-backed RNG 產生隨機數，持久化初始種子與指令日誌供重放審計。
+10. **經濟審計帳本 (Economic Audit Ledger)**：所有星砂、經驗值、裝備實例異動寫入 Append-only 流水帳本。
+11. **伺服器絕對時間 (Authoritative Server Time)**：伺服器時間為唯一時鐘權威。
+12. **架構與來源防護 (Schema & Origin Validation)**：指令白名單欄位、大小限制與 WSS 加密防護。
+13. **作弊線上權限檢驗 (Cheat Dev Entitlements)**：線上作弊需具備 Dev Entitlement，未授權一律拒絕。
+14. **核心環境解耦 (Kernel & Adapter Separation)**：Kernel 純 ES Modules，伺服器專屬適配器隔離於 `server/`。
+15. **版本握手檢驗 (Config Version Handshake)**：連線握手互換 `configVersion`（`2026.09.03`），版本不符提示重新整理。
+16. **每日備份與復原演練 (Daily Backup & Restore Contract)**：排程每日自動備份，具備經過實測的冷啟動復原程序。
+
+### 22.2 通訊協定規格 (`protocol.js` v2.0.0)
+- **Protocol Version**：`2.0.0`
+- **Config Version**：`2026.09.03`
+- **指令格式 (Envelope)**：`{ cmdId, command, payload, clientTime, configVersion, token }`
+- **指令集 (Commands)**：包含經濟裝備（`buyItem`, `buyEquipment`, `equipItem`, `unequipItem`, `allocateStat`, `allocateSkill`）、戰鬥操作（`battle.start`, `battle.selectHand`, `battle.selectTarget`, `battle.useMorph`, `battle.useItem`, `battle.inputQte`, `battle.pause`, `battle.resume`, `battle.abandon`）、自動戰鬥與戰後（`autoBattle.start`, `autoBattle.stop`, `postBattle.requestSwimsuit`, `postBattle.startWatermelon`, `postBattle.strikeWatermelon`）、帳號治理（`account.issueTransferCode`, `account.claimTransferCode`, `account.exportJson`, `account.delete`）、作弊調試（`cheat.setStats`, `cheat.unlockAll`, `cheat.addCoins`）。
+- **事件集 (Events)**：`store:changed`, `battle:state`, `battle:effect`, `battle:damage-logged`, `battle:ended`, `qte:update`, `postbattle:state`, `postbattle:auto-watermelon`, `auto-battle:round-completed`, `auto-battle:summary`, `dialogue`, `toast`, `connection:state`, `command:ack`, `command:rejected`。
+
+### 22.3 帳號轉移碼 (Transfer Code)、JSON 備份與資料權
+- **15 分鐘一次性轉移碼**：透過 `account.issueTransferCode` 產生安全轉移碼，在新設備輸入 `account.claimTransferCode` 即可無縫綁定並繼承全部冒險進度。
+- **完整 JSON 資料匯出**：呼叫 `account.exportJson` 取得包含等級、12 格位裝備實例、星砂經濟帳本與歷程統計之備份檔案。
+- **徹底刪除帳號**：輸入確認文字「DELETE」呼叫 `account.delete`，徹底銷毀雲端與本機所有進度。
+
+### 22.4 運維備份與災難復原契約 (Ops: Backup & Disaster Recovery)
+- 伺服器每日 UTC 04:00 自動執行 `server/scripts/backup.mjs`，產生時間戳壓縮備份檔並異地同步備援。
+- 提供 `server/scripts/restore.mjs` 確保可在 3 分鐘內完成災難還原驗收。
+
 
 
 

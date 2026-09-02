@@ -1,5 +1,4 @@
 import { ASSETS, BATTLE_RULES, HANDS, ITEMS, SKILLS, STAGES, EQUIPMENT_ITEMS } from "../config/gameConfig.js";
-import { I18n } from "../services/I18n.js";
 import { TimerRegistry } from "../core/TimerRegistry.js";
 import { QTESystem, DualQTESystem } from "./QTESystem.js";
 import {
@@ -11,18 +10,35 @@ import {
 } from "./rpsRules.js";
 
 export class BattleSystem {
-  constructor(bus, store, random = Math.random) {
+  constructor(bus, store, random = Math.random, now = Date.now) {
     this.bus = bus;
     this.store = store;
-    this.random = random;
+    const resolvedRandom = typeof random === "function"
+      ? random
+      : (typeof random === "object" && random !== null && typeof random.random === "function"
+        ? random.random
+        : Math.random);
+    const resolvedNow = (typeof random === "object" && random !== null && typeof random.now === "function")
+      ? random.now
+      : (typeof now === "function" ? now : () => Date.now());
+    this.random = resolvedRandom;
+    this.now = resolvedNow;
     this.timers = new TimerRegistry();
-    this.qte = new QTESystem(bus, this.timers, random);
-    this.dualQte = new DualQTESystem(bus, this.timers, random);
+    this.qte = new QTESystem(bus, this.timers, resolvedRandom, resolvedNow);
+    this.dualQte = new DualQTESystem(bus, this.timers, resolvedRandom, resolvedNow);
     this.state = null;
+    this.countdownTimeoutId = null;
     this.countdownId = null;
-    this.reactionTickId = null;
+    this.beatTimerIds = [];
     this.reactionTimeoutId = null;
+    this.reactionTickId = null;
+    this.disconnectTimeoutId = null;
     this.autoRestartTimerId = null;
+    this.pauseCount = 0;
+    this.maxPauses = 3;
+    this.commandBuffer = [];
+    this.commandLog = [];
+    this.battleSeed = 0;
     this.autoBattle = {
       active: false,
       isPaused: false,
@@ -38,6 +54,109 @@ export class BattleSystem {
         this.handleDualQteSlotSuccess(enemyId || slot);
       }
     });
+  }
+
+  // --- Online Authority Policies & Assumptions ---
+
+  // ASSUMPTION: Equipment mutations and stat allocations are locked during an active battle session.
+  isBattleActive() {
+    return Boolean(this.state?.active && this.state.phase !== "ended" && this.state.phase !== "abandoned");
+  }
+
+  canEquip() {
+    // ASSUMPTION: Equipment mutations locked during active battle session
+    return !this.isBattleActive();
+  }
+
+  canAllocate() {
+    // ASSUMPTION: Stat allocations locked during active battle session
+    return !this.isBattleActive();
+  }
+
+  enqueueCommand(cmd) {
+    const arrival = cmd.arrivedAt || this.now();
+    const declared = cmd.declaredAt || arrival;
+    const boundedDeclared = Math.min(declared, arrival + 150);
+    const entry = {
+      ...cmd,
+      arrivedAt: arrival,
+      declaredAt: declared,
+      boundedDeclaredAt: boundedDeclared
+    };
+    this.commandBuffer.push(entry);
+    this.commandBuffer.sort((a, b) => a.boundedDeclaredAt - b.boundedDeclaredAt);
+    return this.flushCommands();
+  }
+
+  flushCommands() {
+    const results = [];
+    while (this.commandBuffer.length > 0) {
+      const nextCmd = this.commandBuffer.shift();
+      results.push(this.dispatchCommand(nextCmd));
+    }
+    return results;
+  }
+
+  processCommand(cmd) {
+    return this.dispatchCommand({
+      ...cmd,
+      arrivedAt: cmd.arrivedAt || this.now(),
+      declaredAt: cmd.declaredAt || this.now()
+    });
+  }
+
+  dispatchCommand(cmd) {
+    const { type, payload, declaredAt, cmdId } = cmd;
+
+    // Check lock assumption
+    if ((type === "equip" || type === "unequip" || type === "allocate") && this.isBattleActive()) {
+      return {
+        ok: false,
+        cmdId,
+        reason: "locked_during_battle",
+        error: "ASSUMPTION: Equipment and stat allocations are locked during active battle"
+      };
+    }
+
+    let result = { ok: false, cmdId };
+    switch (type) {
+      case "select_hand":
+        result = this.selectHand(payload?.handId, payload?.slot, declaredAt);
+        break;
+      case "use_morph":
+        result = this.useMorph(declaredAt);
+        break;
+      case "use_item":
+        result = this.useItem(payload?.itemId, declaredAt);
+        break;
+      case "input_qte":
+        result = { ok: Boolean(this.inputQte(payload?.directionId, payload?.slot, declaredAt)) };
+        break;
+      case "report_qte_batch":
+        result = this.state?.isDualQte
+          ? this.dualQte.auditInputs(payload?.inputs)
+          : this.qte.auditInputs(payload?.inputs);
+        break;
+      case "pause":
+        result = this.pause();
+        break;
+      case "resume":
+        result = this.resume();
+        break;
+      case "abandon":
+        this.abandon();
+        result = { ok: true };
+        break;
+      default:
+        result = { ok: false, reason: "unknown_command" };
+    }
+
+    this.commandLog.push({
+      ...cmd,
+      executedAt: this.now(),
+      result
+    });
+    return result;
   }
 
   getAllEquipEffects(effectType) {
@@ -69,9 +188,12 @@ export class BattleSystem {
       if (options.isDual) {
         stage = {
           id: 992,
-          chapter: I18n.t("dojo.chapterName") || "修練場",
-          name: I18n.t("dojo.mode2Style2") || "影小樂・雙生木樁",
-          subtitle: I18n.t("dojo.mode2Style2Desc") || "第四關雙手雙軌模擬",
+          chapter: "修練場",
+          chapterKey: "dojo.chapterName",
+          name: "影小樂・雙生木樁",
+          nameKey: "dojo.mode2Style2",
+          subtitle: "第四關雙手雙軌模擬",
+          subtitleKey: "dojo.mode2Style2Desc",
           enemyHp: customHp * 2,
           requiredLevel: 1,
           rewardMultiplier: 0,
@@ -91,17 +213,20 @@ export class BattleSystem {
           isDojo: true,
           isSilhouette: true,
           enemies: [
-            { id: "left", name: I18n.t("dojo.dummySilhouetteLeft") || "影・小樂（左）", hp: customHp, maxHp: customHp, alive: true },
-            { id: "right", name: I18n.t("dojo.dummySilhouetteRight") || "影・小樂（右）", hp: customHp, maxHp: customHp, alive: true }
+            { id: "left", name: "影・小樂（左）", nameKey: "dojo.dummySilhouetteLeft", hp: customHp, maxHp: customHp, alive: true },
+            { id: "right", name: "影・小樂（右）", nameKey: "dojo.dummySilhouetteRight", hp: customHp, maxHp: customHp, alive: true }
           ],
           final: false
         };
       } else {
         stage = {
           id: 991,
-          chapter: I18n.t("dojo.chapterName") || "修練場",
-          name: I18n.t("dojo.mode2Style1") || "影小樂・單體木樁",
-          subtitle: I18n.t("dojo.mode2Style1Desc") || "無壓實戰與 DPS 測試",
+          chapter: "修練場",
+          chapterKey: "dojo.chapterName",
+          name: "影小樂・單體木樁",
+          nameKey: "dojo.mode2Style1",
+          subtitle: "無壓實戰與 DPS 測試",
+          subtitleKey: "dojo.mode2Style1Desc",
           enemyHp: customHp,
           requiredLevel: 1,
           rewardMultiplier: 0,
@@ -119,7 +244,7 @@ export class BattleSystem {
           customDamage,
           isDojo: true,
           isSilhouette: true,
-          enemies: [{ id: "main", name: I18n.t("dojo.dummySilhouette") || "影・小樂", hp: customHp, maxHp: customHp, alive: true }],
+          enemies: [{ id: "main", name: "影・小樂", nameKey: "dojo.dummySilhouette", hp: customHp, maxHp: customHp, alive: true }],
           final: false
         };
       }
@@ -127,7 +252,11 @@ export class BattleSystem {
       stage = STAGES.find((item) => item.id === Number(stageId));
       const isStageUnlocked = (profile.records?.clearedStages || []).includes(Number(stageId)) || profile.profile.level >= stage?.requiredLevel;
       if (!stage || !isStageUnlocked) {
-        this.bus.emit("toast", { message: "等級尚未達到這一章的挑戰條件。", tone: "danger" });
+        this.bus.emit("toast", {
+          key: "toast.levelRequirementNotMet",
+          message: "等級尚未達到這一章的挑戰條件。",
+          tone: "danger"
+        });
         return false;
       }
     }
@@ -135,7 +264,10 @@ export class BattleSystem {
     if (options.autoBattle) {
       const cleared = (profile.records?.clearedStages || []).includes(Number(stageId));
       if (!cleared) {
-        this.bus.emit("toast", { message: I18n.t("ui.mustClearOnceForAuto"), tone: "danger" });
+        this.bus.emit("toast", {
+          key: "ui.mustClearOnceForAuto",
+          tone: "danger"
+        });
         return false;
       }
       if (!this.autoBattle.active) {
@@ -158,7 +290,10 @@ export class BattleSystem {
     }
 
     this.stopClocks();
-    this.battleStartTime = Date.now();
+    this.pauseCount = 0;
+    this.battleSeed = options.seed ?? Math.floor(Math.random() * 1000000000);
+    this.commandLog = [];
+    this.battleStartTime = this.now();
     this.battleDamageDealt = 0;
     this.battleDamageTaken = 0;
     this.battleHpPotionUsed = 0;
@@ -208,12 +343,16 @@ export class BattleSystem {
       isEnemyFrozen: false,
       frozenEnemyHand: null,
       isPaused: false,
+      pauseCount: 0,
+      maxPauses: 3,
       appearance: stage.final ? ASSETS.final : ASSETS.default
     };
     this.emitState();
     this.say(
-      stage.final ? I18n.t("dialogue.introFinal") : I18n.t("dialogue.introNormal"),
-      I18n.t("dialogue.speakerKohaku")
+      stage.final
+        ? { key: "dialogue.introFinal" }
+        : { key: "dialogue.introNormal" },
+      { key: "dialogue.speakerKohaku" }
     );
     this.scheduleRound();
     return true;
@@ -221,6 +360,116 @@ export class BattleSystem {
 
   startAutoBattle(stageId, rounds = 10) {
     return this.start(stageId, { autoBattle: true, autoBattleRounds: rounds });
+  }
+
+  // --- Instantaneous Auto-Battle Simulation (Task 5.7) ---
+
+  simulateBattle(stageId, options = {}) {
+    const profile = this.store.snapshot();
+    const stage = STAGES.find((item) => item.id === Number(stageId)) || STAGES[0];
+    const stats = profile.playerStats;
+    const hasDualHand = Boolean(profile.profile?.skills?.dualHand > 0);
+    const momoLvl = profile.profile?.skills?.momo || 0;
+    const seed = options.seed || Math.floor(this.random() * 1000000000);
+
+    let playerHp = stats.maxHp;
+    let playerMp = stats.maxMp;
+    let enemyHp = stage.dualEnemy ? (stage.enemyHp || 10000) : stage.enemyHp;
+    let round = 0;
+    let damageDealt = 0;
+    let damageTaken = 0;
+    const frames = [];
+
+    while (playerHp > 0 && enemyHp > 0 && round < 50) {
+      round += 1;
+      const playerHand = "rock";
+      const hands = ["rock", "paper", "scissors"];
+      const enemyHand = hands[Math.floor(this.random() * hands.length)];
+      const cmp = compareHands(playerHand, enemyHand);
+
+      if (cmp === "win") {
+        const dmg = stats.damage;
+        enemyHp = Math.max(0, enemyHp - dmg);
+        damageDealt += dmg;
+        frames.push({ round, result: "win", damageDealt: dmg, playerHp, enemyHp });
+      } else if (cmp === "loss") {
+        // Player QTE attempt
+        const qteSuccess = this.random() > 0.3;
+        if (qteSuccess) {
+          const dmg = stats.damage;
+          enemyHp = Math.max(0, enemyHp - dmg);
+          damageDealt += dmg;
+          frames.push({ round, result: "qte_counter", damageDealt: dmg, playerHp, enemyHp });
+        } else {
+          const dmg = (BATTLE_RULES.enemyDamage || 100) * (stage.enemyDamageMultiplier || 1);
+          playerHp = Math.max(0, playerHp - dmg);
+          damageTaken += dmg;
+          frames.push({ round, result: "qte_fail", damageTaken: dmg, playerHp, enemyHp });
+        }
+      } else {
+        // Draw + Momo proc
+        if (momoLvl > 0 && this.random() < (momoLvl * 0.10)) {
+          const momoDmg = SKILLS.momo.damage;
+          enemyHp = Math.max(0, enemyHp - momoDmg);
+          damageDealt += momoDmg;
+          frames.push({ round, result: "draw_momo", damageDealt: momoDmg, playerHp, enemyHp });
+        } else {
+          frames.push({ round, result: "draw", playerHp, enemyHp });
+        }
+      }
+    }
+
+    const won = enemyHp <= 0;
+    return {
+      won,
+      stage,
+      seed,
+      round,
+      damageDealt,
+      damageTaken,
+      playerHp,
+      enemyHp,
+      frames
+    };
+  }
+
+  simulateAutoBattle(stageId, totalRounds = 10, options = {}) {
+    const results = [];
+    let wins = 0;
+    let losses = 0;
+    let totalDmgDealt = 0;
+    let totalDmgTaken = 0;
+
+    for (let r = 0; r < totalRounds; r++) {
+      const sim = this.simulateBattle(stageId, options);
+      if (sim.won) wins += 1;
+      else losses += 1;
+      totalDmgDealt += sim.damageDealt;
+      totalDmgTaken += sim.damageTaken;
+      results.push(sim);
+
+      const chunk = {
+        roundIndex: r + 1,
+        totalRounds,
+        won: sim.won,
+        wins,
+        losses,
+        battle: sim
+      };
+      this.bus.emit("auto-battle:stream-chunk", chunk);
+    }
+
+    const finalReport = {
+      stageId: Number(stageId),
+      totalRounds,
+      wins,
+      losses,
+      totalDamageDealt: totalDmgDealt,
+      totalDamageTaken: totalDmgTaken,
+      simulations: results
+    };
+    this.bus.emit("auto-battle:simulated", finalReport);
+    return finalReport;
   }
 
   restore(savedState) {
@@ -250,7 +499,7 @@ export class BattleSystem {
       this.autoBattle.remainingRounds = 0;
     }
 
-    this.battleStartTime = savedState.battleStartTime || Date.now();
+    this.battleStartTime = savedState.battleStartTime || this.now();
     this.battleDamageDealt = savedState.battleDamageDealt || 0;
     this.battleDamageTaken = savedState.battleDamageTaken || 0;
     this.battleHpPotionUsed = savedState.battleHpPotionUsed || 0;
@@ -264,6 +513,7 @@ export class BattleSystem {
     this.battleMorphDamage = savedState.battleMorphDamage || 0;
     this.battleQteHits = savedState.battleQteHits || 0;
     this.battleQteTotal = savedState.battleQteTotal || 0;
+    this.pauseCount = savedState.pauseCount || 0;
 
     const stats = profile.playerStats;
     const hasDualHandSkill = Boolean(profile.profile?.skills?.dualHand > 0);
@@ -289,10 +539,10 @@ export class BattleSystem {
 
     const roundNumber = Math.max(1, Number(savedState.round || 1));
     const currentRound = Math.max(0, roundNumber - 1);
-    
+
     let remainingCountdownMs = null;
     if (savedState.roundExpiresAt) {
-      remainingCountdownMs = Math.max(200, savedState.roundExpiresAt - Date.now());
+      remainingCountdownMs = Math.max(200, savedState.roundExpiresAt - this.now());
     } else if (typeof savedState.countdownRemainingMs === "number" && savedState.countdownRemainingMs > 0) {
       remainingCountdownMs = Math.max(200, savedState.countdownRemainingMs);
     } else if (typeof savedState.countdown === "number" && savedState.countdown > 0) {
@@ -325,6 +575,8 @@ export class BattleSystem {
       isEnemyFrozen: Boolean(savedState.isEnemyFrozen),
       frozenEnemyHand: savedState.frozenEnemyHand || null,
       isPaused: Boolean(this.autoBattle.isPaused),
+      pauseCount: this.pauseCount,
+      maxPauses: 3,
       appearance: stage.final ? ASSETS.final : ASSETS.default
     };
 
@@ -380,74 +632,69 @@ export class BattleSystem {
   }
 
   pause() {
-    if (!this.state?.active || this.state.phase === "ended" || this.state.isPaused) return;
-    this.state.isPaused = true;
-    if (this.state.phase === "countdown") {
-      this.countdownRemainingMs = Math.max(0, (this.countdownDeadline || 0) - performance.now());
-      if (this.countdownId !== null) {
-        this.timers.clearInterval(this.countdownId);
-        this.countdownId = null;
-      }
-    } else if (this.state.phase === "reaction") {
-      this.reactionRemainingMs = Math.max(0, (this.reactionDeadline || 0) - performance.now());
-      this.clearReactionClocks();
-    } else if (this.state.phase === "qte") {
-      if (this.state.isDualQte) {
-        this.dualQte.pause();
-      } else {
-        this.qte.pause();
-      }
+    if (!this.state?.active || this.state.phase === "ended" || this.state.isPaused) {
+      return { ok: false, reason: "invalid_state" };
     }
+    // Only countdown phase allowed for pause
+    if (this.state.phase !== "countdown") {
+      return { ok: false, reason: "pause_only_in_countdown" };
+    }
+    // Limit to 3 times per battle
+    if (this.pauseCount >= this.maxPauses) {
+      return { ok: false, reason: "pause_limit_reached" };
+    }
+    this.pauseCount += 1;
+    this.state.isPaused = true;
+    this.state.pauseCount = this.pauseCount;
+    this.state.maxPauses = this.maxPauses;
+    this.countdownRemainingMs = Math.max(0, (this.countdownDeadline || 0) - this.now());
+    this.clearCountdownClocks();
     this.emitState();
+    return { ok: true, pauseCount: this.pauseCount, remainingMs: this.countdownRemainingMs };
   }
 
   resume() {
-    if (!this.state?.active || this.state.phase === "ended" || !this.state.isPaused) return;
+    if (!this.state?.active || this.state.phase === "ended" || !this.state.isPaused) {
+      return { ok: false, reason: "not_paused" };
+    }
     this.state.isPaused = false;
     if (this.state.phase === "countdown") {
       const remainingMs = this.countdownRemainingMs ?? 1000;
-      this.countdownDeadline = performance.now() + remainingMs;
-      this.countdownId = this.timers.interval(() => {
-        const remaining = Math.max(0, this.countdownDeadline - performance.now());
-        const currentCount = Math.ceil(remaining / 1000);
-        this.state.countdown = currentCount;
-
-        if (currentCount === 3 && this.state.lastChant !== 3) {
-          this.state.lastChant = 3;
-          const chant = I18n.t("dialogue.chant3");
-          this.say(chant, I18n.t("dialogue.speakerKohaku"));
-          this.bus.emit("battle:countdown-beat", { count: 3, word: chant });
-        } else if (currentCount === 2 && this.state.lastChant !== 2) {
-          this.state.lastChant = 2;
-          const chant = I18n.t("dialogue.chant2");
-          this.say(chant, I18n.t("dialogue.speakerKohaku"));
-          this.bus.emit("battle:countdown-beat", { count: 2, word: chant });
-        } else if (currentCount === 1 && this.state.lastChant !== 1) {
-          this.state.lastChant = 1;
-          const chant = I18n.t("dialogue.chant1");
-          this.say(chant, I18n.t("dialogue.speakerKohaku"));
-          this.bus.emit("battle:countdown-beat", { count: 1, word: chant });
-        }
-
-        this.emitState();
-        if (remaining <= 0) this.revealHands();
-      }, 80);
-    } else if (this.state.phase === "reaction") {
-      const remainingMs = this.reactionRemainingMs ?? 500;
-      this.reactionDeadline = performance.now() + remainingMs;
-      this.reactionTickId = this.timers.interval(() => {
-        this.state.reactionRemaining = Math.max(0, (this.reactionDeadline - performance.now()) / 1000);
-        this.emitState();
-      }, 40);
-      this.reactionTimeoutId = this.timers.timeout(() => this.resolveRound(), remainingMs);
-    } else if (this.state.phase === "qte") {
-      if (this.state.isDualQte) {
-        this.dualQte.resume();
-      } else {
-        this.qte.resume();
-      }
+      this.scheduleRound(remainingMs);
     }
     this.emitState();
+    return { ok: true };
+  }
+
+  handleDisconnect() {
+    if (!this.state?.active || this.state.phase === "ended") return;
+    this.state.disconnected = true;
+    this.state.disconnectDeadline = this.now() + 10000;
+    this.emitState();
+    if (this.disconnectTimeoutId !== null) {
+      this.timers.clearTimeout(this.disconnectTimeoutId);
+    }
+    this.disconnectTimeoutId = this.timers.timeout(() => {
+      this.settleDisconnect();
+    }, 10000);
+  }
+
+  handleReconnect() {
+    if (this.disconnectTimeoutId !== null) {
+      this.timers.clearTimeout(this.disconnectTimeoutId);
+      this.disconnectTimeoutId = null;
+    }
+    if (this.state) {
+      this.state.disconnected = false;
+      this.state.disconnectDeadline = null;
+      this.emitState();
+    }
+  }
+
+  settleDisconnect() {
+    if (!this.state?.active || this.state.phase === "ended") return;
+    // Settle battle upon 10s disconnect expiration
+    this.end(false);
   }
 
   selectTarget(enemyId) {
@@ -461,24 +708,62 @@ export class BattleSystem {
   }
 
   snapshot() {
-    return this.state
-      ? {
-          ...structuredClone(this.state),
-          autoBattle: { ...this.autoBattle }
-        }
-      : null;
+    if (!this.state) return null;
+    const snap = structuredClone(this.state);
+    snap.autoBattle = { ...this.autoBattle };
+    snap.commandLog = [...this.commandLog];
+    snap.seed = this.battleSeed;
+
+    if (this.state.phase === "countdown" && this.countdownDeadline) {
+      const rem = Math.max(0, this.countdownDeadline - this.now());
+      snap.countdown = Math.ceil(rem / 1000);
+      snap.countdownRemainingMs = rem;
+    } else if (this.state.phase === "reaction" && this.reactionDeadline) {
+      const rem = Math.max(0, this.reactionDeadline - this.now());
+      snap.reactionRemaining = rem / 1000;
+      snap.reactionRemainingMs = rem;
+    }
+    return snap;
   }
 
   emitState() {
     this.bus.emit("battle:state", this.snapshot());
   }
 
-  say(text, speaker = null) {
-    this.bus.emit("dialogue", { speaker: speaker || I18n.t("dialogue.speakerKohaku"), text });
+  say(messageOrPayload, speaker = null) {
+    let key = null;
+    let params = {};
+    let text = "";
+    let speakerKey = "dialogue.speakerKohaku";
+    let speakerName = "";
+
+    if (typeof messageOrPayload === "object" && messageOrPayload !== null) {
+      key = messageOrPayload.key || null;
+      params = messageOrPayload.params || {};
+      text = messageOrPayload.text || "";
+    } else {
+      text = String(messageOrPayload || "");
+    }
+
+    if (typeof speaker === "object" && speaker !== null) {
+      speakerKey = speaker.key || speakerKey;
+      speakerName = speaker.text || "";
+    } else if (speaker) {
+      speakerName = String(speaker);
+    }
+
+    this.bus.emit("dialogue", {
+      key,
+      params,
+      speakerKey,
+      speaker: speakerName || "小樂",
+      text
+    });
   }
 
   scheduleRound(customMs = null) {
     if (!this.state?.active) return;
+    this.clearCountdownClocks();
     const defaultRoundSeconds = this.state.stage.roundSeconds || BATTLE_RULES.roundSeconds;
     const totalDurationMs = customMs ? customMs : defaultRoundSeconds * 1000;
     const roundSeconds = Math.ceil(totalDurationMs / 1000);
@@ -494,39 +779,51 @@ export class BattleSystem {
     this.state.morphActive = false;
     this.state.lastChant = null;
     this.state.isPaused = false;
-    this.countdownDeadline = performance.now() + totalDurationMs;
-    this.emitState();
+    this.countdownDeadline = this.now() + totalDurationMs;
+    this.state.deadline = this.countdownDeadline;
+    this.state.roundExpiresAt = this.countdownDeadline;
+    this.emitState(); // Push state ONCE on phase transition!
 
-    this.countdownId = this.timers.interval(() => {
-      const remaining = Math.max(0, this.countdownDeadline - performance.now());
-      const currentCount = Math.ceil(remaining / 1000);
-      this.state.countdown = currentCount;
+    // Schedule countdown chant beats
+    const beatTimes = [
+      { count: 3, delay: totalDurationMs - 3000, key: "dialogue.chant3" },
+      { count: 2, delay: totalDurationMs - 2000, key: "dialogue.chant2" },
+      { count: 1, delay: totalDurationMs - 1000, key: "dialogue.chant1" }
+    ];
 
-      if (currentCount === 3 && this.state.lastChant !== 3) {
-        this.state.lastChant = 3;
-        const chant = I18n.t("dialogue.chant3");
-        this.say(chant, I18n.t("dialogue.speakerKohaku"));
-        this.bus.emit("battle:countdown-beat", { count: 3, word: chant });
-      } else if (currentCount === 2 && this.state.lastChant !== 2) {
-        this.state.lastChant = 2;
-        const chant = I18n.t("dialogue.chant2");
-        this.say(chant, I18n.t("dialogue.speakerKohaku"));
-        this.bus.emit("battle:countdown-beat", { count: 2, word: chant });
-      } else if (currentCount === 1 && this.state.lastChant !== 1) {
-        this.state.lastChant = 1;
-        const chant = I18n.t("dialogue.chant1");
-        this.say(chant, I18n.t("dialogue.speakerKohaku"));
-        this.bus.emit("battle:countdown-beat", { count: 1, word: chant });
+    beatTimes.forEach(({ count, delay, key }) => {
+      if (delay > 0) {
+        const timerId = this.timers.timeout(() => {
+          if (this.state?.active && this.state.phase === "countdown" && !this.state.isPaused) {
+            this.state.lastChant = count;
+            this.say(
+              { key },
+              { key: "dialogue.speakerKohaku" }
+            );
+            this.bus.emit("battle:countdown-beat", { count, key });
+          }
+        }, delay);
+        this.beatTimerIds.push(timerId);
       }
+    });
 
-      this.emitState();
-      if (remaining <= 0) this.revealHands();
-    }, 80);
+    this.countdownTimeoutId = this.timers.timeout(() => {
+      this.countdownTimeoutId = null;
+      if (this.state?.active && this.state.phase === "countdown" && !this.state.isPaused) {
+        this.revealHands();
+      }
+    }, totalDurationMs);
   }
 
-  selectHand(handId, slot = null) {
-    if (!this.state?.active || !HANDS[handId]) return;
+  selectHand(handId, slot = null, declaredAt = null) {
+    if (!this.state?.active || !HANDS[handId]) return false;
+    const arrival = this.now();
+
     if (this.state.phase === "countdown") {
+      // Secret commitment sealed before reveal
+      if (arrival > this.countdownDeadline) {
+        return { ok: false, reason: "late_commitment" };
+      }
       if (slot === "left") {
         this.state.selectedHands.left = handId;
         this.state.selectedHand = handId;
@@ -541,7 +838,12 @@ export class BattleSystem {
       }
       this.emitState();
       this.bus.emit("sound", { name: "select" });
+      return { ok: true, handId, slot };
     } else if (this.state.phase === "reaction" && this.state.morphActive) {
+      // 150ms grace check on morph reaction window
+      if (arrival > this.reactionDeadline + 150) {
+        return { ok: false, reason: "morph_expired" };
+      }
       if (slot === "left") {
         this.state.selectedHands.left = handId;
         this.state.selectedHand = handId;
@@ -559,15 +861,14 @@ export class BattleSystem {
       this.emitState();
       this.bus.emit("sound", { name: "select" });
       this.resolveRound();
+      return { ok: true, handId, slot };
     }
+    return false;
   }
 
   revealHands() {
     if (!this.state?.active || this.state.phase !== "countdown") return;
-    if (this.countdownId !== null) {
-      this.timers.clearInterval(this.countdownId);
-      this.countdownId = null;
-    }
+    this.clearCountdownClocks();
     this.state.phase = "reaction";
 
     const isDualStage = Boolean(this.state.stage?.dualEnemy && this.state.enemies?.length > 1);
@@ -626,27 +927,48 @@ export class BattleSystem {
 
     let reactionWindowMs = this.state.stage?.reactionWindowMs ?? BATTLE_RULES.reactionWindowMs;
     this.state.reactionRemaining = reactionWindowMs / 1000;
+    this.reactionDeadline = this.now() + reactionWindowMs;
+    this.state.deadline = this.reactionDeadline;
+    this.state.reactionExpiresAt = this.reactionDeadline;
 
-    this.reactionDeadline = performance.now() + reactionWindowMs;
-    this.emitState();
+    this.emitState(); // Push state ONCE on phase transition!
     this.bus.emit("sound", { name: "reveal" });
 
-    this.reactionTickId = this.timers.interval(() => {
-      this.state.reactionRemaining = Math.max(0, (this.reactionDeadline - performance.now()) / 1000);
-      this.emitState();
-    }, 40);
-    this.reactionTimeoutId = this.timers.timeout(() => this.resolveRound(), reactionWindowMs);
+    this.reactionTimeoutId = this.timers.timeout(() => {
+      this.reactionTimeoutId = null;
+      this.resolveRound();
+    }, reactionWindowMs);
   }
 
-  useMorph() {
+  useMorph(declaredAt = null) {
+    const arrival = this.now();
+    const timestamp = declaredAt || arrival;
+
     if (!this.state?.active || this.state.phase !== "reaction" || this.state.morphActive) {
-      return { ok: false, message: "變拳只能在看見小樂出拳後的反應時間內使用。" };
+      return {
+        ok: false,
+        key: "combat.morphWindowOnly",
+        message: "變拳只能在看見小樂出拳後的反應時間內使用。"
+      };
     }
+    // 150ms grace check on reaction window
+    if (timestamp > this.reactionDeadline + 150) {
+      return {
+        ok: false,
+        key: "combat.morphWindowExpired",
+        message: "反應時間已過。"
+      };
+    }
+
     const totalDiscount = this.getAllEquipEffects("morph_discount").reduce((sum, eff) => sum + (eff.morphDiscount || 0), 0);
     const morphCost = Math.max(5, BATTLE_RULES.morphCost - totalDiscount);
 
     if (this.state.playerMp < morphCost) {
-      return { ok: false, message: "MP 不足，無法使用變拳。" };
+      return {
+        ok: false,
+        key: "combat.insufficientMp",
+        message: "MP 不足，無法使用變拳。"
+      };
     }
     this.clearReactionClocks();
     this.state.playerMp -= morphCost;
@@ -658,18 +980,20 @@ export class BattleSystem {
 
     const morphWindowMs = 2000;
     this.state.reactionRemaining = morphWindowMs / 1000;
-    this.reactionDeadline = performance.now() + morphWindowMs;
+    this.reactionDeadline = this.now() + morphWindowMs;
+    this.state.deadline = this.reactionDeadline;
+    this.state.reactionExpiresAt = this.reactionDeadline;
 
-    this.emitState();
+    this.emitState(); // Push state ONCE on phase transition!
     this.bus.emit("battle:effect", { type: "morph" });
     this.bus.emit("sound", { name: "skill" });
-    this.say(I18n.t("dialogue.morphReaction"), I18n.t("dialogue.speakerKohaku"));
+    this.say(
+      { key: "dialogue.morphReaction" },
+      { key: "dialogue.speakerKohaku" }
+    );
 
-    this.reactionTickId = this.timers.interval(() => {
-      this.state.reactionRemaining = Math.max(0, (this.reactionDeadline - performance.now()) / 1000);
-      this.emitState();
-    }, 40);
     this.reactionTimeoutId = this.timers.timeout(() => {
+      this.reactionTimeoutId = null;
       this.state.morphActive = false;
       this.resolveRound();
     }, morphWindowMs);
@@ -728,7 +1052,9 @@ export class BattleSystem {
           const rightEnemy = this.state.enemies.find((e) => e.id === "right" && e.alive);
           if (leftEnemy) this.applyDamageToEnemy(leftEnemy, null, false);
           if (rightEnemy) this.applyDamageToEnemy(rightEnemy, null, false);
-          const suffix = this.state.morphUsed ? "雙手變拳齊出，完美破除雙生合擊！" : "雙手同時獲勝，漂亮破除雙生合擊！";
+          const suffix = this.state.morphUsed
+            ? { key: "dialogue.winDualMorphBoth" }
+            : { key: "dialogue.winDualBoth" };
           this.finishRound("win", suffix);
           return;
         }
@@ -738,7 +1064,9 @@ export class BattleSystem {
           this.state.targetEnemyId = winEnemyId;
           const target = this.state.enemies.find((e) => e.id === winEnemyId && e.alive);
           if (target) this.applyDamageToEnemy(target, null, false);
-          const suffix = this.state.morphUsed ? "變拳擊破一手，成功壓制！" : "單手獲勝，成功壓制一手！";
+          const suffix = this.state.morphUsed
+            ? { key: "dialogue.winDualMorphSingle" }
+            : { key: "dialogue.winDualSingle" };
           this.finishRound("win", suffix);
           return;
         }
@@ -780,7 +1108,9 @@ export class BattleSystem {
         const rightEnemy = this.state.enemies.find((e) => e.id === "right" && e.alive);
         if (leftEnemy) this.applyDamageToEnemy(leftEnemy, null, false);
         if (rightEnemy) this.applyDamageToEnemy(rightEnemy, null, false);
-        const suffix = this.state.morphUsed ? "變拳齊出，一併壓制雙生小樂！" : "雙拳齊勝，完美克制雙生小樂！";
+        const suffix = this.state.morphUsed
+          ? { key: "dialogue.winDualMorphBoth" }
+          : { key: "dialogue.winDualBoth" };
         this.finishRound("win", suffix);
         return;
       }
@@ -790,7 +1120,9 @@ export class BattleSystem {
         this.state.targetEnemyId = winEnemyId;
         const target = this.state.enemies.find((e) => e.id === winEnemyId && e.alive);
         if (target) this.applyDamageToEnemy(target, null, false);
-        const suffix = this.state.morphUsed ? "變拳奏效，成功壓制一手！" : "單手壓制，削弱了雙生陣勢！";
+        const suffix = this.state.morphUsed
+          ? { key: "dialogue.winDualMorphSingle" }
+          : { key: "dialogue.winDualSingle" };
         this.finishRound("win", suffix);
         return;
       }
@@ -815,13 +1147,17 @@ export class BattleSystem {
 
       if (bothWin) {
         const doubleDamage = this.state.playerDamage * 2;
-        const suffix = this.state.morphUsed ? "雙手變拳齊出，造成雙倍壓制傷害！" : "雙手同時獲勝，造成雙倍壓制傷害！";
+        const suffix = this.state.morphUsed
+          ? { key: "dialogue.winDualMorphDoubleDmg" }
+          : { key: "dialogue.winDualDoubleDmg" };
         this.damageEnemy(suffix, false, doubleDamage);
         return;
       }
 
       if (singleWin) {
-        const suffix = this.state.morphUsed ? "變拳奏效，成功壓制！" : "漂亮地壓過了小樂的手勢！";
+        const suffix = this.state.morphUsed
+          ? { key: "dialogue.winSingleMorph" }
+          : { key: "dialogue.winSingleNormal" };
         this.damageEnemy(suffix, false);
         return;
       }
@@ -838,7 +1174,9 @@ export class BattleSystem {
       return;
     }
     if (result === "win") {
-      const suffix = this.state.morphUsed ? "變拳奏效，這一手由你拿下！" : "漂亮地壓過了小樂的手勢！";
+      const suffix = this.state.morphUsed
+        ? { key: "dialogue.winSingleMorph" }
+        : { key: "dialogue.winSingleNormal" };
       this.damageEnemy(suffix);
       return;
     }
@@ -858,6 +1196,8 @@ export class BattleSystem {
           const target = aliveEnemies[Math.floor(this.random() * aliveEnemies.length)];
           const dodgeRate = this.state.stage?.momoDodgeRate || 0;
           const isDodged = this.random() < dodgeRate;
+          const targetName = target.name || "小樂";
+
           if (isDodged) {
             this.store.recordMomoProc({ success: false, damage: 0 });
             this.bus.emit("battle:effect", {
@@ -866,7 +1206,10 @@ export class BattleSystem {
               skill: "momo"
             });
             this.bus.emit("sound", { name: "danger" });
-            this.finishRound("draw", "平手！你試圖偷摸" + target.name + "，但被她敏捷地閃開了！");
+            this.finishRound("draw", {
+              key: "dialogue.drawMomoDodge",
+              params: { target: targetName, targetId: target.id }
+            });
             return;
           }
 
@@ -896,13 +1239,18 @@ export class BattleSystem {
             actionType: "attack"
           });
           this.bus.emit("sound", { name: "counterRub" });
-          this.finishRound("draw", "平手！但你偷摸了" + target.name + "一下，造成 " + momoDamage + " 點傷害！");
+          this.finishRound("draw", {
+            key: "dialogue.drawMomoHit",
+            params: { target: targetName, targetId: target.id, damage: momoDamage }
+          });
           return;
         }
       }
     }
 
-    this.finishRound("draw", "同樣的手勢在空中碰上了——平手。");
+    this.finishRound("draw", {
+      key: "dialogue.drawNormal"
+    });
   }
 
   startQte(targetEnemyId = null) {
@@ -912,7 +1260,10 @@ export class BattleSystem {
       this.state.targetEnemyId = targetEnemyId;
     }
     this.emitState();
-    this.say(I18n.t("dialogue.qteSingleBreak"), I18n.t("dialogue.speakerKohaku"));
+    this.say(
+      { key: "dialogue.qteSingleBreak" },
+      { key: "dialogue.speakerKohaku" }
+    );
     this.bus.emit("sound", { name: "danger" });
     const extraQte = this.getAllEquipEffects("qte_time").reduce((sum, eff) => sum + (eff.extraQteSeconds || 0), 0);
     this.qte.start({
@@ -928,7 +1279,10 @@ export class BattleSystem {
     this.state.isDualQte = true;
     this.state.dualQteResolved = { left: false, right: false };
     this.emitState();
-    this.say(I18n.t("dialogue.qteDualBreak"), I18n.t("dialogue.speakerPlatinumKohaku"));
+    this.say(
+      { key: "dialogue.qteDualBreak" },
+      { key: "dialogue.speakerPlatinumKohaku" }
+    );
     this.bus.emit("sound", { name: "danger" });
     const extraQte = this.getAllEquipEffects("qte_time").reduce((sum, eff) => sum + (eff.extraQteSeconds || 0), 0);
     this.dualQte.start({
@@ -939,12 +1293,12 @@ export class BattleSystem {
     });
   }
 
-  inputQte(directionId, slot = null) {
+  inputQte(directionId, slot = null, declaredAt = null) {
     if (this.state?.phase !== "qte") return false;
     if (this.state.isDualQte) {
-      return this.dualQte.input(directionId, slot);
+      return this.dualQte.input(directionId, slot, declaredAt);
     }
-    return this.qte.input(directionId);
+    return this.qte.input(directionId, declaredAt);
   }
 
   handleDualQteSlotSuccess(slotOrEnemyId) {
@@ -958,7 +1312,13 @@ export class BattleSystem {
     if (!targetEnemy) return;
 
     this.applyDamageToEnemy(targetEnemy, null, true);
-    this.say(`化解了${targetEnemy.name}的單側攻勢！`, "你");
+    this.say(
+      {
+        key: "dialogue.deflectedSingleAttack",
+        params: { target: targetEnemy.name, targetId: targetEnemy.id }
+      },
+      { key: "dialogue.speakerPlayer" }
+    );
     this.emitState();
   }
 
@@ -983,13 +1343,17 @@ export class BattleSystem {
       if (!rightSuccess) failedCount += 1;
 
       if (failedCount > 0) {
-        this.damagePlayerForDual(failedCount, "未能防住全部攻勢，受到反擊！");
+        this.damagePlayerForDual(failedCount, {
+          key: "dialogue.dualQteMiss"
+        });
       } else {
         const counter = getQteCounterNarration(this.state.selectedHand);
         this.state.selectedHand = counter.changedHand;
         this.timers.timeout(() => {
           if (this.state?.active && this.state.phase === "qte") {
-            this.finishRound("win", "雙重反制成功！完美化解了雙生攻勢！");
+            this.finishRound("win", {
+              key: "dialogue.dualQteSuccess"
+            });
           }
         }, 500);
       }
@@ -1004,12 +1368,14 @@ export class BattleSystem {
       this.state.selectedHand = counter.changedHand;
       this.timers.timeout(() => {
         if (this.state?.active && this.state.phase === "qte") {
-          this.damageEnemy(counter.text, true);
+          this.damageEnemy(counter, true);
         }
       }, 500);
     } else {
       this.store.recordQteAttempt(this.state?.stage?.id, false);
-      this.damagePlayer("節奏慢了一拍，小樂的攻勢命中了你。");
+      this.damagePlayer({
+        key: "dialogue.qteMiss"
+      });
     }
   }
 
@@ -1040,13 +1406,20 @@ export class BattleSystem {
         const frozenHand = hands[Math.floor(this.random() * hands.length)];
         this.state.frozenEnemyHand = frozenHand;
         this.state.isEnemyFrozen = true;
+        const handLabel = HANDS[frozenHand]?.label || "";
         this.bus.emit("battle:effect", {
           type: "freeze",
           frozenHand,
-          handLabel: HANDS[frozenHand].label,
+          handLabel,
           handGlyph: HANDS[frozenHand].glyph
         });
-        this.say(`❄️ 霜月冰結！小樂的手掌被凍結，下一回合無法出【${HANDS[frozenHand].label}】！`, "小樂");
+        this.say(
+          {
+            key: "dialogue.freezeNarration",
+            params: { hand: handLabel }
+          },
+          { key: "dialogue.speakerKohaku" }
+        );
       }
     }
 
@@ -1074,25 +1447,27 @@ export class BattleSystem {
   }
 
   dealEnemyDamage(amount) {
-    this.damageEnemy("受到傷害", false, amount);
+    this.damageEnemy({ key: "combat.tookDamage", text: "受到傷害" }, false, amount);
   }
 
-  damageEnemy(message, countered = false, damageAmount = null) {
+  damageEnemy(messageOrPayload, countered = false, damageAmount = null) {
     const target = this.state.enemies.find((e) => e.id === this.state.targetEnemyId && e.alive)
       || this.state.enemies.find((e) => e.alive);
 
     if (target) {
       this.applyDamageToEnemy(target, damageAmount, countered);
     }
-    this.finishRound("win", message);
+    this.finishRound("win", messageOrPayload);
   }
 
-  damagePlayer(message) {
+  damagePlayer(messageOrPayload) {
     const dodge = this.hasEquipEffect("dodge");
     if (dodge && this.random() < (dodge.dodgeChance || 0.25)) {
       this.bus.emit("battle:effect", { type: "player-dodge" });
       this.bus.emit("sound", { name: "danger" });
-      this.finishRound("draw", "殘影閃避！你藉由幻影羽織化解了攻勢！");
+      this.finishRound("draw", {
+        key: "dialogue.dodgeDodge"
+      });
       return;
     }
 
@@ -1113,10 +1488,10 @@ export class BattleSystem {
       type: "player-hit",
       amount: totalDamage
     });
-    const playerName = (I18n.t("dialogue.speakerPlayer") && !I18n.t("dialogue.speakerPlayer").includes(".")) ? I18n.t("dialogue.speakerPlayer") : "旅人";
     this.bus.emit("battle:damage-logged", {
       target: "player",
-      targetName: playerName,
+      targetNameKey: "dialogue.speakerPlayer",
+      targetName: "旅人",
       amount: totalDamage,
       source: "enemy_attack",
       round: this.state?.round || 1,
@@ -1151,15 +1526,17 @@ export class BattleSystem {
       }
     }
 
-    this.finishRound("loss", message);
+    this.finishRound("loss", messageOrPayload);
   }
 
-  damagePlayerForDual(count, message) {
+  damagePlayerForDual(count, messageOrPayload) {
     const dodge = this.hasEquipEffect("dodge");
     if (dodge && this.random() < (dodge.dodgeChance || 0.25)) {
       this.bus.emit("battle:effect", { type: "player-dodge" });
       this.bus.emit("sound", { name: "danger" });
-      this.finishRound("draw", "殘影閃避！你藉由幻影羽織化解了雙生攻勢！");
+      this.finishRound("draw", {
+        key: "dialogue.dodgeDodgeDual"
+      });
       return;
     }
 
@@ -1181,10 +1558,10 @@ export class BattleSystem {
       type: "player-hit",
       amount: totalDamage
     });
-    const playerName = (I18n.t("dialogue.speakerPlayer") && !I18n.t("dialogue.speakerPlayer").includes(".")) ? I18n.t("dialogue.speakerPlayer") : "旅人";
     this.bus.emit("battle:damage-logged", {
       target: "player",
-      targetName: playerName,
+      targetNameKey: "dialogue.speakerPlayer",
+      targetName: "旅人",
       amount: totalDamage,
       source: "enemy_attack",
       round: this.state?.round || 1,
@@ -1219,10 +1596,10 @@ export class BattleSystem {
       }
     }
 
-    this.finishRound("loss", message);
+    this.finishRound("loss", messageOrPayload);
   }
 
-  finishRound(result, message) {
+  finishRound(result, messageOrPayload) {
     this.state.phase = "result";
     this.state.lastResult = result;
 
@@ -1233,10 +1610,10 @@ export class BattleSystem {
       this.state.playerMp = Math.min(this.state.playerMaxMp, this.state.playerMp + totalMpRegen);
       const restored = this.state.playerMp - before;
       if (restored > 0) {
-        const playerName = (I18n.t("dialogue.speakerPlayer") && !I18n.t("dialogue.speakerPlayer").includes(".")) ? I18n.t("dialogue.speakerPlayer") : "旅人";
         this.bus.emit("battle:damage-logged", {
           target: "player",
-          targetName: playerName,
+          targetNameKey: "dialogue.speakerPlayer",
+          targetName: "旅人",
           amount: restored,
           source: "regen_mp",
           round: this.state?.round || 1,
@@ -1270,8 +1647,9 @@ export class BattleSystem {
       });
     }
 
-    this.emitState();
-    this.say(message, result === "loss" ? I18n.t("dialogue.speakerKohaku") : I18n.t("dialogue.speakerNarrator"));
+    this.emitState(); // Push state ONCE on phase transition!
+    const speakerKey = result === "loss" ? "dialogue.speakerKohaku" : "dialogue.speakerNarrator";
+    this.say(messageOrPayload, { key: speakerKey });
 
     if (this.state.enemyHp <= 0) {
       this.timers.timeout(() => this.end(true), 1300);
@@ -1284,20 +1662,40 @@ export class BattleSystem {
     this.timers.timeout(() => this.scheduleRound(), 1550);
   }
 
-  useItem(itemId) {
+  useItem(itemId, declaredAt = null) {
     if (!this.state?.active || this.state.phase === "ended") {
-      return { ok: false, message: "目前不在戰鬥中。" };
+      return {
+        ok: false,
+        key: "combat.notInBattle",
+        message: "目前不在戰鬥中。"
+      };
     }
     const item = ITEMS[itemId];
-    if (!item) return { ok: false, message: "找不到這個道具。" };
+    if (!item) {
+      return {
+        ok: false,
+        key: "combat.itemNotFound",
+        message: "找不到這個道具。"
+      };
+    }
 
     const valueKey = item.resource === "hp" ? "playerHp" : "playerMp";
     const maxKey = item.resource === "hp" ? "playerMaxHp" : "playerMaxMp";
     if (this.state[valueKey] >= this.state[maxKey]) {
-      return { ok: false, message: item.resource.toUpperCase() + " 已經是滿的。" };
+      return {
+        ok: false,
+        key: "combat.resourceFull",
+        params: { resource: item.resource.toUpperCase() },
+        message: item.resource.toUpperCase() + " 已經是滿的。"
+      };
     }
     if (!this.store.consumeItem(itemId)) {
-      return { ok: false, message: item.shortName + "已用完。" };
+      return {
+        ok: false,
+        key: "combat.itemDepleted",
+        params: { name: item.shortName },
+        message: item.shortName + "已用完。"
+      };
     }
 
     const potionBoost = this.getAllEquipEffects("potion_boost").reduce((sum, eff) => sum + (eff.potionBoost || 0), 0);
@@ -1315,10 +1713,10 @@ export class BattleSystem {
       this.battleMpRestored = (this.battleMpRestored || 0) + restored;
     }
     this.store.recordPotionUse(item.resource === "hp" ? "hpPotion" : "mpPotion", { restored });
-    const playerName = (I18n.t("dialogue.speakerPlayer") && !I18n.t("dialogue.speakerPlayer").includes(".")) ? I18n.t("dialogue.speakerPlayer") : "旅人";
     this.bus.emit("battle:damage-logged", {
       target: "player",
-      targetName: playerName,
+      targetNameKey: "dialogue.speakerPlayer",
+      targetName: "旅人",
       amount: restored,
       source: item.resource === "hp" ? "heal_hp" : "heal_mp",
       round: this.state?.round || 1,
@@ -1328,16 +1726,19 @@ export class BattleSystem {
     this.emitState();
     this.bus.emit("battle:effect", { type: "item", resource: item.resource, amount: restored });
     this.bus.emit("sound", { name: "heal" });
-    const locItem = I18n.getLocalizedItem(item);
     this.say(
-      I18n.t("dialogue.itemUsed", {
-        name: locItem.name,
-        restored,
-        resource: item.resource.toUpperCase()
-      }),
-      I18n.t("dialogue.speakerNarrator")
+      {
+        key: "dialogue.itemUsed",
+        params: {
+          name: item.name || itemId,
+          itemId: item.id || itemId,
+          restored,
+          resource: item.resource.toUpperCase()
+        }
+      },
+      { key: "dialogue.speakerNarrator" }
     );
-    return { ok: true };
+    return { ok: true, restored, resource: item.resource };
   }
 
   end(won) {
@@ -1348,7 +1749,7 @@ export class BattleSystem {
     this.state.active = false;
     this.state.phase = "ended";
     this.state.won = won;
-    const durationSec = Math.max(1, Math.round((Date.now() - (this.battleStartTime || Date.now())) / 1000));
+    const durationSec = Math.max(1, Math.round((this.now() - (this.battleStartTime || this.now())) / 1000));
     const reward = this.store.recordBattle(won, this.state.stage, {
       isAuto: Boolean(this.autoBattle?.active),
       damageDealt: this.battleDamageDealt || 0,
@@ -1366,7 +1767,7 @@ export class BattleSystem {
       qteHits: this.battleQteHits || null,
       qteTotal: this.battleQteTotal || null
     });
-    this.emitState();
+    this.emitState(); // Push state ONCE on phase transition!
     this.bus.emit("battle:ended", {
       won,
       stage: this.state.stage,
@@ -1375,6 +1776,8 @@ export class BattleSystem {
       damageDealt: this.battleDamageDealt || 0,
       damageTaken: this.battleDamageTaken || 0,
       durationSec,
+      seed: this.battleSeed,
+      commandLog: [...this.commandLog],
       battle: this.snapshot(),
       autoBattle: { ...this.autoBattle },
       isAuto: Boolean(this.autoBattle?.active)
@@ -1438,6 +1841,19 @@ export class BattleSystem {
     }
   }
 
+  clearCountdownClocks() {
+    if (this.countdownTimeoutId !== null) {
+      this.timers.clearTimeout(this.countdownTimeoutId);
+      this.countdownTimeoutId = null;
+    }
+    if (this.countdownId !== null) {
+      this.timers.clearInterval(this.countdownId);
+      this.countdownId = null;
+    }
+    this.beatTimerIds.forEach((id) => this.timers.clearTimeout(id));
+    this.beatTimerIds = [];
+  }
+
   clearReactionClocks() {
     if (this.reactionTickId !== null) {
       this.timers.clearInterval(this.reactionTickId);
@@ -1454,9 +1870,13 @@ export class BattleSystem {
       this.timers.clearTimeout(this.autoRestartTimerId);
       this.autoRestartTimerId = null;
     }
+    if (this.disconnectTimeoutId !== null) {
+      this.timers.clearTimeout(this.disconnectTimeoutId);
+      this.disconnectTimeoutId = null;
+    }
+    this.clearCountdownClocks();
+    this.clearReactionClocks();
     this.timers.clearAll();
-    this.countdownId = null;
-    this.reactionTickId = null;
-    this.reactionTimeoutId = null;
   }
 }
+

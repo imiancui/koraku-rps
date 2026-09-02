@@ -26,14 +26,17 @@ export function getQteCounterNarration(originalPlayerHand) {
   const narratives = {
     paper: {
       changedHand: "paper",
+      key: "narration.qteCounterPaper",
       text: "用手包裹住小樂的剪刀手——反制成功！"
     },
     scissors: {
       changedHand: "paper",
+      key: "narration.qteCounterScissors",
       text: "用布握住了小樂的小拳頭——反制成功！"
     },
     rock: {
       changedHand: "paper",
+      key: "narration.qteCounterRock",
       text: "用五指交扣了小樂的軟綿綿小手手，離奇獲勝！"
     }
   };

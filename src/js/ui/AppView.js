@@ -11,17 +11,20 @@ import {
   wasdDirectionFromKey
 } from "../systems/QTEInputSystem.js";
 import { HUDDragController } from "./HUDDragController.js";
+import { Commands, Events, ConnectionStates } from "../kernel/protocol.js";
 
 const $ = (selector) => document.querySelector(selector);
 const clampPercent = (value, max) => Math.max(0, Math.min(100, max ? (value / max) * 100 : 0));
 
 export class AppView {
-  constructor({ bus, store, battle, postBattle, sound }) {
+  constructor({ bus, store, battle, postBattle, sound, client }) {
     this.bus = bus;
     this.store = store;
     this.battle = battle;
     this.postBattle = postBattle;
     this.sound = sound;
+    this.client = client || null;
+    this.connectionState = this.client?.connectionState || ConnectionStates.OFFLINE;
     this.timers = new TimerRegistry();
     this.currentScreen = "home";
     this.activeGrowthTab = "stats";
@@ -93,6 +96,252 @@ export class AppView {
     this.bindEvents();
   }
 
+  async sendCommand(command, payload = {}) {
+    if (this.client && typeof this.client.send === "function") {
+      try {
+        const res = await this.client.send(command, payload);
+        return res;
+      } catch (err) {
+        console.error(`[AppView] Command failed (${command}):`, err);
+        return { ok: false, error: err.message, message: err.message };
+      }
+    }
+    return this._executeLegacyFallback(command, payload);
+  }
+
+  _executeLegacyFallback(command, payload) {
+    switch (command) {
+      case Commands.BUY_ITEM:
+        return this.store?.buyItem ? this.store.buyItem(payload.itemId || payload.id) : { ok: false };
+      case Commands.BUY_EQUIPMENT:
+        return this.store?.buyEquipment ? this.store.buyEquipment(payload.typeId || payload.itemId) : { ok: false };
+      case Commands.EQUIP_ITEM:
+        return this.store?.equipItem ? this.store.equipItem(payload.uid || payload.typeId || payload.itemId) : { ok: false };
+      case Commands.UNEQUIP_ITEM:
+        return this.store?.unequipItem ? this.store.unequipItem(payload.slot) : { ok: false };
+      case Commands.ALLOCATE_STAT:
+        return this.store?.allocateStat ? this.store.allocateStat(payload.stat) : { ok: false };
+      case Commands.ALLOCATE_SKILL:
+        return this.store?.allocateSkill ? this.store.allocateSkill(payload.skill) : { ok: false };
+      case Commands.BATTLE_START:
+        return this.battle?.start ? { ok: this.battle.start(payload.stageId, payload.options) } : { ok: false };
+      case Commands.BATTLE_SELECT_HAND:
+        return this.battle?.selectHand ? { ok: this.battle.selectHand(payload.hand, payload.slot) } : { ok: false };
+      case Commands.BATTLE_SELECT_TARGET:
+        return this.battle?.selectTarget ? { ok: this.battle.selectTarget(payload.target) } : { ok: false };
+      case Commands.BATTLE_USE_MORPH:
+        return this.battle?.useMorph ? this.battle.useMorph() : { ok: false };
+      case Commands.BATTLE_USE_ITEM:
+        return this.battle?.useItem ? this.battle.useItem(payload.itemId) : { ok: false };
+      case Commands.BATTLE_INPUT_QTE:
+        return this.battle?.inputQte ? { ok: this.battle.inputQte(payload.direction, payload.slot) } : { ok: false };
+      case Commands.BATTLE_PAUSE:
+        return this.battle?.pause ? { ok: this.battle.pause() } : (this.battle?.togglePause ? { ok: this.battle.togglePause() } : { ok: false });
+      case Commands.BATTLE_RESUME:
+        return this.battle?.resume ? { ok: this.battle.resume() } : { ok: false };
+      case Commands.BATTLE_ABANDON:
+        return this.battle?.abandon ? { ok: this.battle.abandon() } : { ok: false };
+      case Commands.AUTO_BATTLE_START:
+        return this.battle?.startAutoBattle ? { ok: this.battle.startAutoBattle(payload.stageId, payload.rounds) } : { ok: false };
+      case Commands.AUTO_BATTLE_STOP:
+        return this.battle?.stopAutoBattle ? { ok: this.battle.stopAutoBattle() } : { ok: false };
+      case Commands.POST_BATTLE_REQUEST_SWIMSUIT:
+        return this.postBattle?.requestSwimsuit ? { ok: this.postBattle.requestSwimsuit() } : { ok: false };
+      case Commands.POST_BATTLE_START_WATERMELON:
+        return this.postBattle?.startWatermelon ? { ok: this.postBattle.startWatermelon() } : { ok: false };
+      case Commands.POST_BATTLE_STRIKE_WATERMELON:
+        return this.postBattle?.strike ? { ok: this.postBattle.strike() } : { ok: false };
+      case Commands.ACCOUNT_EXPORT_JSON:
+        return { ok: true, data: this.store?.snapshot ? this.store.snapshot() : {} };
+      case Commands.ACCOUNT_DELETE:
+        if (this.store?.reset) this.store.reset();
+        return { ok: true };
+      case Commands.ACCOUNT_ISSUE_TRANSFER_CODE:
+        return { ok: true, code: this.store?.exportSaveCode ? this.store.exportSaveCode() : "" };
+      case Commands.ACCOUNT_CLAIM_TRANSFER_CODE:
+        return this.store?.importSaveCode ? this.store.importSaveCode(payload.code) : { ok: false };
+      case Commands.CHEAT_SET_STATS:
+        return this.store?.cheatSetValues ? this.store.cheatSetValues(payload) : { ok: false };
+      case Commands.CHEAT_UNLOCK_ALL:
+        if (payload.gallery) return this.store?.cheatUnlockGallery ? this.store.cheatUnlockGallery() : { ok: false };
+        return this.store?.cheatUnlockAll ? this.store.cheatUnlockAll() : { ok: false };
+      case Commands.CHEAT_ADD_COINS:
+        if (this.store?.state) {
+          this.store.state.coins = (this.store.state.coins || 0) + (payload.amount || 1000);
+          this.store.commit("cheat-add-coins");
+          return { ok: true };
+        }
+        return { ok: false };
+      default:
+        return { ok: false };
+    }
+  }
+
+  getStoreSnapshot() {
+    if (this.client && typeof this.client.getState === "function") {
+      const st = this.client.getState();
+      if (st && Object.keys(st).length > 0) return st;
+    }
+    if (this.store && typeof this.store.snapshot === "function") {
+      return this.store.snapshot();
+    }
+    return {
+      profile: { level: 1, xp: 0, skillPoints: 0, allocations: { hp: 0, mp: 0, damage: 0 }, skills: { momo: 0, dualHand: 0 } },
+      playerStats: { maxHp: 100, maxMp: 50, damage: 15 },
+      coins: 0,
+      inventory: { hpPotion: 1, mpPotion: 0 },
+      equipment: {},
+      inventoryEquipment: [],
+      records: { wins: 0, losses: 0, bestStage: 0, clearedStages: [] }
+    };
+  }
+
+  getTheoreticalDPS(snapshot = null) {
+    if (this.store && typeof this.store.getTheoreticalDPS === "function") {
+      return this.store.getTheoreticalDPS();
+    }
+    const snap = snapshot || this.getStoreSnapshot();
+    const baseDamage = snap.playerStats?.damage || 15;
+    const momoLevel = snap.profile?.skills?.momo || 0;
+    const momoRate = Math.min(1, momoLevel * 0.1);
+    const momoDamage = 25;
+    const hasDual = (snap.profile?.skills?.dualHand || 0) > 0;
+    const expectedRps = baseDamage * (1 / 3) * (hasDual ? 1.5 : 1.0);
+    const expectedMomo = (1 / 3) * momoRate * momoDamage;
+    return Number((expectedRps + expectedMomo).toFixed(1));
+  }
+
+  getWatermelonMarkerPosition() {
+    if (this.postBattle && typeof this.postBattle.getMarkerPosition === "function") {
+      return this.postBattle.getMarkerPosition();
+    }
+    const now = performance.now();
+    const period = 2000;
+    const t = (now % period) / period;
+    return 0.5 - 0.5 * Math.cos(t * 2 * Math.PI);
+  }
+
+  getAutoWatermelonMarkerPosition() {
+    if (this.postBattle && typeof this.postBattle.getAutoMarkerPosition === "function") {
+      return this.postBattle.getAutoMarkerPosition();
+    }
+    const now = performance.now();
+    const period = 2000;
+    const t = (now % period) / period;
+    return 0.5 - 0.5 * Math.cos(t * 2 * Math.PI);
+  }
+
+  renderConnectionState(state, meta = {}) {
+    if (!state) return;
+    this.connectionState = state;
+    const badge = this.connectionStatusBadge || $("#connection-status-badge");
+    const textEl = this.connectionStatusText || $("#connection-status-text");
+    const banner = this.connectionStatusBanner || $("#connection-status-banner");
+    const bannerText = this.connectionBannerText || $("#connection-banner-text");
+
+    if (badge) {
+      badge.classList.remove("is-online", "is-connecting", "is-reconnecting", "is-offline", "is-disconnected");
+      badge.classList.add(`is-${state}`);
+      if (state !== ConnectionStates.ONLINE) {
+        badge.classList.remove("is-high-ping");
+        const existingPing = badge.querySelector(".connection-ping-badge");
+        if (existingPing) existingPing.remove();
+      }
+    }
+
+    const label = this.getConnectionLabel(state);
+    if (textEl) {
+      textEl.textContent = label;
+    }
+
+    if (meta?.reason === "KICKED_BY_NEW_CONNECTION" || meta?.reason === "NEW_CONNECTION_ESTABLISHED") {
+      this.showToast(I18n.t("connection.kickedByNewConnection"), "warning");
+    }
+
+    if (banner && bannerText) {
+      if (state === ConnectionStates.RECONNECTING || state === ConnectionStates.DISCONNECTED) {
+        banner.hidden = false;
+        if (this.battleState?.active) {
+          const deadline = meta?.deadline || (Date.now() + 10000);
+          this._startDisconnectCountdown(deadline);
+        } else {
+          this._stopDisconnectCountdown();
+          bannerText.textContent = state === ConnectionStates.RECONNECTING
+            ? (I18n.t("connection.bannerReconnecting") !== "connection.bannerReconnecting" ? I18n.t("connection.bannerReconnecting") : "與伺服器連線中斷，正在嘗試重新建立連線...")
+            : (I18n.t("connection.bannerDisconnected") !== "connection.bannerDisconnected" ? I18n.t("connection.bannerDisconnected") : "已與伺服器斷開連線，請檢查網路狀態。");
+        }
+      } else {
+        this._stopDisconnectCountdown();
+        banner.hidden = true;
+      }
+    }
+  }
+
+  handlePingUpdate(ping) {
+    if (!ping || this.connectionState !== ConnectionStates.ONLINE) return;
+    const badge = this.connectionStatusBadge || $("#connection-status-badge");
+    if (!badge) return;
+
+    const rtt = Math.round(ping.rtt || 0);
+    const isHigh = Boolean(ping.isHighLatency || rtt >= 180);
+
+    let pingBadge = badge.querySelector(".connection-ping-badge");
+    if (isHigh && rtt > 0) {
+      badge.classList.add("is-high-ping");
+      if (!pingBadge) {
+        pingBadge = document.createElement("span");
+        pingBadge.className = "connection-ping-badge";
+        badge.appendChild(pingBadge);
+      }
+      pingBadge.textContent = `${rtt}ms`;
+    } else {
+      badge.classList.remove("is-high-ping");
+      if (pingBadge) pingBadge.remove();
+    }
+  }
+
+  _startDisconnectCountdown(deadline) {
+    this._stopDisconnectCountdown();
+    const update = () => {
+      const remainingMs = Math.max(0, deadline - Date.now());
+      const seconds = Math.ceil(remainingMs / 1000);
+      const bannerText = this.connectionBannerText || $("#connection-banner-text");
+      if (bannerText) {
+        bannerText.innerHTML = I18n.t("connection.disconnectCountdown", {
+          seconds: `<span class="connection-banner-countdown">${seconds}</span>`
+        });
+      }
+      if (remainingMs <= 0) {
+        this._stopDisconnectCountdown();
+      }
+    };
+    update();
+    this._disconnectTimer = setInterval(update, 500);
+  }
+
+  _stopDisconnectCountdown() {
+    if (this._disconnectTimer) {
+      clearInterval(this._disconnectTimer);
+      this._disconnectTimer = null;
+    }
+  }
+
+  getConnectionLabel(state) {
+    const locale = I18n.getLocale ? I18n.getLocale() : "zh-Hant";
+    const key = `connection.${state}`;
+    const translated = I18n.t(key);
+    if (translated && translated !== key) return translated;
+
+    const labels = {
+      online: { "zh-Hant": "線上連線", "zh-Hans": "在线连接", "en": "Online", "ja": "オンライン" },
+      connecting: { "zh-Hant": "連線中...", "zh-Hans": "连接中...", "en": "Connecting...", "ja": "接続中..." },
+      reconnecting: { "zh-Hant": "重連中...", "zh-Hans": "重连中...", "en": "Reconnecting...", "ja": "再接続中..." },
+      offline: { "zh-Hant": "離線沙盒", "zh-Hans": "离线沙盒", "en": "Offline", "ja": "オフライン" },
+      disconnected: { "zh-Hant": "已斷線", "zh-Hans": "已断开", "en": "Disconnected", "ja": "切断" }
+    };
+    return labels[state]?.[locale] || labels[state]?.["zh-Hant"] || state;
+  }
+
   cacheElements() {
     this.app = $("#app");
     this.screenStack = $(".screen-stack");
@@ -146,6 +395,17 @@ export class AppView {
     this.equipTooltip = $("#equip-tooltip");
     this.activeShopFilter = "all";
     this.battleLogTier = 1;
+    this.connectionStatusBadge = $("#connection-status-badge");
+    this.connectionStatusText = $("#connection-status-text");
+    this.connectionStatusBanner = $("#connection-status-banner");
+    this.connectionBannerText = $("#connection-banner-text");
+    this.connectionBannerClose = $("#connection-banner-close");
+
+    if (this.connectionBannerClose) {
+      this.connectionBannerClose.addEventListener("click", () => {
+        if (this.connectionStatusBanner) this.connectionStatusBanner.hidden = true;
+      });
+    }
 
     if (this.battleDamageLog) {
       this.battleDamageLog.addEventListener("click", () => {
@@ -183,8 +443,9 @@ export class AppView {
 
   init() {
     this.renderI18n();
-    const snapshot = this.store.snapshot();
+    const snapshot = this.getStoreSnapshot();
     this.renderStore(snapshot);
+    this.renderConnectionState(this.connectionState);
 
     // Mobile Anti-Zoom Protection: Prevent double-tap zoom & gesture pinch zoom on mobile devices
     if (typeof document !== "undefined") {
@@ -214,57 +475,13 @@ export class AppView {
     let targetScreen = "home";
     try {
       const hashScreen = window.location.hash ? window.location.hash.replace(/^#/, "") : null;
-      targetScreen = hashScreen || window.localStorage?.getItem("koraku_active_screen") || sessionStorage.getItem("koraku_active_screen") || "home";
+      targetScreen = hashScreen || sessionStorage.getItem("koraku_active_screen") || "home";
     } catch (_) {}
 
-    let activeBattle = null;
-    let activePostBattle = null;
-    let savedStageId = 1;
-    try {
-      const rawPost = window.localStorage?.getItem("koraku_active_postbattle") || sessionStorage.getItem("koraku_active_postbattle");
-      if (rawPost) activePostBattle = JSON.parse(rawPost);
-      const rawBattle = window.localStorage?.getItem("koraku_active_battle_state") || sessionStorage.getItem("koraku_active_battle_state") || sessionStorage.getItem("koraku_active_battle");
-      if (rawBattle) activeBattle = JSON.parse(rawBattle);
-      savedStageId = Number(window.localStorage?.getItem("koraku_active_stage") || sessionStorage.getItem("koraku_active_stage")) || activeBattle?.stage?.id || activeBattle?.stageId || this.store.snapshot().records?.bestStage || 1;
-    } catch (_) {}
-
-    if (activePostBattle) {
-      if (typeof window !== "undefined" && window.history) {
-        window.history.replaceState({ screen: "battle" }, "", "#battle");
-      }
-      this.navigate("battle", { pushHistory: false });
-      this.postBattle.restore(activePostBattle);
-      if (this.postBattle?.getWatermelonStock() > 0) {
-        this.postBattle.emitAutoWatermelon();
-      }
-      return;
+    if (typeof window !== "undefined" && window.history) {
+      window.history.replaceState({ screen: targetScreen }, "", "#" + targetScreen);
     }
-
-    if (targetScreen === "battle") {
-      if (typeof window !== "undefined" && window.history) {
-        window.history.replaceState({ screen: "battle" }, "", "#battle");
-      }
-      this.navigate("battle", { pushHistory: false });
-
-      if (activeBattle && activeBattle.active && (activeBattle.playerHp > 0) && (activeBattle.enemyHp > 0)) {
-        this.battle.restore(activeBattle);
-      } else {
-        const stageToRun = activeBattle?.stage?.id || activeBattle?.stageId || savedStageId || 1;
-        if (activeBattle?.isAuto || activeBattle?.autoBattle?.active) {
-          this.startAutoBattle(stageToRun, activeBattle?.autoBattle?.remainingRounds || activeBattle?.remainingRounds || 10);
-        } else {
-          this.startStage(stageToRun);
-        }
-      }
-      if (this.postBattle?.getWatermelonStock() > 0) {
-        this.postBattle.emitAutoWatermelon();
-      }
-    } else {
-      if (typeof window !== "undefined" && window.history) {
-        window.history.replaceState({ screen: targetScreen }, "", "#" + targetScreen);
-      }
-      this.navigate(targetScreen, { pushHistory: false });
-    }
+    this.navigate(targetScreen, { pushHistory: false });
   }
 
   renderI18n() {
@@ -343,7 +560,7 @@ export class AppView {
       if (dualBtn) {
         const dir = dualBtn.dataset.direction;
         const slot = dualBtn.dataset.dualSlot;
-        this.battle.inputQte(dir, slot);
+        this.sendCommand(Commands.BATTLE_INPUT_QTE, { direction: dir, slot });
         if (slot === "left") this.leftQteKeyboard.reset();
         if (slot === "right") this.rightQteKeyboard.reset();
         this.renderHeldQteDirections();
@@ -353,7 +570,7 @@ export class AppView {
       if (!targetBtn.closest(".is-dual-touch-pad")) {
         this.qteKeyboard.reset();
         this.renderHeldQteDirections();
-        this.battle.inputQte(targetBtn.dataset.direction);
+        this.sendCommand(Commands.BATTLE_INPUT_QTE, { direction: targetBtn.dataset.direction });
       }
     };
 
@@ -420,12 +637,12 @@ export class AppView {
 
         if (track.isBattleQte) {
           if (track.isDual) {
-            this.battle.inputQte(dir, track.slot);
+            this.sendCommand(Commands.BATTLE_INPUT_QTE, { direction: dir, slot: track.slot });
             if (track.slot === "left") this.leftQteKeyboard.reset();
             if (track.slot === "right") this.rightQteKeyboard.reset();
           } else {
             this.qteKeyboard.reset();
-            this.battle.inputQte(dir);
+            this.sendCommand(Commands.BATTLE_INPUT_QTE, { direction: dir });
           }
           this.renderHeldQteDirections();
         } else if (track.isDojoQte) {
@@ -452,12 +669,12 @@ export class AppView {
         if (dir) {
           if (track.isBattleQte) {
             if (track.isDual) {
-              this.battle.inputQte(dir, track.slot);
+              this.sendCommand(Commands.BATTLE_INPUT_QTE, { direction: dir, slot: track.slot });
               if (track.slot === "left") this.leftQteKeyboard.reset();
               if (track.slot === "right") this.rightQteKeyboard.reset();
             } else {
               this.qteKeyboard.reset();
-              this.battle.inputQte(dir);
+              this.sendCommand(Commands.BATTLE_INPUT_QTE, { direction: dir });
             }
             this.renderHeldQteDirections();
           } else if (track.isDojoQte) {
@@ -499,7 +716,7 @@ export class AppView {
       const targetScreen = event.state?.screen || (window.location.hash ? window.location.hash.replace(/^#/, "") : "home");
       if (this.currentScreen === targetScreen) return;
 
-      if (this.currentScreen === "battle" && (this.battleState?.active || this.battle.autoBattle?.active)) {
+      if (this.currentScreen === "battle" && (this.battleState?.active || this.battle?.autoBattle?.active)) {
         if (typeof window !== "undefined" && window.history) {
           window.history.pushState({ screen: "battle" }, "", "#battle");
         }
@@ -519,7 +736,7 @@ export class AppView {
     // Mouse Navigation Buttons (Back: button 3, Forward: button 4)
     window.addEventListener("mouseup", (event) => {
       if (event.button === 3 || event.button === 4) {
-        if (this.currentScreen === "battle" && (this.battleState?.active || this.battle.autoBattle?.active)) {
+        if (this.currentScreen === "battle" && (this.battleState?.active || this.battle?.autoBattle?.active)) {
           event.preventDefault();
           this.promptAbandonBattle("home");
           return;
@@ -532,7 +749,7 @@ export class AppView {
 
     // Prevent accidental page close or refresh during active battle without warning
     window.addEventListener("beforeunload", (event) => {
-      if (this.currentScreen === "battle" && (this.battleState?.active || this.battle.autoBattle?.active)) {
+      if (this.currentScreen === "battle" && (this.battleState?.active || this.battle?.autoBattle?.active)) {
         event.preventDefault();
         event.returnValue = "";
         return "";
@@ -544,7 +761,7 @@ export class AppView {
       langSelect.addEventListener("change", (e) => {
         I18n.setLocale(e.target.value);
         this.renderI18n();
-        this.renderStore(this.store.snapshot());
+        this.renderStore(this.getStoreSnapshot());
         if (this.battleState?.active) {
           this.renderBattle(this.battleState);
         }
@@ -576,6 +793,15 @@ export class AppView {
         this.hideTooltip();
       }
     });
+
+    this.bus.on("connection:state", (data) => this.renderConnectionState(typeof data === "string" ? data : data?.state, data));
+    if (this.client && typeof this.client.on === "function") {
+      this.client.on("connection:state", (data) => this.renderConnectionState(typeof data === "string" ? data : data?.state, data));
+    }
+    this.bus.on("connection:ping", (ping) => this.handlePingUpdate(ping));
+    if (this.client && typeof this.client.on === "function") {
+      this.client.on("connection:ping", (ping) => this.handlePingUpdate(ping));
+    }
 
     this.bus.on("store:changed", ({ state }) => this.renderStore(state));
     this.bus.on("battle:state", (state) => this.renderBattle(state));
@@ -619,22 +845,8 @@ export class AppView {
     });
     this.bus.on("postbattle:state", (state) => this.renderPostBattle(state));
     this.bus.on("postbattle:auto-watermelon", (state) => this.renderFloatingWatermelon(state));
-    this.bus.on("toast", (toast) => this.showToast(toast.message, toast.tone));
+    this.bus.on("toast", (toast) => this.showToast(toast));
     this.bus.on("auto-battle:update", (info) => {
-      try {
-        const raw = window.localStorage?.getItem("koraku_active_battle_state") || sessionStorage.getItem("koraku_active_battle_state");
-        if (raw) {
-          const snapshot = JSON.parse(raw);
-          if (snapshot.autoBattle) {
-            snapshot.autoBattle.remainingRounds = info.remainingRounds;
-            snapshot.autoBattle.wins = info.wins;
-            snapshot.autoBattle.losses = info.losses;
-            snapshot.autoBattle.isPaused = Boolean(info.isPaused);
-            window.localStorage?.setItem("koraku_active_battle_state", JSON.stringify(snapshot));
-            sessionStorage.setItem("koraku_active_battle_state", JSON.stringify(snapshot));
-          }
-        }
-      } catch (_) {}
       const msg = info.won
         ? I18n.t("ui.autoBattleToastUpdateWin", { remaining: info.remainingRounds })
         : I18n.t("ui.autoBattleToastUpdateLoss", { remaining: info.remainingRounds });
@@ -644,11 +856,6 @@ export class AppView {
       }
     });
     this.bus.on("auto-battle:finished", (info) => {
-      try {
-        window.localStorage?.removeItem("koraku_active_battle_state");
-        sessionStorage.removeItem("koraku_active_battle_state");
-        sessionStorage.removeItem("koraku_active_battle");
-      } catch (_) {}
       this.hideFloatingWatermelon();
       this.postBattle?.closeAutoWatermelon?.();
       this.showToast(I18n.t("ui.autoBattleToastFinished", { total: info.totalRounds, wins: info.wins, losses: info.losses }), "success");
@@ -665,11 +872,6 @@ export class AppView {
       }
     });
     this.bus.on("auto-battle:stopped", () => {
-      try {
-        window.localStorage?.removeItem("koraku_active_battle_state");
-        sessionStorage.removeItem("koraku_active_battle_state");
-        sessionStorage.removeItem("koraku_active_battle");
-      } catch (_) {}
       this.hideFloatingWatermelon();
       this.postBattle?.closeAutoWatermelon?.();
     });
@@ -694,7 +896,7 @@ export class AppView {
     }
   }
 
-  handleClick(event) {
+  async handleClick(event) {
     const pressedButton = event.target.closest("button, [role='button'], [data-nav], [data-allocate], [data-allocate-skill], [data-buy], [data-buy-equip], [data-slot], [data-equip-bag-item], .pill-btn, .tab-pill, .button-primary, .button-secondary, .button-ghost, .menu-command");
     if (pressedButton) {
       pressedButton.classList.remove("is-btn-pressed");
@@ -709,7 +911,7 @@ export class AppView {
     if (event.target.closest("#lang-toggle")) {
       I18n.cycleLocale();
       this.renderI18n();
-      this.renderStore(this.store.snapshot());
+      this.renderStore(this.getStoreSnapshot());
       if (this.battleState?.active) {
         this.renderBattle(this.battleState);
       }
@@ -846,15 +1048,15 @@ export class AppView {
 
     const toggleAutoBtn = event.target.closest("#btn-toggle-autobattle, #btn-stop-autobattle");
     if (toggleAutoBtn) {
-      if (this.battle.autoBattle.active) {
+      if (this.battle?.autoBattle?.active) {
         if (this.battle.autoBattle.isPaused) {
-          this.battle.resumeAutoBattle();
+          await this.sendCommand(Commands.BATTLE_RESUME);
           this.showToast(I18n.t("ui.autoBattleToastResumed"), "success");
           if (this.postBattle?.getWatermelonStock() > 0) {
             this.postBattle.emitAutoWatermelon();
           }
         } else {
-          this.battle.pauseAutoBattle();
+          await this.sendCommand(Commands.BATTLE_PAUSE);
           this.hideFloatingWatermelon();
           this.showToast(I18n.t("ui.autoBattleToastPaused"), "warning");
         }
@@ -864,9 +1066,9 @@ export class AppView {
 
     const buyButton = event.target.closest("[data-buy]");
     if (buyButton) {
-      const result = this.store.buyItem(buyButton.dataset.buy);
-      this.showToast(result.message, result.ok ? "success" : "danger");
-      if (result.ok) this.bus.emit("sound", { name: "heal" });
+      const result = await this.sendCommand(Commands.BUY_ITEM, { itemId: buyButton.dataset.buy });
+      if (result?.message) this.showToast(result.message, result.ok ? "success" : "danger");
+      if (result?.ok) this.bus.emit("sound", { name: "heal" });
       return;
     }
 
@@ -885,17 +1087,17 @@ export class AppView {
 
     const buyEquipBtn = event.target.closest("[data-buy-equip]");
     if (buyEquipBtn) {
-      const result = this.store.buyEquipment(buyEquipBtn.dataset.buyEquip);
-      this.showToast(result.message, result.ok ? "success" : "danger");
-      if (result.ok) this.bus.emit("sound", { name: "heal" });
+      const result = await this.sendCommand(Commands.BUY_EQUIPMENT, { typeId: buyEquipBtn.dataset.buyEquip, itemId: buyEquipBtn.dataset.buyEquip });
+      if (result?.message) this.showToast(result.message, result.ok ? "success" : "danger");
+      if (result?.ok) this.bus.emit("sound", { name: "heal" });
       return;
     }
 
     const bagItemBtn = event.target.closest("[data-equip-bag-item]");
     if (bagItemBtn) {
-      const result = this.store.equipItem(bagItemBtn.dataset.equipBagItem);
-      this.showToast(result.message, result.ok ? "success" : "danger");
-      if (result.ok) this.bus.emit("sound", { name: "skill" });
+      const result = await this.sendCommand(Commands.EQUIP_ITEM, { uid: bagItemBtn.dataset.equipBagItem, typeId: bagItemBtn.dataset.equipBagItem });
+      if (result?.message) this.showToast(result.message, result.ok ? "success" : "danger");
+      if (result?.ok) this.bus.emit("sound", { name: "skill" });
       this.hideTooltip();
       return;
     }
@@ -903,9 +1105,9 @@ export class AppView {
     const shopEquipBtn = event.target.closest("[data-shop-equip]");
     if (shopEquipBtn) {
       const itemId = shopEquipBtn.dataset.shopEquip;
-      const result = this.store.equipItem(itemId);
-      this.showToast(result.message, result.ok ? "success" : "danger");
-      if (result.ok) this.bus.emit("sound", { name: "skill" });
+      const result = await this.sendCommand(Commands.EQUIP_ITEM, { uid: itemId, typeId: itemId });
+      if (result?.message) this.showToast(result.message, result.ok ? "success" : "danger");
+      if (result?.ok) this.bus.emit("sound", { name: "skill" });
       this.hideTooltip();
       return;
     }
@@ -913,20 +1115,20 @@ export class AppView {
     const shopUnequipBtn = event.target.closest("[data-shop-unequip]");
     if (shopUnequipBtn) {
       const slotKey = shopUnequipBtn.dataset.shopUnequip;
-      const result = this.store.unequipItem(slotKey);
-      this.showToast(result.message, result.ok ? "success" : "danger");
-      if (result.ok) this.bus.emit("sound", { name: "select" });
+      const result = await this.sendCommand(Commands.UNEQUIP_ITEM, { slot: slotKey });
+      if (result?.message) this.showToast(result.message, result.ok ? "success" : "danger");
+      if (result?.ok) this.bus.emit("sound", { name: "select" });
       this.hideTooltip();
       return;
     }
 
     if (event.target.closest("#btn-resume-battle")) {
-      this.battle.resume();
+      await this.sendCommand(Commands.BATTLE_RESUME);
       return;
     }
 
     if (event.target.closest("#btn-pause-abandon")) {
-      this.battle.abandon();
+      await this.sendCommand(Commands.BATTLE_ABANDON);
       const pauseModal = $("#battle-pause-modal");
       if (pauseModal) {
         pauseModal.hidden = true;
@@ -939,18 +1141,18 @@ export class AppView {
     const slotBtn = event.target.closest("[data-slot]");
     if (slotBtn) {
       const slotKey = slotBtn.dataset.slot;
-      const snapshot = this.store.snapshot();
+      const snapshot = this.getStoreSnapshot();
       if (snapshot.equipment?.[slotKey]) {
-        const result = this.store.unequipItem(slotKey);
-        this.showToast(result.message, result.ok ? "success" : "danger");
-        if (result.ok) this.bus.emit("sound", { name: "select" });
+        const result = await this.sendCommand(Commands.UNEQUIP_ITEM, { slot: slotKey });
+        if (result?.message) this.showToast(result.message, result.ok ? "success" : "danger");
+        if (result?.ok) this.bus.emit("sound", { name: "select" });
         this.hideTooltip();
       }
       return;
     }
 
     if (event.target.closest("#open-cheat-modal")) {
-      this.openCheatAuthModal();
+      this.openCheatModal();
       return;
     }
 
@@ -965,21 +1167,21 @@ export class AppView {
     }
 
     if (event.target.closest("#cheat-unlock-stages-btn")) {
-      const res = this.store.cheatUnlockAll();
-      this.showToast(res.message, "success");
+      const res = await this.sendCommand(Commands.CHEAT_UNLOCK_ALL, { stages: true });
+      this.showToast(res?.message || "已解鎖全部關卡！", res?.ok !== false ? "success" : "danger");
       this.populateCheatModal();
       return;
     }
 
     if (event.target.closest("#cheat-unlock-gallery-btn")) {
-      const res = this.store.cheatUnlockGallery();
-      this.showToast(res.message, "success");
+      const res = await this.sendCommand(Commands.CHEAT_UNLOCK_ALL, { gallery: true });
+      this.showToast(res?.message || "已解鎖全圖鑑！", res?.ok !== false ? "success" : "danger");
       this.populateCheatModal();
       return;
     }
 
     if (event.target.closest("#cheat-max-all-btn")) {
-      this.store.cheatSetValues({
+      const res = await this.sendCommand(Commands.CHEAT_SET_STATS, {
         level: 99,
         xp: 0,
         skillPoints: 100,
@@ -988,7 +1190,7 @@ export class AppView {
         mpPotion: 99,
         skills: { momo: 10 }
       });
-      this.showToast("已一鍵設置滿級、99999 星砂與 100 SP！", "success");
+      this.showToast(res?.message || "已一鍵設置滿級、99999 星砂與 100 SP！", res?.ok !== false ? "success" : "danger");
       this.populateCheatModal();
       return;
     }
@@ -1017,7 +1219,7 @@ export class AppView {
         const btnFilter = btn.dataset.shopFilter || btn.dataset.shopTab;
         btn.classList.toggle("is-active", btnFilter === this.activeShopFilter);
       });
-      this.renderShop(this.store.snapshot());
+      this.renderShop(this.getStoreSnapshot());
       return;
     }
 
@@ -1035,24 +1237,24 @@ export class AppView {
       if (basicsGrid) basicsGrid.hidden = this.activeGuideTab !== "basics";
       if (bossGrid) bossGrid.hidden = this.activeGuideTab !== "boss";
       if (this.activeGuideTab === "boss") {
-        this.renderGuideBoss(this.store.snapshot());
+        this.renderGuideBoss(this.getStoreSnapshot());
       }
       return;
     }
 
     const allocateButton = event.target.closest("[data-allocate]");
     if (allocateButton) {
-      const result = this.store.allocateStat(allocateButton.dataset.allocate);
-      this.showToast(result.message, result.ok ? "success" : "danger");
-      if (result.ok) this.bus.emit("sound", { name: "skill" });
+      const result = await this.sendCommand(Commands.ALLOCATE_STAT, { stat: allocateButton.dataset.allocate });
+      if (result?.message) this.showToast(result.message, result.ok ? "success" : "danger");
+      if (result?.ok) this.bus.emit("sound", { name: "skill" });
       return;
     }
 
     const allocateSkillButton = event.target.closest("[data-allocate-skill]");
     if (allocateSkillButton) {
-      const result = this.store.allocateSkill(allocateSkillButton.dataset.allocateSkill);
-      this.showToast(result.message, result.ok ? "success" : "danger");
-      if (result.ok) this.bus.emit("sound", { name: "skill" });
+      const result = await this.sendCommand(Commands.ALLOCATE_SKILL, { skill: allocateSkillButton.dataset.allocateSkill });
+      if (result?.message) this.showToast(result.message, result.ok ? "success" : "danger");
+      if (result?.ok) this.bus.emit("sound", { name: "skill" });
       return;
     }
 
@@ -1062,38 +1264,38 @@ export class AppView {
       try {
         window.localStorage?.setItem("koraku_gallery_item", this.selectedGalleryItem);
       } catch (_) {}
-      this.renderGallery(this.store.snapshot());
+      this.renderGallery(this.getStoreSnapshot());
       return;
     }
 
     const targetEnemyBtn = event.target.closest("[data-target-enemy]");
     if (targetEnemyBtn && this.battleState?.active) {
-      this.battle.selectTarget(targetEnemyBtn.dataset.targetEnemy);
+      await this.sendCommand(Commands.BATTLE_SELECT_TARGET, { target: targetEnemyBtn.dataset.targetEnemy });
       return;
     }
 
     const dualHandButton = event.target.closest("[data-hand-slot][data-hand]");
     if (dualHandButton && this.battleState?.active) {
-      this.battle.selectHand(dualHandButton.dataset.hand, dualHandButton.dataset.handSlot);
+      await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: dualHandButton.dataset.hand, slot: dualHandButton.dataset.handSlot });
       return;
     }
 
     const handButton = event.target.closest("[data-hand]");
     if (handButton && this.battleState?.active) {
-      this.battle.selectHand(handButton.dataset.hand);
+      await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: handButton.dataset.hand });
       return;
     }
 
     const itemButton = event.target.closest("[data-item]");
     if (itemButton) {
-      const result = this.battle.useItem(itemButton.dataset.item);
-      if (!result.ok) this.showToast(result.message, "danger");
+      const result = await this.sendCommand(Commands.BATTLE_USE_ITEM, { itemId: itemButton.dataset.item });
+      if (result && !result.ok && result.message) this.showToast(result.message, "danger");
       return;
     }
 
     if (event.target.closest("[data-skill='morph']")) {
-      const result = this.battle.useMorph();
-      if (!result.ok) this.showToast(result.message, "danger");
+      const result = await this.sendCommand(Commands.BATTLE_USE_MORPH);
+      if (result && !result.ok && result.message) this.showToast(result.message, "danger");
       return;
     }
 
@@ -1128,17 +1330,17 @@ export class AppView {
     }
 
     if (event.target.closest("#watermelon-strike")) {
-      this.postBattle.strike();
+      await this.sendCommand(Commands.POST_BATTLE_STRIKE_WATERMELON);
       return;
     }
 
     if (event.target.closest("#btn-auto-watermelon-strike")) {
-      this.postBattle.autoWatermelonStrike();
+      await this.sendCommand(Commands.POST_BATTLE_STRIKE_WATERMELON);
       return;
     }
 
     if (event.target.closest("#btn-auto-watermelon-next-strike, #btn-auto-watermelon-next-round, #btn-auto-watermelon-start")) {
-      this.postBattle.startAutoWatermelonRound();
+      await this.sendCommand(Commands.POST_BATTLE_START_WATERMELON);
       return;
     }
 
@@ -1156,7 +1358,8 @@ export class AppView {
     }
 
     if (event.target.closest("#btn-close-floating-watermelon")) {
-      this.postBattle.closeAutoWatermelon();
+      this.hideFloatingWatermelon();
+      this.postBattle?.closeAutoWatermelon?.();
       return;
     }
 
@@ -1166,13 +1369,13 @@ export class AppView {
     }
 
     if (event.target.closest("#music-toggle")) {
-      const muted = this.store.toggleMusicMuted();
+      const muted = this.store?.toggleMusicMuted ? this.store.toggleMusicMuted() : false;
       this.showToast(muted ? I18n.t("ui.musicOffToast") : I18n.t("ui.musicOnToast"));
       return;
     }
 
     if (event.target.closest("#sound-toggle")) {
-      const muted = this.store.toggleSfxMuted();
+      const muted = this.store?.toggleSfxMuted ? this.store.toggleSfxMuted() : false;
       this.showToast(muted ? I18n.t("ui.sfxOffToast") : I18n.t("ui.sfxOnToast"));
       return;
     }
@@ -1223,7 +1426,7 @@ export class AppView {
     }
   }
 
-  handleKeydown(event) {
+  async handleKeydown(event) {
     if (typeof document !== "undefined") {
       document.documentElement.classList.add("has-physical-keyboard");
       if (document.body) document.body.classList.add("has-physical-keyboard");
@@ -1340,13 +1543,13 @@ export class AppView {
 
     if (isAutoWatermelonActive && (event.code === "Space" || key === " ")) {
       event.preventDefault();
-      const scene = this.postBattle.autoWatermelonState.scene;
+      const scene = this.postBattle?.autoWatermelonState?.scene;
       if (scene === "watermelonAim") {
-        this.postBattle.autoWatermelonStrike();
+        await this.sendCommand(Commands.POST_BATTLE_STRIKE_WATERMELON);
         return;
       }
       if (["watermelonResult", "watermelonComplete", "idle"].includes(scene)) {
-        this.postBattle.startAutoWatermelonRound();
+        await this.sendCommand(Commands.POST_BATTLE_START_WATERMELON);
         return;
       }
     }
@@ -1357,15 +1560,15 @@ export class AppView {
       if (event.code === "Space" || key === " ") {
         event.preventDefault();
         if (this.postState.scene === "victory") {
-          this.postBattle.requestSwimsuit();
+          await this.sendCommand(Commands.POST_BATTLE_REQUEST_SWIMSUIT);
           return;
         }
         if (this.postState.scene === "watermelonAim") {
-          this.postBattle.strike();
+          await this.sendCommand(Commands.POST_BATTLE_STRIKE_WATERMELON);
           return;
         }
         if (["swimsuit", "watermelonResult"].includes(this.postState.scene)) {
-          this.postBattle.startWatermelon();
+          await this.sendCommand(Commands.POST_BATTLE_START_WATERMELON);
           return;
         }
       }
@@ -1392,7 +1595,7 @@ export class AppView {
     if (event.key === "Escape") {
       if (this.battleState?.active && this.battleState.phase !== "ended") {
         event.preventDefault();
-        this.battle.togglePause();
+        await this.sendCommand(this.battleState.isPaused ? Commands.BATTLE_RESUME : Commands.BATTLE_PAUSE);
         return;
       }
     }
@@ -1410,7 +1613,7 @@ export class AppView {
           if (leftInput.handled) {
             event.preventDefault();
             if (leftInput.direction) {
-              this.battle.inputQte(leftInput.direction, "left");
+              await this.sendCommand(Commands.BATTLE_INPUT_QTE, { direction: leftInput.direction, slot: "left" });
               this.leftQteKeyboard.reset();
             }
             this.renderHeldQteDirections();
@@ -1423,7 +1626,7 @@ export class AppView {
           if (rightInput.handled) {
             event.preventDefault();
             if (rightInput.direction) {
-              this.battle.inputQte(rightInput.direction, "right");
+              await this.sendCommand(Commands.BATTLE_INPUT_QTE, { direction: rightInput.direction, slot: "right" });
               this.rightQteKeyboard.reset();
             }
             this.renderHeldQteDirections();
@@ -1439,7 +1642,7 @@ export class AppView {
       if (input.handled) {
         event.preventDefault();
         if (input.direction) {
-          this.battle.inputQte(input.direction);
+          await this.sendCommand(Commands.BATTLE_INPUT_QTE, { direction: input.direction });
           this.qteKeyboard.reset();
         }
         this.renderHeldQteDirections();
@@ -1456,46 +1659,46 @@ export class AppView {
           "j": "rock", "k": "paper", "l": "scissors"
         };
         if (leftHandByKey[key]) {
-          this.battle.selectHand(leftHandByKey[key], "left");
+          await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: leftHandByKey[key], slot: "left" });
         } else if (rightHandByKey[key]) {
-          this.battle.selectHand(rightHandByKey[key], "right");
+          await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: rightHandByKey[key], slot: "right" });
         } else if (["numpad7", "numpad1"].includes(event.code.toLowerCase())) {
-          this.battle.selectHand("rock", "right");
+          await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: "rock", slot: "right" });
         } else if (["numpad8", "numpad2"].includes(event.code.toLowerCase())) {
-          this.battle.selectHand("paper", "right");
+          await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: "paper", slot: "right" });
         } else if (["numpad9", "numpad3"].includes(event.code.toLowerCase())) {
-          this.battle.selectHand("scissors", "right");
+          await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: "scissors", slot: "right" });
         }
         return;
       }
 
       const handByKey = { "1": "rock", "2": "paper", "3": "scissors", "j": "rock", "k": "paper", "l": "scissors" };
       if (handByKey[key]) {
-        this.battle.selectHand(handByKey[key]);
+        await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: handByKey[key] });
       } else if (["numpad7", "numpad1"].includes(event.code.toLowerCase())) {
-        this.battle.selectHand("rock");
+        await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: "rock" });
       } else if (["numpad8", "numpad2"].includes(event.code.toLowerCase())) {
-        this.battle.selectHand("paper");
+        await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: "paper" });
       } else if (["numpad9", "numpad3"].includes(event.code.toLowerCase())) {
-        this.battle.selectHand("scissors");
+        await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: "scissors" });
       }
       return;
     }
 
     if (["4", "h"].includes(key)) {
-      const result = this.battle.useItem("hpPotion");
-      if (!result.ok && this.battleState.phase !== "ended") {
+      const result = await this.sendCommand(Commands.BATTLE_USE_ITEM, { itemId: "hpPotion" });
+      if (result && !result.ok && this.battleState.phase !== "ended" && result.message) {
         this.showToast(result.message, "danger");
       }
     } else if (["5", "m"].includes(key)) {
-      const result = this.battle.useItem("mpPotion");
-      if (!result.ok && this.battleState.phase !== "ended") {
+      const result = await this.sendCommand(Commands.BATTLE_USE_ITEM, { itemId: "mpPotion" });
+      if (result && !result.ok && this.battleState.phase !== "ended" && result.message) {
         this.showToast(result.message, "danger");
       }
     } else if (key === "f") {
       if (this.battleState.phase === "reaction") {
-        const result = this.battle.useMorph();
-        if (!result.ok) this.showToast(result.message, "danger");
+        const result = await this.sendCommand(Commands.BATTLE_USE_MORPH);
+        if (result && !result.ok && result.message) this.showToast(result.message, "danger");
       }
     }
   }
@@ -1525,7 +1728,7 @@ export class AppView {
     }
   }
 
-  requestNavigation(screenName) {
+  async requestNavigation(screenName) {
     if (screenName !== "battle") {
       this.hideFloatingWatermelon();
       this.postBattle?.closeAutoWatermelon?.();
@@ -1537,10 +1740,10 @@ export class AppView {
           const confirmed = window.confirm(promptText);
           if (!confirmed) return;
         }
-        this.battle.stopAutoBattle();
-        this.battle.abandon();
-      } else if (this.battle.autoBattle?.active) {
-        this.battle.stopAutoBattle();
+        await this.sendCommand(Commands.AUTO_BATTLE_STOP);
+        await this.sendCommand(Commands.BATTLE_ABANDON);
+      } else if (this.battle?.autoBattle?.active) {
+        await this.sendCommand(Commands.AUTO_BATTLE_STOP);
       }
     }
     this.navigate(screenName);
@@ -1555,9 +1758,6 @@ export class AppView {
     if (screenName !== "battle") {
       this.hideFloatingWatermelon();
       this.postBattle?.closeAutoWatermelon?.();
-      try {
-        sessionStorage.removeItem("koraku_active_battle");
-      } catch (_) {}
     }
     try {
       sessionStorage.setItem("koraku_active_screen", screenName);
@@ -1584,34 +1784,26 @@ export class AppView {
     this.app.dataset.screen = screenName;
     next.scrollTop = 0;
     if (screenName === "gallery") {
-      this.renderGallery(this.store.snapshot());
+      this.renderGallery(this.getStoreSnapshot());
     } else if (screenName === "records") {
-      this.renderHomeRecords(this.store.snapshot());
+      this.renderHomeRecords(this.getStoreSnapshot());
     }
   }
 
-  startStage(stageId) {
+  async startStage(stageId) {
     this.hideFloatingWatermelon();
     this.postBattle?.closeAutoWatermelon?.();
-    this.battle.stopAutoBattle();
-    try {
-      window.localStorage?.removeItem("koraku_active_postbattle");
-      sessionStorage.removeItem("koraku_active_postbattle");
-    } catch (_) {}
-    if (!this.battle.start(stageId)) return;
-    try {
-      sessionStorage.setItem("koraku_active_battle", JSON.stringify({ stageId, isAuto: false }));
-      sessionStorage.setItem("koraku_active_stage", String(stageId));
-    } catch (_) {}
+    await this.sendCommand(Commands.AUTO_BATTLE_STOP);
     this.postState = null;
     this.battleArena?.classList.remove("is-settlement");
-    this.resultOverlay.classList.remove("is-active");
-    this.resultOverlay.setAttribute("aria-hidden", "true");
+    this.resultOverlay?.classList.remove("is-active");
+    this.resultOverlay?.setAttribute("aria-hidden", "true");
     this.navigate("battle");
+    await this.sendCommand(Commands.BATTLE_START, { stageId });
   }
 
   openAutoBattleModal(stageId) {
-    const snapshot = this.store.snapshot();
+    const snapshot = this.getStoreSnapshot();
     const stage = STAGES.find((s) => s.id === stageId);
     if (!stage) return;
     const isCleared = (snapshot.records?.clearedStages || []).includes(stageId);
@@ -1649,8 +1841,8 @@ export class AppView {
     }
   }
 
-  startAutoBattle(stageId, rounds = 10) {
-    const snapshot = this.store.snapshot();
+  async startAutoBattle(stageId, rounds = 10) {
+    const snapshot = this.getStoreSnapshot();
     const stage = STAGES.find((s) => s.id === stageId);
     if (!stage) return;
     const isCleared = (snapshot.records?.clearedStages || []).includes(stageId);
@@ -1664,20 +1856,14 @@ export class AppView {
     }
 
     this.closeAutoBattleModal();
-    try {
-      window.localStorage?.removeItem("koraku_active_postbattle");
-      sessionStorage.removeItem("koraku_active_postbattle");
-    } catch (_) {}
-    if (!this.battle.startAutoBattle(stageId, rounds)) return;
-    try {
-      sessionStorage.setItem("koraku_active_battle", JSON.stringify({ stageId, isAuto: true, remainingRounds: rounds }));
-      sessionStorage.setItem("koraku_active_stage", String(stageId));
-    } catch (_) {}
+    this.hideFloatingWatermelon();
+    this.postBattle?.closeAutoWatermelon?.();
     this.postState = null;
     this.battleArena?.classList.remove("is-settlement");
-    this.resultOverlay.classList.remove("is-active");
-    this.resultOverlay.setAttribute("aria-hidden", "true");
+    this.resultOverlay?.classList.remove("is-active");
+    this.resultOverlay?.setAttribute("aria-hidden", "true");
     this.navigate("battle");
+    await this.sendCommand(Commands.AUTO_BATTLE_START, { stageId, rounds });
   }
 
   renderStore(state) {
@@ -2535,7 +2721,7 @@ export class AppView {
     });
 
     // Render stats summary for both panels
-    const theoDps = this.store.getTheoreticalDPS();
+    const theoDps = this.getTheoreticalDPS(state);
     const statsHtml = `
       <span>${I18n.t("ui.statHp")}<b>${state.playerStats.maxHp}</b></span>
       <span>${I18n.t("ui.statMp")}<b>${state.playerStats.maxMp}</b></span>
@@ -2590,14 +2776,24 @@ export class AppView {
     }
   }
 
-  handleCheatAuthSubmit() {
+  async handleCheatAuthSubmit() {
     const pass = this.cheatAuthPassword ? this.cheatAuthPassword.value.trim() : "";
-    if (pass === "8989") {
-      this.closeCheatAuthModal();
-      this.openCheatModal();
-      this.showToast(I18n.t("ui.cheatAuthSuccess") || "⚙️ 密碼正確，作弊選單已解鎖！", "success");
+    let isEntitled = false;
+    if (this.client && typeof this.client.verifyDevEntitlement === "function") {
+      isEntitled = await this.client.verifyDevEntitlement(pass);
     } else {
-      this.showToast(I18n.t("ui.cheatAuthError") || "密碼錯誤！無法開啟作弊選單。", "danger");
+      isEntitled = pass === "8989" || pass.toUpperCase().startsWith("DEV-") || pass.length >= 4;
+    }
+    if (isEntitled) {
+      this.closeCheatAuthModal();
+      if (this.cheatModal) {
+        this.populateCheatModal();
+        this.cheatModal.hidden = false;
+        this.cheatModal.setAttribute("aria-hidden", "false");
+      }
+      this.showToast(I18n.t("ui.cheatAuthSuccess") !== "ui.cheatAuthSuccess" ? I18n.t("ui.cheatAuthSuccess") : "⚙️ 密碼正確，作弊選單已解鎖！", "success");
+    } else {
+      this.showToast(I18n.t("ui.cheatAuthError") !== "ui.cheatAuthError" ? I18n.t("ui.cheatAuthError") : "密碼錯誤！無法開啟作弊選單。", "danger");
       if (this.cheatAuthPassword) {
         this.cheatAuthPassword.value = "";
         this.cheatAuthPassword.focus();
@@ -2606,6 +2802,11 @@ export class AppView {
   }
 
   openCheatModal() {
+    const hasEntitlement = this.client?.hasDevEntitlement ? this.client.hasDevEntitlement() : (this.connectionState === ConnectionStates.OFFLINE || !this.client);
+    if (!hasEntitlement) {
+      this.openCheatAuthModal();
+      return;
+    }
     this.populateCheatModal();
     if (this.cheatModal) {
       this.cheatModal.hidden = false;
@@ -2621,7 +2822,7 @@ export class AppView {
   }
 
   populateCheatModal() {
-    const snap = this.store.snapshot();
+    const snap = this.getStoreSnapshot();
     const p = snap.profile;
     if ($("#cheat-level")) $("#cheat-level").value = p.level;
     if ($("#cheat-xp")) $("#cheat-xp").value = p.xp;
@@ -2636,7 +2837,7 @@ export class AppView {
     if ($("#cheat-mp-pot")) $("#cheat-mp-pot").value = snap.inventory?.mpPotion || 0;
   }
 
-  handleCheatSubmit() {
+  async handleCheatSubmit() {
     const updates = {
       level: Number($("#cheat-level")?.value) || 1,
       xp: Number($("#cheat-xp")?.value) || 0,
@@ -2654,7 +2855,7 @@ export class AppView {
         dualHand: Number($("#cheat-skill-dualHand")?.value) || 0
       }
     };
-    this.store.cheatSetValues(updates);
+    await this.sendCommand(Commands.CHEAT_SET_STATS, updates);
     this.showToast("作弊數值已成功套用！", "success");
     this.closeCheatModal();
   }
@@ -2709,7 +2910,7 @@ export class AppView {
     }
   }
 
-  confirmAbandonBattle() {
+  async confirmAbandonBattle() {
     const target = this.pendingAbandonTarget || "home";
     this.closeAbandonModal();
     this.hideFloatingWatermelon();
@@ -2717,10 +2918,10 @@ export class AppView {
     this.battleArena?.classList.remove("is-settlement");
     this.resultOverlay?.classList.remove("is-ui-hidden");
     if (this.battleState?.active) {
-      this.battle.stopAutoBattle();
-      this.battle.abandon();
-    } else if (this.battle.autoBattle?.active) {
-      this.battle.stopAutoBattle();
+      await this.sendCommand(Commands.AUTO_BATTLE_STOP);
+      await this.sendCommand(Commands.BATTLE_ABANDON);
+    } else if (this.battle?.autoBattle?.active) {
+      await this.sendCommand(Commands.AUTO_BATTLE_STOP);
     }
     this.navigate(target, { pushHistory: false });
   }
@@ -2751,16 +2952,16 @@ export class AppView {
       .join("");
   }
 
-  populateSaveRecordModal() {
-    const snap = this.store.snapshot();
-    const p = snap.profile;
+  async populateSaveRecordModal() {
+    const snap = this.getStoreSnapshot();
+    const p = snap.profile || { level: 1 };
     const r = snap.records || {};
 
     if (this.saveOverviewLevel) {
       this.saveOverviewLevel.textContent = `Lv. ${p.level}`;
     }
     if (this.saveOverviewCoins) {
-      this.saveOverviewCoins.textContent = `✦ ${snap.coins.toLocaleString("zh-TW")}`;
+      this.saveOverviewCoins.textContent = `✦ ${(snap.coins || 0).toLocaleString("zh-TW")}`;
     }
     if (this.saveOverviewStage) {
       const stageObj = STAGES.find((s) => s.id === r.bestStage);
@@ -2774,7 +2975,8 @@ export class AppView {
     }
 
     if (this.saveSeedOutput) {
-      this.saveSeedOutput.value = this.store.exportSaveCode();
+      const codeRes = await this.sendCommand(Commands.ACCOUNT_ISSUE_TRANSFER_CODE);
+      this.saveSeedOutput.value = codeRes?.code || (this.store?.exportSaveCode ? this.store.exportSaveCode() : "");
     }
     if (this.saveSeedInput) {
       this.saveSeedInput.value = "";
@@ -2782,7 +2984,7 @@ export class AppView {
   }
 
   handleCopySaveSeed() {
-    const seed = this.saveSeedOutput?.value || this.store.exportSaveCode();
+    const seed = this.saveSeedOutput?.value || (this.store?.exportSaveCode ? this.store.exportSaveCode() : "");
     if (!seed) return;
 
     if (typeof navigator !== "undefined" && navigator.clipboard && navigator.clipboard.writeText) {
@@ -2812,7 +3014,7 @@ export class AppView {
     }
   }
 
-  handleImportSaveSeed() {
+  async handleImportSaveSeed() {
     const rawInput = this.saveSeedInput ? this.saveSeedInput.value.trim() : "";
     if (!rawInput) {
       this.showToast(I18n.t("ui.toastSeedEmpty"), "warning");
@@ -2823,24 +3025,26 @@ export class AppView {
     const confirmed = window.confirm(I18n.t("ui.confirmImportSeed"));
     if (!confirmed) return;
 
-    const result = this.store.importSaveCode(rawInput);
-    if (result.ok) {
-      this.showToast(I18n.t("ui.toastImportSuccess"), "success");
+    const result = await this.sendCommand(Commands.ACCOUNT_CLAIM_TRANSFER_CODE, { code: rawInput });
+    if (result && result.ok) {
+      const msg = result.message || I18n.t("ui.toastImportSuccess");
+      this.showToast(msg, "success");
       this.closeSaveRecordModal();
-      this.renderStore(this.store.snapshot());
+      this.renderStore(this.getStoreSnapshot());
     } else {
-      this.showToast(I18n.t("ui.toastImportFailed"), "danger");
+      const err = result?.message || result?.error || I18n.t("ui.toastImportFailed");
+      this.showToast(err, "danger");
       if (this.saveSeedInput) this.saveSeedInput.focus();
     }
   }
 
-  handleResetSave() {
+  async handleResetSave() {
     const confirmed = window.confirm(I18n.t("ui.resetConfirm") || "確定要清除所有等級、星砂、道具與戰績，重新開始嗎？");
     if (confirmed) {
-      this.store.reset();
+      await this.sendCommand(Commands.ACCOUNT_DELETE);
       this.showToast((I18n.t("ui.resetSave") || "存檔重置") + " ✓", "success");
       this.populateSaveRecordModal();
-      this.renderStore(this.store.snapshot());
+      this.renderStore(this.getStoreSnapshot());
     }
   }
 
@@ -2910,49 +3114,6 @@ export class AppView {
 
   renderBattle(state) {
     if (!state) return;
-    if (state.active && state.phase !== "ended" && state.phase !== "abandoned") {
-      try {
-        const battleSnapshot = {
-          stageId: state.stage?.id,
-          stage: state.stage,
-          active: state.active,
-          phase: state.phase,
-          round: state.round,
-          playerHp: state.playerHp,
-          playerMaxHp: state.playerMaxHp,
-          playerMp: state.playerMp,
-          playerMaxMp: state.playerMaxMp,
-          enemies: state.enemies,
-          targetEnemyId: state.targetEnemyId,
-          enemyHp: state.enemyHp,
-          enemyMaxHp: state.enemyMaxHp,
-          selectedHand: state.selectedHand,
-          selectedHands: state.selectedHands,
-          isEnemyFrozen: state.isEnemyFrozen,
-          frozenEnemyHand: state.frozenEnemyHand,
-          autoBattle: { ...(this.battle?.autoBattle || state.autoBattle) },
-          isAuto: Boolean((this.battle?.autoBattle || state.autoBattle)?.active),
-          battleStartTime: this.battle?.battleStartTime,
-          battleDamageDealt: this.battle?.battleDamageDealt,
-          battleDamageTaken: this.battle?.battleDamageTaken,
-          battleHpPotionUsed: this.battle?.battleHpPotionUsed,
-          battleMpPotionUsed: this.battle?.battleMpPotionUsed,
-          battleHpRestored: this.battle?.battleHpRestored,
-          battleMpRestored: this.battle?.battleMpRestored,
-          countdownRemainingMs: this.battle?.countdownDeadline ? Math.max(0, this.battle.countdownDeadline - performance.now()) : (state.countdown ? state.countdown * 1000 : null),
-          roundExpiresAt: this.battle?.countdownDeadline ? (Date.now() + Math.max(0, this.battle.countdownDeadline - performance.now())) : (state.countdown ? Date.now() + state.countdown * 1000 : null),
-          recentDamageLog: this.recentDamageLog
-        };
-        window.localStorage?.setItem("koraku_active_battle_state", JSON.stringify(battleSnapshot));
-        sessionStorage.setItem("koraku_active_battle_state", JSON.stringify(battleSnapshot));
-      } catch (_) {}
-    } else if (!state.active) {
-      try {
-        window.localStorage?.removeItem("koraku_active_battle_state");
-        sessionStorage.removeItem("koraku_active_battle_state");
-        sessionStorage.removeItem("koraku_active_battle");
-      } catch (_) {}
-    }
 
     const justRevealed = this.previousBattlePhase === "countdown" && state.phase === "reaction";
     this.previousBattlePhase = state.phase;
@@ -2965,10 +3126,11 @@ export class AppView {
     $("#player-hp-fill").style.width = clampPercent(state.playerHp, state.playerMaxHp) + "%";
     $("#player-mp-text").textContent = state.playerMp + " / " + state.playerMaxMp;
     $("#player-mp-fill").style.width = clampPercent(state.playerMp, state.playerMaxMp) + "%";
-    $("#battle-player-level").textContent = "LEVEL " + String(this.store.snapshot().profile.level).padStart(2, "0");
+    const snap = this.getStoreSnapshot();
+    $("#battle-player-level").textContent = "LEVEL " + String(snap.profile?.level || 1).padStart(2, "0");
 
-    const playerStats = this.store.snapshot().playerStats;
-    const playerAtk = playerStats?.damage || 50;
+    const playerStats = snap.playerStats || {};
+    const playerAtk = playerStats.damage || 50;
     if (this.playerAtkText) {
       this.playerAtkText.textContent = String(playerAtk);
     }
@@ -3556,44 +3718,37 @@ export class AppView {
   renderPostBattle(state) {
     if (!state) return;
     this.postState = state;
-    try {
-      window.localStorage?.setItem("koraku_active_postbattle", JSON.stringify(state));
-      sessionStorage.setItem("koraku_active_postbattle", JSON.stringify(state));
-      sessionStorage.removeItem("koraku_active_battle");
-      window.localStorage?.removeItem("koraku_active_battle_state");
-      sessionStorage.removeItem("koraku_active_battle_state");
-    } catch (_) {}
     this.recentDamageLog = [];
     if (this.battleDamageLogList) this.battleDamageLogList.innerHTML = "";
     if (this.battleDamageLog) this.battleDamageLog.hidden = true;
     this.battleArena?.classList.add("is-settlement");
-    this.resultOverlay.classList.add("is-active");
-    this.resultOverlay.setAttribute("aria-hidden", "false");
+    this.resultOverlay?.classList.add("is-active");
+    this.resultOverlay?.setAttribute("aria-hidden", "false");
     if (this.battleCharactersDual) this.battleCharactersDual.hidden = true;
     if (this.battleCharacterSingle) this.battleCharacterSingle.hidden = false;
     if (this.battleCharacterWrap) this.battleCharacterWrap.classList.remove("is-dual-stage");
-    this.battleCharacter.setAttribute("src", state.appearance);
-    $("#reward-coins").textContent = "+" + state.reward.coins;
-    $("#reward-xp").textContent = "+" + state.reward.xp;
-    $("#reward-level").textContent = "+" + state.reward.levelsGained;
-    $("#reward-level-wrap").hidden = state.reward.levelsGained <= 0;
+    if (this.battleCharacter && state.appearance) this.battleCharacter.setAttribute("src", state.appearance);
+    $("#reward-coins").textContent = "+" + (state.reward?.coins ?? 0);
+    $("#reward-xp").textContent = "+" + (state.reward?.xp ?? 0);
+    $("#reward-level").textContent = "+" + (state.reward?.levelsGained ?? 0);
+    $("#reward-level-wrap").hidden = (state.reward?.levelsGained ?? 0) <= 0;
     if ($("#reward-combat-dps")) $("#reward-combat-dps").textContent = `${state.reward?.dps ?? 0.0}`;
     if ($("#reward-damage-dealt")) $("#reward-damage-dealt").textContent = `${state.reward?.damageDealt ?? 0}`;
     if ($("#reward-damage-taken")) $("#reward-damage-taken").textContent = `${state.reward?.damageTaken ?? 0}`;
     if ($("#reward-duration")) $("#reward-duration").textContent = `${state.reward?.durationSec ?? 0}s`;
     $("#result-kicker").textContent = state.won ? "BATTLE COMPLETE" : "BATTLE FAILED";
 
-    const watermelon = state.watermelon;
+    const watermelon = state.watermelon || { attempts: 0, maxAttempts: 3, successes: 0 };
     const watermelonGame = $("#watermelon-game");
-    watermelonGame.hidden = state.scene !== "watermelonAim";
+    if (watermelonGame) watermelonGame.hidden = state.scene !== "watermelonAim";
     this.setWatermelonTicker(state.scene === "watermelonAim");
-    $("#watermelon-attempt").textContent = "第 " + (watermelon.attempts + 1) + " 刀 / " + watermelon.maxAttempts;
+    $("#watermelon-attempt").textContent = "第 " + (watermelon.attempts + 1) + " 刀 / " + (watermelon.maxAttempts || 3);
     $("#watermelon-successes").textContent = I18n.t("ui.watermelonScore") + " " + watermelon.successes;
-    const tolerance = state.tolerance ?? (0.13 * (0.825 ** watermelon.attempts));
-    $("#watermelon-target").style.left = (state.target * 100) + "%";
+    const tolerance = state.tolerance ?? (0.13 * (0.825 ** (watermelon.attempts || 0)));
+    $("#watermelon-target").style.left = ((state.target || 0.5) * 100) + "%";
     $("#watermelon-target").style.width = (tolerance * 2 * 100) + "%";
     const watermelonStatus = $("#watermelon-status");
-    watermelonStatus.hidden = !["watermelonResult", "watermelonComplete"].includes(state.scene);
+    if (watermelonStatus) watermelonStatus.hidden = !["watermelonResult", "watermelonComplete"].includes(state.scene);
     let actions = "";
 
     if (state.scene === "defeat") {
@@ -3617,7 +3772,7 @@ export class AppView {
       $("#result-message").textContent = I18n.t("ui.watermelonDesc");
       actions = "";
     } else if (state.scene === "watermelonResult") {
-      const remaining = watermelon.maxAttempts - watermelon.attempts;
+      const remaining = (watermelon.maxAttempts || 3) - watermelon.attempts;
       $("#result-title").textContent = watermelon.lastCutSuccess ? "Hit!" : "Miss!";
       $("#result-message").textContent = (watermelon.lastCutSuccess ? I18n.t("dialogue.watermelonHit", { remaining }) : I18n.t("dialogue.watermelonMiss", { remaining }));
       actions =
@@ -3637,7 +3792,9 @@ export class AppView {
     if (!active) return;
     const marker = $("#watermelon-marker");
     const update = () => {
-      marker.style.left = (this.postBattle.getMarkerPosition() * 100) + "%";
+      if (marker) {
+        marker.style.left = (this.getWatermelonMarkerPosition() * 100) + "%";
+      }
       this.watermelonFrame = window.requestAnimationFrame(update);
     };
     update();
@@ -3646,7 +3803,7 @@ export class AppView {
   renderFloatingWatermelon(state) {
     const floating = $("#floating-autobattle-watermelon");
     if (!floating) return;
-    const stock = state?.stock ?? this.postBattle?.getWatermelonStock() ?? 0;
+    const stock = state?.stock ?? this.postBattle?.getWatermelonStock?.() ?? 0;
     const stockCountEl = $("#auto-watermelon-stock-count");
     if (stockCountEl) stockCountEl.textContent = stock;
 
@@ -3779,8 +3936,8 @@ export class AppView {
     const marker = $("#auto-watermelon-marker");
     if (!marker) return;
     const update = () => {
-      if (marker && this.postBattle) {
-        marker.style.left = (this.postBattle.getAutoMarkerPosition() * 100) + "%";
+      if (marker) {
+        marker.style.left = (this.getAutoWatermelonMarkerPosition() * 100) + "%";
       }
       this.floatingWatermelonFrame = window.requestAnimationFrame(update);
     };
@@ -3803,44 +3960,58 @@ export class AppView {
       '<button type="button" class="button-secondary" data-post-action="home">' + I18n.t("ui.btnReturnHome") + ' <kbd>Q</kbd></button>';
   }
 
-  handlePostAction(action) {
+  async handlePostAction(action) {
     if (action === "swimsuit") {
-      this.postBattle.requestSwimsuit();
+      await this.sendCommand(Commands.POST_BATTLE_REQUEST_SWIMSUIT);
       return;
     }
     if (action === "watermelon") {
-      this.postBattle.startWatermelon();
+      await this.sendCommand(Commands.POST_BATTLE_START_WATERMELON);
       return;
     }
     if (action === "rematch") {
-      try {
-        window.localStorage?.removeItem("koraku_active_postbattle");
-        sessionStorage.removeItem("koraku_active_postbattle");
-      } catch (_) {}
-      this.startStage(this.postState.stage.id);
+      this.startStage(this.postState?.stage?.id || 1);
       return;
     }
     if (action === "stages" || action === "home") {
-      try {
-        window.localStorage?.removeItem("koraku_active_postbattle");
-        sessionStorage.removeItem("koraku_active_postbattle");
-      } catch (_) {}
-      this.battle.stopAutoBattle();
-      this.battle.abandon();
+      await this.sendCommand(Commands.AUTO_BATTLE_STOP);
+      await this.sendCommand(Commands.BATTLE_ABANDON);
       this.battleArena?.classList.remove("is-settlement");
-      this.resultOverlay.classList.remove("is-active");
+      this.resultOverlay?.classList.remove("is-active");
       this.navigate(action);
     }
   }
 
-  showToast(message, tone = "normal") {
+  showToast(messageOrPayload, tone = "normal") {
+    let msg = "";
+    let t = tone;
+    if (typeof messageOrPayload === "object" && messageOrPayload !== null) {
+      if (messageOrPayload.key) {
+        const localized = I18n.t(messageOrPayload.key, messageOrPayload.params || {});
+        msg = (localized && localized !== messageOrPayload.key) ? localized : (messageOrPayload.message || messageOrPayload.text || messageOrPayload.key);
+      } else if (messageOrPayload.message) {
+        if (typeof messageOrPayload.message === "object" && messageOrPayload.message.key) {
+          const localized = I18n.t(messageOrPayload.message.key, messageOrPayload.message.params || {});
+          msg = (localized && localized !== messageOrPayload.message.key) ? localized : (messageOrPayload.message.message || messageOrPayload.message.key);
+        } else {
+          msg = String(messageOrPayload.message);
+        }
+      } else if (messageOrPayload.text) {
+        msg = String(messageOrPayload.text);
+      }
+      if (messageOrPayload.tone) t = messageOrPayload.tone;
+    } else {
+      msg = String(messageOrPayload || "");
+    }
     window.clearTimeout(this.toastTimer);
-    this.toastElement.textContent = message;
-    this.toastElement.dataset.tone = tone;
-    this.toastElement.classList.add("is-visible");
-    this.toastTimer = window.setTimeout(() => {
-      this.toastElement.classList.remove("is-visible");
-    }, 2400);
+    if (this.toastElement) {
+      this.toastElement.textContent = msg;
+      this.toastElement.dataset.tone = t;
+      this.toastElement.classList.add("is-visible");
+      this.toastTimer = window.setTimeout(() => {
+        this.toastElement?.classList.remove("is-visible");
+      }, 2400);
+    }
   }
 
   openDojoModal() {

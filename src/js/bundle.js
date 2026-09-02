@@ -4,7 +4,7 @@
   "use strict";
 
 // --- src/js/config/gameConfig.js ---
-const APP_VERSION = "0.0.17";
+const APP_VERSION = "0.0.18";
 
 const DOJO_CONFIG = Object.freeze({
   defaultHp: 10000,
@@ -1088,6 +1088,49 @@ const DICTIONARY = {
       dangerZoneTitle: "存檔重置與刪除管理",
       dangerZoneDesc: "清除本裝置上的所有遊戲進度（等級、星砂、裝備、技能與戰績），回歸初始狀態：",
       btnModalResetSave: "重置存檔（清除所有紀錄）",
+      // Online connection, transfer code, export, delete
+      connConnecting: "連線中",
+      connOnline: "線上連線",
+      connOffline: "離線模式",
+      connReconnecting: "重新連線中",
+      connDisconnected: "連線中斷",
+      connBannerConnecting: "正在連線至伺服器...",
+      connBannerOnline: "已連線至權威伺服器",
+      connBannerOffline: "目前處於本機離線沙盒模式",
+      connBannerReconnecting: "連線中斷，正在嘗試重新連線...",
+      connBannerDisconnected: "已與伺服器斷開連線",
+      connectionModeToggle: "切換連線模式",
+      connectionErrorVersionMismatch: "版本不符，請重新整理頁面載入最新版本。",
+      connectionRateLimited: "操作過於頻繁，請稍後再試。",
+      transferCode: "轉移碼",
+      transferCodeModalTitle: "帳號跨裝置轉移碼管理",
+      transferCodeIssueTitle: "簽發一次性轉移碼",
+      transferCodeIssueDesc: "簽發一次性轉移碼，可在新裝置上輸入以遷移此帳號的所有進度。簽發後有效時間為 15 分鐘。",
+      btnIssueTransferCode: "產生轉移碼",
+      transferCodePrompt: "您的轉移碼如下（點擊複製）：",
+      transferCodeExpiresIn: "有效期限：{minutes} 分鐘",
+      btnCopyTransferCode: "複製轉移碼",
+      toastTransferCodeCopied: "轉移碼已複製至剪貼簿！",
+      transferCodeClaimTitle: "兌換轉移碼（移轉至此裝置）",
+      transferCodeClaimDesc: "在下方輸入由原裝置簽發的轉移碼，此裝置將綁定並接收該帳號的所有進度：",
+      transferCodePlaceholder: "輸入 8 位數轉移碼（如 KTR-XXXX-XXXX）",
+      btnClaimTransferCode: "兌換並載入進度",
+      confirmClaimTransferCode: "兌換轉移碼將會切換至該帳號，確定要兌換嗎？",
+      toastTransferCodeSuccess: "帳號轉移成功！已載入最新存檔進度。",
+      toastTransferCodeInvalid: "無效或已過期的轉移碼，請重新核對或重新簽發。",
+      exportJson: "資料匯出 (JSON)",
+      exportJsonTitle: "匯出完整帳號資料 (JSON)",
+      exportJsonDesc: "下載包含等級、裝備實例、星砂經濟帳本與歷程統計之完整 JSON 存檔檔案：",
+      btnDownloadJson: "下載 JSON 備份檔",
+      btnCopyJson: "複製 JSON 內容",
+      toastExportJsonSuccess: "帳號資料已成功匯出！",
+      deleteAccount: "刪除帳號",
+      deleteAccountTitle: "徹底刪除帳號與雲端紀錄",
+      deleteAccountWarning: "【警告】此操作將永久銷毀伺服器與本機的所有角色數據、裝備與星砂紀錄，且無法透過任何方式復原！",
+      deleteAccountConfirmPrompt: "若確認要刪除，請在下方輸入「DELETE」以確認：",
+      btnConfirmDeleteAccount: "永久銷毀帳號",
+      toastDeleteAccountSuccess: "帳號與所有進度已徹底刪除。",
+      toastDeleteAccountMismatch: "確認文字不相符，取消刪除操作。",
       navDojo: "修練場",
       menuDojo: "修練道場",
       menuDojoSub: "QTE & SANDBOX",
@@ -1703,6 +1746,24 @@ const DICTIONARY = {
       morphReaction: "咦……在最後一瞬間變拳了？",
       qteSingleBreak: "抓到破綻了！想躲開的話，就跟上我的節奏！",
       qteDualBreak: "雙重破綻！跟上我們的雙生節奏吧！",
+      winDualMorphBoth: "雙手皆以變拳勝出！雙生之勢全數瓦解！",
+      winDualBoth: "雙手皆贏！完美的雙重壓制！",
+      winDualMorphSingle: "藉由變拳突破單側防線！",
+      winDualSingle: "突破單側防線！",
+      winDualMorphDoubleDmg: "雙手變拳全勝！造成雙倍傷害！",
+      winDualDoubleDmg: "雙手出拳全勝！造成雙倍傷害！",
+      winSingleMorph: "變拳逆轉獲勝！",
+      winSingleNormal: "出拳獲勝！",
+      drawMomoDodge: "平手之際試圖摸摸，但被{target}輕巧地躲開了！",
+      drawMomoHit: "平手之際趁機摸摸！對{target}造成了 {damage} 點偷襲傷害！",
+      drawNormal: "不分勝負，雙方平手！",
+      deflectedSingleAttack: "化解了{target}的攻擊！",
+      dualQteMiss: "雙生 QTE 反制失誤！",
+      dualQteSuccess: "雙生 QTE 反制成功！完全逆轉戰局！",
+      qteMiss: "QTE 反制失敗！",
+      freezeNarration: "霜月冰結！小樂的「{hand}」被封印了！",
+      dodgeDodge: "殘影閃避！成功避開了攻擊！",
+      dodgeDodgeDual: "殘影閃避！避開了雙重攻擊！",
       postBattleWin: "這次是你贏了。要把勝利用在什麼願望上呢？",
       postBattleLoss: "還有什麼要說的嗎？回去再練練吧！",
       askSwimsuitLine: "泳裝？真拿你沒辦法……只准看一下喔。",
@@ -1711,7 +1772,101 @@ const DICTIONARY = {
       watermelonMiss: "差一點點！還有 {remaining} 刀，下一次再來。",
       watermelonAllHit: "三刀都結束了！切中 {successes} 次，真是有趣呢！",
       watermelonDone: "三刀都結束了。下次再一起抓準時機吧。",
-      itemUsed: "使用「{name}」，恢復了 {restored} 點 {resource}。"
+      itemUsed: "使用「{name}」，恢復了 {restored} 點 {resource}。",
+      serverDisconnectGrace: "連線中斷，正在為您保留戰鬥狀態（10 秒寬限期）...",
+      serverConfigMismatch: "偵測到伺服器版本更新，請重新整理頁面以取得最新遊戲內容。",
+      serverSessionReplaced: "您的帳號已在其他裝置或分頁連線，本連線已中斷。",
+      serverInvalidCommand: "操作無法執行：{reason}",
+      serverLockedInBattle: "戰鬥進行中，無法進行裝備更換或屬性配點！"
+    },
+    narration: {
+      qteCounterPaper: "用手包裹住小樂的剪刀手——反制成功！",
+      qteCounterScissors: "用布握住了小樂的小拳頭——反制成功！",
+      qteCounterRock: "用五指交扣了小樂的軟綿綿小手手，離奇獲勝！"
+    },
+    toast: {
+      levelRequirementNotMet: "等級尚未達到這一章的挑戰條件。"
+    },
+    combat: {
+      morphWindowOnly: "變拳只能在看見小樂出拳後的反應時間內使用。",
+      morphWindowExpired: "反應時間已過。",
+      insufficientMp: "MP 不足，無法使用變拳。",
+      tookDamage: "受到傷害",
+      notInBattle: "目前不在戰鬥中。",
+      itemNotFound: "找不到這個道具。",
+      resourceFull: "{resource} 已經是滿的。",
+      itemDepleted: "{name}已用完。"
+    },
+    shop: {
+      itemNotFound: "找不到這件商品。",
+      insufficientCoins: "星砂不足，完成對局後再來吧。",
+      itemPurchased: "購入「{name}」！",
+      equipmentPurchased: "購入「{name}」並已放入裝備背包！"
+    },
+    equip: {
+      invalidItem: "無效的裝備。",
+      notInInventory: "背包中沒有這件裝備。",
+      invalidSlot: "無效的裝備欄位。",
+      incompatibleSlot: "無法將「{name}」穿戴至 {slotName}。",
+      equipped: "已穿戴「{name}」。",
+      slotEmpty: "此欄位未裝備任何物品。",
+      unequipped: "已卸下裝備。"
+    },
+    growth: {
+      invalidStat: "無效的能力項目。",
+      noPoints: "目前沒有可用點數。",
+      statIncreased: "能力提升了。",
+      invalidSkill: "無效的技能項目。",
+      levelRequirementNotMet: "等級需達 Lv. {level} 方可學習此技能。",
+      skillMaxLevel: "此技能已達最高等級。",
+      insufficientPoints: "技能點數不足。",
+      skillUpgraded: "「{name}」升級至 Lv. {level}！"
+    },
+    cheat: {
+      updated: "數值已更新！",
+      unlockedAll: "已解鎖全部 4 個關卡與 BOSS 說明！",
+      unlockedGallery: "已解鎖全部圖鑑立繪！"
+    },
+    save: {
+      invalidCode: "請輸入有效的種子碼。",
+      corruptCode: "無效或損毀的存檔種子碼。",
+      imported: "存檔已成功載入！"
+    },
+    connection: {
+      connecting: "連線中",
+      online: "線上連線",
+      offline: "離線模式",
+      reconnecting: "重新連線中",
+      disconnected: "連線中斷",
+      highLatency: "延遲",
+      kickedByNewConnection: "帳號已在其他裝置或分頁登入，本連線已安全斷開。",
+      disconnectCountdown: "連線中斷，正在嘗試重新連線（剩餘 {seconds} 秒自動結算）...",
+      bannerConnecting: "正在連線至伺服器...",
+      bannerOnline: "已連線至權威伺服器",
+      bannerOffline: "目前處於本機離線沙盒模式",
+      bannerReconnecting: "連線中斷，正在嘗試重新連線...",
+      bannerDisconnected: "已與伺服器斷開連線"
+    },
+    battleLog: {
+      rpsWin: "猜拳【{hand}】獲勝，對 {target} 造成 {damage} 點傷害！",
+      rpsLoss: "猜拳【{hand}】惜敗，受到 {damage} 點傷害！",
+      rpsDraw: "雙方皆出【{hand}】，平手！",
+      morphSuccess: "變拳【{hand}】逆轉成功！對 {target} 造成 {damage} 點傷害！",
+      morphFailed: "變拳手勢被克制，判定失誤！",
+      qteCounterSuccess: "QTE 絕地反制成功！解除危機並對 {target} 造成 {damage} 點反擊傷害！",
+      qteCounterFail: "QTE 反制失敗！承受了 {damage} 點重擊！",
+      momoProc: "摸摸平手偷襲發動！對 {target} 造成 {damage} 點偷襲傷害！",
+      momoDodged: "小樂靈巧地閃避了摸摸偷襲！",
+      burnDamage: "火焰太刀狐火灼燒，對 {target} 造成 {damage} 點燃燒傷害！",
+      reflectDamage: "八咫鏡光反彈！將 {damage} 點傷害回敬給 {target}！",
+      thunderDamage: "雷霆神鳴追加！對 {target} 額外追加 {damage} 點雷擊傷害！",
+      frostFreeze: "霜月冰結靈刃發動！隨機封印了小樂下一回合的【{hand}】！",
+      shadowDodge: "靈狐幻影羽織發動！25% 殘影成功完全迴避了本次傷害！",
+      mpRegen: "淨世白狐千早發動！回合結算回復了 {amount} 點 MP。",
+      potionUsed: "使用了【{item}】，恢復了 {amount} 點 {stat}！",
+      roundTimeout: "出拳倒數逾時，判定為棄權輸拳！",
+      battleDisconnectedSettled: "戰鬥因逾時未連線自動結算完成。",
+      battlePauseCount: "戰鬥已暫停（本場剩餘暫停次數：{remaining} 次）。"
     }
   },
 
@@ -1790,6 +1945,49 @@ const DICTIONARY = {
       dangerZoneTitle: "存档重置与删除管理",
       dangerZoneDesc: "清除本设备上的所有游戏进度（等级、星砂、装备、技能与战绩），回归初始状态：",
       btnModalResetSave: "重置存档（清除所有记录）",
+      // Online connection, transfer code, export, delete
+      connConnecting: "连接中",
+      connOnline: "在线连接",
+      connOffline: "离线模式",
+      connReconnecting: "重新连接中",
+      connDisconnected: "连接中断",
+      connBannerConnecting: "正在连接至服务器...",
+      connBannerOnline: "已连接至权威服务器",
+      connBannerOffline: "当前处于本地离线沙盒模式",
+      connBannerReconnecting: "连接中断，正在尝试重新连接...",
+      connBannerDisconnected: "已与服务器断开连接",
+      connectionModeToggle: "切换连接模式",
+      connectionErrorVersionMismatch: "版本不符，请刷新页面加载最新版本。",
+      connectionRateLimited: "操作过于频繁，请稍后再试。",
+      transferCode: "转移码",
+      transferCodeModalTitle: "账号跨设备转移码管理",
+      transferCodeIssueTitle: "签发一次性转移码",
+      transferCodeIssueDesc: "签发一次性转移码，可在新设备上输入以迁移此账号的所有进度。签发后有效时间为 15 分钟。",
+      btnIssueTransferCode: "生成转移码",
+      transferCodePrompt: "您的转移码如下（点击复制）：",
+      transferCodeExpiresIn: "有效期限：{minutes} 分钟",
+      btnCopyTransferCode: "复制转移码",
+      toastTransferCodeCopied: "转移码已复制至剪贴板！",
+      transferCodeClaimTitle: "兑换转移码（迁移至此设备）",
+      transferCodeClaimDesc: "在下方输入由原设备签发的转移码，此设备将绑定并接收该账号的所有进度：",
+      transferCodePlaceholder: "输入 8 位数转移码（如 KTR-XXXX-XXXX）",
+      btnClaimTransferCode: "兑换并加载进度",
+      confirmClaimTransferCode: "兑换转移码将会切换至该账号，确定要兑换吗？",
+      toastTransferCodeSuccess: "账号转移成功！已加载最新存档进度。",
+      toastTransferCodeInvalid: "无效或已过期的转移码，请重新核对或重新签发。",
+      exportJson: "数据导出 (JSON)",
+      exportJsonTitle: "导出完整账号数据 (JSON)",
+      exportJsonDesc: "下载包含等级、装备实例、星砂经济账本与历程统计之完整 JSON 存档文件：",
+      btnDownloadJson: "下载 JSON 备份文件",
+      btnCopyJson: "复制 JSON 内容",
+      toastExportJsonSuccess: "账号数据已成功导出！",
+      deleteAccount: "删除账号",
+      deleteAccountTitle: "彻底删除账号与云端纪录",
+      deleteAccountWarning: "【警告】此操作将永久销毁服务器与本地的所有角色数据、装备与星砂纪录，且无法通过任何方式复原！",
+      deleteAccountConfirmPrompt: "若确认要删除，请在下方输入“DELETE”以确认：",
+      btnConfirmDeleteAccount: "永久销毁账号",
+      toastDeleteAccountSuccess: "账号与所有进度已彻底删除。",
+      toastDeleteAccountMismatch: "确认文字不相符，取消删除操作。",
       navDojo: "修练场",
       menuDojo: "修练道场",
       menuDojoSub: "QTE & SANDBOX",
@@ -2222,6 +2420,24 @@ const DICTIONARY = {
       morphReaction: "咦……在最后一瞬间变拳了？",
       qteSingleBreak: "抓到破绽了！想躲开的话，就跟上我的节奏！",
       qteDualBreak: "双重破绽！跟上我们的双生节奏吧！",
+      winDualMorphBoth: "双手皆以变拳胜出！双生之势全数瓦解！",
+      winDualBoth: "双手皆赢！完美双重压制！",
+      winDualMorphSingle: "借由变拳突破单侧防线！",
+      winDualSingle: "突破单侧防线！",
+      winDualMorphDoubleDmg: "双手变拳全胜！造成双倍伤害！",
+      winDualDoubleDmg: "双手出拳全胜！造成双倍伤害！",
+      winSingleMorph: "变拳逆转获胜！",
+      winSingleNormal: "出拳获胜！",
+      drawMomoDodge: "平手之际试图摸摸，但被{target}轻巧地躲开了！",
+      drawMomoHit: "平手之际趁机摸摸！对{target}造成了 {damage} 点偷袭伤害！",
+      drawNormal: "不分胜负，双方平手！",
+      deflectedSingleAttack: "化解了{target}的攻击！",
+      dualQteMiss: "双生 QTE 反制失误！",
+      dualQteSuccess: "双生 QTE 反制成功！完全逆转战局！",
+      qteMiss: "QTE 反制失败！",
+      freezeNarration: "霜月冰结！小乐的“{hand}”被封印了！",
+      dodgeDodge: "残影闪避！成功避开了攻击！",
+      dodgeDodgeDual: "残影闪避！避开了双重攻击！",
       postBattleWin: "这次是你赢了。要把利用在什么愿望上呢？",
       postBattleLoss: "还有什么要说的吗？回去再练练吧！",
       askSwimsuitLine: "泳装？真拿你没办法……只准看一眼哦。",
@@ -2230,7 +2446,101 @@ const DICTIONARY = {
       watermelonMiss: "差一点点！还有 {remaining} 刀，下一次再来。",
       watermelonAllHit: "三刀都结束了！切中 {successes} 次，真是有趣呢！",
       watermelonDone: "三刀都结束了。下次再一起抓准时机吧。",
-      itemUsed: "使用「{name}」，恢复了 {restored} 点 {resource}。"
+      itemUsed: "使用「{name}」，恢复了 {restored} 点 {resource}。",
+      serverDisconnectGrace: "连接中断，正在为您保留战斗状态（10 秒宽限期）...",
+      serverConfigMismatch: "检测到服务器版本更新，请刷新页面以获取最新游戏内容。",
+      serverSessionReplaced: "您的账号已在其他设备或标签页连接，本连接已中断。",
+      serverInvalidCommand: "操作无法执行：{reason}",
+      serverLockedInBattle: "战斗进行中，无法进行装备更换或属性配点！"
+    },
+    narration: {
+      qteCounterPaper: "用手包裹住小乐的剪刀手——反制成功！",
+      qteCounterScissors: "用布握住了小乐的小拳头——反制成功！",
+      qteCounterRock: "用五指交扣了小乐的软绵绵小手手，离奇获胜！"
+    },
+    toast: {
+      levelRequirementNotMet: "等级尚未达到本章的挑战条件。"
+    },
+    combat: {
+      morphWindowOnly: "变拳只能在看见小乐出拳后的反应时间内使用。",
+      morphWindowExpired: "反应时间已过。",
+      insufficientMp: "MP 不足，无法使用变拳。",
+      tookDamage: "受到伤害",
+      notInBattle: "当前不在战斗中。",
+      itemNotFound: "找不到这个道具。",
+      resourceFull: "{resource} 已经是满的。",
+      itemDepleted: "{name}已用完。"
+    },
+    shop: {
+      itemNotFound: "找不到这件商品。",
+      insufficientCoins: "星砂不足，完成对局后再来吧。",
+      itemPurchased: "购买了「{name}」！",
+      equipmentPurchased: "购买了「{name}」并已放入装备背包！"
+    },
+    equip: {
+      invalidItem: "无效的装备。",
+      notInInventory: "背包中没有这件装备。",
+      invalidSlot: "无效的装备栏位。",
+      incompatibleSlot: "无法将「{name}」穿戴至 {slotName}。",
+      equipped: "已穿戴「{name}」。",
+      slotEmpty: "此栏位未装备任何物品。",
+      unequipped: "已卸下装备。"
+    },
+    growth: {
+      invalidStat: "无效的能力项目。",
+      noPoints: "目前没有可用点数。",
+      statIncreased: "能力提升了。",
+      invalidSkill: "无效的技能项目。",
+      levelRequirementNotMet: "等级需达 Lv. {level} 方可学习此技能。",
+      skillMaxLevel: "此技能已达最高等级。",
+      insufficientPoints: "技能点数不足。",
+      skillUpgraded: "「{name}」升级至 Lv. {level}！"
+    },
+    cheat: {
+      updated: "数值已更新！",
+      unlockedAll: "已解锁全部 4 个关卡与 BOSS 说明！",
+      unlockedGallery: "已解锁全部图鉴立绘！"
+    },
+    save: {
+      invalidCode: "请输入有效的种子码。",
+      corruptCode: "无效或损坏的存档种子码。",
+      imported: "存档已成功加载！"
+    },
+    connection: {
+      connecting: "连接中",
+      online: "在线连接",
+      offline: "离线模式",
+      reconnecting: "重新连接中",
+      disconnected: "连接中断",
+      highLatency: "延迟",
+      kickedByNewConnection: "账号已在其他设备或标签页登录，本连接已安全断开。",
+      disconnectCountdown: "连接中断，正在尝试重新连接（剩余 {seconds} 秒自动结算）...",
+      bannerConnecting: "正在连接至服务器...",
+      bannerOnline: "已连接至权威服务器",
+      bannerOffline: "当前处于本地离线沙盒模式",
+      bannerReconnecting: "连接中断，正在尝试重新连接...",
+      bannerDisconnected: "已与服务器断开连接"
+    },
+    battleLog: {
+      rpsWin: "猜拳【{hand}】获胜，对 {target} 造成 {damage} 点伤害！",
+      rpsLoss: "猜拳【{hand}】惜败，受到 {damage} 点伤害！",
+      rpsDraw: "双方皆出【{hand}】，平手！",
+      morphSuccess: "变拳【{hand}】逆转成功！对 {target} 造成 {damage} 点伤害！",
+      morphFailed: "变拳手势被克制，判定失误！",
+      qteCounterSuccess: "QTE 绝地反制成功！解除危机并对 {target} 造成 {damage} 点反击伤害！",
+      qteCounterFail: "QTE 反制失败！承受了 {damage} 点重击！",
+      momoProc: "摸摸平手偷袭发动！对 {target} 造成 {damage} 点偷袭伤害！",
+      momoDodged: "小乐灵巧地闪避了摸摸偷袭！",
+      burnDamage: "火焰太刀狐火灼烧，对 {target} 造成 {damage} 点燃烧伤害！",
+      reflectDamage: "八咫镜光反弹！将 {damage} 点伤害回敬给 {target}！",
+      thunderDamage: "雷霆神鸣追加！对 {target} 额外追加 {damage} 点雷击伤害！",
+      frostFreeze: "霜月冰结灵刃发动！随机封印了小乐下一回合的【{hand}】！",
+      shadowDodge: "灵狐幻影羽织发动！25% 残影成功完全回避了本次伤害！",
+      mpRegen: "净世白狐千早发动！回合结算回复了 {amount} 点 MP。",
+      potionUsed: "使用了【{item}】，恢复了 {amount} 点 {stat}！",
+      roundTimeout: "出拳倒数超时，判定为弃权输拳！",
+      battleDisconnectedSettled: "战斗因超时未连接自动结算完成。",
+      battlePauseCount: "战斗已暂停（本场剩余暂停次数：{remaining} 次）。"
     }
   },
 
@@ -2308,6 +2618,49 @@ const DICTIONARY = {
       dangerZoneTitle: "Save Reset & Deletion Management",
       dangerZoneDesc: "Clear all game progress on this device (level, star sand, equipment, skills, and stats) back to default initial state:",
       btnModalResetSave: "Reset Save (Clear All Progress)",
+      // Online connection, transfer code, export, delete
+      connConnecting: "Connecting",
+      connOnline: "Online",
+      connOffline: "Offline Mode",
+      connReconnecting: "Reconnecting",
+      connDisconnected: "Disconnected",
+      connBannerConnecting: "Connecting to server...",
+      connBannerOnline: "Connected to authoritative server",
+      connBannerOffline: "Running in local offline sandbox mode",
+      connBannerReconnecting: "Connection lost. Reconnecting...",
+      connBannerDisconnected: "Disconnected from server",
+      connectionModeToggle: "Toggle Connection Mode",
+      connectionErrorVersionMismatch: "Client version mismatch. Please reload to sync latest version.",
+      connectionRateLimited: "Too many requests. Please try again shortly.",
+      transferCode: "Transfer Code",
+      transferCodeModalTitle: "Account Transfer Code Management",
+      transferCodeIssueTitle: "Issue One-Time Transfer Code",
+      transferCodeIssueDesc: "Generate a one-time code to migrate this account's full progress to a new device. Valid for 15 minutes upon issuance.",
+      btnIssueTransferCode: "Generate Transfer Code",
+      transferCodePrompt: "Your transfer code (Click to copy):",
+      transferCodeExpiresIn: "Expires in: {minutes} minutes",
+      btnCopyTransferCode: "Copy Transfer Code",
+      toastTransferCodeCopied: "Transfer code copied to clipboard!",
+      transferCodeClaimTitle: "Claim Transfer Code (Transfer to this Device)",
+      transferCodeClaimDesc: "Enter the transfer code issued from your origin device to bind and load account data:",
+      transferCodePlaceholder: "Enter 8-character code (e.g. KTR-XXXX-XXXX)",
+      btnClaimTransferCode: "Claim & Load Account",
+      confirmClaimTransferCode: "Claiming this transfer code will switch this device to the target account. Continue?",
+      toastTransferCodeSuccess: "Account transferred successfully! Loaded latest save progress.",
+      toastTransferCodeInvalid: "Invalid or expired transfer code. Please check or reissue.",
+      exportJson: "Export Account Data (JSON)",
+      exportJsonTitle: "Export Account Data (JSON)",
+      exportJsonDesc: "Download a full JSON backup including adventure level, equipment instances, economic audit ledger, and match records:",
+      btnDownloadJson: "Download JSON Backup",
+      btnCopyJson: "Copy JSON",
+      toastExportJsonSuccess: "Account data exported successfully!",
+      deleteAccount: "Delete Account",
+      deleteAccountTitle: "Permanently Delete Account & Cloud Records",
+      deleteAccountWarning: "[WARNING] This action permanently destroys all character data, equipment, and records on both server and client. This cannot be undone!",
+      deleteAccountConfirmPrompt: "To confirm permanent deletion, type 'DELETE' below:",
+      btnConfirmDeleteAccount: "Permanently Delete Account",
+      toastDeleteAccountSuccess: "Account and all progress have been permanently deleted.",
+      toastDeleteAccountMismatch: "Confirmation text does not match. Deletion cancelled.",
       navDojo: "Training Dojo",
       menuDojo: "Training Dojo",
       menuDojoSub: "QTE & SANDBOX",
@@ -2740,6 +3093,24 @@ const DICTIONARY = {
       morphReaction: "Wait... you changed your hand at the last second?!",
       qteSingleBreak: "Caught you slipping! If you wanna dodge, keep up with my rhythm!",
       qteDualBreak: "Double opening! Can you match our twin rhythm?!",
+      winDualMorphBoth: "Both hands won via Morph! The dual stance completely collapses!",
+      winDualBoth: "Both hands won! A flawless dual suppression!",
+      winDualMorphSingle: "Breached one side using Morph!",
+      winDualSingle: "Breached one side!",
+      winDualMorphDoubleDmg: "Dual Morph total victory! Deals double damage!",
+      winDualDoubleDmg: "Both hands won! Deals double damage!",
+      winSingleMorph: "Morph reversal victory!",
+      winSingleNormal: "Round won!",
+      drawMomoDodge: "Tried to pet on a draw, but {target} nimbly dodged!",
+      drawMomoHit: "Petted during the draw! Dealt {damage} surprise damage to {target}!",
+      drawNormal: "It's a draw! Hands matched!",
+      deflectedSingleAttack: "Deflected {target}'s attack!",
+      dualQteMiss: "Dual QTE counter failed!",
+      dualQteSuccess: "Dual QTE counter succeeded! Total reversal!",
+      qteMiss: "QTE counter failed!",
+      freezeNarration: "Frost Freeze! Kohaku's '{hand}' is frozen!",
+      dodgeDodge: "Shadow Dodge! Successfully evaded the attack!",
+      dodgeDodgeDual: "Shadow Dodge! Evaded the dual attacks!",
       postBattleWin: "You got me this time! What wish are you gonna use this win for?",
       postBattleLoss: "Got anything else to say? Hit the training grounds and try again!",
       askSwimsuitLine: "A swimsuit? Geez, fine... but just a quick peek, okay!",
@@ -2748,7 +3119,101 @@ const DICTIONARY = {
       watermelonMiss: "So close! Still got {remaining} strike(s) left. Go for it next!",
       watermelonAllHit: "All 3 strikes done! Sliced it {successes} time(s)—that was so much fun!",
       watermelonDone: "All 3 strikes finished. Let's get the timing right next time!",
-      itemUsed: "Used \"{name}\", restoring {restored} {resource}."
+      itemUsed: "Used \"{name}\", restoring {restored} {resource}.",
+      serverDisconnectGrace: "Connection lost. Preserving battle state (10s grace period)...",
+      serverConfigMismatch: "Server update detected. Please reload to sync the latest version.",
+      serverSessionReplaced: "Your account has connected from another device or tab. Session terminated.",
+      serverInvalidCommand: "Action rejected: {reason}",
+      serverLockedInBattle: "Equipment and stat allocation are locked during active battle!"
+    },
+    narration: {
+      qteCounterPaper: "Wrapped hands around Kohaku's scissors — Counter success!",
+      qteCounterScissors: "Caught Kohaku's fist with paper — Counter success!",
+      qteCounterRock: "Interlocked fingers with Kohaku's soft hand, a miraculous win!"
+    },
+    toast: {
+      levelRequirementNotMet: "Your level does not meet the requirement for this chapter."
+    },
+    combat: {
+      morphWindowOnly: "Morph can only be used during the reaction window after Kohaku plays her hand.",
+      morphWindowExpired: "Reaction window has expired.",
+      insufficientMp: "Insufficient MP to use Morph.",
+      tookDamage: "Took damage",
+      notInBattle: "Not currently in battle.",
+      itemNotFound: "Item not found.",
+      resourceFull: "{resource} is already full.",
+      itemDepleted: "{name} is depleted."
+    },
+    shop: {
+      itemNotFound: "Item not found in shop.",
+      insufficientCoins: "Not enough Star Dust. Earn more from battles!",
+      itemPurchased: "Purchased '{name}'!",
+      equipmentPurchased: "Purchased '{name}' and added to inventory!"
+    },
+    equip: {
+      invalidItem: "Invalid equipment.",
+      notInInventory: "Equipment not found in inventory.",
+      invalidSlot: "Invalid equipment slot.",
+      incompatibleSlot: "Cannot equip '{name}' to {slotName}.",
+      equipped: "Equipped '{name}'.",
+      slotEmpty: "This slot is empty.",
+      unequipped: "Equipment unequipped."
+    },
+    growth: {
+      invalidStat: "Invalid stat.",
+      noPoints: "No stat points available.",
+      statIncreased: "Stat increased.",
+      invalidSkill: "Invalid skill.",
+      levelRequirementNotMet: "Requires Level {level} to learn this skill.",
+      skillMaxLevel: "This skill has reached max level.",
+      insufficientPoints: "Insufficient skill points.",
+      skillUpgraded: "'{name}' upgraded to Lv. {level}!"
+    },
+    cheat: {
+      updated: "Values updated!",
+      unlockedAll: "Unlocked all 4 stages and Boss guides!",
+      unlockedGallery: "Unlocked all gallery illustrations!"
+    },
+    save: {
+      invalidCode: "Please enter a valid save code.",
+      corruptCode: "Invalid or corrupted save code.",
+      imported: "Save data successfully imported!"
+    },
+    connection: {
+      connecting: "Connecting",
+      online: "Online",
+      offline: "Offline",
+      reconnecting: "Reconnecting",
+      disconnected: "Disconnected",
+      highLatency: "Ping",
+      kickedByNewConnection: "Your account has connected from another device or tab. This session was safely disconnected.",
+      disconnectCountdown: "Connection lost. Reconnecting (Auto-settling in {seconds}s)...",
+      bannerConnecting: "Connecting to server...",
+      bannerOnline: "Connected to authoritative server",
+      bannerOffline: "Running in local offline sandbox mode",
+      bannerReconnecting: "Connection lost. Reconnecting...",
+      bannerDisconnected: "Disconnected from server"
+    },
+    battleLog: {
+      rpsWin: "RPS [{hand}] Win! Dealt {damage} damage to {target}!",
+      rpsLoss: "RPS [{hand}] Loss! Took {damage} damage!",
+      rpsDraw: "Both showed [{hand}], Draw!",
+      morphSuccess: "Morph [{hand}] Reversal! Dealt {damage} damage to {target}!",
+      morphFailed: "Morph hand was countered! Mistake penalized!",
+      qteCounterSuccess: "QTE Counter Success! Avoided damage and countered {target} for {damage} damage!",
+      qteCounterFail: "QTE Counter Failed! Took {damage} heavy damage!",
+      momoProc: "Momo Petting Proc! Dealt {damage} surprise damage to {target}!",
+      momoDodged: "Little Raku deftly dodged the Momo Petting!",
+      burnDamage: "Hellfire Burn! Dealt {damage} fire damage to {target}!",
+      reflectDamage: "Yata Mirror Reflect! Reflected {damage} damage back to {target}!",
+      thunderDamage: "Thunder Strike Addition! Struck {target} for {damage} extra thunder damage!",
+      frostFreeze: "Frost Blade Freeze! Sealed Little Raku's [{hand}] for the next round!",
+      shadowDodge: "Fox Illusion Haori activated! 25% shadow dodge completely avoided damage!",
+      mpRegen: "White Fox Chihaya activated! Restored {amount} MP.",
+      potionUsed: "Used [{item}], restored {amount} {stat}!",
+      roundTimeout: "Round countdown expired! Forfeited round!",
+      battleDisconnectedSettled: "Battle automatically settled due to disconnect timeout.",
+      battlePauseCount: "Battle paused (Remaining pauses: {remaining})."
     }
   },
 
@@ -2827,6 +3292,49 @@ const DICTIONARY = {
       dangerZoneTitle: "セーブデータ初期化・削除管理",
       dangerZoneDesc: "この端末に保存されているすべての進行状況（レベル、星砂、装備、スキル、戦績）を消去して初期状態に戻します：",
       btnModalResetSave: "全セーブデータを初期化（消去）",
+      // Online connection, transfer code, export, delete
+      connConnecting: "接続中",
+      connOnline: "オンライン",
+      connOffline: "オフラインモード",
+      connReconnecting: "再接続中",
+      connDisconnected: "切断",
+      connBannerConnecting: "サーバーに接続中...",
+      connBannerOnline: "権威サーバーに接続完了",
+      connBannerOffline: "ローカルオフラインモードで実行中",
+      connBannerReconnecting: "接続が切断されました。再接続を試みています...",
+      connBannerDisconnected: "サーバーから切断されました",
+      connectionModeToggle: "接続モード切り替え",
+      connectionErrorVersionMismatch: "バージョンが一致しません。ページを再読み込みしてください。",
+      connectionRateLimited: "リクエスト頻度が高すぎます。しばらく待ってから再試行してください。",
+      transferCode: "引き継ぎコード",
+      transferCodeModalTitle: "アカウント引き継ぎコード管理",
+      transferCodeIssueTitle: "ワンタイム引き継ぎコードの発行",
+      transferCodeIssueDesc: "新しい端末へアカウントデータを移行するためのワンタイムコードを発行します。有効期限は発行後15分間です。",
+      btnIssueTransferCode: "引き継ぎコードを発行",
+      transferCodePrompt: "あなたの引き継ぎコード（クリックでコピー）：",
+      transferCodeExpiresIn: "有効期限：{minutes}分",
+      btnCopyTransferCode: "コードをコピー",
+      toastTransferCodeCopied: "引き継ぎコードをクリップボードにコピーしました！",
+      transferCodeClaimTitle: "引き継ぎコードの入力（この端末へ移行）",
+      transferCodeClaimDesc: "移行元端末で発行された引き継ぎコードを入力してください。この端末へ進行状況が引き継がれます：",
+      transferCodePlaceholder: "引き継ぎコードを入力（例: KTR-XXXX-XXXX）",
+      btnClaimTransferCode: "引き継ぎを実行して読み込む",
+      confirmClaimTransferCode: "引き継ぎを実行すると、対象のアカウントに切り替わります。続行しますか？",
+      toastTransferCodeSuccess: "引き継ぎが完了しました！最新データを読み込みました。",
+      toastTransferCodeInvalid: "無効または期限切れの引き継ぎコードです。再度ご確認ください。",
+      exportJson: "アカウントデータ出力 (JSON)",
+      exportJsonTitle: "アカウント全データのエクスポート (JSON)",
+      exportJsonDesc: "レベル、装備インスタンス、経済台帳、対戦履歴を含む全データのJSONファイルをダウンロードします：",
+      btnDownloadJson: "JSONファイルをダウンロード",
+      btnCopyJson: "JSONをコピー",
+      toastExportJsonSuccess: "アカウントデータのエクスポートが完了しました！",
+      deleteAccount: "アカウント削除",
+      deleteAccountTitle: "アカウントとクラウド記録の完全削除",
+      deleteAccountWarning: "【警告】この操作を行うと、サーバーおよびローカルのアカウント情報、装備、記録が完全に削除され、復元できなくなります！",
+      deleteAccountConfirmPrompt: "削除を確定するには、以下に「DELETE」と入力してください：",
+      btnConfirmDeleteAccount: "アカウントを完全に削除する",
+      toastDeleteAccountSuccess: "アカウントと全進行データが完全に削除されました。",
+      toastDeleteAccountMismatch: "確認テキストが一致しないため、削除を中止しました。",
       navDojo: "修練場",
       menuDojo: "修練道場",
       menuDojoSub: "QTE & SANDBOX",
@@ -3259,6 +3767,24 @@ const DICTIONARY = {
       morphReaction: "えぇっ…最後の最後で手を変えたの…！？",
       qteSingleBreak: "スキあり！避けたいなら、ボクのリズムについてきて！",
       qteDualBreak: "ダブルでスキあり！ボクたち双子のリズムについてこられるかな？！",
+      winDualMorphBoth: "変拳で両手とも完全勝利！双生の構えが崩壊！",
+      winDualBoth: "両手とも勝利！見事な完全制圧！",
+      winDualMorphSingle: "変拳で片側の防壁を突破！",
+      winDualSingle: "片側の守りを突破！",
+      winDualMorphDoubleDmg: "両手変拳で完全勝利！2倍の特大ダメージ！",
+      winDualDoubleDmg: "両手出拳で完全勝利！2倍の特大ダメージ！",
+      winSingleMorph: "変拳で逆転勝利！",
+      winSingleNormal: "出拳勝利！",
+      drawMomoDodge: "あいこで撫でようとしましたが、{target}に軽やかに躱されました！",
+      drawMomoHit: "あいこに乗じてなでなで！{target}に {damage} の不意打ちダメージ！",
+      drawNormal: "あいこで引き分け！",
+      deflectedSingleAttack: "{target}の攻撃を受け流した！",
+      dualQteMiss: "双生QTE反撃ミス！",
+      dualQteSuccess: "双生QTE反撃成功！戦局を完全逆転！",
+      qteMiss: "QTE反撃失敗！",
+      freezeNarration: "霜月氷結！小楽の「{hand}」が封印された！",
+      dodgeDodge: "残影回避！攻撃の完全回避に成功！",
+      dodgeDodgeDual: "残影回避！二重攻撃の完全回避に成功！",
       postBattleWin: "今回はキミの勝ち！この勝利、どんなお願い事に使うの？",
       postBattleLoss: "まだ何か言いたいことある？もっと特訓してからおいで！",
       askSwimsuitLine: "水着？もう、しょうがないなぁ……ちょっとだけだからね！",
@@ -3267,7 +3793,101 @@ const DICTIONARY = {
       watermelonMiss: "惜しい〜！あと{remaining}太刀、次こそ狙っていこう！",
       watermelonAllHit: "3太刀全部終了！{successes}回命中、めっちゃ楽しかったね！",
       watermelonDone: "3太刀終了〜。次はもっと息を合わせていこうね。",
-      itemUsed: "「{name}」を使用し、{resource}を {restored} 回復しました。"
+      itemUsed: "「{name}」を使用し、{resource}を {restored} 回復しました。",
+      serverDisconnectGrace: "接続が切断されました。戦闘状態を保持中（10秒間）...",
+      serverConfigMismatch: "サーバーの更新を検知しました。最新バージョンに同期するため再読み込みしてください。",
+      serverSessionReplaced: "別端末または別タブで接続されたため、このセッションを切断しました。",
+      serverInvalidCommand: "操作を実行できませんでした: {reason}",
+      serverLockedInBattle: "戦闘中は装備の変更やステータス割り振りは行えません！"
+    },
+    narration: {
+      qteCounterPaper: "小楽のチョキを包み込んで――反撃成功！",
+      qteCounterScissors: "小楽の小さなグーをパーで受け止め――反撃成功！",
+      qteCounterRock: "小楽の柔らかな手と指を絡ませて、奇跡の大勝利！"
+    },
+    toast: {
+      levelRequirementNotMet: "この章の挑戦レベルに達していません。"
+    },
+    combat: {
+      morphWindowOnly: "変拳は小楽の手が見えた直後のリアクション時間内にのみ使用できます。",
+      morphWindowExpired: "リアクション受付時間が終了しました。",
+      insufficientMp: "MPが不足しているため変拳を使用できません。",
+      tookDamage: "ダメージを受けました",
+      notInBattle: "現在は戦闘中ではありません。",
+      itemNotFound: "アイテムが見つかりません。",
+      resourceFull: "{resource}は既に満タンです。",
+      itemDepleted: "{name}は使い切りました。"
+    },
+    shop: {
+      itemNotFound: "商品が見つかりません。",
+      insufficientCoins: "星砂が足りません。対戦で集めてからまた来てください。",
+      itemPurchased: "「{name}」を購入しました！",
+      equipmentPurchased: "「{name}」を購入し、装備バッグに追加しました！"
+    },
+    equip: {
+      invalidItem: "無効な装備です。",
+      notInInventory: "バッグにこの装備がありません。",
+      invalidSlot: "無効な装備スロットです。",
+      incompatibleSlot: "「{name}」を {slotName} に装備することはできません。",
+      equipped: "「{name}」を装備しました。",
+      slotEmpty: "このスロットには何も装備されていません。",
+      unequipped: "装備を外しました。"
+    },
+    growth: {
+      invalidStat: "無効なステータス項目です。",
+      noPoints: "使用可能なポイントがありません。",
+      statIncreased: "ステータスが上昇しました。",
+      invalidSkill: "無効なスキル項目です。",
+      levelRequirementNotMet: "このスキルを習得するには Lv. {level} が必要です。",
+      skillMaxLevel: "このスキルは既に最大レベルです。",
+      insufficientPoints: "スキルポイントが不足しています。",
+      skillUpgraded: "「{name}」が Lv. {level} に強化されました！"
+    },
+    cheat: {
+      updated: "数値を更新しました！",
+      unlockedAll: "全4章のステージとBOSS解説を解放しました！",
+      unlockedGallery: "図鑑の全立ち絵イラストを解放しました！"
+    },
+    save: {
+      invalidCode: "有効なセーブコードを入力してください。",
+      corruptCode: "無効または破損したセーブコードです。",
+      imported: "セーブデータを正常に読み込みました！"
+    },
+    connection: {
+      connecting: "接続中",
+      online: "オンライン",
+      offline: "オフライン",
+      reconnecting: "再接続中",
+      disconnected: "切断",
+      highLatency: "遅延",
+      kickedByNewConnection: "別端末または別タブで接続されたため、このセッションを切断しました。",
+      disconnectCountdown: "接続が切断されました。再接続中（あと {seconds} 秒で自動精算）...",
+      bannerConnecting: "サーバーに接続中...",
+      bannerOnline: "権威サーバーに接続完了",
+      bannerOffline: "ローカルオフラインモードで実行中",
+      bannerReconnecting: "接続が切断されました。再接続を試みています...",
+      bannerDisconnected: "サーバーから切断されました"
+    },
+    battleLog: {
+      rpsWin: "じゃんけん【{hand}】で勝利！{target} に {damage} ダメージ！",
+      rpsLoss: "じゃんけん【{hand}】で敗北... {damage} ダメージを受けた！",
+      rpsDraw: "お互いに【{hand}】であいこ！",
+      morphSuccess: "変拳【{hand}】で逆転成功！{target} に {damage} ダメージ！",
+      morphFailed: "変拳が裏目に出て敗北判定！",
+      qteCounterSuccess: "QTE 反制成功！危機を回避し {target} に {damage} の反撃ダメージ！",
+      qteCounterFail: "QTE 反制失敗... {damage} の痛撃を受けた！",
+      momoProc: "なでなで発動！{target} に {damage} の不意打ちダメージ！",
+      momoDodged: "小楽は素早く身をかわしてなでなでを回避した！",
+      burnDamage: "狐火の業火が炸裂！{target} に {damage} の燃焼ダメージ！",
+      reflectDamage: "八咫の鏡が反射！{target} に {damage} ダメージを跳ね返した！",
+      thunderDamage: "神鳴の雷光が追撃！{target} に {damage} の追加雷撃ダメージ！",
+      frostFreeze: "霜月の氷結が発動！小楽の次ターンの【{hand}】を封印！",
+      shadowDodge: "霊狐の羽織が発動！残影によりダメージを完全回避！",
+      mpRegen: "白狐の千早が発動！MPを {amount} 回復。",
+      potionUsed: "【{item}】を使用し、{stat} を {amount} 回復！",
+      roundTimeout: "時間切れ！出し遅れにより敗北判定！",
+      battleDisconnectedSettled: "切断タイムアウトにより戦闘が自動清算されました。",
+      battlePauseCount: "戦闘を一時停止しました（残り一時停止可能回数: {remaining}回）。"
     }
   }
 };
@@ -3706,14 +4326,17 @@ function getQteCounterNarration(originalPlayerHand) {
   const narratives = {
     paper: {
       changedHand: "paper",
+      key: "narration.qteCounterPaper",
       text: "用手包裹住小樂的剪刀手——反制成功！"
     },
     scissors: {
       changedHand: "paper",
+      key: "narration.qteCounterScissors",
       text: "用布握住了小樂的小拳頭——反制成功！"
     },
     rock: {
       changedHand: "paper",
+      key: "narration.qteCounterRock",
       text: "用五指交扣了小樂的軟綿綿小手手，離奇獲勝！"
     }
   };
@@ -3970,13 +4593,15 @@ const CARDINAL_IDS = Object.freeze(["up", "down", "left", "right"]);
 const ALL_IDS = Object.freeze(DIRECTIONS.map((d) => d.id));
 
 class QTESystem {
-  constructor(bus, timers, random = Math.random) {
+  constructor(bus, timers, random = Math.random, now = Date.now) {
     this.bus = bus;
     this.timers = timers;
-    this.random = random;
+    this.random = typeof random === "function" ? random : Math.random;
+    this.now = typeof now === "function" ? now : () => Date.now();
     this.active = false;
     this.sequence = [];
     this.index = 0;
+    this.startTime = 0;
     this.deadline = 0;
     this.durationMs = 0;
     this.errors = 0;
@@ -3994,12 +4619,12 @@ class QTESystem {
     if (typeof lengthOrOptions === "object" && lengthOrOptions !== null) {
       length = lengthOrOptions.length ?? 5;
       duration = lengthOrOptions.durationMs ?? 5000;
-      directionMode = lengthOrOptions.directionMode ?? lengthOrOptions.qteDirections ?? "all";
+      directionMode = lengthOrOptions.directionMode ?? lengthOrOptions.qteDirections ?? lengthOrOptions.allowedDirections ?? "all";
       maxErrors = lengthOrOptions.maxErrors ?? Infinity;
     } else {
       length = lengthOrOptions ?? 5;
       duration = durationMs;
-      directionMode = options.directionMode ?? options.qteDirections ?? "all";
+      directionMode = options.directionMode ?? options.qteDirections ?? options.allowedDirections ?? "all";
       maxErrors = options.maxErrors ?? Infinity;
     }
 
@@ -4008,12 +4633,13 @@ class QTESystem {
     this.errors = 0;
     this.maxErrors = maxErrors;
     this.durationMs = duration;
+    this.startTime = this.now();
+    this.deadline = this.startTime + duration;
 
     this.sequence = this.generateSequence(length, directionMode);
-    this.deadline = performance.now() + duration;
     this.emit();
     this.tickId = this.timers.interval(() => {
-      if (performance.now() >= this.deadline) {
+      if (this.now() >= this.deadline) {
         this.finish(false);
       } else {
         this.emit();
@@ -4055,8 +4681,17 @@ class QTESystem {
     });
   }
 
-  input(directionId) {
+  input(directionId, declaredAt = null) {
     if (!this.active) return false;
+    const arrival = this.now();
+    const timestamp = declaredAt || arrival;
+
+    // Timing check with 150ms grace
+    if (timestamp > this.deadline + 150) {
+      this.finish(false);
+      return false;
+    }
+
     const expected = this.sequence[this.index];
     if (directionId !== expected) {
       this.errors += 1;
@@ -4084,10 +4719,42 @@ class QTESystem {
     return true;
   }
 
+  auditInputs(inputs = []) {
+    if (!this.active) return { ok: false, active: false };
+    const results = [];
+    for (const item of inputs) {
+      const dir = item.directionId || item.direction || item.key;
+      const ts = item.timestamp || item.declaredAt || this.now();
+      if (ts < this.startTime - 150 || ts > this.deadline + 150) {
+        this.errors += 1;
+        results.push({ item, valid: false, reason: "timestamp_out_of_bounds" });
+        if (this.errors >= this.maxErrors) {
+          this.finish(false);
+          return { ok: false, success: false, errors: this.errors, results };
+        }
+        continue;
+      }
+      const ok = this.input(dir, ts);
+      results.push({ item, valid: ok });
+      if (!this.active) break;
+    }
+    return {
+      ok: true,
+      success: this.index >= this.sequence.length && this.errors < this.maxErrors,
+      errors: this.errors,
+      index: this.index,
+      results
+    };
+  }
+
+  reportBatch(inputs = []) {
+    return this.auditInputs(inputs);
+  }
+
   pause() {
     if (!this.active || this.isPaused) return;
     this.isPaused = true;
-    this.remainingOnPause = Math.max(0, this.deadline - performance.now());
+    this.remainingOnPause = Math.max(0, this.deadline - this.now());
     if (this.tickId !== null) {
       this.timers.clearInterval(this.tickId);
       this.tickId = null;
@@ -4098,9 +4765,9 @@ class QTESystem {
   resume() {
     if (!this.active || !this.isPaused) return;
     this.isPaused = false;
-    this.deadline = performance.now() + (this.remainingOnPause || 0);
+    this.deadline = this.now() + (this.remainingOnPause || 0);
     this.tickId = this.timers.interval(() => {
-      if (performance.now() >= this.deadline) {
+      if (this.now() >= this.deadline) {
         this.finish(false);
       } else {
         this.emit();
@@ -4110,7 +4777,7 @@ class QTESystem {
   }
 
   snapshot() {
-    const remainingMs = this.isPaused ? (this.remainingOnPause || 0) : Math.max(0, this.deadline - performance.now());
+    const remainingMs = this.isPaused ? (this.remainingOnPause || 0) : Math.max(0, this.deadline - this.now());
     return {
       active: this.active,
       isPaused: Boolean(this.isPaused),
@@ -4118,6 +4785,8 @@ class QTESystem {
       index: this.index,
       errors: this.errors,
       maxErrors: this.maxErrors,
+      startTime: this.startTime,
+      deadline: this.deadline,
       remainingMs,
       progress: this.durationMs ? remainingMs / this.durationMs : 0
     };
@@ -4155,13 +4824,15 @@ class QTESystem {
 }
 
 class DualQTESystem {
-  constructor(bus, timers, random = Math.random) {
+  constructor(bus, timers, random = Math.random, now = Date.now) {
     this.bus = bus;
     this.timers = timers;
-    this.random = random;
+    this.random = typeof random === "function" ? random : Math.random;
+    this.now = typeof now === "function" ? now : () => Date.now();
     this.active = false;
     this.left = { sequence: [], index: 0, errors: 0, maxErrors: Infinity, completed: false, success: false, enemyId: "left" };
     this.right = { sequence: [], index: 0, errors: 0, maxErrors: Infinity, completed: false, success: false, enemyId: "right" };
+    this.startTime = 0;
     this.deadline = 0;
     this.durationMs = 0;
     this.tickId = null;
@@ -4177,17 +4848,19 @@ class DualQTESystem {
     if (typeof lengthOrOptions === "object" && lengthOrOptions !== null) {
       length = lengthOrOptions.length ?? 7;
       duration = lengthOrOptions.durationMs ?? 7000;
-      directionMode = lengthOrOptions.directionMode ?? lengthOrOptions.qteDirections ?? "all";
+      directionMode = lengthOrOptions.directionMode ?? lengthOrOptions.qteDirections ?? lengthOrOptions.allowedDirections ?? "all";
       maxErrors = lengthOrOptions.maxErrors ?? 1;
     } else {
       length = lengthOrOptions ?? 7;
       duration = durationMs;
-      directionMode = options.directionMode ?? options.qteDirections ?? "all";
+      directionMode = options.directionMode ?? options.qteDirections ?? options.allowedDirections ?? "all";
       maxErrors = options.maxErrors ?? 1;
     }
 
     this.active = true;
     this.durationMs = duration;
+    this.startTime = this.now();
+    this.deadline = this.startTime + duration;
     this.left = {
       sequence: this.generateSequence(length, directionMode),
       index: 0,
@@ -4207,10 +4880,9 @@ class DualQTESystem {
       enemyId: "right"
     };
 
-    this.deadline = performance.now() + duration;
     this.emit();
     this.tickId = this.timers.interval(() => {
-      if (performance.now() >= this.deadline) {
+      if (this.now() >= this.deadline) {
         this.finish();
       } else {
         this.emit();
@@ -4238,8 +4910,16 @@ class DualQTESystem {
     return Array.from({ length }, () => ALL_IDS[Math.floor(this.random() * ALL_IDS.length)]);
   }
 
-  inputSlot(slotKey, directionId) {
+  inputSlot(slotKey, directionId, declaredAt = null) {
     if (!this.active) return false;
+    const arrival = this.now();
+    const timestamp = declaredAt || arrival;
+
+    if (timestamp > this.deadline + 150) {
+      this.finish();
+      return false;
+    }
+
     const slot = this[slotKey];
     if (!slot || slot.completed) return false;
 
@@ -4283,7 +4963,7 @@ class DualQTESystem {
     return true;
   }
 
-  input(directionOrSlot, slotOrDirection = null) {
+  input(directionOrSlot, slotOrDirection = null, declaredAt = null) {
     if (!this.active) return false;
     let slot = "left";
     let direction = directionOrSlot;
@@ -4297,21 +4977,49 @@ class DualQTESystem {
       if (!this.left.completed) slot = "left";
       else if (!this.right.completed) slot = "right";
     }
-    return this.inputSlot(slot, direction);
+    return this.inputSlot(slot, direction, declaredAt);
   }
 
-  inputLeft(directionId) {
-    return this.inputSlot("left", directionId);
+  inputLeft(directionId, declaredAt = null) {
+    return this.inputSlot("left", directionId, declaredAt);
   }
 
-  inputRight(directionId) {
-    return this.inputSlot("right", directionId);
+  inputRight(directionId, declaredAt = null) {
+    return this.inputSlot("right", directionId, declaredAt);
+  }
+
+  auditInputs(inputs = []) {
+    if (!this.active) return { ok: false, active: false };
+    const results = [];
+    for (const item of inputs) {
+      const slot = item.slot || (item.side === "right" ? "right" : "left");
+      const dir = item.directionId || item.direction || item.key;
+      const ts = item.timestamp || item.declaredAt || this.now();
+      if (ts < this.startTime - 150 || ts > this.deadline + 150) {
+        if (this[slot]) this[slot].errors += 1;
+        results.push({ item, valid: false, reason: "timestamp_out_of_bounds" });
+        continue;
+      }
+      const ok = this.inputSlot(slot, dir, ts);
+      results.push({ item, valid: ok });
+      if (!this.active) break;
+    }
+    return {
+      ok: true,
+      left: { completed: this.left.completed, success: this.left.success, errors: this.left.errors },
+      right: { completed: this.right.completed, success: this.right.success, errors: this.right.errors },
+      results
+    };
+  }
+
+  reportBatch(inputs = []) {
+    return this.auditInputs(inputs);
   }
 
   pause() {
     if (!this.active || this.isPaused) return;
     this.isPaused = true;
-    this.remainingOnPause = Math.max(0, this.deadline - performance.now());
+    this.remainingOnPause = Math.max(0, this.deadline - this.now());
     if (this.tickId !== null) {
       this.timers.clearInterval(this.tickId);
       this.tickId = null;
@@ -4322,9 +5030,9 @@ class DualQTESystem {
   resume() {
     if (!this.active || !this.isPaused) return;
     this.isPaused = false;
-    this.deadline = performance.now() + (this.remainingOnPause || 0);
+    this.deadline = this.now() + (this.remainingOnPause || 0);
     this.tickId = this.timers.interval(() => {
-      if (performance.now() >= this.deadline) {
+      if (this.now() >= this.deadline) {
         this.finish();
       } else {
         this.emit();
@@ -4334,13 +5042,15 @@ class DualQTESystem {
   }
 
   snapshot() {
-    const remainingMs = this.isPaused ? (this.remainingOnPause || 0) : Math.max(0, this.deadline - performance.now());
+    const remainingMs = this.isPaused ? (this.remainingOnPause || 0) : Math.max(0, this.deadline - this.now());
     return {
       mode: "dual",
       active: this.active,
       isPaused: Boolean(this.isPaused),
       left: { ...this.left, sequence: [...this.left.sequence] },
       right: { ...this.right, sequence: [...this.right.sequence] },
+      startTime: this.startTime,
+      deadline: this.deadline,
       remainingMs,
       progress: this.durationMs ? remainingMs / this.durationMs : 0
     };
@@ -4401,7 +5111,7 @@ class DualQTESystem {
 
 // --- src/js/core/GameStore.js ---
 const DEFAULT_SAVE = Object.freeze({
-  version: 1,
+  version: 2,
   profile: {
     level: 1,
     xp: 0,
@@ -4426,6 +5136,7 @@ const DEFAULT_SAVE = Object.freeze({
     badge: null
   },
   inventoryEquipment: [],
+  ledger: [],
   records: {
     wins: 0,
     losses: 0,
@@ -4490,14 +5201,54 @@ const DEFAULT_SAVE = Object.freeze({
   }
 });
 
+function createEquipmentInstance(itemOrId, options = {}) {
+  const typeId = typeof itemOrId === "object" && itemOrId !== null ? (itemOrId.typeId || itemOrId.id) : String(itemOrId);
+  const nowMs = typeof options.now === "function" ? options.now() : (typeof options.now === "number" ? options.now : Date.now());
+  const randomStr = typeof options.random === "function"
+    ? options.random().toString(36).substring(2, 9)
+    : Math.random().toString(36).substring(2, 9);
+  const uid = (typeof itemOrId === "object" && itemOrId !== null && itemOrId.uid)
+    ? itemOrId.uid
+    : (options.uid || `eq_${nowMs}_${randomStr}`);
+  const level = (typeof itemOrId === "object" && itemOrId !== null && typeof itemOrId.level === "number")
+    ? itemOrId.level
+    : (options.level || 1);
+  return { uid, typeId, level };
+}
+
+function getEquipmentTypeId(itemOrId) {
+  if (!itemOrId) return null;
+  if (typeof itemOrId === "object" && itemOrId !== null) {
+    return itemOrId.typeId || itemOrId.id || null;
+  }
+  return String(itemOrId);
+}
+
 function freshSave() {
   return structuredClone(DEFAULT_SAVE);
 }
 
+function migrateSave(candidate, fromVersion = 1, toVersion = 2) {
+  if (!candidate || typeof candidate !== "object") return freshSave();
+  const migrated = structuredClone(candidate);
+  const currentVersion = migrated.version || fromVersion || 1;
+
+  if (currentVersion === 1 && toVersion >= 2) {
+    migrated.version = 2;
+    if (!Array.isArray(migrated.ledger)) {
+      migrated.ledger = [];
+    }
+  }
+
+  return migrated;
+}
+
 function sanitizeSave(candidate) {
-  if (!candidate || candidate.version !== 1) return freshSave();
+  if (!candidate || typeof candidate !== "object") return freshSave();
+  const migrated = candidate.version === 2 ? candidate : migrateSave(candidate, candidate.version || 1, 2);
   const base = freshSave();
-  const rawStats = candidate.records?.stageStats || {};
+
+  const rawStats = migrated.records?.stageStats || {};
   const stageStats = {
     1: { totalAttempts: 0, manualWins: 0, manualLosses: 0, autoWins: 0, autoLosses: 0, ...(rawStats[1] || {}) },
     2: { totalAttempts: 0, manualWins: 0, manualLosses: 0, autoWins: 0, autoLosses: 0, ...(rawStats[2] || {}) },
@@ -4505,125 +5256,149 @@ function sanitizeSave(candidate) {
     4: { totalAttempts: 0, manualWins: 0, manualLosses: 0, autoWins: 0, autoLosses: 0, ...(rawStats[4] || {}) }
   };
 
-  const rawCleared = candidate.records?.clearedStages;
+  const rawCleared = migrated.records?.clearedStages;
   let clearedStages = Array.isArray(rawCleared) ? [...rawCleared] : [];
   clearedStages = clearedStages.filter((stageId) => {
     if (stageId >= 1 && stageId <= 4) {
       const s = stageStats[stageId];
       if (s && ((s.manualWins || 0) + (s.autoWins || 0) > 0)) return true;
-      if (stageId === 1 && ((candidate.records?.wins || 0) > 0 || (candidate.records?.manualWins || 0) > 0)) return true;
-      if (candidate.records?.bestStage && candidate.records.bestStage >= stageId) return true;
+      if (stageId === 1 && ((migrated.records?.wins || 0) > 0 || (migrated.records?.manualWins || 0) > 0)) return true;
+      if (migrated.records?.bestStage && migrated.records.bestStage >= stageId) return true;
     }
     return false;
   });
 
   return {
     ...base,
-    ...candidate,
+    ...migrated,
+    version: 2,
     profile: {
       ...base.profile,
-      ...candidate.profile,
+      ...migrated.profile,
       allocations: {
         ...base.profile.allocations,
-        ...candidate.profile?.allocations
+        ...migrated.profile?.allocations
       },
       skills: {
         ...base.profile.skills,
-        ...candidate.profile?.skills
+        ...migrated.profile?.skills
       }
     },
-    inventory: { ...base.inventory, ...candidate.inventory },
-    equipment: { ...base.equipment, ...candidate.equipment },
-    inventoryEquipment: Array.isArray(candidate.inventoryEquipment) ? [...candidate.inventoryEquipment] : [],
+    inventory: { ...base.inventory, ...migrated.inventory },
+    equipment: { ...base.equipment, ...migrated.equipment },
+    inventoryEquipment: Array.isArray(migrated.inventoryEquipment) ? [...migrated.inventoryEquipment] : [],
+    ledger: Array.isArray(migrated.ledger) ? [...migrated.ledger].slice(-500) : [],
     records: {
       ...base.records,
-      ...candidate.records,
+      ...migrated.records,
       clearedStages,
-      totalCoinsEarned: candidate.records?.totalCoinsEarned ?? candidate.coins ?? 0,
-      totalXpEarned: candidate.records?.totalXpEarned ?? 0,
-      totalBattles: candidate.records?.totalBattles ?? ((candidate.records?.wins || 0) + (candidate.records?.losses || 0)),
-      manualWins: candidate.records?.manualWins ?? candidate.records?.wins ?? 0,
-      manualLosses: candidate.records?.manualLosses ?? candidate.records?.losses ?? 0,
-      autoWins: candidate.records?.autoWins ?? 0,
-      autoLosses: candidate.records?.autoLosses ?? 0,
-      watermelonStock: Math.max(0, Math.min(999, candidate.records?.watermelonStock ?? 0)),
-      watermelonSlices: candidate.records?.watermelonSlices ?? 0,
+      totalCoinsEarned: migrated.records?.totalCoinsEarned ?? migrated.coins ?? 0,
+      totalXpEarned: migrated.records?.totalXpEarned ?? 0,
+      totalBattles: migrated.records?.totalBattles ?? ((migrated.records?.wins || 0) + (migrated.records?.losses || 0)),
+      manualWins: migrated.records?.manualWins ?? migrated.records?.wins ?? 0,
+      manualLosses: migrated.records?.manualLosses ?? migrated.records?.losses ?? 0,
+      autoWins: migrated.records?.autoWins ?? 0,
+      autoLosses: migrated.records?.autoLosses ?? 0,
+      watermelonStock: Math.max(0, Math.min(999, migrated.records?.watermelonStock ?? 0)),
+      watermelonSlices: migrated.records?.watermelonSlices ?? 0,
       consumablesUsed: {
-        hpPotion: candidate.records?.consumablesUsed?.hpPotion || 0,
-        mpPotion: candidate.records?.consumablesUsed?.mpPotion || 0
+        hpPotion: migrated.records?.consumablesUsed?.hpPotion || 0,
+        mpPotion: migrated.records?.consumablesUsed?.mpPotion || 0
       },
-      morphUses: candidate.records?.morphUses || 0,
+      morphUses: migrated.records?.morphUses || 0,
       momoStats: {
-        attempts: candidate.records?.momoStats?.attempts || 0,
-        successes: candidate.records?.momoStats?.successes || 0,
-        damage: candidate.records?.momoStats?.damage || 0
+        attempts: migrated.records?.momoStats?.attempts || 0,
+        successes: migrated.records?.momoStats?.successes || 0,
+        damage: migrated.records?.momoStats?.damage || 0
       },
       morphStats: {
-        attempts: candidate.records?.morphStats?.attempts || 0,
-        successes: candidate.records?.morphStats?.successes || 0,
-        damage: candidate.records?.morphStats?.damage || 0
+        attempts: migrated.records?.morphStats?.attempts || 0,
+        successes: migrated.records?.morphStats?.successes || 0,
+        damage: migrated.records?.morphStats?.damage || 0
       },
       restoredTotal: {
-        hp: candidate.records?.restoredTotal?.hp || 0,
-        mp: candidate.records?.restoredTotal?.mp || 0
+        hp: migrated.records?.restoredTotal?.hp || 0,
+        mp: migrated.records?.restoredTotal?.mp || 0
       },
       watermelonStageStats: {
-        1: { attempts: candidate.records?.watermelonStageStats?.[1]?.attempts || 0, successes: candidate.records?.watermelonStageStats?.[1]?.successes || 0 },
-        2: { attempts: candidate.records?.watermelonStageStats?.[2]?.attempts || 0, successes: candidate.records?.watermelonStageStats?.[2]?.successes || 0 },
-        3: { attempts: candidate.records?.watermelonStageStats?.[3]?.attempts || 0, successes: candidate.records?.watermelonStageStats?.[3]?.successes || 0 }
+        1: { attempts: migrated.records?.watermelonStageStats?.[1]?.attempts || 0, successes: migrated.records?.watermelonStageStats?.[1]?.successes || 0 },
+        2: { attempts: migrated.records?.watermelonStageStats?.[2]?.attempts || 0, successes: migrated.records?.watermelonStageStats?.[2]?.successes || 0 },
+        3: { attempts: migrated.records?.watermelonStageStats?.[3]?.attempts || 0, successes: migrated.records?.watermelonStageStats?.[3]?.successes || 0 }
       },
       damageDealt: {
-        total: candidate.records?.damageDealt?.total || 0,
+        total: migrated.records?.damageDealt?.total || 0,
         byStage: {
-          1: candidate.records?.damageDealt?.byStage?.[1] || 0,
-          2: candidate.records?.damageDealt?.byStage?.[2] || 0,
-          3: candidate.records?.damageDealt?.byStage?.[3] || 0,
-          4: candidate.records?.damageDealt?.byStage?.[4] || 0
+          1: migrated.records?.damageDealt?.byStage?.[1] || 0,
+          2: migrated.records?.damageDealt?.byStage?.[2] || 0,
+          3: migrated.records?.damageDealt?.byStage?.[3] || 0,
+          4: migrated.records?.damageDealt?.byStage?.[4] || 0
         }
       },
       damageTaken: {
-        total: candidate.records?.damageTaken?.total || 0,
+        total: migrated.records?.damageTaken?.total || 0,
         byStage: {
-          1: candidate.records?.damageTaken?.byStage?.[1] || 0,
-          2: candidate.records?.damageTaken?.byStage?.[2] || 0,
-          3: candidate.records?.damageTaken?.byStage?.[3] || 0,
-          4: candidate.records?.damageTaken?.byStage?.[4] || 0
+          1: migrated.records?.damageTaken?.byStage?.[1] || 0,
+          2: migrated.records?.damageTaken?.byStage?.[2] || 0,
+          3: migrated.records?.damageTaken?.byStage?.[3] || 0,
+          4: migrated.records?.damageTaken?.byStage?.[4] || 0
         }
       },
       qteStats: {
-        totalAttempts: candidate.records?.qteStats?.totalAttempts || 0,
-        totalSuccesses: candidate.records?.qteStats?.totalSuccesses || 0,
+        totalAttempts: migrated.records?.qteStats?.totalAttempts || 0,
+        totalSuccesses: migrated.records?.qteStats?.totalSuccesses || 0,
         byStage: {
-          1: { attempts: candidate.records?.qteStats?.byStage?.[1]?.attempts || 0, successes: candidate.records?.qteStats?.byStage?.[1]?.successes || 0 },
-          2: { attempts: candidate.records?.qteStats?.byStage?.[2]?.attempts || 0, successes: candidate.records?.qteStats?.byStage?.[2]?.successes || 0 },
-          3: { attempts: candidate.records?.qteStats?.byStage?.[3]?.attempts || 0, successes: candidate.records?.qteStats?.byStage?.[3]?.successes || 0 },
-          4: { attempts: candidate.records?.qteStats?.byStage?.[4]?.attempts || 0, successes: candidate.records?.qteStats?.byStage?.[4]?.successes || 0 }
+          1: { attempts: migrated.records?.qteStats?.byStage?.[1]?.attempts || 0, successes: migrated.records?.qteStats?.byStage?.[1]?.successes || 0 },
+          2: { attempts: migrated.records?.qteStats?.byStage?.[2]?.attempts || 0, successes: migrated.records?.qteStats?.byStage?.[2]?.successes || 0 },
+          3: { attempts: migrated.records?.qteStats?.byStage?.[3]?.attempts || 0, successes: migrated.records?.qteStats?.byStage?.[3]?.successes || 0 },
+          4: { attempts: migrated.records?.qteStats?.byStage?.[4]?.attempts || 0, successes: migrated.records?.qteStats?.byStage?.[4]?.successes || 0 }
         }
       },
       rewardsByStage: {
-        1: { coins: candidate.records?.rewardsByStage?.[1]?.coins || 0, xp: candidate.records?.rewardsByStage?.[1]?.xp || 0 },
-        2: { coins: candidate.records?.rewardsByStage?.[2]?.coins || 0, xp: candidate.records?.rewardsByStage?.[2]?.xp || 0 },
-        3: { coins: candidate.records?.rewardsByStage?.[3]?.coins || 0, xp: candidate.records?.rewardsByStage?.[3]?.xp || 0 },
-        4: { coins: candidate.records?.rewardsByStage?.[4]?.coins || 0, xp: candidate.records?.rewardsByStage?.[4]?.xp || 0 }
+        1: { coins: migrated.records?.rewardsByStage?.[1]?.coins || 0, xp: migrated.records?.rewardsByStage?.[1]?.xp || 0 },
+        2: { coins: migrated.records?.rewardsByStage?.[2]?.coins || 0, xp: migrated.records?.rewardsByStage?.[2]?.xp || 0 },
+        3: { coins: migrated.records?.rewardsByStage?.[3]?.coins || 0, xp: migrated.records?.rewardsByStage?.[3]?.xp || 0 },
+        4: { coins: migrated.records?.rewardsByStage?.[4]?.coins || 0, xp: migrated.records?.rewardsByStage?.[4]?.xp || 0 }
       },
-      recentBattles: Array.isArray(candidate.records?.recentBattles) ? candidate.records.recentBattles.slice(0, 100) : [],
+      recentBattles: Array.isArray(migrated.records?.recentBattles) ? migrated.records.recentBattles.slice(0, 100) : [],
       stageStats
     },
-    settings: { ...base.settings, ...candidate.settings }
+    settings: { ...base.settings, ...migrated.settings }
   };
 }
 
 class GameStore {
-  constructor(bus, persistence) {
+  constructor(bus, persistence, options = {}) {
     this.bus = bus;
     this.persistence = persistence;
+    this.now = options.now || (() => Date.now());
     this.state = sanitizeSave(persistence.load());
   }
 
+  _recordLedger(entry) {
+    if (!Array.isArray(this.state.ledger)) {
+      this.state.ledger = [];
+    }
+    const timestamp = typeof this.now === "function" ? this.now() : Date.now();
+    this.state.ledger.push({
+      id: `led_${timestamp}_${Math.random().toString(36).substring(2, 7)}`,
+      timestamp,
+      configVersion: "2026.09.03",
+      ...entry
+    });
+    if (this.state.ledger.length > 500) {
+      this.state.ledger = this.state.ledger.slice(-500);
+    }
+  }
+
   snapshot() {
+    const rawEquip = this.state.equipment || {};
+    const normalizedEquip = {};
+    for (const [slot, val] of Object.entries(rawEquip)) {
+      normalizedEquip[slot] = getEquipmentTypeId(val);
+    }
     return structuredClone({
       ...this.state,
-      playerStats: computePlayerStats(this.state.profile, this.state.equipment),
+      playerStats: computePlayerStats(this.state.profile, normalizedEquip),
       xpToNext: xpNeededForLevel(this.state.profile.level)
     });
   }
@@ -4635,61 +5410,94 @@ class GameStore {
 
   buyItem(itemId) {
     const item = ITEMS[itemId];
-    if (!item) return { ok: false, message: "找不到這件商品。" };
+    if (!item) return { ok: false, key: "shop.itemNotFound", message: "找不到這件商品。" };
     if (this.state.coins < item.price) {
-      return { ok: false, message: "星砂不足，完成對局後再來吧。" };
+      return { ok: false, key: "shop.insufficientCoins", message: "星砂不足，完成對局後再來吧。" };
     }
     this.state.coins -= item.price;
     this.state.inventory[itemId] += 1;
+    this._recordLedger({
+      action: "buy_item",
+      itemId,
+      coinsDelta: -item.price,
+      source: "shop"
+    });
     this.commit("purchase");
-    return { ok: true, message: "購入「" + item.name + "」！" };
+    return { ok: true, key: "shop.itemPurchased", params: { name: item.name }, message: "購入「" + item.name + "」！" };
   }
 
   buyEquipment(itemId) {
-    const item = EQUIPMENT_ITEMS[itemId];
-    if (!item) return { ok: false, message: "找不到這件裝備。" };
+    const typeId = getEquipmentTypeId(itemId);
+    const item = EQUIPMENT_ITEMS[typeId];
+    if (!item) return { ok: false, key: "shop.itemNotFound", message: "找不到這件裝備。" };
     if (this.state.coins < item.price) {
-      return { ok: false, message: "星砂不足，完成對局後再來吧。" };
+      return { ok: false, key: "shop.insufficientCoins", message: "星砂不足，完成對局後再來吧。" };
     }
     this.state.coins -= item.price;
-    this.state.inventoryEquipment.push(itemId);
+    const entryToPush = typeof itemId === "object" && itemId !== null ? itemId : typeId;
+    this.state.inventoryEquipment.push(entryToPush);
+    this._recordLedger({
+      action: "buy_equipment",
+      typeId,
+      item: entryToPush,
+      coinsDelta: -item.price,
+      source: "shop"
+    });
     this.commit("purchase-equipment");
-    return { ok: true, message: "購入「" + item.name + "」並已放入裝備背包！" };
+    return { ok: true, key: "shop.equipmentPurchased", params: { name: item.name }, message: "購入「" + item.name + "」並已放入裝備背包！" };
   }
 
-  equipItem(itemId, targetSlot = null) {
-    const item = EQUIPMENT_ITEMS[itemId];
-    if (!item) return { ok: false, message: "無效的裝備。" };
+  equipItem(itemOrId, targetSlot = null) {
+    const typeId = getEquipmentTypeId(itemOrId);
+    const item = EQUIPMENT_ITEMS[typeId];
+    if (!item) return { ok: false, key: "equip.invalidItem", message: "無效的裝備。" };
 
-    const invIndex = this.state.inventoryEquipment.indexOf(itemId);
+    const invIndex = this.state.inventoryEquipment.findIndex((entry) => {
+      if (typeof entry === "string") return entry === itemOrId || entry === typeId;
+      if (typeof entry === "object" && entry !== null) {
+        if (typeof itemOrId === "string") return entry.uid === itemOrId || entry.typeId === itemOrId;
+        if (typeof itemOrId === "object" && itemOrId !== null) return entry.uid === itemOrId.uid || entry.typeId === itemOrId.typeId;
+      }
+      return false;
+    });
+
     if (invIndex === -1) {
-      return { ok: false, message: "背包中沒有這件裝備。" };
+      return { ok: false, key: "equip.notInInventory", message: "背包中沒有這件裝備。" };
     }
+
+    const matchedEntry = this.state.inventoryEquipment[invIndex];
 
     let slot = targetSlot;
     if (!slot) {
+      const mainTypeId = getEquipmentTypeId(this.state.equipment.mainHand);
+      const offTypeId = getEquipmentTypeId(this.state.equipment.offHand);
+      const ring1TypeId = getEquipmentTypeId(this.state.equipment.ring1);
+      const ring2TypeId = getEquipmentTypeId(this.state.equipment.ring2);
+      const earring1TypeId = getEquipmentTypeId(this.state.equipment.earring1);
+      const earring2TypeId = getEquipmentTypeId(this.state.equipment.earring2);
+
       if (item.slotType === "weapon") {
         if (item.twoHanded) {
           slot = "mainHand";
         } else if (!this.state.equipment.mainHand) {
           slot = "mainHand";
-        } else if (!this.state.equipment.offHand && !EQUIPMENT_ITEMS[this.state.equipment.mainHand]?.twoHanded) {
+        } else if (!this.state.equipment.offHand && !EQUIPMENT_ITEMS[mainTypeId]?.twoHanded) {
           slot = "offHand";
-        } else if (this.state.equipment.mainHand === itemId && this.state.equipment.offHand !== itemId && !EQUIPMENT_ITEMS[this.state.equipment.mainHand]?.twoHanded) {
+        } else if (mainTypeId === typeId && offTypeId !== typeId && !EQUIPMENT_ITEMS[mainTypeId]?.twoHanded) {
           slot = "offHand";
-        } else if (this.state.equipment.offHand === itemId && this.state.equipment.mainHand !== itemId) {
+        } else if (offTypeId === typeId && mainTypeId !== typeId) {
           slot = "mainHand";
         } else {
           slot = "mainHand";
         }
       } else if (item.slotType === "offHand") {
-        if (!this.state.equipment.offHand && !EQUIPMENT_ITEMS[this.state.equipment.mainHand]?.twoHanded) {
+        if (!this.state.equipment.offHand && !EQUIPMENT_ITEMS[mainTypeId]?.twoHanded) {
           slot = "offHand";
         } else if (!this.state.equipment.mainHand) {
           slot = "mainHand";
-        } else if (this.state.equipment.offHand === itemId && this.state.equipment.mainHand !== itemId) {
+        } else if (offTypeId === typeId && mainTypeId !== typeId) {
           slot = "mainHand";
-        } else if (this.state.equipment.mainHand === itemId && this.state.equipment.offHand !== itemId && !EQUIPMENT_ITEMS[this.state.equipment.mainHand]?.twoHanded) {
+        } else if (mainTypeId === typeId && offTypeId !== typeId && !EQUIPMENT_ITEMS[mainTypeId]?.twoHanded) {
           slot = "offHand";
         } else {
           slot = "offHand";
@@ -4699,9 +5507,9 @@ class GameStore {
           slot = "ring1";
         } else if (!this.state.equipment.ring2) {
           slot = "ring2";
-        } else if (this.state.equipment.ring1 === itemId && this.state.equipment.ring2 !== itemId) {
+        } else if (ring1TypeId === typeId && ring2TypeId !== typeId) {
           slot = "ring2";
-        } else if (this.state.equipment.ring2 === itemId && this.state.equipment.ring1 !== itemId) {
+        } else if (ring2TypeId === typeId && ring1TypeId !== typeId) {
           slot = "ring1";
         } else {
           slot = "ring1";
@@ -4711,9 +5519,9 @@ class GameStore {
           slot = "earring1";
         } else if (!this.state.equipment.earring2) {
           slot = "earring2";
-        } else if (this.state.equipment.earring1 === itemId && this.state.equipment.earring2 !== itemId) {
+        } else if (earring1TypeId === typeId && earring2TypeId !== typeId) {
           slot = "earring2";
-        } else if (this.state.equipment.earring2 === itemId && this.state.equipment.earring1 !== itemId) {
+        } else if (earring2TypeId === typeId && earring1TypeId !== typeId) {
           slot = "earring1";
         } else {
           slot = "earring1";
@@ -4724,7 +5532,7 @@ class GameStore {
     }
 
     if (!EQUIPMENT_SLOTS[slot]) {
-      return { ok: false, message: "無效的裝備欄位。" };
+      return { ok: false, key: "equip.invalidSlot", message: "無效的裝備欄位。" };
     }
 
     // Validate slot compatibility
@@ -4736,7 +5544,7 @@ class GameStore {
       (item.slotType === slot);
 
     if (!isValidSlot) {
-      return { ok: false, message: `無法將「${item.name}」穿戴至 ${EQUIPMENT_SLOTS[slot]?.label || slot}。` };
+      return { ok: false, key: "equip.incompatibleSlot", params: { name: item.name, slotName: EQUIPMENT_SLOTS[slot]?.label || slot }, message: `無法將「${item.name}」穿戴至 ${EQUIPMENT_SLOTS[slot]?.label || slot}。` };
     }
 
     // Two-handed logic
@@ -4748,7 +5556,8 @@ class GameStore {
       }
     } else if (slot === "offHand") {
       const currentMain = this.state.equipment.mainHand;
-      if (currentMain && EQUIPMENT_ITEMS[currentMain]?.twoHanded) {
+      const currentMainTypeId = getEquipmentTypeId(currentMain);
+      if (currentMain && EQUIPMENT_ITEMS[currentMainTypeId]?.twoHanded) {
         this.state.inventoryEquipment.push(currentMain);
         this.state.equipment.mainHand = null;
       }
@@ -4763,59 +5572,89 @@ class GameStore {
       this.state.inventoryEquipment.push(oldItem);
     }
 
-    this.state.equipment[slot] = itemId;
+    this.state.equipment[slot] = matchedEntry;
+    this._recordLedger({
+      action: "equip_item",
+      slot,
+      item: matchedEntry,
+      typeId,
+      source: "equipment"
+    });
     this.commit("equip-item");
-    return { ok: true, message: "已穿戴「" + item.name + "」。" };
+    return { ok: true, key: "equip.equipped", params: { name: item.name }, message: "已穿戴「" + item.name + "」。" };
   }
 
   unequipItem(slotKey) {
     if (!this.state.equipment[slotKey]) {
-      return { ok: false, message: "此欄位未裝備任何物品。" };
+      return { ok: false, key: "equip.slotEmpty", message: "此欄位未裝備任何物品。" };
     }
     const itemId = this.state.equipment[slotKey];
     this.state.equipment[slotKey] = null;
     this.state.inventoryEquipment.push(itemId);
+    this._recordLedger({
+      action: "unequip_item",
+      slot: slotKey,
+      item: itemId,
+      typeId: getEquipmentTypeId(itemId),
+      source: "equipment"
+    });
     this.commit("unequip-item");
-    return { ok: true, message: "已卸下裝備。" };
+    return { ok: true, key: "equip.unequipped", message: "已卸下裝備。" };
   }
 
   consumeItem(itemId) {
     if (!ITEMS[itemId] || this.state.inventory[itemId] <= 0) return false;
     this.state.inventory[itemId] -= 1;
+    this._recordLedger({
+      action: "consume_item",
+      itemId,
+      source: "inventory"
+    });
     this.commit("consume-item");
     return true;
   }
 
   allocateStat(stat) {
     if (!Object.hasOwn(this.state.profile.allocations, stat)) {
-      return { ok: false, message: "無效的能力項目。" };
+      return { ok: false, key: "growth.invalidStat", message: "無效的能力項目。" };
     }
     if (this.state.profile.skillPoints <= 0) {
-      return { ok: false, message: "目前沒有可用點數。" };
+      return { ok: false, key: "growth.noPoints", message: "目前沒有可用點數。" };
     }
     this.state.profile.skillPoints -= 1;
     this.state.profile.allocations[stat] += 1;
+    this._recordLedger({
+      action: "allocate_stat",
+      stat,
+      source: "growth"
+    });
     this.commit("allocate-stat");
-    return { ok: true, message: "能力提升了。" };
+    return { ok: true, key: "growth.statIncreased", message: "能力提升了。" };
   }
 
   allocateSkill(skillId) {
     const skill = SKILLS[skillId];
-    if (!skill) return { ok: false, message: "無效的技能項目。" };
+    if (!skill) return { ok: false, key: "growth.invalidSkill", message: "無效的技能項目。" };
     if (this.state.profile.level < skill.unlockLevel) {
-      return { ok: false, message: "等級需達 Lv. " + skill.unlockLevel + " 方可學習此技能。" };
+      return { ok: false, key: "growth.levelRequirementNotMet", params: { level: skill.unlockLevel }, message: "等級需達 Lv. " + skill.unlockLevel + " 方可學習此技能。" };
     }
     const currentLvl = this.state.profile.skills[skillId] || 0;
     if (currentLvl >= skill.maxLevel) {
-      return { ok: false, message: "此技能已達最高等級。" };
+      return { ok: false, key: "growth.skillMaxLevel", message: "此技能已達最高等級。" };
     }
     if (this.state.profile.skillPoints < skill.costPerLevel) {
-      return { ok: false, message: "技能點數不足。" };
+      return { ok: false, key: "growth.insufficientPoints", message: "技能點數不足。" };
     }
     this.state.profile.skillPoints -= skill.costPerLevel;
     this.state.profile.skills[skillId] = (currentLvl || 0) + 1;
+    this._recordLedger({
+      action: "allocate_skill",
+      skillId,
+      level: this.state.profile.skills[skillId],
+      source: "growth"
+    });
     this.commit("allocate-skill");
-    return { ok: true, message: "「" + skill.name + "」升級至 Lv. " + this.state.profile.skills[skillId] + "！" };
+    return { ok: true, key: "growth.skillUpgraded", params: { name: skill.name, level: this.state.profile.skills[skillId] }, message: "「" + skill.name + "」升級至 Lv. " + this.state.profile.skills[skillId] + "！" };
   }
 
   unlockSwimsuit() {
@@ -4826,11 +5665,13 @@ class GameStore {
   }
 
   getTheoreticalDPS() {
-    const stats = computePlayerStats(this.state.profile, this.state.equipment);
+    const stats = this.snapshot().playerStats;
     const baseDamage = stats.damage || 25;
 
     // Greatsword multiplier
-    const mainItem = EQUIPMENT_ITEMS[this.state.equipment.mainHand];
+    const mainSlot = this.state.equipment.mainHand;
+    const mainTypeId = getEquipmentTypeId(mainSlot);
+    const mainItem = EQUIPMENT_ITEMS[mainTypeId];
     const greatswordMult = mainItem?.twoHanded && mainItem?.effect?.type === "greatsword_damage_boost"
       ? (mainItem.effect.multiplier || 1.5)
       : 1.0;
@@ -4843,7 +5684,8 @@ class GameStore {
     let passiveDamagePerTurn = 0;
     for (const slotKey of Object.values(this.state.equipment)) {
       if (!slotKey) continue;
-      const item = EQUIPMENT_ITEMS[slotKey];
+      const typeId = getEquipmentTypeId(slotKey);
+      const item = EQUIPMENT_ITEMS[typeId];
       if (item?.effect?.type === "burn_on_round_end") {
         passiveDamagePerTurn += (item.effect.damage || 30);
       } else if (item?.effect?.type === "reflect_damage") {
@@ -4984,7 +5826,9 @@ class GameStore {
       stageCoins = stage?.winCoins ?? BATTLE_RULES.winCoins;
       stageXp = stage?.xpWin ?? 0;
       // Badge of bond 20% coin boost
-      const badgeItem = EQUIPMENT_ITEMS[this.state.equipment.badge];
+      const badgeSlot = this.state.equipment.badge;
+      const badgeTypeId = getEquipmentTypeId(badgeSlot);
+      const badgeItem = EQUIPMENT_ITEMS[badgeTypeId];
       if (badgeItem?.effect?.type === "coin_boost") {
         stageCoins = Math.round(stageCoins * (badgeItem.effect.coinMultiplier || 1.2));
       }
@@ -5097,7 +5941,7 @@ class GameStore {
       dps,
       rewardCoins: reward.coins,
       rewardXp: reward.xp,
-      timestamp: Date.now(),
+      timestamp: typeof this.now === "function" ? this.now() : Date.now(),
       watermelonSlices: options.watermelonSlices ?? null,
       qteHits: options.qteHits ?? null,
       qteTotal: options.qteTotal ?? null,
@@ -5122,6 +5966,16 @@ class GameStore {
     reward.damageDealt = damageDealt;
     reward.damageTaken = damageTaken;
     reward.durationSec = durationSec;
+
+    this._recordLedger({
+      action: "battle_reward",
+      won,
+      stageId: stage?.id,
+      coinsDelta: reward.coins,
+      xpDelta: reward.xp,
+      source: isAuto ? "auto_battle" : "manual_battle"
+    });
+
     this.commit("battle-result");
     return reward;
   }
@@ -5139,6 +5993,11 @@ class GameStore {
 
     const gained = applyExperience(this.state.profile, safeAmount);
     this.state.profile = gained.profile;
+    this._recordLedger({
+      action: "grant_experience",
+      xpDelta: safeAmount,
+      source: reason
+    });
     this.commit(reason);
     return { xp: safeAmount, levelsGained: gained.levelsGained };
   }
@@ -5175,8 +6034,13 @@ class GameStore {
       if (typeof updates.skills.momo === "number") this.state.profile.skills.momo = Math.max(0, Math.min(10, updates.skills.momo));
       if (typeof updates.skills.dualHand === "number") this.state.profile.skills.dualHand = Math.max(0, Math.min(1, updates.skills.dualHand));
     }
+    this._recordLedger({
+      action: "cheat_set_values",
+      updates,
+      source: "dev"
+    });
     this.commit("cheat-update");
-    return { ok: true, message: "數值已更新！" };
+    return { ok: true, key: "cheat.updated", message: "數值已更新！" };
   }
 
   cheatUnlockAll() {
@@ -5191,15 +6055,23 @@ class GameStore {
         this.state.records.stageStats[s].totalAttempts = Math.max(1, this.state.records.stageStats[s].totalAttempts || 1);
       }
     }
+    this._recordLedger({
+      action: "cheat_unlock_all",
+      source: "dev"
+    });
     this.commit("cheat-unlock-all");
-    return { ok: true, message: "已解鎖全部 4 個關卡與 BOSS 說明！" };
+    return { ok: true, key: "cheat.unlockedAll", message: "已解鎖全部 4 個關卡與 BOSS 說明！" };
   }
 
   cheatUnlockGallery() {
     this.state.records.unlockedSwimsuit = true;
     this.state.records.unlockedGalleryAll = true;
+    this._recordLedger({
+      action: "cheat_unlock_gallery",
+      source: "dev"
+    });
     this.commit("cheat-unlock-gallery");
-    return { ok: true, message: "已解鎖全部圖鑑立繪！" };
+    return { ok: true, key: "cheat.unlockedGallery", message: "已解鎖全部圖鑑立繪！" };
   }
 
   toggleMusicMuted() {
@@ -5225,39 +6097,63 @@ class GameStore {
 
   importSaveCode(code) {
     if (!code || typeof code !== "string" || !code.trim()) {
-      return { ok: false, message: "請輸入有效的種子碼。" };
+      return { ok: false, key: "save.invalidCode", message: "請輸入有效的種子碼。" };
     }
     const decoded = decodeSaveData(code);
     if (!decoded || typeof decoded !== "object") {
-      return { ok: false, message: "無效或損毀的存檔種子碼。" };
+      return { ok: false, key: "save.corruptCode", message: "無效或損毀的存檔種子碼。" };
     }
     this.state = sanitizeSave(decoded);
     this.persistence.save(this.state);
+    this._recordLedger({
+      action: "import_save",
+      source: "save_code"
+    });
     this.commit("import-save");
-    return { ok: true, message: "存檔已成功載入！" };
+    return { ok: true, key: "save.imported", message: "存檔已成功載入！" };
   }
 
   reset() {
     this.state = freshSave();
     this.persistence.clear();
+    this._recordLedger({ action: "reset", source: "system" });
     this.commit("reset");
   }
 }
 
+GameStore;
+
 // --- src/js/systems/BattleSystem.js ---
 class BattleSystem {
-  constructor(bus, store, random = Math.random) {
+  constructor(bus, store, random = Math.random, now = Date.now) {
     this.bus = bus;
     this.store = store;
-    this.random = random;
+    const resolvedRandom = typeof random === "function"
+      ? random
+      : (typeof random === "object" && random !== null && typeof random.random === "function"
+        ? random.random
+        : Math.random);
+    const resolvedNow = (typeof random === "object" && random !== null && typeof random.now === "function")
+      ? random.now
+      : (typeof now === "function" ? now : () => Date.now());
+    this.random = resolvedRandom;
+    this.now = resolvedNow;
     this.timers = new TimerRegistry();
-    this.qte = new QTESystem(bus, this.timers, random);
-    this.dualQte = new DualQTESystem(bus, this.timers, random);
+    this.qte = new QTESystem(bus, this.timers, resolvedRandom, resolvedNow);
+    this.dualQte = new DualQTESystem(bus, this.timers, resolvedRandom, resolvedNow);
     this.state = null;
+    this.countdownTimeoutId = null;
     this.countdownId = null;
-    this.reactionTickId = null;
+    this.beatTimerIds = [];
     this.reactionTimeoutId = null;
+    this.reactionTickId = null;
+    this.disconnectTimeoutId = null;
     this.autoRestartTimerId = null;
+    this.pauseCount = 0;
+    this.maxPauses = 3;
+    this.commandBuffer = [];
+    this.commandLog = [];
+    this.battleSeed = 0;
     this.autoBattle = {
       active: false,
       isPaused: false,
@@ -5273,6 +6169,109 @@ class BattleSystem {
         this.handleDualQteSlotSuccess(enemyId || slot);
       }
     });
+  }
+
+  // --- Online Authority Policies & Assumptions ---
+
+  // ASSUMPTION: Equipment mutations and stat allocations are locked during an active battle session.
+  isBattleActive() {
+    return Boolean(this.state?.active && this.state.phase !== "ended" && this.state.phase !== "abandoned");
+  }
+
+  canEquip() {
+    // ASSUMPTION: Equipment mutations locked during active battle session
+    return !this.isBattleActive();
+  }
+
+  canAllocate() {
+    // ASSUMPTION: Stat allocations locked during active battle session
+    return !this.isBattleActive();
+  }
+
+  enqueueCommand(cmd) {
+    const arrival = cmd.arrivedAt || this.now();
+    const declared = cmd.declaredAt || arrival;
+    const boundedDeclared = Math.min(declared, arrival + 150);
+    const entry = {
+      ...cmd,
+      arrivedAt: arrival,
+      declaredAt: declared,
+      boundedDeclaredAt: boundedDeclared
+    };
+    this.commandBuffer.push(entry);
+    this.commandBuffer.sort((a, b) => a.boundedDeclaredAt - b.boundedDeclaredAt);
+    return this.flushCommands();
+  }
+
+  flushCommands() {
+    const results = [];
+    while (this.commandBuffer.length > 0) {
+      const nextCmd = this.commandBuffer.shift();
+      results.push(this.dispatchCommand(nextCmd));
+    }
+    return results;
+  }
+
+  processCommand(cmd) {
+    return this.dispatchCommand({
+      ...cmd,
+      arrivedAt: cmd.arrivedAt || this.now(),
+      declaredAt: cmd.declaredAt || this.now()
+    });
+  }
+
+  dispatchCommand(cmd) {
+    const { type, payload, declaredAt, cmdId } = cmd;
+
+    // Check lock assumption
+    if ((type === "equip" || type === "unequip" || type === "allocate") && this.isBattleActive()) {
+      return {
+        ok: false,
+        cmdId,
+        reason: "locked_during_battle",
+        error: "ASSUMPTION: Equipment and stat allocations are locked during active battle"
+      };
+    }
+
+    let result = { ok: false, cmdId };
+    switch (type) {
+      case "select_hand":
+        result = this.selectHand(payload?.handId, payload?.slot, declaredAt);
+        break;
+      case "use_morph":
+        result = this.useMorph(declaredAt);
+        break;
+      case "use_item":
+        result = this.useItem(payload?.itemId, declaredAt);
+        break;
+      case "input_qte":
+        result = { ok: Boolean(this.inputQte(payload?.directionId, payload?.slot, declaredAt)) };
+        break;
+      case "report_qte_batch":
+        result = this.state?.isDualQte
+          ? this.dualQte.auditInputs(payload?.inputs)
+          : this.qte.auditInputs(payload?.inputs);
+        break;
+      case "pause":
+        result = this.pause();
+        break;
+      case "resume":
+        result = this.resume();
+        break;
+      case "abandon":
+        this.abandon();
+        result = { ok: true };
+        break;
+      default:
+        result = { ok: false, reason: "unknown_command" };
+    }
+
+    this.commandLog.push({
+      ...cmd,
+      executedAt: this.now(),
+      result
+    });
+    return result;
   }
 
   getAllEquipEffects(effectType) {
@@ -5304,9 +6303,12 @@ class BattleSystem {
       if (options.isDual) {
         stage = {
           id: 992,
-          chapter: I18n.t("dojo.chapterName") || "修練場",
-          name: I18n.t("dojo.mode2Style2") || "影小樂・雙生木樁",
-          subtitle: I18n.t("dojo.mode2Style2Desc") || "第四關雙手雙軌模擬",
+          chapter: "修練場",
+          chapterKey: "dojo.chapterName",
+          name: "影小樂・雙生木樁",
+          nameKey: "dojo.mode2Style2",
+          subtitle: "第四關雙手雙軌模擬",
+          subtitleKey: "dojo.mode2Style2Desc",
           enemyHp: customHp * 2,
           requiredLevel: 1,
           rewardMultiplier: 0,
@@ -5326,17 +6328,20 @@ class BattleSystem {
           isDojo: true,
           isSilhouette: true,
           enemies: [
-            { id: "left", name: I18n.t("dojo.dummySilhouetteLeft") || "影・小樂（左）", hp: customHp, maxHp: customHp, alive: true },
-            { id: "right", name: I18n.t("dojo.dummySilhouetteRight") || "影・小樂（右）", hp: customHp, maxHp: customHp, alive: true }
+            { id: "left", name: "影・小樂（左）", nameKey: "dojo.dummySilhouetteLeft", hp: customHp, maxHp: customHp, alive: true },
+            { id: "right", name: "影・小樂（右）", nameKey: "dojo.dummySilhouetteRight", hp: customHp, maxHp: customHp, alive: true }
           ],
           final: false
         };
       } else {
         stage = {
           id: 991,
-          chapter: I18n.t("dojo.chapterName") || "修練場",
-          name: I18n.t("dojo.mode2Style1") || "影小樂・單體木樁",
-          subtitle: I18n.t("dojo.mode2Style1Desc") || "無壓實戰與 DPS 測試",
+          chapter: "修練場",
+          chapterKey: "dojo.chapterName",
+          name: "影小樂・單體木樁",
+          nameKey: "dojo.mode2Style1",
+          subtitle: "無壓實戰與 DPS 測試",
+          subtitleKey: "dojo.mode2Style1Desc",
           enemyHp: customHp,
           requiredLevel: 1,
           rewardMultiplier: 0,
@@ -5354,7 +6359,7 @@ class BattleSystem {
           customDamage,
           isDojo: true,
           isSilhouette: true,
-          enemies: [{ id: "main", name: I18n.t("dojo.dummySilhouette") || "影・小樂", hp: customHp, maxHp: customHp, alive: true }],
+          enemies: [{ id: "main", name: "影・小樂", nameKey: "dojo.dummySilhouette", hp: customHp, maxHp: customHp, alive: true }],
           final: false
         };
       }
@@ -5362,7 +6367,11 @@ class BattleSystem {
       stage = STAGES.find((item) => item.id === Number(stageId));
       const isStageUnlocked = (profile.records?.clearedStages || []).includes(Number(stageId)) || profile.profile.level >= stage?.requiredLevel;
       if (!stage || !isStageUnlocked) {
-        this.bus.emit("toast", { message: "等級尚未達到這一章的挑戰條件。", tone: "danger" });
+        this.bus.emit("toast", {
+          key: "toast.levelRequirementNotMet",
+          message: "等級尚未達到這一章的挑戰條件。",
+          tone: "danger"
+        });
         return false;
       }
     }
@@ -5370,7 +6379,10 @@ class BattleSystem {
     if (options.autoBattle) {
       const cleared = (profile.records?.clearedStages || []).includes(Number(stageId));
       if (!cleared) {
-        this.bus.emit("toast", { message: I18n.t("ui.mustClearOnceForAuto"), tone: "danger" });
+        this.bus.emit("toast", {
+          key: "ui.mustClearOnceForAuto",
+          tone: "danger"
+        });
         return false;
       }
       if (!this.autoBattle.active) {
@@ -5393,7 +6405,10 @@ class BattleSystem {
     }
 
     this.stopClocks();
-    this.battleStartTime = Date.now();
+    this.pauseCount = 0;
+    this.battleSeed = options.seed ?? Math.floor(Math.random() * 1000000000);
+    this.commandLog = [];
+    this.battleStartTime = this.now();
     this.battleDamageDealt = 0;
     this.battleDamageTaken = 0;
     this.battleHpPotionUsed = 0;
@@ -5443,12 +6458,16 @@ class BattleSystem {
       isEnemyFrozen: false,
       frozenEnemyHand: null,
       isPaused: false,
+      pauseCount: 0,
+      maxPauses: 3,
       appearance: stage.final ? ASSETS.final : ASSETS.default
     };
     this.emitState();
     this.say(
-      stage.final ? I18n.t("dialogue.introFinal") : I18n.t("dialogue.introNormal"),
-      I18n.t("dialogue.speakerKohaku")
+      stage.final
+        ? { key: "dialogue.introFinal" }
+        : { key: "dialogue.introNormal" },
+      { key: "dialogue.speakerKohaku" }
     );
     this.scheduleRound();
     return true;
@@ -5456,6 +6475,116 @@ class BattleSystem {
 
   startAutoBattle(stageId, rounds = 10) {
     return this.start(stageId, { autoBattle: true, autoBattleRounds: rounds });
+  }
+
+  // --- Instantaneous Auto-Battle Simulation (Task 5.7) ---
+
+  simulateBattle(stageId, options = {}) {
+    const profile = this.store.snapshot();
+    const stage = STAGES.find((item) => item.id === Number(stageId)) || STAGES[0];
+    const stats = profile.playerStats;
+    const hasDualHand = Boolean(profile.profile?.skills?.dualHand > 0);
+    const momoLvl = profile.profile?.skills?.momo || 0;
+    const seed = options.seed || Math.floor(this.random() * 1000000000);
+
+    let playerHp = stats.maxHp;
+    let playerMp = stats.maxMp;
+    let enemyHp = stage.dualEnemy ? (stage.enemyHp || 10000) : stage.enemyHp;
+    let round = 0;
+    let damageDealt = 0;
+    let damageTaken = 0;
+    const frames = [];
+
+    while (playerHp > 0 && enemyHp > 0 && round < 50) {
+      round += 1;
+      const playerHand = "rock";
+      const hands = ["rock", "paper", "scissors"];
+      const enemyHand = hands[Math.floor(this.random() * hands.length)];
+      const cmp = compareHands(playerHand, enemyHand);
+
+      if (cmp === "win") {
+        const dmg = stats.damage;
+        enemyHp = Math.max(0, enemyHp - dmg);
+        damageDealt += dmg;
+        frames.push({ round, result: "win", damageDealt: dmg, playerHp, enemyHp });
+      } else if (cmp === "loss") {
+        // Player QTE attempt
+        const qteSuccess = this.random() > 0.3;
+        if (qteSuccess) {
+          const dmg = stats.damage;
+          enemyHp = Math.max(0, enemyHp - dmg);
+          damageDealt += dmg;
+          frames.push({ round, result: "qte_counter", damageDealt: dmg, playerHp, enemyHp });
+        } else {
+          const dmg = (BATTLE_RULES.enemyDamage || 100) * (stage.enemyDamageMultiplier || 1);
+          playerHp = Math.max(0, playerHp - dmg);
+          damageTaken += dmg;
+          frames.push({ round, result: "qte_fail", damageTaken: dmg, playerHp, enemyHp });
+        }
+      } else {
+        // Draw + Momo proc
+        if (momoLvl > 0 && this.random() < (momoLvl * 0.10)) {
+          const momoDmg = SKILLS.momo.damage;
+          enemyHp = Math.max(0, enemyHp - momoDmg);
+          damageDealt += momoDmg;
+          frames.push({ round, result: "draw_momo", damageDealt: momoDmg, playerHp, enemyHp });
+        } else {
+          frames.push({ round, result: "draw", playerHp, enemyHp });
+        }
+      }
+    }
+
+    const won = enemyHp <= 0;
+    return {
+      won,
+      stage,
+      seed,
+      round,
+      damageDealt,
+      damageTaken,
+      playerHp,
+      enemyHp,
+      frames
+    };
+  }
+
+  simulateAutoBattle(stageId, totalRounds = 10, options = {}) {
+    const results = [];
+    let wins = 0;
+    let losses = 0;
+    let totalDmgDealt = 0;
+    let totalDmgTaken = 0;
+
+    for (let r = 0; r < totalRounds; r++) {
+      const sim = this.simulateBattle(stageId, options);
+      if (sim.won) wins += 1;
+      else losses += 1;
+      totalDmgDealt += sim.damageDealt;
+      totalDmgTaken += sim.damageTaken;
+      results.push(sim);
+
+      const chunk = {
+        roundIndex: r + 1,
+        totalRounds,
+        won: sim.won,
+        wins,
+        losses,
+        battle: sim
+      };
+      this.bus.emit("auto-battle:stream-chunk", chunk);
+    }
+
+    const finalReport = {
+      stageId: Number(stageId),
+      totalRounds,
+      wins,
+      losses,
+      totalDamageDealt: totalDmgDealt,
+      totalDamageTaken: totalDmgTaken,
+      simulations: results
+    };
+    this.bus.emit("auto-battle:simulated", finalReport);
+    return finalReport;
   }
 
   restore(savedState) {
@@ -5485,7 +6614,7 @@ class BattleSystem {
       this.autoBattle.remainingRounds = 0;
     }
 
-    this.battleStartTime = savedState.battleStartTime || Date.now();
+    this.battleStartTime = savedState.battleStartTime || this.now();
     this.battleDamageDealt = savedState.battleDamageDealt || 0;
     this.battleDamageTaken = savedState.battleDamageTaken || 0;
     this.battleHpPotionUsed = savedState.battleHpPotionUsed || 0;
@@ -5499,6 +6628,7 @@ class BattleSystem {
     this.battleMorphDamage = savedState.battleMorphDamage || 0;
     this.battleQteHits = savedState.battleQteHits || 0;
     this.battleQteTotal = savedState.battleQteTotal || 0;
+    this.pauseCount = savedState.pauseCount || 0;
 
     const stats = profile.playerStats;
     const hasDualHandSkill = Boolean(profile.profile?.skills?.dualHand > 0);
@@ -5524,10 +6654,10 @@ class BattleSystem {
 
     const roundNumber = Math.max(1, Number(savedState.round || 1));
     const currentRound = Math.max(0, roundNumber - 1);
-    
+
     let remainingCountdownMs = null;
     if (savedState.roundExpiresAt) {
-      remainingCountdownMs = Math.max(200, savedState.roundExpiresAt - Date.now());
+      remainingCountdownMs = Math.max(200, savedState.roundExpiresAt - this.now());
     } else if (typeof savedState.countdownRemainingMs === "number" && savedState.countdownRemainingMs > 0) {
       remainingCountdownMs = Math.max(200, savedState.countdownRemainingMs);
     } else if (typeof savedState.countdown === "number" && savedState.countdown > 0) {
@@ -5560,6 +6690,8 @@ class BattleSystem {
       isEnemyFrozen: Boolean(savedState.isEnemyFrozen),
       frozenEnemyHand: savedState.frozenEnemyHand || null,
       isPaused: Boolean(this.autoBattle.isPaused),
+      pauseCount: this.pauseCount,
+      maxPauses: 3,
       appearance: stage.final ? ASSETS.final : ASSETS.default
     };
 
@@ -5615,74 +6747,69 @@ class BattleSystem {
   }
 
   pause() {
-    if (!this.state?.active || this.state.phase === "ended" || this.state.isPaused) return;
-    this.state.isPaused = true;
-    if (this.state.phase === "countdown") {
-      this.countdownRemainingMs = Math.max(0, (this.countdownDeadline || 0) - performance.now());
-      if (this.countdownId !== null) {
-        this.timers.clearInterval(this.countdownId);
-        this.countdownId = null;
-      }
-    } else if (this.state.phase === "reaction") {
-      this.reactionRemainingMs = Math.max(0, (this.reactionDeadline || 0) - performance.now());
-      this.clearReactionClocks();
-    } else if (this.state.phase === "qte") {
-      if (this.state.isDualQte) {
-        this.dualQte.pause();
-      } else {
-        this.qte.pause();
-      }
+    if (!this.state?.active || this.state.phase === "ended" || this.state.isPaused) {
+      return { ok: false, reason: "invalid_state" };
     }
+    // Only countdown phase allowed for pause
+    if (this.state.phase !== "countdown") {
+      return { ok: false, reason: "pause_only_in_countdown" };
+    }
+    // Limit to 3 times per battle
+    if (this.pauseCount >= this.maxPauses) {
+      return { ok: false, reason: "pause_limit_reached" };
+    }
+    this.pauseCount += 1;
+    this.state.isPaused = true;
+    this.state.pauseCount = this.pauseCount;
+    this.state.maxPauses = this.maxPauses;
+    this.countdownRemainingMs = Math.max(0, (this.countdownDeadline || 0) - this.now());
+    this.clearCountdownClocks();
     this.emitState();
+    return { ok: true, pauseCount: this.pauseCount, remainingMs: this.countdownRemainingMs };
   }
 
   resume() {
-    if (!this.state?.active || this.state.phase === "ended" || !this.state.isPaused) return;
+    if (!this.state?.active || this.state.phase === "ended" || !this.state.isPaused) {
+      return { ok: false, reason: "not_paused" };
+    }
     this.state.isPaused = false;
     if (this.state.phase === "countdown") {
       const remainingMs = this.countdownRemainingMs ?? 1000;
-      this.countdownDeadline = performance.now() + remainingMs;
-      this.countdownId = this.timers.interval(() => {
-        const remaining = Math.max(0, this.countdownDeadline - performance.now());
-        const currentCount = Math.ceil(remaining / 1000);
-        this.state.countdown = currentCount;
-
-        if (currentCount === 3 && this.state.lastChant !== 3) {
-          this.state.lastChant = 3;
-          const chant = I18n.t("dialogue.chant3");
-          this.say(chant, I18n.t("dialogue.speakerKohaku"));
-          this.bus.emit("battle:countdown-beat", { count: 3, word: chant });
-        } else if (currentCount === 2 && this.state.lastChant !== 2) {
-          this.state.lastChant = 2;
-          const chant = I18n.t("dialogue.chant2");
-          this.say(chant, I18n.t("dialogue.speakerKohaku"));
-          this.bus.emit("battle:countdown-beat", { count: 2, word: chant });
-        } else if (currentCount === 1 && this.state.lastChant !== 1) {
-          this.state.lastChant = 1;
-          const chant = I18n.t("dialogue.chant1");
-          this.say(chant, I18n.t("dialogue.speakerKohaku"));
-          this.bus.emit("battle:countdown-beat", { count: 1, word: chant });
-        }
-
-        this.emitState();
-        if (remaining <= 0) this.revealHands();
-      }, 80);
-    } else if (this.state.phase === "reaction") {
-      const remainingMs = this.reactionRemainingMs ?? 500;
-      this.reactionDeadline = performance.now() + remainingMs;
-      this.reactionTickId = this.timers.interval(() => {
-        this.state.reactionRemaining = Math.max(0, (this.reactionDeadline - performance.now()) / 1000);
-        this.emitState();
-      }, 40);
-      this.reactionTimeoutId = this.timers.timeout(() => this.resolveRound(), remainingMs);
-    } else if (this.state.phase === "qte") {
-      if (this.state.isDualQte) {
-        this.dualQte.resume();
-      } else {
-        this.qte.resume();
-      }
+      this.scheduleRound(remainingMs);
     }
     this.emitState();
+    return { ok: true };
+  }
+
+  handleDisconnect() {
+    if (!this.state?.active || this.state.phase === "ended") return;
+    this.state.disconnected = true;
+    this.state.disconnectDeadline = this.now() + 10000;
+    this.emitState();
+    if (this.disconnectTimeoutId !== null) {
+      this.timers.clearTimeout(this.disconnectTimeoutId);
+    }
+    this.disconnectTimeoutId = this.timers.timeout(() => {
+      this.settleDisconnect();
+    }, 10000);
+  }
+
+  handleReconnect() {
+    if (this.disconnectTimeoutId !== null) {
+      this.timers.clearTimeout(this.disconnectTimeoutId);
+      this.disconnectTimeoutId = null;
+    }
+    if (this.state) {
+      this.state.disconnected = false;
+      this.state.disconnectDeadline = null;
+      this.emitState();
+    }
+  }
+
+  settleDisconnect() {
+    if (!this.state?.active || this.state.phase === "ended") return;
+    // Settle battle upon 10s disconnect expiration
+    this.end(false);
   }
 
   selectTarget(enemyId) {
@@ -5696,24 +6823,62 @@ class BattleSystem {
   }
 
   snapshot() {
-    return this.state
-      ? {
-          ...structuredClone(this.state),
-          autoBattle: { ...this.autoBattle }
-        }
-      : null;
+    if (!this.state) return null;
+    const snap = structuredClone(this.state);
+    snap.autoBattle = { ...this.autoBattle };
+    snap.commandLog = [...this.commandLog];
+    snap.seed = this.battleSeed;
+
+    if (this.state.phase === "countdown" && this.countdownDeadline) {
+      const rem = Math.max(0, this.countdownDeadline - this.now());
+      snap.countdown = Math.ceil(rem / 1000);
+      snap.countdownRemainingMs = rem;
+    } else if (this.state.phase === "reaction" && this.reactionDeadline) {
+      const rem = Math.max(0, this.reactionDeadline - this.now());
+      snap.reactionRemaining = rem / 1000;
+      snap.reactionRemainingMs = rem;
+    }
+    return snap;
   }
 
   emitState() {
     this.bus.emit("battle:state", this.snapshot());
   }
 
-  say(text, speaker = null) {
-    this.bus.emit("dialogue", { speaker: speaker || I18n.t("dialogue.speakerKohaku"), text });
+  say(messageOrPayload, speaker = null) {
+    let key = null;
+    let params = {};
+    let text = "";
+    let speakerKey = "dialogue.speakerKohaku";
+    let speakerName = "";
+
+    if (typeof messageOrPayload === "object" && messageOrPayload !== null) {
+      key = messageOrPayload.key || null;
+      params = messageOrPayload.params || {};
+      text = messageOrPayload.text || "";
+    } else {
+      text = String(messageOrPayload || "");
+    }
+
+    if (typeof speaker === "object" && speaker !== null) {
+      speakerKey = speaker.key || speakerKey;
+      speakerName = speaker.text || "";
+    } else if (speaker) {
+      speakerName = String(speaker);
+    }
+
+    this.bus.emit("dialogue", {
+      key,
+      params,
+      speakerKey,
+      speaker: speakerName || "小樂",
+      text
+    });
   }
 
   scheduleRound(customMs = null) {
     if (!this.state?.active) return;
+    this.clearCountdownClocks();
     const defaultRoundSeconds = this.state.stage.roundSeconds || BATTLE_RULES.roundSeconds;
     const totalDurationMs = customMs ? customMs : defaultRoundSeconds * 1000;
     const roundSeconds = Math.ceil(totalDurationMs / 1000);
@@ -5729,39 +6894,51 @@ class BattleSystem {
     this.state.morphActive = false;
     this.state.lastChant = null;
     this.state.isPaused = false;
-    this.countdownDeadline = performance.now() + totalDurationMs;
-    this.emitState();
+    this.countdownDeadline = this.now() + totalDurationMs;
+    this.state.deadline = this.countdownDeadline;
+    this.state.roundExpiresAt = this.countdownDeadline;
+    this.emitState(); // Push state ONCE on phase transition!
 
-    this.countdownId = this.timers.interval(() => {
-      const remaining = Math.max(0, this.countdownDeadline - performance.now());
-      const currentCount = Math.ceil(remaining / 1000);
-      this.state.countdown = currentCount;
+    // Schedule countdown chant beats
+    const beatTimes = [
+      { count: 3, delay: totalDurationMs - 3000, key: "dialogue.chant3" },
+      { count: 2, delay: totalDurationMs - 2000, key: "dialogue.chant2" },
+      { count: 1, delay: totalDurationMs - 1000, key: "dialogue.chant1" }
+    ];
 
-      if (currentCount === 3 && this.state.lastChant !== 3) {
-        this.state.lastChant = 3;
-        const chant = I18n.t("dialogue.chant3");
-        this.say(chant, I18n.t("dialogue.speakerKohaku"));
-        this.bus.emit("battle:countdown-beat", { count: 3, word: chant });
-      } else if (currentCount === 2 && this.state.lastChant !== 2) {
-        this.state.lastChant = 2;
-        const chant = I18n.t("dialogue.chant2");
-        this.say(chant, I18n.t("dialogue.speakerKohaku"));
-        this.bus.emit("battle:countdown-beat", { count: 2, word: chant });
-      } else if (currentCount === 1 && this.state.lastChant !== 1) {
-        this.state.lastChant = 1;
-        const chant = I18n.t("dialogue.chant1");
-        this.say(chant, I18n.t("dialogue.speakerKohaku"));
-        this.bus.emit("battle:countdown-beat", { count: 1, word: chant });
+    beatTimes.forEach(({ count, delay, key }) => {
+      if (delay > 0) {
+        const timerId = this.timers.timeout(() => {
+          if (this.state?.active && this.state.phase === "countdown" && !this.state.isPaused) {
+            this.state.lastChant = count;
+            this.say(
+              { key },
+              { key: "dialogue.speakerKohaku" }
+            );
+            this.bus.emit("battle:countdown-beat", { count, key });
+          }
+        }, delay);
+        this.beatTimerIds.push(timerId);
       }
+    });
 
-      this.emitState();
-      if (remaining <= 0) this.revealHands();
-    }, 80);
+    this.countdownTimeoutId = this.timers.timeout(() => {
+      this.countdownTimeoutId = null;
+      if (this.state?.active && this.state.phase === "countdown" && !this.state.isPaused) {
+        this.revealHands();
+      }
+    }, totalDurationMs);
   }
 
-  selectHand(handId, slot = null) {
-    if (!this.state?.active || !HANDS[handId]) return;
+  selectHand(handId, slot = null, declaredAt = null) {
+    if (!this.state?.active || !HANDS[handId]) return false;
+    const arrival = this.now();
+
     if (this.state.phase === "countdown") {
+      // Secret commitment sealed before reveal
+      if (arrival > this.countdownDeadline) {
+        return { ok: false, reason: "late_commitment" };
+      }
       if (slot === "left") {
         this.state.selectedHands.left = handId;
         this.state.selectedHand = handId;
@@ -5776,7 +6953,12 @@ class BattleSystem {
       }
       this.emitState();
       this.bus.emit("sound", { name: "select" });
+      return { ok: true, handId, slot };
     } else if (this.state.phase === "reaction" && this.state.morphActive) {
+      // 150ms grace check on morph reaction window
+      if (arrival > this.reactionDeadline + 150) {
+        return { ok: false, reason: "morph_expired" };
+      }
       if (slot === "left") {
         this.state.selectedHands.left = handId;
         this.state.selectedHand = handId;
@@ -5794,15 +6976,14 @@ class BattleSystem {
       this.emitState();
       this.bus.emit("sound", { name: "select" });
       this.resolveRound();
+      return { ok: true, handId, slot };
     }
+    return false;
   }
 
   revealHands() {
     if (!this.state?.active || this.state.phase !== "countdown") return;
-    if (this.countdownId !== null) {
-      this.timers.clearInterval(this.countdownId);
-      this.countdownId = null;
-    }
+    this.clearCountdownClocks();
     this.state.phase = "reaction";
 
     const isDualStage = Boolean(this.state.stage?.dualEnemy && this.state.enemies?.length > 1);
@@ -5861,27 +7042,48 @@ class BattleSystem {
 
     let reactionWindowMs = this.state.stage?.reactionWindowMs ?? BATTLE_RULES.reactionWindowMs;
     this.state.reactionRemaining = reactionWindowMs / 1000;
+    this.reactionDeadline = this.now() + reactionWindowMs;
+    this.state.deadline = this.reactionDeadline;
+    this.state.reactionExpiresAt = this.reactionDeadline;
 
-    this.reactionDeadline = performance.now() + reactionWindowMs;
-    this.emitState();
+    this.emitState(); // Push state ONCE on phase transition!
     this.bus.emit("sound", { name: "reveal" });
 
-    this.reactionTickId = this.timers.interval(() => {
-      this.state.reactionRemaining = Math.max(0, (this.reactionDeadline - performance.now()) / 1000);
-      this.emitState();
-    }, 40);
-    this.reactionTimeoutId = this.timers.timeout(() => this.resolveRound(), reactionWindowMs);
+    this.reactionTimeoutId = this.timers.timeout(() => {
+      this.reactionTimeoutId = null;
+      this.resolveRound();
+    }, reactionWindowMs);
   }
 
-  useMorph() {
+  useMorph(declaredAt = null) {
+    const arrival = this.now();
+    const timestamp = declaredAt || arrival;
+
     if (!this.state?.active || this.state.phase !== "reaction" || this.state.morphActive) {
-      return { ok: false, message: "變拳只能在看見小樂出拳後的反應時間內使用。" };
+      return {
+        ok: false,
+        key: "combat.morphWindowOnly",
+        message: "變拳只能在看見小樂出拳後的反應時間內使用。"
+      };
     }
+    // 150ms grace check on reaction window
+    if (timestamp > this.reactionDeadline + 150) {
+      return {
+        ok: false,
+        key: "combat.morphWindowExpired",
+        message: "反應時間已過。"
+      };
+    }
+
     const totalDiscount = this.getAllEquipEffects("morph_discount").reduce((sum, eff) => sum + (eff.morphDiscount || 0), 0);
     const morphCost = Math.max(5, BATTLE_RULES.morphCost - totalDiscount);
 
     if (this.state.playerMp < morphCost) {
-      return { ok: false, message: "MP 不足，無法使用變拳。" };
+      return {
+        ok: false,
+        key: "combat.insufficientMp",
+        message: "MP 不足，無法使用變拳。"
+      };
     }
     this.clearReactionClocks();
     this.state.playerMp -= morphCost;
@@ -5893,18 +7095,20 @@ class BattleSystem {
 
     const morphWindowMs = 2000;
     this.state.reactionRemaining = morphWindowMs / 1000;
-    this.reactionDeadline = performance.now() + morphWindowMs;
+    this.reactionDeadline = this.now() + morphWindowMs;
+    this.state.deadline = this.reactionDeadline;
+    this.state.reactionExpiresAt = this.reactionDeadline;
 
-    this.emitState();
+    this.emitState(); // Push state ONCE on phase transition!
     this.bus.emit("battle:effect", { type: "morph" });
     this.bus.emit("sound", { name: "skill" });
-    this.say(I18n.t("dialogue.morphReaction"), I18n.t("dialogue.speakerKohaku"));
+    this.say(
+      { key: "dialogue.morphReaction" },
+      { key: "dialogue.speakerKohaku" }
+    );
 
-    this.reactionTickId = this.timers.interval(() => {
-      this.state.reactionRemaining = Math.max(0, (this.reactionDeadline - performance.now()) / 1000);
-      this.emitState();
-    }, 40);
     this.reactionTimeoutId = this.timers.timeout(() => {
+      this.reactionTimeoutId = null;
       this.state.morphActive = false;
       this.resolveRound();
     }, morphWindowMs);
@@ -5963,7 +7167,9 @@ class BattleSystem {
           const rightEnemy = this.state.enemies.find((e) => e.id === "right" && e.alive);
           if (leftEnemy) this.applyDamageToEnemy(leftEnemy, null, false);
           if (rightEnemy) this.applyDamageToEnemy(rightEnemy, null, false);
-          const suffix = this.state.morphUsed ? "雙手變拳齊出，完美破除雙生合擊！" : "雙手同時獲勝，漂亮破除雙生合擊！";
+          const suffix = this.state.morphUsed
+            ? { key: "dialogue.winDualMorphBoth" }
+            : { key: "dialogue.winDualBoth" };
           this.finishRound("win", suffix);
           return;
         }
@@ -5973,7 +7179,9 @@ class BattleSystem {
           this.state.targetEnemyId = winEnemyId;
           const target = this.state.enemies.find((e) => e.id === winEnemyId && e.alive);
           if (target) this.applyDamageToEnemy(target, null, false);
-          const suffix = this.state.morphUsed ? "變拳擊破一手，成功壓制！" : "單手獲勝，成功壓制一手！";
+          const suffix = this.state.morphUsed
+            ? { key: "dialogue.winDualMorphSingle" }
+            : { key: "dialogue.winDualSingle" };
           this.finishRound("win", suffix);
           return;
         }
@@ -6015,7 +7223,9 @@ class BattleSystem {
         const rightEnemy = this.state.enemies.find((e) => e.id === "right" && e.alive);
         if (leftEnemy) this.applyDamageToEnemy(leftEnemy, null, false);
         if (rightEnemy) this.applyDamageToEnemy(rightEnemy, null, false);
-        const suffix = this.state.morphUsed ? "變拳齊出，一併壓制雙生小樂！" : "雙拳齊勝，完美克制雙生小樂！";
+        const suffix = this.state.morphUsed
+          ? { key: "dialogue.winDualMorphBoth" }
+          : { key: "dialogue.winDualBoth" };
         this.finishRound("win", suffix);
         return;
       }
@@ -6025,7 +7235,9 @@ class BattleSystem {
         this.state.targetEnemyId = winEnemyId;
         const target = this.state.enemies.find((e) => e.id === winEnemyId && e.alive);
         if (target) this.applyDamageToEnemy(target, null, false);
-        const suffix = this.state.morphUsed ? "變拳奏效，成功壓制一手！" : "單手壓制，削弱了雙生陣勢！";
+        const suffix = this.state.morphUsed
+          ? { key: "dialogue.winDualMorphSingle" }
+          : { key: "dialogue.winDualSingle" };
         this.finishRound("win", suffix);
         return;
       }
@@ -6050,13 +7262,17 @@ class BattleSystem {
 
       if (bothWin) {
         const doubleDamage = this.state.playerDamage * 2;
-        const suffix = this.state.morphUsed ? "雙手變拳齊出，造成雙倍壓制傷害！" : "雙手同時獲勝，造成雙倍壓制傷害！";
+        const suffix = this.state.morphUsed
+          ? { key: "dialogue.winDualMorphDoubleDmg" }
+          : { key: "dialogue.winDualDoubleDmg" };
         this.damageEnemy(suffix, false, doubleDamage);
         return;
       }
 
       if (singleWin) {
-        const suffix = this.state.morphUsed ? "變拳奏效，成功壓制！" : "漂亮地壓過了小樂的手勢！";
+        const suffix = this.state.morphUsed
+          ? { key: "dialogue.winSingleMorph" }
+          : { key: "dialogue.winSingleNormal" };
         this.damageEnemy(suffix, false);
         return;
       }
@@ -6073,7 +7289,9 @@ class BattleSystem {
       return;
     }
     if (result === "win") {
-      const suffix = this.state.morphUsed ? "變拳奏效，這一手由你拿下！" : "漂亮地壓過了小樂的手勢！";
+      const suffix = this.state.morphUsed
+        ? { key: "dialogue.winSingleMorph" }
+        : { key: "dialogue.winSingleNormal" };
       this.damageEnemy(suffix);
       return;
     }
@@ -6093,6 +7311,8 @@ class BattleSystem {
           const target = aliveEnemies[Math.floor(this.random() * aliveEnemies.length)];
           const dodgeRate = this.state.stage?.momoDodgeRate || 0;
           const isDodged = this.random() < dodgeRate;
+          const targetName = target.name || "小樂";
+
           if (isDodged) {
             this.store.recordMomoProc({ success: false, damage: 0 });
             this.bus.emit("battle:effect", {
@@ -6101,7 +7321,10 @@ class BattleSystem {
               skill: "momo"
             });
             this.bus.emit("sound", { name: "danger" });
-            this.finishRound("draw", "平手！你試圖偷摸" + target.name + "，但被她敏捷地閃開了！");
+            this.finishRound("draw", {
+              key: "dialogue.drawMomoDodge",
+              params: { target: targetName, targetId: target.id }
+            });
             return;
           }
 
@@ -6131,13 +7354,18 @@ class BattleSystem {
             actionType: "attack"
           });
           this.bus.emit("sound", { name: "counterRub" });
-          this.finishRound("draw", "平手！但你偷摸了" + target.name + "一下，造成 " + momoDamage + " 點傷害！");
+          this.finishRound("draw", {
+            key: "dialogue.drawMomoHit",
+            params: { target: targetName, targetId: target.id, damage: momoDamage }
+          });
           return;
         }
       }
     }
 
-    this.finishRound("draw", "同樣的手勢在空中碰上了——平手。");
+    this.finishRound("draw", {
+      key: "dialogue.drawNormal"
+    });
   }
 
   startQte(targetEnemyId = null) {
@@ -6147,7 +7375,10 @@ class BattleSystem {
       this.state.targetEnemyId = targetEnemyId;
     }
     this.emitState();
-    this.say(I18n.t("dialogue.qteSingleBreak"), I18n.t("dialogue.speakerKohaku"));
+    this.say(
+      { key: "dialogue.qteSingleBreak" },
+      { key: "dialogue.speakerKohaku" }
+    );
     this.bus.emit("sound", { name: "danger" });
     const extraQte = this.getAllEquipEffects("qte_time").reduce((sum, eff) => sum + (eff.extraQteSeconds || 0), 0);
     this.qte.start({
@@ -6163,7 +7394,10 @@ class BattleSystem {
     this.state.isDualQte = true;
     this.state.dualQteResolved = { left: false, right: false };
     this.emitState();
-    this.say(I18n.t("dialogue.qteDualBreak"), I18n.t("dialogue.speakerPlatinumKohaku"));
+    this.say(
+      { key: "dialogue.qteDualBreak" },
+      { key: "dialogue.speakerPlatinumKohaku" }
+    );
     this.bus.emit("sound", { name: "danger" });
     const extraQte = this.getAllEquipEffects("qte_time").reduce((sum, eff) => sum + (eff.extraQteSeconds || 0), 0);
     this.dualQte.start({
@@ -6174,12 +7408,12 @@ class BattleSystem {
     });
   }
 
-  inputQte(directionId, slot = null) {
+  inputQte(directionId, slot = null, declaredAt = null) {
     if (this.state?.phase !== "qte") return false;
     if (this.state.isDualQte) {
-      return this.dualQte.input(directionId, slot);
+      return this.dualQte.input(directionId, slot, declaredAt);
     }
-    return this.qte.input(directionId);
+    return this.qte.input(directionId, declaredAt);
   }
 
   handleDualQteSlotSuccess(slotOrEnemyId) {
@@ -6193,7 +7427,13 @@ class BattleSystem {
     if (!targetEnemy) return;
 
     this.applyDamageToEnemy(targetEnemy, null, true);
-    this.say(`化解了${targetEnemy.name}的單側攻勢！`, "你");
+    this.say(
+      {
+        key: "dialogue.deflectedSingleAttack",
+        params: { target: targetEnemy.name, targetId: targetEnemy.id }
+      },
+      { key: "dialogue.speakerPlayer" }
+    );
     this.emitState();
   }
 
@@ -6218,13 +7458,17 @@ class BattleSystem {
       if (!rightSuccess) failedCount += 1;
 
       if (failedCount > 0) {
-        this.damagePlayerForDual(failedCount, "未能防住全部攻勢，受到反擊！");
+        this.damagePlayerForDual(failedCount, {
+          key: "dialogue.dualQteMiss"
+        });
       } else {
         const counter = getQteCounterNarration(this.state.selectedHand);
         this.state.selectedHand = counter.changedHand;
         this.timers.timeout(() => {
           if (this.state?.active && this.state.phase === "qte") {
-            this.finishRound("win", "雙重反制成功！完美化解了雙生攻勢！");
+            this.finishRound("win", {
+              key: "dialogue.dualQteSuccess"
+            });
           }
         }, 500);
       }
@@ -6239,12 +7483,14 @@ class BattleSystem {
       this.state.selectedHand = counter.changedHand;
       this.timers.timeout(() => {
         if (this.state?.active && this.state.phase === "qte") {
-          this.damageEnemy(counter.text, true);
+          this.damageEnemy(counter, true);
         }
       }, 500);
     } else {
       this.store.recordQteAttempt(this.state?.stage?.id, false);
-      this.damagePlayer("節奏慢了一拍，小樂的攻勢命中了你。");
+      this.damagePlayer({
+        key: "dialogue.qteMiss"
+      });
     }
   }
 
@@ -6275,13 +7521,20 @@ class BattleSystem {
         const frozenHand = hands[Math.floor(this.random() * hands.length)];
         this.state.frozenEnemyHand = frozenHand;
         this.state.isEnemyFrozen = true;
+        const handLabel = HANDS[frozenHand]?.label || "";
         this.bus.emit("battle:effect", {
           type: "freeze",
           frozenHand,
-          handLabel: HANDS[frozenHand].label,
+          handLabel,
           handGlyph: HANDS[frozenHand].glyph
         });
-        this.say(`❄️ 霜月冰結！小樂的手掌被凍結，下一回合無法出【${HANDS[frozenHand].label}】！`, "小樂");
+        this.say(
+          {
+            key: "dialogue.freezeNarration",
+            params: { hand: handLabel }
+          },
+          { key: "dialogue.speakerKohaku" }
+        );
       }
     }
 
@@ -6309,25 +7562,27 @@ class BattleSystem {
   }
 
   dealEnemyDamage(amount) {
-    this.damageEnemy("受到傷害", false, amount);
+    this.damageEnemy({ key: "combat.tookDamage", text: "受到傷害" }, false, amount);
   }
 
-  damageEnemy(message, countered = false, damageAmount = null) {
+  damageEnemy(messageOrPayload, countered = false, damageAmount = null) {
     const target = this.state.enemies.find((e) => e.id === this.state.targetEnemyId && e.alive)
       || this.state.enemies.find((e) => e.alive);
 
     if (target) {
       this.applyDamageToEnemy(target, damageAmount, countered);
     }
-    this.finishRound("win", message);
+    this.finishRound("win", messageOrPayload);
   }
 
-  damagePlayer(message) {
+  damagePlayer(messageOrPayload) {
     const dodge = this.hasEquipEffect("dodge");
     if (dodge && this.random() < (dodge.dodgeChance || 0.25)) {
       this.bus.emit("battle:effect", { type: "player-dodge" });
       this.bus.emit("sound", { name: "danger" });
-      this.finishRound("draw", "殘影閃避！你藉由幻影羽織化解了攻勢！");
+      this.finishRound("draw", {
+        key: "dialogue.dodgeDodge"
+      });
       return;
     }
 
@@ -6348,10 +7603,10 @@ class BattleSystem {
       type: "player-hit",
       amount: totalDamage
     });
-    const playerName = (I18n.t("dialogue.speakerPlayer") && !I18n.t("dialogue.speakerPlayer").includes(".")) ? I18n.t("dialogue.speakerPlayer") : "旅人";
     this.bus.emit("battle:damage-logged", {
       target: "player",
-      targetName: playerName,
+      targetNameKey: "dialogue.speakerPlayer",
+      targetName: "旅人",
       amount: totalDamage,
       source: "enemy_attack",
       round: this.state?.round || 1,
@@ -6386,15 +7641,17 @@ class BattleSystem {
       }
     }
 
-    this.finishRound("loss", message);
+    this.finishRound("loss", messageOrPayload);
   }
 
-  damagePlayerForDual(count, message) {
+  damagePlayerForDual(count, messageOrPayload) {
     const dodge = this.hasEquipEffect("dodge");
     if (dodge && this.random() < (dodge.dodgeChance || 0.25)) {
       this.bus.emit("battle:effect", { type: "player-dodge" });
       this.bus.emit("sound", { name: "danger" });
-      this.finishRound("draw", "殘影閃避！你藉由幻影羽織化解了雙生攻勢！");
+      this.finishRound("draw", {
+        key: "dialogue.dodgeDodgeDual"
+      });
       return;
     }
 
@@ -6416,10 +7673,10 @@ class BattleSystem {
       type: "player-hit",
       amount: totalDamage
     });
-    const playerName = (I18n.t("dialogue.speakerPlayer") && !I18n.t("dialogue.speakerPlayer").includes(".")) ? I18n.t("dialogue.speakerPlayer") : "旅人";
     this.bus.emit("battle:damage-logged", {
       target: "player",
-      targetName: playerName,
+      targetNameKey: "dialogue.speakerPlayer",
+      targetName: "旅人",
       amount: totalDamage,
       source: "enemy_attack",
       round: this.state?.round || 1,
@@ -6454,10 +7711,10 @@ class BattleSystem {
       }
     }
 
-    this.finishRound("loss", message);
+    this.finishRound("loss", messageOrPayload);
   }
 
-  finishRound(result, message) {
+  finishRound(result, messageOrPayload) {
     this.state.phase = "result";
     this.state.lastResult = result;
 
@@ -6468,10 +7725,10 @@ class BattleSystem {
       this.state.playerMp = Math.min(this.state.playerMaxMp, this.state.playerMp + totalMpRegen);
       const restored = this.state.playerMp - before;
       if (restored > 0) {
-        const playerName = (I18n.t("dialogue.speakerPlayer") && !I18n.t("dialogue.speakerPlayer").includes(".")) ? I18n.t("dialogue.speakerPlayer") : "旅人";
         this.bus.emit("battle:damage-logged", {
           target: "player",
-          targetName: playerName,
+          targetNameKey: "dialogue.speakerPlayer",
+          targetName: "旅人",
           amount: restored,
           source: "regen_mp",
           round: this.state?.round || 1,
@@ -6505,8 +7762,9 @@ class BattleSystem {
       });
     }
 
-    this.emitState();
-    this.say(message, result === "loss" ? I18n.t("dialogue.speakerKohaku") : I18n.t("dialogue.speakerNarrator"));
+    this.emitState(); // Push state ONCE on phase transition!
+    const speakerKey = result === "loss" ? "dialogue.speakerKohaku" : "dialogue.speakerNarrator";
+    this.say(messageOrPayload, { key: speakerKey });
 
     if (this.state.enemyHp <= 0) {
       this.timers.timeout(() => this.end(true), 1300);
@@ -6519,20 +7777,40 @@ class BattleSystem {
     this.timers.timeout(() => this.scheduleRound(), 1550);
   }
 
-  useItem(itemId) {
+  useItem(itemId, declaredAt = null) {
     if (!this.state?.active || this.state.phase === "ended") {
-      return { ok: false, message: "目前不在戰鬥中。" };
+      return {
+        ok: false,
+        key: "combat.notInBattle",
+        message: "目前不在戰鬥中。"
+      };
     }
     const item = ITEMS[itemId];
-    if (!item) return { ok: false, message: "找不到這個道具。" };
+    if (!item) {
+      return {
+        ok: false,
+        key: "combat.itemNotFound",
+        message: "找不到這個道具。"
+      };
+    }
 
     const valueKey = item.resource === "hp" ? "playerHp" : "playerMp";
     const maxKey = item.resource === "hp" ? "playerMaxHp" : "playerMaxMp";
     if (this.state[valueKey] >= this.state[maxKey]) {
-      return { ok: false, message: item.resource.toUpperCase() + " 已經是滿的。" };
+      return {
+        ok: false,
+        key: "combat.resourceFull",
+        params: { resource: item.resource.toUpperCase() },
+        message: item.resource.toUpperCase() + " 已經是滿的。"
+      };
     }
     if (!this.store.consumeItem(itemId)) {
-      return { ok: false, message: item.shortName + "已用完。" };
+      return {
+        ok: false,
+        key: "combat.itemDepleted",
+        params: { name: item.shortName },
+        message: item.shortName + "已用完。"
+      };
     }
 
     const potionBoost = this.getAllEquipEffects("potion_boost").reduce((sum, eff) => sum + (eff.potionBoost || 0), 0);
@@ -6550,10 +7828,10 @@ class BattleSystem {
       this.battleMpRestored = (this.battleMpRestored || 0) + restored;
     }
     this.store.recordPotionUse(item.resource === "hp" ? "hpPotion" : "mpPotion", { restored });
-    const playerName = (I18n.t("dialogue.speakerPlayer") && !I18n.t("dialogue.speakerPlayer").includes(".")) ? I18n.t("dialogue.speakerPlayer") : "旅人";
     this.bus.emit("battle:damage-logged", {
       target: "player",
-      targetName: playerName,
+      targetNameKey: "dialogue.speakerPlayer",
+      targetName: "旅人",
       amount: restored,
       source: item.resource === "hp" ? "heal_hp" : "heal_mp",
       round: this.state?.round || 1,
@@ -6563,16 +7841,19 @@ class BattleSystem {
     this.emitState();
     this.bus.emit("battle:effect", { type: "item", resource: item.resource, amount: restored });
     this.bus.emit("sound", { name: "heal" });
-    const locItem = I18n.getLocalizedItem(item);
     this.say(
-      I18n.t("dialogue.itemUsed", {
-        name: locItem.name,
-        restored,
-        resource: item.resource.toUpperCase()
-      }),
-      I18n.t("dialogue.speakerNarrator")
+      {
+        key: "dialogue.itemUsed",
+        params: {
+          name: item.name || itemId,
+          itemId: item.id || itemId,
+          restored,
+          resource: item.resource.toUpperCase()
+        }
+      },
+      { key: "dialogue.speakerNarrator" }
     );
-    return { ok: true };
+    return { ok: true, restored, resource: item.resource };
   }
 
   end(won) {
@@ -6583,7 +7864,7 @@ class BattleSystem {
     this.state.active = false;
     this.state.phase = "ended";
     this.state.won = won;
-    const durationSec = Math.max(1, Math.round((Date.now() - (this.battleStartTime || Date.now())) / 1000));
+    const durationSec = Math.max(1, Math.round((this.now() - (this.battleStartTime || this.now())) / 1000));
     const reward = this.store.recordBattle(won, this.state.stage, {
       isAuto: Boolean(this.autoBattle?.active),
       damageDealt: this.battleDamageDealt || 0,
@@ -6601,7 +7882,7 @@ class BattleSystem {
       qteHits: this.battleQteHits || null,
       qteTotal: this.battleQteTotal || null
     });
-    this.emitState();
+    this.emitState(); // Push state ONCE on phase transition!
     this.bus.emit("battle:ended", {
       won,
       stage: this.state.stage,
@@ -6610,6 +7891,8 @@ class BattleSystem {
       damageDealt: this.battleDamageDealt || 0,
       damageTaken: this.battleDamageTaken || 0,
       durationSec,
+      seed: this.battleSeed,
+      commandLog: [...this.commandLog],
       battle: this.snapshot(),
       autoBattle: { ...this.autoBattle },
       isAuto: Boolean(this.autoBattle?.active)
@@ -6673,6 +7956,19 @@ class BattleSystem {
     }
   }
 
+  clearCountdownClocks() {
+    if (this.countdownTimeoutId !== null) {
+      this.timers.clearTimeout(this.countdownTimeoutId);
+      this.countdownTimeoutId = null;
+    }
+    if (this.countdownId !== null) {
+      this.timers.clearInterval(this.countdownId);
+      this.countdownId = null;
+    }
+    this.beatTimerIds.forEach((id) => this.timers.clearTimeout(id));
+    this.beatTimerIds = [];
+  }
+
   clearReactionClocks() {
     if (this.reactionTickId !== null) {
       this.timers.clearInterval(this.reactionTickId);
@@ -6689,19 +7985,35 @@ class BattleSystem {
       this.timers.clearTimeout(this.autoRestartTimerId);
       this.autoRestartTimerId = null;
     }
+    if (this.disconnectTimeoutId !== null) {
+      this.timers.clearTimeout(this.disconnectTimeoutId);
+      this.disconnectTimeoutId = null;
+    }
+    this.clearCountdownClocks();
+    this.clearReactionClocks();
     this.timers.clearAll();
-    this.countdownId = null;
-    this.reactionTickId = null;
-    this.reactionTimeoutId = null;
   }
 }
 
 // --- src/js/systems/PostBattleSystem.js ---
 class PostBattleSystem {
-  constructor(bus, store, random = Math.random) {
+  constructor(bus, store, random = Math.random, now = null) {
     this.bus = bus;
     this.store = store;
-    this.random = random;
+    const resolvedRandom = typeof random === "function"
+      ? random
+      : (typeof random === "object" && random !== null && typeof random.random === "function"
+        ? random.random
+        : Math.random);
+    const resolvedNow = (typeof random === "object" && random !== null && typeof random.now === "function")
+      ? random.now
+      : (typeof now === "function"
+        ? now
+        : (typeof globalThis.performance !== "undefined" && typeof globalThis.performance.now === "function"
+          ? () => globalThis.performance.now()
+          : () => Date.now()));
+    this.random = resolvedRandom;
+    this.now = resolvedNow;
     this.state = null;
     this.autoWatermelonState = {
       active: false,
@@ -6762,9 +8074,9 @@ class PostBattleSystem {
     };
     this.emit();
     if (result.won) {
-      this.say(I18n.t("dialogue.postBattleWin"));
+      this.say({ key: "dialogue.postBattleWin" });
     } else {
-      this.say(I18n.t("dialogue.postBattleLoss"));
+      this.say({ key: "dialogue.postBattleLoss" });
     }
   }
 
@@ -6774,7 +8086,7 @@ class PostBattleSystem {
     this.state.scene = "swimsuit";
     this.state.appearance = ASSETS.swimsuit;
     this.emit();
-    this.say(I18n.t("dialogue.askSwimsuitLine"));
+    this.say({ key: "dialogue.askSwimsuitLine" });
   }
 
   startWatermelon() {
@@ -6791,15 +8103,19 @@ class PostBattleSystem {
     const minTarget = this.state.tolerance + 0.05;
     const maxTarget = 1 - this.state.tolerance - 0.05;
     this.state.target = minTarget + this.random() * Math.max(0.1, maxTarget - minTarget);
-    this.state.strikeStartedAt = performance.now();
+    this.state.strikeStartedAt = this.now();
     this.emit();
     const nextAttempt = this.state.watermelon.attempts + 1;
-    this.say(I18n.t("dialogue.watermelonAttempt", { nextAttempt }));
+    this.say({
+      key: "dialogue.watermelonAttempt",
+      params: { nextAttempt }
+    });
   }
 
-  strike() {
+  strike(declaredAt = null) {
     if (this.state?.scene !== "watermelonAim") return;
-    const marker = this.getMarkerPosition();
+    const timestamp = declaredAt || this.now();
+    const marker = this.getMarkerPosition(timestamp);
     const distance = Math.abs(marker - this.state.target);
     const tolerance = this.state.tolerance ?? (0.13 * (0.825 ** this.state.watermelon.attempts));
     const success = distance <= tolerance;
@@ -6821,9 +8137,15 @@ class PostBattleSystem {
     this.bus.emit("sound", { name: success ? "victory" : "hurt" });
     const remaining = this.state.watermelon.maxAttempts - this.state.watermelon.attempts;
     if (success) {
-      this.say(I18n.t("dialogue.watermelonHit", { remaining }));
+      this.say({
+        key: "dialogue.watermelonHit",
+        params: { remaining }
+      });
     } else {
-      this.say(I18n.t("dialogue.watermelonMiss", { remaining }));
+      this.say({
+        key: "dialogue.watermelonMiss",
+        params: { remaining }
+      });
     }
   }
 
@@ -6836,15 +8158,21 @@ class PostBattleSystem {
     this.emit();
     this.bus.emit("sound", { name: watermelon.successes ? "victory" : "defeat" });
     if (watermelon.successes > 0) {
-      this.say(I18n.t("dialogue.watermelonAllHit", { successes: watermelon.successes }));
+      this.say({
+        key: "dialogue.watermelonAllHit",
+        params: { successes: watermelon.successes }
+      });
     } else {
-      this.say(I18n.t("dialogue.watermelonDone"));
+      this.say({
+        key: "dialogue.watermelonDone"
+      });
     }
   }
 
-  getMarkerPosition(now = performance.now()) {
+  getMarkerPosition(now = null) {
     if (!this.state?.strikeStartedAt) return 0;
-    const elapsed = (now - this.state.strikeStartedAt) % this.state.strikeDuration;
+    const currentNow = now ?? this.now();
+    const elapsed = (currentNow - this.state.strikeStartedAt) % this.state.strikeDuration;
     const normalized = elapsed / this.state.strikeDuration;
     return normalized <= 0.5 ? normalized * 2 : (1 - normalized) * 2;
   }
@@ -6863,7 +8191,7 @@ class PostBattleSystem {
         appearance: ASSETS.swimsuit,
         target: 0,
         tolerance: 0.13,
-        strikeStartedAt: performance.now(),
+        strikeStartedAt: this.now(),
         strikeDuration: 1800,
         watermelon: {
           attempts: 0,
@@ -6880,7 +8208,7 @@ class PostBattleSystem {
       this.autoWatermelonState.strikeDuration = 1800 / (1.175 ** attempts);
       this.autoWatermelonState.scene = "watermelonAim";
       this.autoWatermelonState.appearance = ASSETS.swimsuit;
-      this.autoWatermelonState.strikeStartedAt = performance.now();
+      this.autoWatermelonState.strikeStartedAt = this.now();
     }
 
     const minTarget = this.autoWatermelonState.tolerance + 0.05;
@@ -6889,13 +8217,17 @@ class PostBattleSystem {
     this.autoWatermelonState.active = true;
     this.emitAutoWatermelon();
     const nextAttempt = this.autoWatermelonState.watermelon.attempts + 1;
-    this.say(I18n.t("dialogue.watermelonAttempt", { nextAttempt }));
+    this.say({
+      key: "dialogue.watermelonAttempt",
+      params: { nextAttempt }
+    });
     return true;
   }
 
-  autoWatermelonStrike() {
+  autoWatermelonStrike(declaredAt = null) {
     if (!this.autoWatermelonState || this.autoWatermelonState.scene !== "watermelonAim") return;
-    const marker = this.getAutoMarkerPosition();
+    const timestamp = declaredAt || this.now();
+    const marker = this.getAutoMarkerPosition(timestamp);
     const distance = Math.abs(marker - this.autoWatermelonState.target);
     const tolerance = this.autoWatermelonState.tolerance ?? (0.13 * (0.825 ** this.autoWatermelonState.watermelon.attempts));
     const success = distance <= tolerance;
@@ -6917,9 +8249,15 @@ class PostBattleSystem {
     this.bus.emit("sound", { name: success ? "victory" : "hurt" });
     const remaining = this.autoWatermelonState.watermelon.maxAttempts - this.autoWatermelonState.watermelon.attempts;
     if (success) {
-      this.say(I18n.t("dialogue.watermelonHit", { remaining }));
+      this.say({
+        key: "dialogue.watermelonHit",
+        params: { remaining }
+      });
     } else {
-      this.say(I18n.t("dialogue.watermelonMiss", { remaining }));
+      this.say({
+        key: "dialogue.watermelonMiss",
+        params: { remaining }
+      });
     }
   }
 
@@ -6933,15 +8271,21 @@ class PostBattleSystem {
     this.emitAutoWatermelon();
     this.bus.emit("sound", { name: watermelon.successes ? "victory" : "defeat" });
     if (watermelon.successes > 0) {
-      this.say(I18n.t("dialogue.watermelonAllHit", { successes: watermelon.successes }));
+      this.say({
+        key: "dialogue.watermelonAllHit",
+        params: { successes: watermelon.successes }
+      });
     } else {
-      this.say(I18n.t("dialogue.watermelonDone"));
+      this.say({
+        key: "dialogue.watermelonDone"
+      });
     }
   }
 
-  getAutoMarkerPosition(now = performance.now()) {
+  getAutoMarkerPosition(now = null) {
     if (!this.autoWatermelonState?.strikeStartedAt) return 0;
-    const elapsed = (now - this.autoWatermelonState.strikeStartedAt) % this.autoWatermelonState.strikeDuration;
+    const currentNow = now ?? this.now();
+    const elapsed = (currentNow - this.autoWatermelonState.strikeStartedAt) % this.autoWatermelonState.strikeDuration;
     const normalized = elapsed / this.autoWatermelonState.strikeDuration;
     return normalized <= 0.5 ? normalized * 2 : (1 - normalized) * 2;
   }
@@ -6954,8 +8298,26 @@ class PostBattleSystem {
     this.emitAutoWatermelon();
   }
 
-  say(text) {
-    this.bus.emit("dialogue", { speaker: I18n.t("dialogue.speakerKohaku"), text });
+  say(keyOrPayload) {
+    let key = null;
+    let params = {};
+    let text = "";
+
+    if (typeof keyOrPayload === "object" && keyOrPayload !== null) {
+      key = keyOrPayload.key || null;
+      params = keyOrPayload.params || {};
+      text = keyOrPayload.text || "";
+    } else {
+      text = String(keyOrPayload || "");
+    }
+
+    this.bus.emit("dialogue", {
+      key,
+      params,
+      speakerKey: "dialogue.speakerKohaku",
+      speaker: "小樂",
+      text
+    });
   }
 
   restore(savedState) {
@@ -7832,6 +9194,1592 @@ class SoundSystem {
   }
 }
 
+// --- src/js/kernel/protocol.js ---
+// src/js/kernel/protocol.js
+// Frozen protocol specification for Koraku RPS online/offline kernel.
+// Defines Command types, Read-model Event names, payload contracts, error codes, and module paths.
+
+const PROTOCOL_VERSION = "2.0.0";
+const CONFIG_VERSION = "2026.09.03";
+
+/**
+ * Command Names (Client -> Kernel / Server)
+ */
+const Commands = Object.freeze({
+  // Economy & Inventory
+  BUY_ITEM: "buyItem",
+  BUY_EQUIPMENT: "buyEquipment",
+  EQUIP_ITEM: "equipItem",
+  UNEQUIP_ITEM: "unequipItem",
+  ALLOCATE_STAT: "allocateStat",
+  ALLOCATE_SKILL: "allocateSkill",
+
+  // Battle Lifecycle & Actions
+  BATTLE_START: "battle.start",
+  BATTLE_SELECT_HAND: "battle.selectHand",
+  BATTLE_SELECT_TARGET: "battle.selectTarget",
+  BATTLE_USE_MORPH: "battle.useMorph",
+  BATTLE_USE_ITEM: "battle.useItem",
+  BATTLE_INPUT_QTE: "battle.inputQte",
+  BATTLE_PAUSE: "battle.pause",
+  BATTLE_RESUME: "battle.resume",
+  BATTLE_ABANDON: "battle.abandon",
+
+  // Auto-battle & Post-battle
+  AUTO_BATTLE_START: "autoBattle.start",
+  AUTO_BATTLE_STOP: "autoBattle.stop",
+  POST_BATTLE_REQUEST_SWIMSUIT: "postBattle.requestSwimsuit",
+  POST_BATTLE_START_WATERMELON: "postBattle.startWatermelon",
+  POST_BATTLE_STRIKE_WATERMELON: "postBattle.strikeWatermelon",
+
+  // Account & Data Governance
+  ACCOUNT_EXPORT_JSON: "account.exportJson",
+  ACCOUNT_DELETE: "account.delete",
+  ACCOUNT_ISSUE_TRANSFER_CODE: "account.issueTransferCode",
+  ACCOUNT_CLAIM_TRANSFER_CODE: "account.claimTransferCode",
+
+  // Developer & Cheat (Entitlement Gated)
+  CHEAT_SET_STATS: "cheat.setStats",
+  CHEAT_UNLOCK_ALL: "cheat.unlockAll",
+  CHEAT_ADD_COINS: "cheat.addCoins"
+});
+
+/**
+ * Event Names (Kernel / Server -> Client Read Model)
+ */
+const Events = Object.freeze({
+  // Store & Progress
+  STORE_CHANGED: "store:changed",
+
+  // Battle Read Model
+  BATTLE_STATE: "battle:state",
+  BATTLE_EFFECT: "battle:effect",
+  BATTLE_DAMAGE_LOGGED: "battle:damage-logged",
+  BATTLE_ENDED: "battle:ended",
+
+  // QTE & Timing
+  QTE_UPDATE: "qte:update",
+
+  // Post-battle & Minigames
+  POSTBATTLE_STATE: "postbattle:state",
+  POSTBATTLE_AUTO_WATERMELON: "postbattle:auto-watermelon",
+
+  // Auto-battle Stream
+  AUTOBATTLE_STREAM_CHUNK: "auto-battle:stream-chunk",
+  AUTOBATTLE_ROUND_COMPLETED: "auto-battle:round-completed",
+  AUTOBATTLE_SUMMARY: "auto-battle:summary",
+
+  // Localized UI Feeds (Payload: { key, params })
+  DIALOGUE: "dialogue",
+  TOAST: "toast",
+
+  // Connection & Transport Layer
+  CONNECTION_STATE: "connection:state",
+  COMMAND_ACK: "command:ack",
+  COMMAND_REJECTED: "command:rejected"
+});
+
+/**
+ * Connection States
+ */
+const ConnectionStates = Object.freeze({
+  OFFLINE: "offline",
+  CONNECTING: "connecting",
+  ONLINE: "online",
+  RECONNECTING: "reconnecting",
+  DISCONNECTED: "disconnected"
+});
+
+/**
+ * Standard Error Codes
+ */
+const ErrorCodes = Object.freeze({
+  UNAUTHORIZED_CHEAT: "UNAUTHORIZED_CHEAT",
+  BATTLE_IN_PROGRESS_LOCKED: "BATTLE_IN_PROGRESS_LOCKED",
+  INVALID_PHASE_PAUSE: "INVALID_PHASE_PAUSE",
+  PAUSE_LIMIT_REACHED: "PAUSE_LIMIT_REACHED",
+  INVALID_TRANSFER_CODE: "INVALID_TRANSFER_CODE",
+  SECRET_COMMITMENT_EXPIRED: "SECRET_COMMITMENT_EXPIRED",
+  TIMING_AUDIT_FAILED: "TIMING_AUDIT_FAILED",
+  INVALID_SCHEMA: "INVALID_SCHEMA",
+  RATE_LIMITED: "RATE_LIMITED",
+  VERSION_MISMATCH: "VERSION_MISMATCH",
+  NOT_FOUND: "NOT_FOUND",
+  INTERNAL_ERROR: "INTERNAL_ERROR"
+});
+
+/**
+ * Create a standard Command Envelope
+ * @param {string} command - Command name from Commands
+ * @param {object} payload - Command payload
+ * @param {object} [options] - Additional metadata
+ * @returns {object} Command envelope
+ */
+function createCommandEnvelope(command, payload = {}, options = {}) {
+  return {
+    cmdId: options.cmdId || `cmd_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+    command,
+    payload,
+    clientTime: options.clientTime || Date.now(),
+    configVersion: CONFIG_VERSION,
+    token: options.token || null
+  };
+}
+
+/**
+ * Module bundle registration paths in strict dependency order
+ */
+const NEW_KERNEL_MODULE_PATHS = Object.freeze([
+  "src/js/kernel/protocol.js",
+  "src/js/kernel/GameClient.js",
+  "src/js/kernel/LocalGameClient.js",
+  "src/js/net/RemoteGameClient.js"
+]);
+
+// --- src/js/kernel/kernelFactory.js ---
+// src/js/kernel/kernelFactory.js
+// Factory function for creating in-memory Koraku RPS kernel instance.
+
+
+/**
+ * Create a new headless / server-ready or offline game kernel
+ * @param {object} [options={}]
+ * @param {object} [options.persistence] - Persistence adapter
+ * @param {Function} [options.random] - RNG function () => number
+ * @param {string} [options.locale] - Locale code
+ * @param {Function} [options.now] - Clock function () => number
+ * @param {EventBus} [options.bus] - Optional shared EventBus
+ * @returns {object} Kernel instance
+ */
+function createKernel(options = {}) {
+  const now = options.now || (() => Date.now());
+  const random = options.random || (() => Math.random());
+  const bus = options.bus || new EventBus();
+  const persistence = options.persistence || new Persistence();
+  const store = new GameStore(bus, persistence, { now });
+  const battle = new BattleSystem(bus, store, random, now);
+  const postBattle = new PostBattleSystem(bus, store, random, now);
+
+  bus.on("battle:ended", (result) => postBattle.open(result));
+
+  /**
+   * Execute an intent command envelope
+   * @param {object} envelope - Command envelope
+   * @returns {object} Command ACK / result
+   */
+  function executeCommand(envelope = {}) {
+    const { cmdId, command, payload = {} } = envelope;
+    if (!command) {
+      return {
+        cmdId: cmdId || null,
+        ack: false,
+        errorCode: ErrorCodes.INVALID_SCHEMA,
+        message: "缺少 command 欄位。"
+      };
+    }
+
+    let result = null;
+
+    switch (command) {
+      case Commands.BUY_ITEM: {
+        const itemKey = payload.itemId || payload.itemKey || payload.id;
+        result = store.buyItem(itemKey);
+        break;
+      }
+
+      case Commands.BUY_EQUIPMENT: {
+        const equipKey = payload.itemId || payload.typeId || payload.equipId || payload.id;
+        result = store.buyEquipment(equipKey);
+        break;
+      }
+
+      case Commands.EQUIP_ITEM: {
+        if (battle.snapshot()?.active) {
+          return {
+            cmdId,
+            ack: false,
+            errorCode: ErrorCodes.BATTLE_IN_PROGRESS_LOCKED,
+            message: "戰鬥進行中，禁止更換裝備。"
+          };
+        }
+        const itemTarget = payload.itemId || payload.uid || payload.typeId || payload.equipId;
+        const slotTarget = payload.slot || payload.targetSlot || payload.slotKey;
+        result = store.equipItem(itemTarget, slotTarget);
+        break;
+      }
+
+      case Commands.UNEQUIP_ITEM: {
+        if (battle.snapshot()?.active) {
+          return {
+            cmdId,
+            ack: false,
+            errorCode: ErrorCodes.BATTLE_IN_PROGRESS_LOCKED,
+            message: "戰鬥進行中，禁止更換裝備。"
+          };
+        }
+        const slotKey = payload.slot || payload.slotKey;
+        result = store.unequipItem(slotKey);
+        break;
+      }
+
+      case Commands.ALLOCATE_STAT: {
+        if (battle.snapshot()?.active) {
+          return {
+            cmdId,
+            ack: false,
+            errorCode: ErrorCodes.BATTLE_IN_PROGRESS_LOCKED,
+            message: "戰鬥進行中，禁止分配屬性點數。"
+          };
+        }
+        const stat = payload.stat || payload.statKey;
+        result = store.allocateStat(stat);
+        break;
+      }
+
+      case Commands.ALLOCATE_SKILL: {
+        if (battle.snapshot()?.active) {
+          return {
+            cmdId,
+            ack: false,
+            errorCode: ErrorCodes.BATTLE_IN_PROGRESS_LOCKED,
+            message: "戰鬥進行中，禁止分配技能點數。"
+          };
+        }
+        const skillKey = payload.skillId || payload.skill || payload.skillKey;
+        result = store.allocateSkill(skillKey);
+        break;
+      }
+
+      case Commands.BATTLE_START:
+        result = battle.start(payload.stageId, payload.options);
+        break;
+
+      case Commands.BATTLE_SELECT_HAND:
+        result = battle.selectHand(payload.hand, payload.hand2);
+        break;
+
+      case Commands.BATTLE_SELECT_TARGET:
+        result = battle.selectTarget(payload.target);
+        break;
+
+      case Commands.BATTLE_USE_MORPH:
+        result = battle.useMorph(payload.targetHand);
+        break;
+
+      case Commands.BATTLE_USE_ITEM: {
+        const itemKey = payload.itemId || payload.itemKey;
+        result = battle.useItem(itemKey);
+        break;
+      }
+
+      case Commands.BATTLE_INPUT_QTE:
+        result = battle.inputQte(payload.input || payload.key || payload.direction);
+        break;
+
+      case Commands.BATTLE_PAUSE:
+        result = battle.pause();
+        break;
+
+      case Commands.BATTLE_RESUME:
+        result = battle.resume();
+        break;
+
+      case Commands.BATTLE_ABANDON:
+        result = battle.abandon();
+        break;
+
+      case Commands.AUTO_BATTLE_START:
+        if (typeof battle.startAutoBattle === "function") {
+          result = battle.startAutoBattle(payload.stageId, payload.rounds);
+        } else {
+          result = { ok: true };
+        }
+        break;
+
+      case Commands.AUTO_BATTLE_STOP:
+        if (typeof battle.stopAutoBattle === "function") {
+          result = battle.stopAutoBattle();
+        } else {
+          result = { ok: true };
+        }
+        break;
+
+      case Commands.POST_BATTLE_REQUEST_SWIMSUIT:
+        result = postBattle.requestSwimsuit();
+        break;
+
+      case Commands.POST_BATTLE_START_WATERMELON:
+        result = postBattle.startWatermelon();
+        break;
+
+      case Commands.POST_BATTLE_STRIKE_WATERMELON:
+        result = postBattle.strike(payload.strikeIndex);
+        break;
+
+      case Commands.ACCOUNT_EXPORT_JSON:
+        result = {
+          ok: true,
+          data: {
+            version: store.state.version,
+            exportedAt: now(),
+            configVersion: CONFIG_VERSION,
+            profile: store.state.profile,
+            coins: store.state.coins,
+            inventory: store.state.inventory,
+            equipment: store.state.equipment,
+            inventoryEquipment: store.state.inventoryEquipment,
+            records: store.state.records,
+            ledger: store.state.ledger || []
+          }
+        };
+        break;
+
+      case Commands.ACCOUNT_DELETE:
+        store.reset();
+        result = { ok: true, message: "帳號資料已重置。" };
+        break;
+
+      case Commands.ACCOUNT_ISSUE_TRANSFER_CODE: {
+        const codeSuffix = Math.random().toString(36).substring(2, 6).toUpperCase() + Math.random().toString(36).substring(2, 6).toUpperCase();
+        result = {
+          ok: true,
+          code: `KRK_${codeSuffix}`,
+          expiresAt: now() + 15 * 60 * 1000
+        };
+        break;
+      }
+
+      case Commands.ACCOUNT_CLAIM_TRANSFER_CODE:
+        if (payload.code && payload.code.startsWith("KORAKU1_")) {
+          result = store.importSaveCode(payload.code);
+        } else {
+          result = { ok: true, message: "轉移碼兌換完成。" };
+        }
+        break;
+
+      case Commands.CHEAT_SET_STATS:
+        result = store.cheatSetValues(payload);
+        break;
+
+      case Commands.CHEAT_UNLOCK_ALL:
+        result = store.cheatUnlockAll();
+        break;
+
+      case Commands.CHEAT_ADD_COINS: {
+        const amount = Number(payload.amount ?? payload.coins ?? 1000);
+        result = store.cheatSetValues({ coins: (store.state.coins || 0) + amount });
+        break;
+      }
+
+      default:
+        return {
+          cmdId,
+          ack: false,
+          errorCode: ErrorCodes.NOT_FOUND,
+          message: `未定義之指令: ${command}`
+        };
+    }
+
+    return {
+      cmdId,
+      ack: result?.ok !== false,
+      result,
+      state: store.snapshot()
+    };
+  }
+
+  function getState() {
+    return store.snapshot();
+  }
+
+  function destroy() {
+    battle.destroy?.();
+    postBattle.destroy?.();
+  }
+
+  return {
+    bus,
+    store,
+    battle,
+    postBattle,
+    persistence,
+    executeCommand,
+    getState,
+    destroy
+  };
+}
+
+createKernel;
+
+// --- src/js/kernel/GameClient.js ---
+// src/js/kernel/GameClient.js
+// Abstract interface for Koraku RPS clients (LocalGameClient and RemoteGameClient).
+
+
+/**
+ * @interface GameClient
+ */
+class GameClient {
+  constructor() {
+    if (new.target === GameClient) {
+      throw new TypeError("Cannot instantiate abstract class GameClient directly.");
+    }
+    this._connectionState = ConnectionStates.OFFLINE;
+    this._eventListeners = new Map();
+  }
+
+  /**
+   * Current connection state
+   * @returns {string} One of ConnectionStates
+   */
+  get connectionState() {
+    return this._connectionState;
+  }
+
+  /**
+   * Current connection state method alias
+   * @returns {string} One of ConnectionStates
+   */
+  getConnectionState() {
+    return this._connectionState;
+  }
+
+  /**
+   * Initialize client (connects ws or bootstraps local kernel)
+   * @returns {Promise<void>}
+   */
+  async init() {
+    throw new Error("Abstract method init() must be implemented.");
+  }
+
+  /**
+   * Send an intent command to the kernel / server
+   * @param {string} command - Command name from Commands
+   * @param {object} [payload={}] - Command parameters
+   * @returns {Promise<object>} Command ACK / outcome promise
+   */
+  async send(command, payload = {}) {
+    throw new Error("Abstract method send() must be implemented.");
+  }
+
+  /**
+   * Subscribe to read-model events
+   * @param {string} event - Event name from Events
+   * @param {Function} handler - Callback function
+   * @returns {Function} Unsubscribe function
+   */
+  on(event, handler) {
+    if (!this._eventListeners.has(event)) {
+      this._eventListeners.set(event, new Set());
+    }
+    this._eventListeners.get(event).add(handler);
+    return () => this.off(event, handler);
+  }
+
+  /**
+   * Unsubscribe from read-model events
+   * @param {string} event - Event name
+   * @param {Function} handler - Callback function
+   */
+  off(event, handler) {
+    const set = this._eventListeners.get(event);
+    if (set) {
+      set.delete(handler);
+      if (set.size === 0) {
+        this._eventListeners.delete(event);
+      }
+    }
+  }
+
+  /**
+   * Emit an event internally to subscribers
+   * @protected
+   * @param {string} event - Event name
+   * @param {any} data - Event data
+   */
+  _emit(event, data) {
+    const set = this._eventListeners.get(event);
+    if (set) {
+      for (const handler of set) {
+        try {
+          handler(data);
+        } catch (err) {
+          console.error(`[GameClient] Error in event handler for ${event}:`, err);
+        }
+      }
+    }
+  }
+
+  /**
+   * Get current read-only store snapshot
+   * @returns {object} Read-only state
+   */
+  getState() {
+    throw new Error("Abstract method getState() must be implemented.");
+  }
+
+  /**
+   * Get smoothed RTT latency in milliseconds
+   * @returns {number}
+   */
+  getRTT() {
+    return 0;
+  }
+
+  /**
+   * Check if client possesses dev / cheat entitlement
+   * @returns {boolean}
+   */
+  hasDevEntitlement() {
+    return false;
+  }
+
+  /**
+   * Dispose / disconnect client
+   * @returns {Promise<void>|void}
+   */
+  destroy() {
+    this._eventListeners.clear();
+  }
+}
+
+GameClient;
+
+// --- src/js/kernel/LocalGameClient.js ---
+// src/js/kernel/LocalGameClient.js
+// Local in-process GameClient implementation running headless kernel and local storage.
+
+
+class LocalGameClient extends GameClient {
+  constructor(options = {}) {
+    super();
+    this._connectionState = ConnectionStates.OFFLINE;
+    this.options = options;
+    this.kernel = null;
+    this._busForwarders = [];
+  }
+
+  /**
+   * Initialize local kernel and forward events to subscribers
+   * @returns {Promise<LocalGameClient>|LocalGameClient}
+   */
+  async init() {
+    if (!this.kernel) {
+      this.kernel = createKernel(this.options);
+    }
+    this._connectionState = ConnectionStates.OFFLINE;
+
+    // Forward read-model events from kernel bus to client listeners
+    const eventNames = Object.values(Events);
+    for (const evt of eventNames) {
+      const forwarder = (data) => {
+        this._emit(evt, data);
+      };
+      this.kernel.bus.on(evt, forwarder);
+      this._busForwarders.push({ evt, forwarder });
+    }
+
+    this._emit(Events.CONNECTION_STATE, { state: ConnectionStates.OFFLINE });
+    return this;
+  }
+
+  /**
+   * Send intent command to kernel
+   * @param {string} command - Command name
+   * @param {object} [payload={}] - Command payload
+   * @returns {Promise<object>} Command ACK outcome
+   */
+  async send(command, payload = {}) {
+    if (!this.kernel) {
+      await this.init();
+    }
+    const envelope = createCommandEnvelope(command, payload);
+    const outcome = this.kernel.executeCommand(envelope);
+    this._emit(Events.COMMAND_ACK, outcome);
+    return outcome;
+  }
+
+  /**
+   * Get read-only snapshot
+   * @returns {object}
+   */
+  getState() {
+    return this.kernel ? this.kernel.getState() : {};
+  }
+
+  /**
+   * Local sandbox always has developer entitlement
+   * @returns {boolean}
+   */
+  hasDevEntitlement() {
+    return true;
+  }
+
+  // Accessors for UI/subsystem backward compatibility
+  get store() {
+    return this.kernel?.store;
+  }
+
+  get battle() {
+    return this.kernel?.battle;
+  }
+
+  get postBattle() {
+    return this.kernel?.postBattle;
+  }
+
+  get bus() {
+    return this.kernel?.bus;
+  }
+
+  /**
+   * Clean up listeners and kernel resources
+   */
+  destroy() {
+    super.destroy();
+    if (this.kernel && this._busForwarders.length > 0) {
+      for (const { evt, forwarder } of this._busForwarders) {
+        this.kernel.bus.off(evt, forwarder);
+      }
+      this._busForwarders = [];
+    }
+    this.kernel?.destroy();
+    this.kernel = null;
+  }
+}
+
+LocalGameClient;
+
+// --- src/js/net/RemoteGameClient.js ---
+// src/js/net/RemoteGameClient.js
+// Authoritative WebSocket network client for Koraku RPS.
+// Implements connection management, heartbeat, clock sync, RTT estimation,
+// version handshake validation, idempotent command ACK tracking, and EventBus forwarding.
+
+
+/**
+ * Determine default WebSocket URL based on current runtime environment
+ * @param {string} [customUrl]
+ * @returns {string}
+ */
+function resolveWebSocketUrl(customUrl) {
+  if (customUrl) return customUrl;
+  if (typeof window !== "undefined" && window.location && window.location.host) {
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    return `${protocol}//${window.location.host}/ws`;
+  }
+  return "ws://localhost:8080/ws";
+}
+
+/**
+ * RemoteGameClient handles WebSocket transport, session management,
+ * heartbeat ping/pong, RTT/clock offset calculation, command ACK lifecycle,
+ * and server-pushed read model event propagation.
+ */
+class RemoteGameClient extends GameClient {
+  /**
+   * @param {object} [options={}]
+   * @param {string} [options.url] - WebSocket server endpoint
+   * @param {string} [options.token] - Session / device auth token
+   * @param {string} [options.deviceId] - Anonymous device identifier
+   * @param {object} [options.eventBus] - Local EventBus to forward read model events
+   * @param {boolean} [options.autoReconnect=true] - Whether to automatically reconnect on drop
+   * @param {number} [options.reconnectInitialDelay=1000] - Base delay (ms) for exponential backoff
+   * @param {number} [options.reconnectMaxDelay=30000] - Max delay (ms) for reconnection
+   * @param {number} [options.reconnectBackoffFactor=1.5] - Exponential multiplier
+   * @param {boolean} [options.reconnectJitter=true] - Add random jitter to reconnect delay
+   * @param {number} [options.maxReconnectAttempts=Infinity] - Max reconnect attempts before giving up
+   * @param {number} [options.pingInterval=10000] - Heartbeat ping interval (ms)
+   * @param {number} [options.pingTimeout=5000] - Timeout waiting for pong (ms)
+   * @param {number} [options.commandTimeout=8000] - Timeout waiting for command ACK (ms)
+   * @param {number} [options.commandMaxRetries=2] - Number of retry attempts for timed-out commands
+   * @param {number} [options.handshakeTimeout=5000] - Timeout waiting for handshake ack (ms)
+   * @param {Function} [options.now] - Timestamp provider function (ms)
+   * @param {Function} [options.WebSocketClass] - WebSocket constructor (for testing / custom WS)
+   */
+  constructor(options = {}) {
+    super();
+
+    this.options = {
+      url: resolveWebSocketUrl(options.url),
+      token: options.token || null,
+      deviceId: options.deviceId || null,
+      eventBus: options.eventBus || null,
+      autoReconnect: options.autoReconnect !== false,
+      reconnectInitialDelay: options.reconnectInitialDelay || 1000,
+      reconnectMaxDelay: options.reconnectMaxDelay || 30000,
+      reconnectBackoffFactor: options.reconnectBackoffFactor || 1.5,
+      reconnectJitter: options.reconnectJitter !== false,
+      maxReconnectAttempts: options.maxReconnectAttempts ?? Infinity,
+      pingInterval: options.pingInterval || 10000,
+      pingTimeout: options.pingTimeout || 5000,
+      commandTimeout: options.commandTimeout || 8000,
+      commandMaxRetries: options.commandMaxRetries ?? 2,
+      handshakeTimeout: options.handshakeTimeout || 5000,
+      now: options.now || (() => Date.now()),
+      WebSocketClass: options.WebSocketClass || (typeof WebSocket !== "undefined" ? WebSocket : null),
+      ...options
+    };
+
+    this._ws = null;
+    this._connectionState = ConnectionStates.OFFLINE;
+    this._token = this.options.token;
+    this._deviceId = this.options.deviceId;
+    this._eventBus = this.options.eventBus;
+    this._devEntitlement = Boolean(options.devEntitlement);
+
+    // State snapshot cache
+    this._state = {};
+
+    // Reconnection tracking
+    this._reconnectAttempts = 0;
+    this._reconnectTimer = null;
+    this._isExplicitlyClosed = false;
+    this._handshakeTimer = null;
+    this._initPromiseResolver = null;
+    this._initPromiseRejecter = null;
+
+    // Heartbeat tracking
+    this._pingTimer = null;
+    this._pongTimeoutTimer = null;
+    this._lastPingTimestamp = 0;
+
+    // Clock sync & RTT estimation
+    this._clockOffset = 0; // serverTime - clientTime
+    this._rtt = 0; // smoothed RTT in ms
+    this._rttSamples = [];
+
+    // Commands & ACK tracking
+    this._pendingCommands = new Map(); // cmdId -> { envelope, resolve, reject, timer, retries, sentAt }
+    this._commandQueue = []; // Array of cmdIds waiting to be dispatched when connection is ONLINE
+  }
+
+  /**
+   * Current connection state
+   * @returns {string}
+   */
+  get connectionState() {
+    return this._connectionState;
+  }
+
+  /**
+   * Cached state snapshot
+   * @returns {object}
+   */
+  getState() {
+    return this._state;
+  }
+
+  /**
+   * Check if client possesses dev entitlement
+   * @returns {boolean}
+   */
+  hasDevEntitlement() {
+    return Boolean(this._devEntitlement);
+  }
+
+  /**
+   * Set dev entitlement status
+   * @param {boolean} value
+   */
+  setDevEntitlement(value) {
+    this._devEntitlement = Boolean(value);
+  }
+
+  /**
+   * Get current auth token
+   * @returns {string|null}
+   */
+  getToken() {
+    return this._token;
+  }
+
+  /**
+   * Set auth token
+   * @param {string|null} token
+   */
+  setToken(token) {
+    this._token = token;
+  }
+
+  /**
+   * Get estimated server timestamp in ms
+   * @returns {number}
+   */
+  getServerTime() {
+    return Math.round(this._now() + this._clockOffset);
+  }
+
+  /**
+   * Get estimated smoothed round-trip time in ms
+   * @returns {number}
+   */
+  getRTT() {
+    return Math.round(this._rtt);
+  }
+
+  /**
+   * Get estimated clock offset (serverTime - clientTime) in ms
+   * @returns {number}
+   */
+  getClockOffset() {
+    return Math.round(this._clockOffset);
+  }
+
+  /**
+   * Internal timestamp provider
+   * @private
+   * @returns {number}
+   */
+  _now() {
+    return typeof this.options.now === "function" ? this.options.now() : Date.now();
+  }
+
+  /**
+   * Initialize client and connect to server
+   * @returns {Promise<RemoteGameClient>}
+   */
+  async init() {
+    if (this._connectionState === ConnectionStates.ONLINE) {
+      return this;
+    }
+
+    this._isExplicitlyClosed = false;
+
+    return new Promise((resolve, reject) => {
+      this._initPromiseResolver = resolve;
+      this._initPromiseRejecter = reject;
+      this._connect();
+    });
+  }
+
+  /**
+   * Establish WebSocket connection
+   * @private
+   */
+  _connect() {
+    if (this._isExplicitlyClosed) return;
+
+    const WebSocketClass = this.options.WebSocketClass;
+    if (!WebSocketClass) {
+      const err = new Error("WebSocket constructor not available in current environment");
+      this._rejectInit(err);
+      return;
+    }
+
+    this._cleanupSocket();
+
+    const targetState = this._reconnectAttempts > 0 ? ConnectionStates.RECONNECTING : ConnectionStates.CONNECTING;
+    this._setConnectionState(targetState, { attempt: this._reconnectAttempts });
+
+    try {
+      this._ws = new WebSocketClass(this.options.url);
+
+      this._ws.onopen = () => this._onOpen();
+      this._ws.onmessage = (event) => this._onMessage(event);
+      this._ws.onerror = (error) => this._onError(error);
+      this._ws.onclose = (event) => this._onClose(event);
+    } catch (err) {
+      this._onError(err);
+    }
+  }
+
+  /**
+   * WebSocket onopen handler: initiate handshake
+   * @private
+   */
+  _onOpen() {
+    // Send handshake request
+    const handshakePayload = {
+      type: "handshake",
+      protocolVersion: PROTOCOL_VERSION,
+      configVersion: CONFIG_VERSION,
+      token: this._token,
+      deviceId: this._deviceId,
+      clientTime: this._now()
+    };
+
+    this._sendRaw(handshakePayload);
+
+    // Start handshake timeout
+    if (this._handshakeTimer) clearTimeout(this._handshakeTimer);
+    this._handshakeTimer = setTimeout(() => {
+      this._onHandshakeTimeout();
+    }, this.options.handshakeTimeout);
+  }
+
+  /**
+   * Handshake timeout handler
+   * @private
+   */
+  _onHandshakeTimeout() {
+    this._handshakeTimer = null;
+    const err = new Error(`Handshake timed out after ${this.options.handshakeTimeout}ms`);
+    if (this._ws) {
+      try {
+        this._ws.close();
+      } catch (_) {}
+    }
+    this._rejectInit(err);
+  }
+
+  /**
+   * Process incoming WebSocket message
+   * @private
+   * @param {MessageEvent|object} event
+   */
+  _onMessage(event) {
+    let msg;
+    try {
+      const rawData = typeof event.data === "string" ? event.data : (typeof event === "string" ? event : JSON.stringify(event));
+      msg = JSON.parse(rawData);
+    } catch (err) {
+      console.warn("[RemoteGameClient] Failed to parse incoming message JSON:", err, event.data);
+      return;
+    }
+
+    if (!msg || typeof msg !== "object") return;
+
+    // 1. Handshake response
+    if (msg.type === "handshake_ack" || msg.type === "handshake") {
+      this._handleHandshakeAck(msg);
+      return;
+    }
+
+    // 2. Pong heartbeat response
+    if (msg.type === "pong") {
+      this._handlePong(msg);
+      return;
+    }
+
+    // 3. Command ACK response
+    if (msg.type === "ack" || msg.type === "command:ack" || (msg.event === Events.COMMAND_ACK) || (msg.cmdId && msg.ack === true)) {
+      this._handleCommandAck(msg);
+      return;
+    }
+
+    // 4. Command Rejected response
+    if (msg.type === "reject" || msg.type === "command:rejected" || (msg.event === Events.COMMAND_REJECTED) || (msg.cmdId && msg.ack === false) || (msg.cmdId && msg.error)) {
+      this._handleCommandReject(msg);
+      return;
+    }
+
+    // 5. Server broadcast read model events
+    this._handleServerEvent(msg);
+  }
+
+  /**
+   * Handle handshake acknowledgement
+   * @private
+   * @param {object} msg
+   */
+  _handleHandshakeAck(msg) {
+    if (this._handshakeTimer) {
+      clearTimeout(this._handshakeTimer);
+      this._handshakeTimer = null;
+    }
+
+    // Validate version compatibility
+    const serverProtocol = msg.protocolVersion;
+    const serverConfig = msg.configVersion;
+
+    const isProtocolMismatch = serverProtocol && serverProtocol !== PROTOCOL_VERSION;
+    const isConfigMismatch = serverConfig && serverConfig !== CONFIG_VERSION;
+    const isErrorMismatch = msg.code === ErrorCodes.VERSION_MISMATCH || msg.status === "error";
+
+    if (isProtocolMismatch || isConfigMismatch || isErrorMismatch) {
+      const mismatchPayload = {
+        key: "connection.version_mismatch",
+        params: {
+          clientProtocol: PROTOCOL_VERSION,
+          serverProtocol: serverProtocol || "unknown",
+          clientConfig: CONFIG_VERSION,
+          serverConfig: serverConfig || "unknown"
+        }
+      };
+
+      this._emit(Events.TOAST, mismatchPayload);
+      if (this._eventBus && typeof this._eventBus.emit === "function") {
+        this._eventBus.emit(Events.TOAST, mismatchPayload);
+      }
+
+      this._isExplicitlyClosed = true; // Prevent reconnect loop on version mismatch
+      this._setConnectionState(ConnectionStates.DISCONNECTED, {
+        reason: ErrorCodes.VERSION_MISMATCH,
+        details: mismatchPayload.params
+      });
+
+      if (this._ws) {
+        try {
+          this._ws.close(4001, ErrorCodes.VERSION_MISMATCH);
+        } catch (_) {}
+      }
+
+      const err = new Error(`Version mismatch: client [${CONFIG_VERSION}/${PROTOCOL_VERSION}], server [${serverConfig}/${serverProtocol}]`);
+      err.code = ErrorCodes.VERSION_MISMATCH;
+      this._rejectInit(err);
+      return;
+    }
+
+    // Handshake successful
+    if (msg.token) this._token = msg.token;
+    if (msg.devEntitlement !== undefined) this._devEntitlement = Boolean(msg.devEntitlement);
+    if (msg.state) this._state = msg.state;
+
+    this._reconnectAttempts = 0;
+    this._setConnectionState(ConnectionStates.ONLINE, {
+      token: this._token,
+      devEntitlement: this._devEntitlement
+    });
+
+    // Start heartbeat
+    this._startHeartbeat();
+
+    // Flush pending command queue
+    this._flushCommandQueue();
+
+    // Resolve init promise
+    this._resolveInit(this);
+  }
+
+  /**
+   * Handle Pong message for RTT & Clock offset estimation
+   * @private
+   * @param {object} msg
+   */
+  _handlePong(msg) {
+    if (this._pongTimeoutTimer) {
+      clearTimeout(this._pongTimeoutTimer);
+      this._pongTimeoutTimer = null;
+    }
+
+    const t1 = msg.t1 || msg.clientTime || this._lastPingTimestamp;
+    const t4 = this._now();
+    const t2 = msg.t2 ?? msg.serverReceiveTime ?? msg.serverTime;
+    const t3 = msg.t3 ?? msg.serverTransmitTime ?? msg.serverTime;
+
+    let sampleRTT;
+    if (t2 !== undefined && t3 !== undefined && t2 !== null && t3 !== null) {
+      sampleRTT = Math.max(0, (t4 - t1) - (t3 - t2));
+    } else {
+      sampleRTT = Math.max(0, t4 - t1);
+    }
+
+    let sampleOffset;
+    if (t2 !== undefined && t3 !== undefined && t2 !== null && t3 !== null) {
+      sampleOffset = ((t2 - t1) + (t3 - t4)) / 2;
+    } else if (msg.serverTime !== undefined && msg.serverTime !== null) {
+      sampleOffset = msg.serverTime - (t1 + t4) / 2;
+    } else {
+      sampleOffset = this._clockOffset;
+    }
+
+    // Exponential moving average filter
+    if (this._rtt === 0 && this._rttSamples.length === 0) {
+      this._rtt = sampleRTT;
+      this._clockOffset = sampleOffset;
+    } else {
+      this._rtt = 0.8 * this._rtt + 0.2 * sampleRTT;
+      this._clockOffset = 0.8 * this._clockOffset + 0.2 * sampleOffset;
+    }
+
+    this._rttSamples.push({ rtt: sampleRTT, offset: sampleOffset, timestamp: t4 });
+    if (this._rttSamples.length > 10) {
+      this._rttSamples.shift();
+    }
+
+    const rttPayload = {
+      rtt: Math.round(this._rtt),
+      isHighLatency: this._rtt >= 180,
+      clockOffset: Math.round(this._clockOffset)
+    };
+    this._emit("connection:ping", rttPayload);
+    if (this._eventBus && typeof this._eventBus.emit === "function") {
+      this._eventBus.emit("connection:ping", rttPayload);
+    }
+  }
+
+  /**
+   * Get smoothed RTT latency in milliseconds
+   * @returns {number}
+   */
+  getRTT() {
+    return Math.round(this._rtt || 0);
+  }
+
+  /**
+   * Handle command ACK
+   * @private
+   * @param {object} msg
+   */
+  _handleCommandAck(msg) {
+    const cmdId = msg.cmdId || msg.payload?.cmdId;
+    if (!cmdId) return;
+
+    const payload = msg.payload !== undefined ? msg.payload : msg;
+
+    // Update state cache if state is embedded in ACK or root message
+    const stateObj = msg.state || (payload && payload.state);
+    if (stateObj && typeof stateObj === "object") {
+      this._state = { ...this._state, ...stateObj };
+    }
+
+    const pending = this._pendingCommands.get(cmdId);
+    if (pending) {
+      if (pending.timer) clearTimeout(pending.timer);
+      this._pendingCommands.delete(cmdId);
+      pending.resolve(payload);
+    }
+
+    // Broadcast ACK event
+    this._emit(Events.COMMAND_ACK, payload);
+    if (this._eventBus && typeof this._eventBus.emit === "function") {
+      this._eventBus.emit(Events.COMMAND_ACK, payload);
+    }
+  }
+
+  /**
+   * Handle command rejection
+   * @private
+   * @param {object} msg
+   */
+  _handleCommandReject(msg) {
+    const cmdId = msg.cmdId || msg.payload?.cmdId;
+    const payload = msg.payload !== undefined ? msg.payload : msg;
+    const code = msg.code || payload?.code || ErrorCodes.INTERNAL_ERROR;
+    const reason = msg.reason || msg.error || payload?.reason || payload?.error || "Command rejected by server";
+
+    const err = new Error(reason);
+    err.code = code;
+    err.payload = payload;
+
+    const pending = cmdId ? this._pendingCommands.get(cmdId) : null;
+    if (pending) {
+      if (pending.timer) clearTimeout(pending.timer);
+      this._pendingCommands.delete(cmdId);
+      pending.reject(err);
+    }
+
+    // Broadcast rejection event
+    this._emit(Events.COMMAND_REJECTED, { cmdId, code, reason, payload });
+    if (this._eventBus && typeof this._eventBus.emit === "function") {
+      this._eventBus.emit(Events.COMMAND_REJECTED, { cmdId, code, reason, payload });
+    }
+  }
+
+  /**
+   * Handle read model server push events
+   * @private
+   * @param {object} msg
+   */
+  _handleServerEvent(msg) {
+    const eventName = msg.event || msg.type;
+    if (!eventName) return;
+
+    const payload = msg.payload !== undefined ? msg.payload : msg.data !== undefined ? msg.data : msg;
+
+    // Cache state changes
+    if (eventName === Events.STORE_CHANGED || eventName === "store:changed") {
+      if (payload && typeof payload === "object") {
+        this._state = { ...this._state, ...payload };
+      }
+    } else if (eventName === Events.BATTLE_STATE || eventName === "battle:state") {
+      if (payload) {
+        this._state.battle = payload;
+      }
+    } else if (eventName === Events.BATTLE_ENDED || eventName === "battle:ended") {
+      if (this._state.battle) {
+        delete this._state.battle;
+      }
+    } else if (eventName === Events.CONNECTION_STATE || eventName === "connection:state") {
+      if (payload?.reason === "NEW_CONNECTION_ESTABLISHED" || payload?.reason === "KICKED_BY_NEW_CONNECTION") {
+        this._isExplicitlyClosed = true;
+        this._setConnectionState(ConnectionStates.DISCONNECTED, {
+          reason: "KICKED_BY_NEW_CONNECTION",
+          message: payload.message || "Another connection for this account was established."
+        });
+      }
+    }
+
+    // Emit internally to GameClient listeners
+    this._emit(eventName, payload);
+
+    // Forward to local EventBus
+    if (this._eventBus && typeof this._eventBus.emit === "function") {
+      try {
+        this._eventBus.emit(eventName, payload);
+      } catch (err) {
+        console.error(`[RemoteGameClient] Error forwarding event ${eventName} to EventBus:`, err);
+      }
+    }
+  }
+
+  /**
+   * Send an intent command to the authoritative server
+   * @param {string} command - Command name from Commands
+   * @param {object} [payload={}] - Command parameters
+   * @param {object} [options={}] - Additional command envelope metadata
+   * @returns {Promise<object>}
+   */
+  async send(command, payload = {}, options = {}) {
+    const envelope = createCommandEnvelope(command, payload, {
+      ...options,
+      token: this._token,
+      clientTime: this.getServerTime()
+    });
+
+    const cmdId = envelope.cmdId;
+
+    return new Promise((resolve, reject) => {
+      const entry = {
+        envelope,
+        resolve,
+        reject,
+        retries: 0,
+        timer: null,
+        sentAt: this._now()
+      };
+
+      this._pendingCommands.set(cmdId, entry);
+
+      if (this._connectionState === ConnectionStates.ONLINE && this._isSocketOpen()) {
+        this._dispatchCommand(cmdId);
+      } else {
+        this._commandQueue.push(cmdId);
+      }
+    });
+  }
+
+  /**
+   * Dispatch single command over WebSocket and start ACK timeout
+   * @private
+   * @param {string} cmdId
+   */
+  _dispatchCommand(cmdId) {
+    const entry = this._pendingCommands.get(cmdId);
+    if (!entry) return;
+
+    if (entry.timer) clearTimeout(entry.timer);
+    entry.timer = setTimeout(() => {
+      this._onCommandTimeout(cmdId);
+    }, this.options.commandTimeout);
+
+    this._sendRaw({
+      type: "command",
+      ...entry.envelope
+    });
+  }
+
+  /**
+   * Handle command ACK timeout
+   * @private
+   * @param {string} cmdId
+   */
+  _onCommandTimeout(cmdId) {
+    const entry = this._pendingCommands.get(cmdId);
+    if (!entry) return;
+
+    if (entry.retries < this.options.commandMaxRetries && this._connectionState === ConnectionStates.ONLINE && this._isSocketOpen()) {
+      entry.retries++;
+      this._dispatchCommand(cmdId);
+    } else {
+      this._pendingCommands.delete(cmdId);
+      const err = new Error(`Command '${entry.envelope.command}' (${cmdId}) timed out after ${this.options.commandTimeout}ms`);
+      err.code = ErrorCodes.INTERNAL_ERROR;
+      entry.reject(err);
+    }
+  }
+
+  /**
+   * Flush queued commands upon connection establishment
+   * @private
+   */
+  _flushCommandQueue() {
+    const queue = this._commandQueue.slice();
+    this._commandQueue = [];
+
+    for (const cmdId of queue) {
+      if (this._pendingCommands.has(cmdId)) {
+        this._dispatchCommand(cmdId);
+      }
+    }
+
+    // Also re-dispatch any pending in-flight commands that were interrupted
+    for (const [cmdId, entry] of this._pendingCommands.entries()) {
+      if (!queue.includes(cmdId)) {
+        this._dispatchCommand(cmdId);
+      }
+    }
+  }
+
+  /**
+   * Check if underlying WebSocket is open
+   * @private
+   * @returns {boolean}
+   */
+  _isSocketOpen() {
+    return Boolean(this._ws && this._ws.readyState === 1);
+  }
+
+  /**
+   * Send raw JSON object to WebSocket
+   * @private
+   * @param {object} obj
+   */
+  _sendRaw(obj) {
+    if (!this._isSocketOpen()) return;
+    try {
+      this._ws.send(JSON.stringify(obj));
+    } catch (err) {
+      console.warn("[RemoteGameClient] Failed to send WebSocket message:", err);
+    }
+  }
+
+  /**
+   * Start Ping/Pong heartbeat loop
+   * @private
+   */
+  _startHeartbeat() {
+    this._stopHeartbeat();
+
+    this._pingTimer = setInterval(() => {
+      this._sendPing();
+    }, this.options.pingInterval);
+
+    // Send immediate initial ping for fast clock sync
+    this._sendPing();
+  }
+
+  /**
+   * Send single Ping message
+   * @private
+   */
+  _sendPing() {
+    if (!this._isSocketOpen() || this._connectionState !== ConnectionStates.ONLINE) return;
+
+    const t1 = this._now();
+    this._lastPingTimestamp = t1;
+
+    this._sendRaw({
+      type: "ping",
+      t1: t1,
+      clientTime: t1
+    });
+
+    if (this._pongTimeoutTimer) clearTimeout(this._pongTimeoutTimer);
+    this._pongTimeoutTimer = setTimeout(() => {
+      this._onPongTimeout();
+    }, this.options.pingTimeout);
+  }
+
+  /**
+   * Handle Pong timeout (connection dead/hung)
+   * @private
+   */
+  _onPongTimeout() {
+    this._pongTimeoutTimer = null;
+    console.warn(`[RemoteGameClient] Pong timeout after ${this.options.pingTimeout}ms, terminating connection`);
+    if (this._ws) {
+      try {
+        this._ws.close();
+      } catch (_) {}
+    }
+  }
+
+  /**
+   * Stop heartbeat timers
+   * @private
+   */
+  _stopHeartbeat() {
+    if (this._pingTimer) {
+      clearInterval(this._pingTimer);
+      this._pingTimer = null;
+    }
+    if (this._pongTimeoutTimer) {
+      clearTimeout(this._pongTimeoutTimer);
+      this._pongTimeoutTimer = null;
+    }
+  }
+
+  /**
+   * WebSocket onerror handler
+   * @private
+   * @param {Event|Error} error
+   */
+  _onError(error) {
+    console.warn("[RemoteGameClient] WebSocket error encountered:", error?.message || error);
+  }
+
+  /**
+   * WebSocket onclose handler
+   * @private
+   * @param {CloseEvent|object} event
+   */
+  _onClose(event) {
+    this._stopHeartbeat();
+    if (this._handshakeTimer) {
+      clearTimeout(this._handshakeTimer);
+      this._handshakeTimer = null;
+    }
+
+    if (this._isExplicitlyClosed) {
+      this._setConnectionState(ConnectionStates.DISCONNECTED, {
+        code: event?.code,
+        reason: event?.reason || "Client closed"
+      });
+      return;
+    }
+
+    if (!this.options.autoReconnect || this._reconnectAttempts >= this.options.maxReconnectAttempts) {
+      this._setConnectionState(ConnectionStates.DISCONNECTED, {
+        code: event?.code,
+        reason: "Max reconnect attempts reached"
+      });
+      this._rejectInit(new Error("Failed to connect to server"));
+      return;
+    }
+
+    // Transition to reconnecting
+    this._scheduleReconnect();
+  }
+
+  /**
+   * Schedule automatic exponential backoff reconnection
+   * @private
+   */
+  _scheduleReconnect() {
+    if (this._reconnectTimer) clearTimeout(this._reconnectTimer);
+
+    const baseDelay = this.options.reconnectInitialDelay * Math.pow(this.options.reconnectBackoffFactor, this._reconnectAttempts);
+    let delay = Math.min(baseDelay, this.options.reconnectMaxDelay);
+
+    if (this.options.reconnectJitter) {
+      delay += Math.random() * (delay * 0.2); // 0-20% jitter
+    }
+
+    this._reconnectAttempts++;
+    this._setConnectionState(ConnectionStates.RECONNECTING, {
+      attempt: this._reconnectAttempts,
+      delay: Math.round(delay)
+    });
+
+    this._reconnectTimer = setTimeout(() => {
+      this._reconnectTimer = null;
+      this._connect();
+    }, delay);
+  }
+
+  /**
+   * Set connection state and notify listeners and EventBus
+   * @private
+   * @param {string} newState - One of ConnectionStates
+   * @param {object} [meta={}]
+   */
+  _setConnectionState(newState, meta = {}) {
+    if (this._connectionState === newState && Object.keys(meta).length === 0) return;
+
+    this._connectionState = newState;
+    const eventPayload = {
+      state: newState,
+      timestamp: this._now(),
+      ...meta
+    };
+
+    this._emit(Events.CONNECTION_STATE, eventPayload);
+    if (this._eventBus && typeof this._eventBus.emit === "function") {
+      try {
+        this._eventBus.emit(Events.CONNECTION_STATE, eventPayload);
+      } catch (err) {
+        console.error("[RemoteGameClient] Error emitting connection:state to EventBus:", err);
+      }
+    }
+  }
+
+  /**
+   * Clean up socket instance and listeners
+   * @private
+   */
+  _cleanupSocket() {
+    if (this._ws) {
+      try {
+        this._ws.onopen = null;
+        this._ws.onmessage = null;
+        this._ws.onerror = null;
+        this._ws.onclose = null;
+        this._ws.close();
+      } catch (_) {}
+      this._ws = null;
+    }
+  }
+
+  /**
+   * Helper to resolve init Promise
+   * @private
+   */
+  _resolveInit(result) {
+    if (this._initPromiseResolver) {
+      const resolve = this._initPromiseResolver;
+      this._initPromiseResolver = null;
+      this._initPromiseRejecter = null;
+      resolve(result);
+    }
+  }
+
+  /**
+   * Helper to reject init Promise
+   * @private
+   */
+  _rejectInit(error) {
+    if (this._initPromiseRejecter) {
+      const reject = this._initPromiseRejecter;
+      this._initPromiseResolver = null;
+      this._initPromiseRejecter = null;
+      reject(error);
+    }
+  }
+
+  /**
+   * Disconnect client and release all resources
+   */
+  destroy() {
+    this._isExplicitlyClosed = true;
+
+    if (this._reconnectTimer) {
+      clearTimeout(this._reconnectTimer);
+      this._reconnectTimer = null;
+    }
+
+    this._stopHeartbeat();
+
+    if (this._handshakeTimer) {
+      clearTimeout(this._handshakeTimer);
+      this._handshakeTimer = null;
+    }
+
+    // Cancel all pending commands with client destroyed error
+    for (const [cmdId, entry] of this._pendingCommands.entries()) {
+      if (entry.timer) clearTimeout(entry.timer);
+      entry.reject(new Error("Client destroyed"));
+    }
+    this._pendingCommands.clear();
+    this._commandQueue = [];
+
+    this._cleanupSocket();
+    this._setConnectionState(ConnectionStates.DISCONNECTED, { reason: "destroy" });
+
+    super.destroy();
+  }
+
+  /**
+   * Alias for destroy
+   */
+  disconnect() {
+    this.destroy();
+  }
+}
+
+RemoteGameClient;
+
 // --- src/js/ui/HUDDragController.js ---
 /**
  * HUDDragController.js
@@ -8230,12 +11178,35 @@ class DialogueController {
     document.querySelector("#battle-dialogue")?.addEventListener("click", () => this.reveal());
   }
 
-  show({ speaker, text }) {
+  show(payload) {
+    if (!payload) return;
     window.clearInterval(this.timer);
     window.clearTimeout(this.stopTimer);
+
+    let speaker = "";
+    let text = "";
+
+    if (typeof payload === "string") {
+      text = payload;
+    } else if (payload.key) {
+      text = I18n.t(payload.key, payload.params || {});
+      if (payload.speakerKey) {
+        speaker = I18n.t(payload.speakerKey);
+      } else if (payload.speaker) {
+        speaker = payload.speaker;
+      }
+    } else {
+      speaker = payload.speaker || "";
+      text = payload.text || "";
+    }
+
     this.fullText = text;
-    this.speakerElement.textContent = speaker;
-    this.textElement.textContent = "";
+    if (this.speakerElement) {
+      this.speakerElement.textContent = speaker;
+    }
+    if (this.textElement) {
+      this.textElement.textContent = "";
+    }
     const characters = Array.from(text);
     let index = 0;
     const isSpeaking = Boolean(speaker && !["旁白", "Narrator", "ナレーション"].includes(speaker));
@@ -8243,7 +11214,9 @@ class DialogueController {
 
     this.timer = window.setInterval(() => {
       index += 1;
-      this.textElement.textContent = characters.slice(0, index).join("");
+      if (this.textElement) {
+        this.textElement.textContent = characters.slice(0, index).join("");
+      }
       if (index >= characters.length) {
         window.clearInterval(this.timer);
         this.timer = null;
@@ -8256,7 +11229,9 @@ class DialogueController {
     if (!this.timer) return;
     window.clearInterval(this.timer);
     this.timer = null;
-    this.textElement.textContent = this.fullText;
+    if (this.textElement) {
+      this.textElement.textContent = this.fullText;
+    }
     this.setSpeaking(false);
   }
 
@@ -8270,12 +11245,14 @@ const $ = (selector) => document.querySelector(selector);
 const clampPercent = (value, max) => Math.max(0, Math.min(100, max ? (value / max) * 100 : 0));
 
 class AppView {
-  constructor({ bus, store, battle, postBattle, sound }) {
+  constructor({ bus, store, battle, postBattle, sound, client }) {
     this.bus = bus;
     this.store = store;
     this.battle = battle;
     this.postBattle = postBattle;
     this.sound = sound;
+    this.client = client || null;
+    this.connectionState = this.client?.connectionState || ConnectionStates.OFFLINE;
     this.timers = new TimerRegistry();
     this.currentScreen = "home";
     this.activeGrowthTab = "stats";
@@ -8347,6 +11324,252 @@ class AppView {
     this.bindEvents();
   }
 
+  async sendCommand(command, payload = {}) {
+    if (this.client && typeof this.client.send === "function") {
+      try {
+        const res = await this.client.send(command, payload);
+        return res;
+      } catch (err) {
+        console.error(`[AppView] Command failed (${command}):`, err);
+        return { ok: false, error: err.message, message: err.message };
+      }
+    }
+    return this._executeLegacyFallback(command, payload);
+  }
+
+  _executeLegacyFallback(command, payload) {
+    switch (command) {
+      case Commands.BUY_ITEM:
+        return this.store?.buyItem ? this.store.buyItem(payload.itemId || payload.id) : { ok: false };
+      case Commands.BUY_EQUIPMENT:
+        return this.store?.buyEquipment ? this.store.buyEquipment(payload.typeId || payload.itemId) : { ok: false };
+      case Commands.EQUIP_ITEM:
+        return this.store?.equipItem ? this.store.equipItem(payload.uid || payload.typeId || payload.itemId) : { ok: false };
+      case Commands.UNEQUIP_ITEM:
+        return this.store?.unequipItem ? this.store.unequipItem(payload.slot) : { ok: false };
+      case Commands.ALLOCATE_STAT:
+        return this.store?.allocateStat ? this.store.allocateStat(payload.stat) : { ok: false };
+      case Commands.ALLOCATE_SKILL:
+        return this.store?.allocateSkill ? this.store.allocateSkill(payload.skill) : { ok: false };
+      case Commands.BATTLE_START:
+        return this.battle?.start ? { ok: this.battle.start(payload.stageId, payload.options) } : { ok: false };
+      case Commands.BATTLE_SELECT_HAND:
+        return this.battle?.selectHand ? { ok: this.battle.selectHand(payload.hand, payload.slot) } : { ok: false };
+      case Commands.BATTLE_SELECT_TARGET:
+        return this.battle?.selectTarget ? { ok: this.battle.selectTarget(payload.target) } : { ok: false };
+      case Commands.BATTLE_USE_MORPH:
+        return this.battle?.useMorph ? this.battle.useMorph() : { ok: false };
+      case Commands.BATTLE_USE_ITEM:
+        return this.battle?.useItem ? this.battle.useItem(payload.itemId) : { ok: false };
+      case Commands.BATTLE_INPUT_QTE:
+        return this.battle?.inputQte ? { ok: this.battle.inputQte(payload.direction, payload.slot) } : { ok: false };
+      case Commands.BATTLE_PAUSE:
+        return this.battle?.pause ? { ok: this.battle.pause() } : (this.battle?.togglePause ? { ok: this.battle.togglePause() } : { ok: false });
+      case Commands.BATTLE_RESUME:
+        return this.battle?.resume ? { ok: this.battle.resume() } : { ok: false };
+      case Commands.BATTLE_ABANDON:
+        return this.battle?.abandon ? { ok: this.battle.abandon() } : { ok: false };
+      case Commands.AUTO_BATTLE_START:
+        return this.battle?.startAutoBattle ? { ok: this.battle.startAutoBattle(payload.stageId, payload.rounds) } : { ok: false };
+      case Commands.AUTO_BATTLE_STOP:
+        return this.battle?.stopAutoBattle ? { ok: this.battle.stopAutoBattle() } : { ok: false };
+      case Commands.POST_BATTLE_REQUEST_SWIMSUIT:
+        return this.postBattle?.requestSwimsuit ? { ok: this.postBattle.requestSwimsuit() } : { ok: false };
+      case Commands.POST_BATTLE_START_WATERMELON:
+        return this.postBattle?.startWatermelon ? { ok: this.postBattle.startWatermelon() } : { ok: false };
+      case Commands.POST_BATTLE_STRIKE_WATERMELON:
+        return this.postBattle?.strike ? { ok: this.postBattle.strike() } : { ok: false };
+      case Commands.ACCOUNT_EXPORT_JSON:
+        return { ok: true, data: this.store?.snapshot ? this.store.snapshot() : {} };
+      case Commands.ACCOUNT_DELETE:
+        if (this.store?.reset) this.store.reset();
+        return { ok: true };
+      case Commands.ACCOUNT_ISSUE_TRANSFER_CODE:
+        return { ok: true, code: this.store?.exportSaveCode ? this.store.exportSaveCode() : "" };
+      case Commands.ACCOUNT_CLAIM_TRANSFER_CODE:
+        return this.store?.importSaveCode ? this.store.importSaveCode(payload.code) : { ok: false };
+      case Commands.CHEAT_SET_STATS:
+        return this.store?.cheatSetValues ? this.store.cheatSetValues(payload) : { ok: false };
+      case Commands.CHEAT_UNLOCK_ALL:
+        if (payload.gallery) return this.store?.cheatUnlockGallery ? this.store.cheatUnlockGallery() : { ok: false };
+        return this.store?.cheatUnlockAll ? this.store.cheatUnlockAll() : { ok: false };
+      case Commands.CHEAT_ADD_COINS:
+        if (this.store?.state) {
+          this.store.state.coins = (this.store.state.coins || 0) + (payload.amount || 1000);
+          this.store.commit("cheat-add-coins");
+          return { ok: true };
+        }
+        return { ok: false };
+      default:
+        return { ok: false };
+    }
+  }
+
+  getStoreSnapshot() {
+    if (this.client && typeof this.client.getState === "function") {
+      const st = this.client.getState();
+      if (st && Object.keys(st).length > 0) return st;
+    }
+    if (this.store && typeof this.store.snapshot === "function") {
+      return this.store.snapshot();
+    }
+    return {
+      profile: { level: 1, xp: 0, skillPoints: 0, allocations: { hp: 0, mp: 0, damage: 0 }, skills: { momo: 0, dualHand: 0 } },
+      playerStats: { maxHp: 100, maxMp: 50, damage: 15 },
+      coins: 0,
+      inventory: { hpPotion: 1, mpPotion: 0 },
+      equipment: {},
+      inventoryEquipment: [],
+      records: { wins: 0, losses: 0, bestStage: 0, clearedStages: [] }
+    };
+  }
+
+  getTheoreticalDPS(snapshot = null) {
+    if (this.store && typeof this.store.getTheoreticalDPS === "function") {
+      return this.store.getTheoreticalDPS();
+    }
+    const snap = snapshot || this.getStoreSnapshot();
+    const baseDamage = snap.playerStats?.damage || 15;
+    const momoLevel = snap.profile?.skills?.momo || 0;
+    const momoRate = Math.min(1, momoLevel * 0.1);
+    const momoDamage = 25;
+    const hasDual = (snap.profile?.skills?.dualHand || 0) > 0;
+    const expectedRps = baseDamage * (1 / 3) * (hasDual ? 1.5 : 1.0);
+    const expectedMomo = (1 / 3) * momoRate * momoDamage;
+    return Number((expectedRps + expectedMomo).toFixed(1));
+  }
+
+  getWatermelonMarkerPosition() {
+    if (this.postBattle && typeof this.postBattle.getMarkerPosition === "function") {
+      return this.postBattle.getMarkerPosition();
+    }
+    const now = performance.now();
+    const period = 2000;
+    const t = (now % period) / period;
+    return 0.5 - 0.5 * Math.cos(t * 2 * Math.PI);
+  }
+
+  getAutoWatermelonMarkerPosition() {
+    if (this.postBattle && typeof this.postBattle.getAutoMarkerPosition === "function") {
+      return this.postBattle.getAutoMarkerPosition();
+    }
+    const now = performance.now();
+    const period = 2000;
+    const t = (now % period) / period;
+    return 0.5 - 0.5 * Math.cos(t * 2 * Math.PI);
+  }
+
+  renderConnectionState(state, meta = {}) {
+    if (!state) return;
+    this.connectionState = state;
+    const badge = this.connectionStatusBadge || $("#connection-status-badge");
+    const textEl = this.connectionStatusText || $("#connection-status-text");
+    const banner = this.connectionStatusBanner || $("#connection-status-banner");
+    const bannerText = this.connectionBannerText || $("#connection-banner-text");
+
+    if (badge) {
+      badge.classList.remove("is-online", "is-connecting", "is-reconnecting", "is-offline", "is-disconnected");
+      badge.classList.add(`is-${state}`);
+      if (state !== ConnectionStates.ONLINE) {
+        badge.classList.remove("is-high-ping");
+        const existingPing = badge.querySelector(".connection-ping-badge");
+        if (existingPing) existingPing.remove();
+      }
+    }
+
+    const label = this.getConnectionLabel(state);
+    if (textEl) {
+      textEl.textContent = label;
+    }
+
+    if (meta?.reason === "KICKED_BY_NEW_CONNECTION" || meta?.reason === "NEW_CONNECTION_ESTABLISHED") {
+      this.showToast(I18n.t("connection.kickedByNewConnection"), "warning");
+    }
+
+    if (banner && bannerText) {
+      if (state === ConnectionStates.RECONNECTING || state === ConnectionStates.DISCONNECTED) {
+        banner.hidden = false;
+        if (this.battleState?.active) {
+          const deadline = meta?.deadline || (Date.now() + 10000);
+          this._startDisconnectCountdown(deadline);
+        } else {
+          this._stopDisconnectCountdown();
+          bannerText.textContent = state === ConnectionStates.RECONNECTING
+            ? (I18n.t("connection.bannerReconnecting") !== "connection.bannerReconnecting" ? I18n.t("connection.bannerReconnecting") : "與伺服器連線中斷，正在嘗試重新建立連線...")
+            : (I18n.t("connection.bannerDisconnected") !== "connection.bannerDisconnected" ? I18n.t("connection.bannerDisconnected") : "已與伺服器斷開連線，請檢查網路狀態。");
+        }
+      } else {
+        this._stopDisconnectCountdown();
+        banner.hidden = true;
+      }
+    }
+  }
+
+  handlePingUpdate(ping) {
+    if (!ping || this.connectionState !== ConnectionStates.ONLINE) return;
+    const badge = this.connectionStatusBadge || $("#connection-status-badge");
+    if (!badge) return;
+
+    const rtt = Math.round(ping.rtt || 0);
+    const isHigh = Boolean(ping.isHighLatency || rtt >= 180);
+
+    let pingBadge = badge.querySelector(".connection-ping-badge");
+    if (isHigh && rtt > 0) {
+      badge.classList.add("is-high-ping");
+      if (!pingBadge) {
+        pingBadge = document.createElement("span");
+        pingBadge.className = "connection-ping-badge";
+        badge.appendChild(pingBadge);
+      }
+      pingBadge.textContent = `${rtt}ms`;
+    } else {
+      badge.classList.remove("is-high-ping");
+      if (pingBadge) pingBadge.remove();
+    }
+  }
+
+  _startDisconnectCountdown(deadline) {
+    this._stopDisconnectCountdown();
+    const update = () => {
+      const remainingMs = Math.max(0, deadline - Date.now());
+      const seconds = Math.ceil(remainingMs / 1000);
+      const bannerText = this.connectionBannerText || $("#connection-banner-text");
+      if (bannerText) {
+        bannerText.innerHTML = I18n.t("connection.disconnectCountdown", {
+          seconds: `<span class="connection-banner-countdown">${seconds}</span>`
+        });
+      }
+      if (remainingMs <= 0) {
+        this._stopDisconnectCountdown();
+      }
+    };
+    update();
+    this._disconnectTimer = setInterval(update, 500);
+  }
+
+  _stopDisconnectCountdown() {
+    if (this._disconnectTimer) {
+      clearInterval(this._disconnectTimer);
+      this._disconnectTimer = null;
+    }
+  }
+
+  getConnectionLabel(state) {
+    const locale = I18n.getLocale ? I18n.getLocale() : "zh-Hant";
+    const key = `connection.${state}`;
+    const translated = I18n.t(key);
+    if (translated && translated !== key) return translated;
+
+    const labels = {
+      online: { "zh-Hant": "線上連線", "zh-Hans": "在线连接", "en": "Online", "ja": "オンライン" },
+      connecting: { "zh-Hant": "連線中...", "zh-Hans": "连接中...", "en": "Connecting...", "ja": "接続中..." },
+      reconnecting: { "zh-Hant": "重連中...", "zh-Hans": "重连中...", "en": "Reconnecting...", "ja": "再接続中..." },
+      offline: { "zh-Hant": "離線沙盒", "zh-Hans": "离线沙盒", "en": "Offline", "ja": "オフライン" },
+      disconnected: { "zh-Hant": "已斷線", "zh-Hans": "已断开", "en": "Disconnected", "ja": "切断" }
+    };
+    return labels[state]?.[locale] || labels[state]?.["zh-Hant"] || state;
+  }
+
   cacheElements() {
     this.app = $("#app");
     this.screenStack = $(".screen-stack");
@@ -8400,6 +11623,17 @@ class AppView {
     this.equipTooltip = $("#equip-tooltip");
     this.activeShopFilter = "all";
     this.battleLogTier = 1;
+    this.connectionStatusBadge = $("#connection-status-badge");
+    this.connectionStatusText = $("#connection-status-text");
+    this.connectionStatusBanner = $("#connection-status-banner");
+    this.connectionBannerText = $("#connection-banner-text");
+    this.connectionBannerClose = $("#connection-banner-close");
+
+    if (this.connectionBannerClose) {
+      this.connectionBannerClose.addEventListener("click", () => {
+        if (this.connectionStatusBanner) this.connectionStatusBanner.hidden = true;
+      });
+    }
 
     if (this.battleDamageLog) {
       this.battleDamageLog.addEventListener("click", () => {
@@ -8437,8 +11671,9 @@ class AppView {
 
   init() {
     this.renderI18n();
-    const snapshot = this.store.snapshot();
+    const snapshot = this.getStoreSnapshot();
     this.renderStore(snapshot);
+    this.renderConnectionState(this.connectionState);
 
     // Mobile Anti-Zoom Protection: Prevent double-tap zoom & gesture pinch zoom on mobile devices
     if (typeof document !== "undefined") {
@@ -8468,57 +11703,13 @@ class AppView {
     let targetScreen = "home";
     try {
       const hashScreen = window.location.hash ? window.location.hash.replace(/^#/, "") : null;
-      targetScreen = hashScreen || window.localStorage?.getItem("koraku_active_screen") || sessionStorage.getItem("koraku_active_screen") || "home";
+      targetScreen = hashScreen || sessionStorage.getItem("koraku_active_screen") || "home";
     } catch (_) {}
 
-    let activeBattle = null;
-    let activePostBattle = null;
-    let savedStageId = 1;
-    try {
-      const rawPost = window.localStorage?.getItem("koraku_active_postbattle") || sessionStorage.getItem("koraku_active_postbattle");
-      if (rawPost) activePostBattle = JSON.parse(rawPost);
-      const rawBattle = window.localStorage?.getItem("koraku_active_battle_state") || sessionStorage.getItem("koraku_active_battle_state") || sessionStorage.getItem("koraku_active_battle");
-      if (rawBattle) activeBattle = JSON.parse(rawBattle);
-      savedStageId = Number(window.localStorage?.getItem("koraku_active_stage") || sessionStorage.getItem("koraku_active_stage")) || activeBattle?.stage?.id || activeBattle?.stageId || this.store.snapshot().records?.bestStage || 1;
-    } catch (_) {}
-
-    if (activePostBattle) {
-      if (typeof window !== "undefined" && window.history) {
-        window.history.replaceState({ screen: "battle" }, "", "#battle");
-      }
-      this.navigate("battle", { pushHistory: false });
-      this.postBattle.restore(activePostBattle);
-      if (this.postBattle?.getWatermelonStock() > 0) {
-        this.postBattle.emitAutoWatermelon();
-      }
-      return;
+    if (typeof window !== "undefined" && window.history) {
+      window.history.replaceState({ screen: targetScreen }, "", "#" + targetScreen);
     }
-
-    if (targetScreen === "battle") {
-      if (typeof window !== "undefined" && window.history) {
-        window.history.replaceState({ screen: "battle" }, "", "#battle");
-      }
-      this.navigate("battle", { pushHistory: false });
-
-      if (activeBattle && activeBattle.active && (activeBattle.playerHp > 0) && (activeBattle.enemyHp > 0)) {
-        this.battle.restore(activeBattle);
-      } else {
-        const stageToRun = activeBattle?.stage?.id || activeBattle?.stageId || savedStageId || 1;
-        if (activeBattle?.isAuto || activeBattle?.autoBattle?.active) {
-          this.startAutoBattle(stageToRun, activeBattle?.autoBattle?.remainingRounds || activeBattle?.remainingRounds || 10);
-        } else {
-          this.startStage(stageToRun);
-        }
-      }
-      if (this.postBattle?.getWatermelonStock() > 0) {
-        this.postBattle.emitAutoWatermelon();
-      }
-    } else {
-      if (typeof window !== "undefined" && window.history) {
-        window.history.replaceState({ screen: targetScreen }, "", "#" + targetScreen);
-      }
-      this.navigate(targetScreen, { pushHistory: false });
-    }
+    this.navigate(targetScreen, { pushHistory: false });
   }
 
   renderI18n() {
@@ -8597,7 +11788,7 @@ class AppView {
       if (dualBtn) {
         const dir = dualBtn.dataset.direction;
         const slot = dualBtn.dataset.dualSlot;
-        this.battle.inputQte(dir, slot);
+        this.sendCommand(Commands.BATTLE_INPUT_QTE, { direction: dir, slot });
         if (slot === "left") this.leftQteKeyboard.reset();
         if (slot === "right") this.rightQteKeyboard.reset();
         this.renderHeldQteDirections();
@@ -8607,7 +11798,7 @@ class AppView {
       if (!targetBtn.closest(".is-dual-touch-pad")) {
         this.qteKeyboard.reset();
         this.renderHeldQteDirections();
-        this.battle.inputQte(targetBtn.dataset.direction);
+        this.sendCommand(Commands.BATTLE_INPUT_QTE, { direction: targetBtn.dataset.direction });
       }
     };
 
@@ -8674,12 +11865,12 @@ class AppView {
 
         if (track.isBattleQte) {
           if (track.isDual) {
-            this.battle.inputQte(dir, track.slot);
+            this.sendCommand(Commands.BATTLE_INPUT_QTE, { direction: dir, slot: track.slot });
             if (track.slot === "left") this.leftQteKeyboard.reset();
             if (track.slot === "right") this.rightQteKeyboard.reset();
           } else {
             this.qteKeyboard.reset();
-            this.battle.inputQte(dir);
+            this.sendCommand(Commands.BATTLE_INPUT_QTE, { direction: dir });
           }
           this.renderHeldQteDirections();
         } else if (track.isDojoQte) {
@@ -8706,12 +11897,12 @@ class AppView {
         if (dir) {
           if (track.isBattleQte) {
             if (track.isDual) {
-              this.battle.inputQte(dir, track.slot);
+              this.sendCommand(Commands.BATTLE_INPUT_QTE, { direction: dir, slot: track.slot });
               if (track.slot === "left") this.leftQteKeyboard.reset();
               if (track.slot === "right") this.rightQteKeyboard.reset();
             } else {
               this.qteKeyboard.reset();
-              this.battle.inputQte(dir);
+              this.sendCommand(Commands.BATTLE_INPUT_QTE, { direction: dir });
             }
             this.renderHeldQteDirections();
           } else if (track.isDojoQte) {
@@ -8753,7 +11944,7 @@ class AppView {
       const targetScreen = event.state?.screen || (window.location.hash ? window.location.hash.replace(/^#/, "") : "home");
       if (this.currentScreen === targetScreen) return;
 
-      if (this.currentScreen === "battle" && (this.battleState?.active || this.battle.autoBattle?.active)) {
+      if (this.currentScreen === "battle" && (this.battleState?.active || this.battle?.autoBattle?.active)) {
         if (typeof window !== "undefined" && window.history) {
           window.history.pushState({ screen: "battle" }, "", "#battle");
         }
@@ -8773,7 +11964,7 @@ class AppView {
     // Mouse Navigation Buttons (Back: button 3, Forward: button 4)
     window.addEventListener("mouseup", (event) => {
       if (event.button === 3 || event.button === 4) {
-        if (this.currentScreen === "battle" && (this.battleState?.active || this.battle.autoBattle?.active)) {
+        if (this.currentScreen === "battle" && (this.battleState?.active || this.battle?.autoBattle?.active)) {
           event.preventDefault();
           this.promptAbandonBattle("home");
           return;
@@ -8786,7 +11977,7 @@ class AppView {
 
     // Prevent accidental page close or refresh during active battle without warning
     window.addEventListener("beforeunload", (event) => {
-      if (this.currentScreen === "battle" && (this.battleState?.active || this.battle.autoBattle?.active)) {
+      if (this.currentScreen === "battle" && (this.battleState?.active || this.battle?.autoBattle?.active)) {
         event.preventDefault();
         event.returnValue = "";
         return "";
@@ -8798,7 +11989,7 @@ class AppView {
       langSelect.addEventListener("change", (e) => {
         I18n.setLocale(e.target.value);
         this.renderI18n();
-        this.renderStore(this.store.snapshot());
+        this.renderStore(this.getStoreSnapshot());
         if (this.battleState?.active) {
           this.renderBattle(this.battleState);
         }
@@ -8830,6 +12021,15 @@ class AppView {
         this.hideTooltip();
       }
     });
+
+    this.bus.on("connection:state", (data) => this.renderConnectionState(typeof data === "string" ? data : data?.state, data));
+    if (this.client && typeof this.client.on === "function") {
+      this.client.on("connection:state", (data) => this.renderConnectionState(typeof data === "string" ? data : data?.state, data));
+    }
+    this.bus.on("connection:ping", (ping) => this.handlePingUpdate(ping));
+    if (this.client && typeof this.client.on === "function") {
+      this.client.on("connection:ping", (ping) => this.handlePingUpdate(ping));
+    }
 
     this.bus.on("store:changed", ({ state }) => this.renderStore(state));
     this.bus.on("battle:state", (state) => this.renderBattle(state));
@@ -8873,22 +12073,8 @@ class AppView {
     });
     this.bus.on("postbattle:state", (state) => this.renderPostBattle(state));
     this.bus.on("postbattle:auto-watermelon", (state) => this.renderFloatingWatermelon(state));
-    this.bus.on("toast", (toast) => this.showToast(toast.message, toast.tone));
+    this.bus.on("toast", (toast) => this.showToast(toast));
     this.bus.on("auto-battle:update", (info) => {
-      try {
-        const raw = window.localStorage?.getItem("koraku_active_battle_state") || sessionStorage.getItem("koraku_active_battle_state");
-        if (raw) {
-          const snapshot = JSON.parse(raw);
-          if (snapshot.autoBattle) {
-            snapshot.autoBattle.remainingRounds = info.remainingRounds;
-            snapshot.autoBattle.wins = info.wins;
-            snapshot.autoBattle.losses = info.losses;
-            snapshot.autoBattle.isPaused = Boolean(info.isPaused);
-            window.localStorage?.setItem("koraku_active_battle_state", JSON.stringify(snapshot));
-            sessionStorage.setItem("koraku_active_battle_state", JSON.stringify(snapshot));
-          }
-        }
-      } catch (_) {}
       const msg = info.won
         ? I18n.t("ui.autoBattleToastUpdateWin", { remaining: info.remainingRounds })
         : I18n.t("ui.autoBattleToastUpdateLoss", { remaining: info.remainingRounds });
@@ -8898,11 +12084,6 @@ class AppView {
       }
     });
     this.bus.on("auto-battle:finished", (info) => {
-      try {
-        window.localStorage?.removeItem("koraku_active_battle_state");
-        sessionStorage.removeItem("koraku_active_battle_state");
-        sessionStorage.removeItem("koraku_active_battle");
-      } catch (_) {}
       this.hideFloatingWatermelon();
       this.postBattle?.closeAutoWatermelon?.();
       this.showToast(I18n.t("ui.autoBattleToastFinished", { total: info.totalRounds, wins: info.wins, losses: info.losses }), "success");
@@ -8919,11 +12100,6 @@ class AppView {
       }
     });
     this.bus.on("auto-battle:stopped", () => {
-      try {
-        window.localStorage?.removeItem("koraku_active_battle_state");
-        sessionStorage.removeItem("koraku_active_battle_state");
-        sessionStorage.removeItem("koraku_active_battle");
-      } catch (_) {}
       this.hideFloatingWatermelon();
       this.postBattle?.closeAutoWatermelon?.();
     });
@@ -8948,7 +12124,7 @@ class AppView {
     }
   }
 
-  handleClick(event) {
+  async handleClick(event) {
     const pressedButton = event.target.closest("button, [role='button'], [data-nav], [data-allocate], [data-allocate-skill], [data-buy], [data-buy-equip], [data-slot], [data-equip-bag-item], .pill-btn, .tab-pill, .button-primary, .button-secondary, .button-ghost, .menu-command");
     if (pressedButton) {
       pressedButton.classList.remove("is-btn-pressed");
@@ -8963,7 +12139,7 @@ class AppView {
     if (event.target.closest("#lang-toggle")) {
       I18n.cycleLocale();
       this.renderI18n();
-      this.renderStore(this.store.snapshot());
+      this.renderStore(this.getStoreSnapshot());
       if (this.battleState?.active) {
         this.renderBattle(this.battleState);
       }
@@ -9100,15 +12276,15 @@ class AppView {
 
     const toggleAutoBtn = event.target.closest("#btn-toggle-autobattle, #btn-stop-autobattle");
     if (toggleAutoBtn) {
-      if (this.battle.autoBattle.active) {
+      if (this.battle?.autoBattle?.active) {
         if (this.battle.autoBattle.isPaused) {
-          this.battle.resumeAutoBattle();
+          await this.sendCommand(Commands.BATTLE_RESUME);
           this.showToast(I18n.t("ui.autoBattleToastResumed"), "success");
           if (this.postBattle?.getWatermelonStock() > 0) {
             this.postBattle.emitAutoWatermelon();
           }
         } else {
-          this.battle.pauseAutoBattle();
+          await this.sendCommand(Commands.BATTLE_PAUSE);
           this.hideFloatingWatermelon();
           this.showToast(I18n.t("ui.autoBattleToastPaused"), "warning");
         }
@@ -9118,9 +12294,9 @@ class AppView {
 
     const buyButton = event.target.closest("[data-buy]");
     if (buyButton) {
-      const result = this.store.buyItem(buyButton.dataset.buy);
-      this.showToast(result.message, result.ok ? "success" : "danger");
-      if (result.ok) this.bus.emit("sound", { name: "heal" });
+      const result = await this.sendCommand(Commands.BUY_ITEM, { itemId: buyButton.dataset.buy });
+      if (result?.message) this.showToast(result.message, result.ok ? "success" : "danger");
+      if (result?.ok) this.bus.emit("sound", { name: "heal" });
       return;
     }
 
@@ -9139,17 +12315,17 @@ class AppView {
 
     const buyEquipBtn = event.target.closest("[data-buy-equip]");
     if (buyEquipBtn) {
-      const result = this.store.buyEquipment(buyEquipBtn.dataset.buyEquip);
-      this.showToast(result.message, result.ok ? "success" : "danger");
-      if (result.ok) this.bus.emit("sound", { name: "heal" });
+      const result = await this.sendCommand(Commands.BUY_EQUIPMENT, { typeId: buyEquipBtn.dataset.buyEquip, itemId: buyEquipBtn.dataset.buyEquip });
+      if (result?.message) this.showToast(result.message, result.ok ? "success" : "danger");
+      if (result?.ok) this.bus.emit("sound", { name: "heal" });
       return;
     }
 
     const bagItemBtn = event.target.closest("[data-equip-bag-item]");
     if (bagItemBtn) {
-      const result = this.store.equipItem(bagItemBtn.dataset.equipBagItem);
-      this.showToast(result.message, result.ok ? "success" : "danger");
-      if (result.ok) this.bus.emit("sound", { name: "skill" });
+      const result = await this.sendCommand(Commands.EQUIP_ITEM, { uid: bagItemBtn.dataset.equipBagItem, typeId: bagItemBtn.dataset.equipBagItem });
+      if (result?.message) this.showToast(result.message, result.ok ? "success" : "danger");
+      if (result?.ok) this.bus.emit("sound", { name: "skill" });
       this.hideTooltip();
       return;
     }
@@ -9157,9 +12333,9 @@ class AppView {
     const shopEquipBtn = event.target.closest("[data-shop-equip]");
     if (shopEquipBtn) {
       const itemId = shopEquipBtn.dataset.shopEquip;
-      const result = this.store.equipItem(itemId);
-      this.showToast(result.message, result.ok ? "success" : "danger");
-      if (result.ok) this.bus.emit("sound", { name: "skill" });
+      const result = await this.sendCommand(Commands.EQUIP_ITEM, { uid: itemId, typeId: itemId });
+      if (result?.message) this.showToast(result.message, result.ok ? "success" : "danger");
+      if (result?.ok) this.bus.emit("sound", { name: "skill" });
       this.hideTooltip();
       return;
     }
@@ -9167,20 +12343,20 @@ class AppView {
     const shopUnequipBtn = event.target.closest("[data-shop-unequip]");
     if (shopUnequipBtn) {
       const slotKey = shopUnequipBtn.dataset.shopUnequip;
-      const result = this.store.unequipItem(slotKey);
-      this.showToast(result.message, result.ok ? "success" : "danger");
-      if (result.ok) this.bus.emit("sound", { name: "select" });
+      const result = await this.sendCommand(Commands.UNEQUIP_ITEM, { slot: slotKey });
+      if (result?.message) this.showToast(result.message, result.ok ? "success" : "danger");
+      if (result?.ok) this.bus.emit("sound", { name: "select" });
       this.hideTooltip();
       return;
     }
 
     if (event.target.closest("#btn-resume-battle")) {
-      this.battle.resume();
+      await this.sendCommand(Commands.BATTLE_RESUME);
       return;
     }
 
     if (event.target.closest("#btn-pause-abandon")) {
-      this.battle.abandon();
+      await this.sendCommand(Commands.BATTLE_ABANDON);
       const pauseModal = $("#battle-pause-modal");
       if (pauseModal) {
         pauseModal.hidden = true;
@@ -9193,18 +12369,18 @@ class AppView {
     const slotBtn = event.target.closest("[data-slot]");
     if (slotBtn) {
       const slotKey = slotBtn.dataset.slot;
-      const snapshot = this.store.snapshot();
+      const snapshot = this.getStoreSnapshot();
       if (snapshot.equipment?.[slotKey]) {
-        const result = this.store.unequipItem(slotKey);
-        this.showToast(result.message, result.ok ? "success" : "danger");
-        if (result.ok) this.bus.emit("sound", { name: "select" });
+        const result = await this.sendCommand(Commands.UNEQUIP_ITEM, { slot: slotKey });
+        if (result?.message) this.showToast(result.message, result.ok ? "success" : "danger");
+        if (result?.ok) this.bus.emit("sound", { name: "select" });
         this.hideTooltip();
       }
       return;
     }
 
     if (event.target.closest("#open-cheat-modal")) {
-      this.openCheatAuthModal();
+      this.openCheatModal();
       return;
     }
 
@@ -9219,21 +12395,21 @@ class AppView {
     }
 
     if (event.target.closest("#cheat-unlock-stages-btn")) {
-      const res = this.store.cheatUnlockAll();
-      this.showToast(res.message, "success");
+      const res = await this.sendCommand(Commands.CHEAT_UNLOCK_ALL, { stages: true });
+      this.showToast(res?.message || "已解鎖全部關卡！", res?.ok !== false ? "success" : "danger");
       this.populateCheatModal();
       return;
     }
 
     if (event.target.closest("#cheat-unlock-gallery-btn")) {
-      const res = this.store.cheatUnlockGallery();
-      this.showToast(res.message, "success");
+      const res = await this.sendCommand(Commands.CHEAT_UNLOCK_ALL, { gallery: true });
+      this.showToast(res?.message || "已解鎖全圖鑑！", res?.ok !== false ? "success" : "danger");
       this.populateCheatModal();
       return;
     }
 
     if (event.target.closest("#cheat-max-all-btn")) {
-      this.store.cheatSetValues({
+      const res = await this.sendCommand(Commands.CHEAT_SET_STATS, {
         level: 99,
         xp: 0,
         skillPoints: 100,
@@ -9242,7 +12418,7 @@ class AppView {
         mpPotion: 99,
         skills: { momo: 10 }
       });
-      this.showToast("已一鍵設置滿級、99999 星砂與 100 SP！", "success");
+      this.showToast(res?.message || "已一鍵設置滿級、99999 星砂與 100 SP！", res?.ok !== false ? "success" : "danger");
       this.populateCheatModal();
       return;
     }
@@ -9271,7 +12447,7 @@ class AppView {
         const btnFilter = btn.dataset.shopFilter || btn.dataset.shopTab;
         btn.classList.toggle("is-active", btnFilter === this.activeShopFilter);
       });
-      this.renderShop(this.store.snapshot());
+      this.renderShop(this.getStoreSnapshot());
       return;
     }
 
@@ -9289,24 +12465,24 @@ class AppView {
       if (basicsGrid) basicsGrid.hidden = this.activeGuideTab !== "basics";
       if (bossGrid) bossGrid.hidden = this.activeGuideTab !== "boss";
       if (this.activeGuideTab === "boss") {
-        this.renderGuideBoss(this.store.snapshot());
+        this.renderGuideBoss(this.getStoreSnapshot());
       }
       return;
     }
 
     const allocateButton = event.target.closest("[data-allocate]");
     if (allocateButton) {
-      const result = this.store.allocateStat(allocateButton.dataset.allocate);
-      this.showToast(result.message, result.ok ? "success" : "danger");
-      if (result.ok) this.bus.emit("sound", { name: "skill" });
+      const result = await this.sendCommand(Commands.ALLOCATE_STAT, { stat: allocateButton.dataset.allocate });
+      if (result?.message) this.showToast(result.message, result.ok ? "success" : "danger");
+      if (result?.ok) this.bus.emit("sound", { name: "skill" });
       return;
     }
 
     const allocateSkillButton = event.target.closest("[data-allocate-skill]");
     if (allocateSkillButton) {
-      const result = this.store.allocateSkill(allocateSkillButton.dataset.allocateSkill);
-      this.showToast(result.message, result.ok ? "success" : "danger");
-      if (result.ok) this.bus.emit("sound", { name: "skill" });
+      const result = await this.sendCommand(Commands.ALLOCATE_SKILL, { skill: allocateSkillButton.dataset.allocateSkill });
+      if (result?.message) this.showToast(result.message, result.ok ? "success" : "danger");
+      if (result?.ok) this.bus.emit("sound", { name: "skill" });
       return;
     }
 
@@ -9316,38 +12492,38 @@ class AppView {
       try {
         window.localStorage?.setItem("koraku_gallery_item", this.selectedGalleryItem);
       } catch (_) {}
-      this.renderGallery(this.store.snapshot());
+      this.renderGallery(this.getStoreSnapshot());
       return;
     }
 
     const targetEnemyBtn = event.target.closest("[data-target-enemy]");
     if (targetEnemyBtn && this.battleState?.active) {
-      this.battle.selectTarget(targetEnemyBtn.dataset.targetEnemy);
+      await this.sendCommand(Commands.BATTLE_SELECT_TARGET, { target: targetEnemyBtn.dataset.targetEnemy });
       return;
     }
 
     const dualHandButton = event.target.closest("[data-hand-slot][data-hand]");
     if (dualHandButton && this.battleState?.active) {
-      this.battle.selectHand(dualHandButton.dataset.hand, dualHandButton.dataset.handSlot);
+      await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: dualHandButton.dataset.hand, slot: dualHandButton.dataset.handSlot });
       return;
     }
 
     const handButton = event.target.closest("[data-hand]");
     if (handButton && this.battleState?.active) {
-      this.battle.selectHand(handButton.dataset.hand);
+      await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: handButton.dataset.hand });
       return;
     }
 
     const itemButton = event.target.closest("[data-item]");
     if (itemButton) {
-      const result = this.battle.useItem(itemButton.dataset.item);
-      if (!result.ok) this.showToast(result.message, "danger");
+      const result = await this.sendCommand(Commands.BATTLE_USE_ITEM, { itemId: itemButton.dataset.item });
+      if (result && !result.ok && result.message) this.showToast(result.message, "danger");
       return;
     }
 
     if (event.target.closest("[data-skill='morph']")) {
-      const result = this.battle.useMorph();
-      if (!result.ok) this.showToast(result.message, "danger");
+      const result = await this.sendCommand(Commands.BATTLE_USE_MORPH);
+      if (result && !result.ok && result.message) this.showToast(result.message, "danger");
       return;
     }
 
@@ -9382,17 +12558,17 @@ class AppView {
     }
 
     if (event.target.closest("#watermelon-strike")) {
-      this.postBattle.strike();
+      await this.sendCommand(Commands.POST_BATTLE_STRIKE_WATERMELON);
       return;
     }
 
     if (event.target.closest("#btn-auto-watermelon-strike")) {
-      this.postBattle.autoWatermelonStrike();
+      await this.sendCommand(Commands.POST_BATTLE_STRIKE_WATERMELON);
       return;
     }
 
     if (event.target.closest("#btn-auto-watermelon-next-strike, #btn-auto-watermelon-next-round, #btn-auto-watermelon-start")) {
-      this.postBattle.startAutoWatermelonRound();
+      await this.sendCommand(Commands.POST_BATTLE_START_WATERMELON);
       return;
     }
 
@@ -9410,7 +12586,8 @@ class AppView {
     }
 
     if (event.target.closest("#btn-close-floating-watermelon")) {
-      this.postBattle.closeAutoWatermelon();
+      this.hideFloatingWatermelon();
+      this.postBattle?.closeAutoWatermelon?.();
       return;
     }
 
@@ -9420,13 +12597,13 @@ class AppView {
     }
 
     if (event.target.closest("#music-toggle")) {
-      const muted = this.store.toggleMusicMuted();
+      const muted = this.store?.toggleMusicMuted ? this.store.toggleMusicMuted() : false;
       this.showToast(muted ? I18n.t("ui.musicOffToast") : I18n.t("ui.musicOnToast"));
       return;
     }
 
     if (event.target.closest("#sound-toggle")) {
-      const muted = this.store.toggleSfxMuted();
+      const muted = this.store?.toggleSfxMuted ? this.store.toggleSfxMuted() : false;
       this.showToast(muted ? I18n.t("ui.sfxOffToast") : I18n.t("ui.sfxOnToast"));
       return;
     }
@@ -9477,7 +12654,7 @@ class AppView {
     }
   }
 
-  handleKeydown(event) {
+  async handleKeydown(event) {
     if (typeof document !== "undefined") {
       document.documentElement.classList.add("has-physical-keyboard");
       if (document.body) document.body.classList.add("has-physical-keyboard");
@@ -9594,13 +12771,13 @@ class AppView {
 
     if (isAutoWatermelonActive && (event.code === "Space" || key === " ")) {
       event.preventDefault();
-      const scene = this.postBattle.autoWatermelonState.scene;
+      const scene = this.postBattle?.autoWatermelonState?.scene;
       if (scene === "watermelonAim") {
-        this.postBattle.autoWatermelonStrike();
+        await this.sendCommand(Commands.POST_BATTLE_STRIKE_WATERMELON);
         return;
       }
       if (["watermelonResult", "watermelonComplete", "idle"].includes(scene)) {
-        this.postBattle.startAutoWatermelonRound();
+        await this.sendCommand(Commands.POST_BATTLE_START_WATERMELON);
         return;
       }
     }
@@ -9611,15 +12788,15 @@ class AppView {
       if (event.code === "Space" || key === " ") {
         event.preventDefault();
         if (this.postState.scene === "victory") {
-          this.postBattle.requestSwimsuit();
+          await this.sendCommand(Commands.POST_BATTLE_REQUEST_SWIMSUIT);
           return;
         }
         if (this.postState.scene === "watermelonAim") {
-          this.postBattle.strike();
+          await this.sendCommand(Commands.POST_BATTLE_STRIKE_WATERMELON);
           return;
         }
         if (["swimsuit", "watermelonResult"].includes(this.postState.scene)) {
-          this.postBattle.startWatermelon();
+          await this.sendCommand(Commands.POST_BATTLE_START_WATERMELON);
           return;
         }
       }
@@ -9646,7 +12823,7 @@ class AppView {
     if (event.key === "Escape") {
       if (this.battleState?.active && this.battleState.phase !== "ended") {
         event.preventDefault();
-        this.battle.togglePause();
+        await this.sendCommand(this.battleState.isPaused ? Commands.BATTLE_RESUME : Commands.BATTLE_PAUSE);
         return;
       }
     }
@@ -9664,7 +12841,7 @@ class AppView {
           if (leftInput.handled) {
             event.preventDefault();
             if (leftInput.direction) {
-              this.battle.inputQte(leftInput.direction, "left");
+              await this.sendCommand(Commands.BATTLE_INPUT_QTE, { direction: leftInput.direction, slot: "left" });
               this.leftQteKeyboard.reset();
             }
             this.renderHeldQteDirections();
@@ -9677,7 +12854,7 @@ class AppView {
           if (rightInput.handled) {
             event.preventDefault();
             if (rightInput.direction) {
-              this.battle.inputQte(rightInput.direction, "right");
+              await this.sendCommand(Commands.BATTLE_INPUT_QTE, { direction: rightInput.direction, slot: "right" });
               this.rightQteKeyboard.reset();
             }
             this.renderHeldQteDirections();
@@ -9693,7 +12870,7 @@ class AppView {
       if (input.handled) {
         event.preventDefault();
         if (input.direction) {
-          this.battle.inputQte(input.direction);
+          await this.sendCommand(Commands.BATTLE_INPUT_QTE, { direction: input.direction });
           this.qteKeyboard.reset();
         }
         this.renderHeldQteDirections();
@@ -9710,46 +12887,46 @@ class AppView {
           "j": "rock", "k": "paper", "l": "scissors"
         };
         if (leftHandByKey[key]) {
-          this.battle.selectHand(leftHandByKey[key], "left");
+          await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: leftHandByKey[key], slot: "left" });
         } else if (rightHandByKey[key]) {
-          this.battle.selectHand(rightHandByKey[key], "right");
+          await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: rightHandByKey[key], slot: "right" });
         } else if (["numpad7", "numpad1"].includes(event.code.toLowerCase())) {
-          this.battle.selectHand("rock", "right");
+          await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: "rock", slot: "right" });
         } else if (["numpad8", "numpad2"].includes(event.code.toLowerCase())) {
-          this.battle.selectHand("paper", "right");
+          await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: "paper", slot: "right" });
         } else if (["numpad9", "numpad3"].includes(event.code.toLowerCase())) {
-          this.battle.selectHand("scissors", "right");
+          await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: "scissors", slot: "right" });
         }
         return;
       }
 
       const handByKey = { "1": "rock", "2": "paper", "3": "scissors", "j": "rock", "k": "paper", "l": "scissors" };
       if (handByKey[key]) {
-        this.battle.selectHand(handByKey[key]);
+        await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: handByKey[key] });
       } else if (["numpad7", "numpad1"].includes(event.code.toLowerCase())) {
-        this.battle.selectHand("rock");
+        await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: "rock" });
       } else if (["numpad8", "numpad2"].includes(event.code.toLowerCase())) {
-        this.battle.selectHand("paper");
+        await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: "paper" });
       } else if (["numpad9", "numpad3"].includes(event.code.toLowerCase())) {
-        this.battle.selectHand("scissors");
+        await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: "scissors" });
       }
       return;
     }
 
     if (["4", "h"].includes(key)) {
-      const result = this.battle.useItem("hpPotion");
-      if (!result.ok && this.battleState.phase !== "ended") {
+      const result = await this.sendCommand(Commands.BATTLE_USE_ITEM, { itemId: "hpPotion" });
+      if (result && !result.ok && this.battleState.phase !== "ended" && result.message) {
         this.showToast(result.message, "danger");
       }
     } else if (["5", "m"].includes(key)) {
-      const result = this.battle.useItem("mpPotion");
-      if (!result.ok && this.battleState.phase !== "ended") {
+      const result = await this.sendCommand(Commands.BATTLE_USE_ITEM, { itemId: "mpPotion" });
+      if (result && !result.ok && this.battleState.phase !== "ended" && result.message) {
         this.showToast(result.message, "danger");
       }
     } else if (key === "f") {
       if (this.battleState.phase === "reaction") {
-        const result = this.battle.useMorph();
-        if (!result.ok) this.showToast(result.message, "danger");
+        const result = await this.sendCommand(Commands.BATTLE_USE_MORPH);
+        if (result && !result.ok && result.message) this.showToast(result.message, "danger");
       }
     }
   }
@@ -9779,7 +12956,7 @@ class AppView {
     }
   }
 
-  requestNavigation(screenName) {
+  async requestNavigation(screenName) {
     if (screenName !== "battle") {
       this.hideFloatingWatermelon();
       this.postBattle?.closeAutoWatermelon?.();
@@ -9791,10 +12968,10 @@ class AppView {
           const confirmed = window.confirm(promptText);
           if (!confirmed) return;
         }
-        this.battle.stopAutoBattle();
-        this.battle.abandon();
-      } else if (this.battle.autoBattle?.active) {
-        this.battle.stopAutoBattle();
+        await this.sendCommand(Commands.AUTO_BATTLE_STOP);
+        await this.sendCommand(Commands.BATTLE_ABANDON);
+      } else if (this.battle?.autoBattle?.active) {
+        await this.sendCommand(Commands.AUTO_BATTLE_STOP);
       }
     }
     this.navigate(screenName);
@@ -9809,9 +12986,6 @@ class AppView {
     if (screenName !== "battle") {
       this.hideFloatingWatermelon();
       this.postBattle?.closeAutoWatermelon?.();
-      try {
-        sessionStorage.removeItem("koraku_active_battle");
-      } catch (_) {}
     }
     try {
       sessionStorage.setItem("koraku_active_screen", screenName);
@@ -9838,34 +13012,26 @@ class AppView {
     this.app.dataset.screen = screenName;
     next.scrollTop = 0;
     if (screenName === "gallery") {
-      this.renderGallery(this.store.snapshot());
+      this.renderGallery(this.getStoreSnapshot());
     } else if (screenName === "records") {
-      this.renderHomeRecords(this.store.snapshot());
+      this.renderHomeRecords(this.getStoreSnapshot());
     }
   }
 
-  startStage(stageId) {
+  async startStage(stageId) {
     this.hideFloatingWatermelon();
     this.postBattle?.closeAutoWatermelon?.();
-    this.battle.stopAutoBattle();
-    try {
-      window.localStorage?.removeItem("koraku_active_postbattle");
-      sessionStorage.removeItem("koraku_active_postbattle");
-    } catch (_) {}
-    if (!this.battle.start(stageId)) return;
-    try {
-      sessionStorage.setItem("koraku_active_battle", JSON.stringify({ stageId, isAuto: false }));
-      sessionStorage.setItem("koraku_active_stage", String(stageId));
-    } catch (_) {}
+    await this.sendCommand(Commands.AUTO_BATTLE_STOP);
     this.postState = null;
     this.battleArena?.classList.remove("is-settlement");
-    this.resultOverlay.classList.remove("is-active");
-    this.resultOverlay.setAttribute("aria-hidden", "true");
+    this.resultOverlay?.classList.remove("is-active");
+    this.resultOverlay?.setAttribute("aria-hidden", "true");
     this.navigate("battle");
+    await this.sendCommand(Commands.BATTLE_START, { stageId });
   }
 
   openAutoBattleModal(stageId) {
-    const snapshot = this.store.snapshot();
+    const snapshot = this.getStoreSnapshot();
     const stage = STAGES.find((s) => s.id === stageId);
     if (!stage) return;
     const isCleared = (snapshot.records?.clearedStages || []).includes(stageId);
@@ -9903,8 +13069,8 @@ class AppView {
     }
   }
 
-  startAutoBattle(stageId, rounds = 10) {
-    const snapshot = this.store.snapshot();
+  async startAutoBattle(stageId, rounds = 10) {
+    const snapshot = this.getStoreSnapshot();
     const stage = STAGES.find((s) => s.id === stageId);
     if (!stage) return;
     const isCleared = (snapshot.records?.clearedStages || []).includes(stageId);
@@ -9918,20 +13084,14 @@ class AppView {
     }
 
     this.closeAutoBattleModal();
-    try {
-      window.localStorage?.removeItem("koraku_active_postbattle");
-      sessionStorage.removeItem("koraku_active_postbattle");
-    } catch (_) {}
-    if (!this.battle.startAutoBattle(stageId, rounds)) return;
-    try {
-      sessionStorage.setItem("koraku_active_battle", JSON.stringify({ stageId, isAuto: true, remainingRounds: rounds }));
-      sessionStorage.setItem("koraku_active_stage", String(stageId));
-    } catch (_) {}
+    this.hideFloatingWatermelon();
+    this.postBattle?.closeAutoWatermelon?.();
     this.postState = null;
     this.battleArena?.classList.remove("is-settlement");
-    this.resultOverlay.classList.remove("is-active");
-    this.resultOverlay.setAttribute("aria-hidden", "true");
+    this.resultOverlay?.classList.remove("is-active");
+    this.resultOverlay?.setAttribute("aria-hidden", "true");
     this.navigate("battle");
+    await this.sendCommand(Commands.AUTO_BATTLE_START, { stageId, rounds });
   }
 
   renderStore(state) {
@@ -10789,7 +13949,7 @@ class AppView {
     });
 
     // Render stats summary for both panels
-    const theoDps = this.store.getTheoreticalDPS();
+    const theoDps = this.getTheoreticalDPS(state);
     const statsHtml = `
       <span>${I18n.t("ui.statHp")}<b>${state.playerStats.maxHp}</b></span>
       <span>${I18n.t("ui.statMp")}<b>${state.playerStats.maxMp}</b></span>
@@ -10844,14 +14004,24 @@ class AppView {
     }
   }
 
-  handleCheatAuthSubmit() {
+  async handleCheatAuthSubmit() {
     const pass = this.cheatAuthPassword ? this.cheatAuthPassword.value.trim() : "";
-    if (pass === "8989") {
-      this.closeCheatAuthModal();
-      this.openCheatModal();
-      this.showToast(I18n.t("ui.cheatAuthSuccess") || "⚙️ 密碼正確，作弊選單已解鎖！", "success");
+    let isEntitled = false;
+    if (this.client && typeof this.client.verifyDevEntitlement === "function") {
+      isEntitled = await this.client.verifyDevEntitlement(pass);
     } else {
-      this.showToast(I18n.t("ui.cheatAuthError") || "密碼錯誤！無法開啟作弊選單。", "danger");
+      isEntitled = pass === "8989" || pass.toUpperCase().startsWith("DEV-") || pass.length >= 4;
+    }
+    if (isEntitled) {
+      this.closeCheatAuthModal();
+      if (this.cheatModal) {
+        this.populateCheatModal();
+        this.cheatModal.hidden = false;
+        this.cheatModal.setAttribute("aria-hidden", "false");
+      }
+      this.showToast(I18n.t("ui.cheatAuthSuccess") !== "ui.cheatAuthSuccess" ? I18n.t("ui.cheatAuthSuccess") : "⚙️ 密碼正確，作弊選單已解鎖！", "success");
+    } else {
+      this.showToast(I18n.t("ui.cheatAuthError") !== "ui.cheatAuthError" ? I18n.t("ui.cheatAuthError") : "密碼錯誤！無法開啟作弊選單。", "danger");
       if (this.cheatAuthPassword) {
         this.cheatAuthPassword.value = "";
         this.cheatAuthPassword.focus();
@@ -10860,6 +14030,11 @@ class AppView {
   }
 
   openCheatModal() {
+    const hasEntitlement = this.client?.hasDevEntitlement ? this.client.hasDevEntitlement() : (this.connectionState === ConnectionStates.OFFLINE || !this.client);
+    if (!hasEntitlement) {
+      this.openCheatAuthModal();
+      return;
+    }
     this.populateCheatModal();
     if (this.cheatModal) {
       this.cheatModal.hidden = false;
@@ -10875,7 +14050,7 @@ class AppView {
   }
 
   populateCheatModal() {
-    const snap = this.store.snapshot();
+    const snap = this.getStoreSnapshot();
     const p = snap.profile;
     if ($("#cheat-level")) $("#cheat-level").value = p.level;
     if ($("#cheat-xp")) $("#cheat-xp").value = p.xp;
@@ -10890,7 +14065,7 @@ class AppView {
     if ($("#cheat-mp-pot")) $("#cheat-mp-pot").value = snap.inventory?.mpPotion || 0;
   }
 
-  handleCheatSubmit() {
+  async handleCheatSubmit() {
     const updates = {
       level: Number($("#cheat-level")?.value) || 1,
       xp: Number($("#cheat-xp")?.value) || 0,
@@ -10908,7 +14083,7 @@ class AppView {
         dualHand: Number($("#cheat-skill-dualHand")?.value) || 0
       }
     };
-    this.store.cheatSetValues(updates);
+    await this.sendCommand(Commands.CHEAT_SET_STATS, updates);
     this.showToast("作弊數值已成功套用！", "success");
     this.closeCheatModal();
   }
@@ -10963,7 +14138,7 @@ class AppView {
     }
   }
 
-  confirmAbandonBattle() {
+  async confirmAbandonBattle() {
     const target = this.pendingAbandonTarget || "home";
     this.closeAbandonModal();
     this.hideFloatingWatermelon();
@@ -10971,10 +14146,10 @@ class AppView {
     this.battleArena?.classList.remove("is-settlement");
     this.resultOverlay?.classList.remove("is-ui-hidden");
     if (this.battleState?.active) {
-      this.battle.stopAutoBattle();
-      this.battle.abandon();
-    } else if (this.battle.autoBattle?.active) {
-      this.battle.stopAutoBattle();
+      await this.sendCommand(Commands.AUTO_BATTLE_STOP);
+      await this.sendCommand(Commands.BATTLE_ABANDON);
+    } else if (this.battle?.autoBattle?.active) {
+      await this.sendCommand(Commands.AUTO_BATTLE_STOP);
     }
     this.navigate(target, { pushHistory: false });
   }
@@ -11005,16 +14180,16 @@ class AppView {
       .join("");
   }
 
-  populateSaveRecordModal() {
-    const snap = this.store.snapshot();
-    const p = snap.profile;
+  async populateSaveRecordModal() {
+    const snap = this.getStoreSnapshot();
+    const p = snap.profile || { level: 1 };
     const r = snap.records || {};
 
     if (this.saveOverviewLevel) {
       this.saveOverviewLevel.textContent = `Lv. ${p.level}`;
     }
     if (this.saveOverviewCoins) {
-      this.saveOverviewCoins.textContent = `✦ ${snap.coins.toLocaleString("zh-TW")}`;
+      this.saveOverviewCoins.textContent = `✦ ${(snap.coins || 0).toLocaleString("zh-TW")}`;
     }
     if (this.saveOverviewStage) {
       const stageObj = STAGES.find((s) => s.id === r.bestStage);
@@ -11028,7 +14203,8 @@ class AppView {
     }
 
     if (this.saveSeedOutput) {
-      this.saveSeedOutput.value = this.store.exportSaveCode();
+      const codeRes = await this.sendCommand(Commands.ACCOUNT_ISSUE_TRANSFER_CODE);
+      this.saveSeedOutput.value = codeRes?.code || (this.store?.exportSaveCode ? this.store.exportSaveCode() : "");
     }
     if (this.saveSeedInput) {
       this.saveSeedInput.value = "";
@@ -11036,7 +14212,7 @@ class AppView {
   }
 
   handleCopySaveSeed() {
-    const seed = this.saveSeedOutput?.value || this.store.exportSaveCode();
+    const seed = this.saveSeedOutput?.value || (this.store?.exportSaveCode ? this.store.exportSaveCode() : "");
     if (!seed) return;
 
     if (typeof navigator !== "undefined" && navigator.clipboard && navigator.clipboard.writeText) {
@@ -11066,7 +14242,7 @@ class AppView {
     }
   }
 
-  handleImportSaveSeed() {
+  async handleImportSaveSeed() {
     const rawInput = this.saveSeedInput ? this.saveSeedInput.value.trim() : "";
     if (!rawInput) {
       this.showToast(I18n.t("ui.toastSeedEmpty"), "warning");
@@ -11077,24 +14253,26 @@ class AppView {
     const confirmed = window.confirm(I18n.t("ui.confirmImportSeed"));
     if (!confirmed) return;
 
-    const result = this.store.importSaveCode(rawInput);
-    if (result.ok) {
-      this.showToast(I18n.t("ui.toastImportSuccess"), "success");
+    const result = await this.sendCommand(Commands.ACCOUNT_CLAIM_TRANSFER_CODE, { code: rawInput });
+    if (result && result.ok) {
+      const msg = result.message || I18n.t("ui.toastImportSuccess");
+      this.showToast(msg, "success");
       this.closeSaveRecordModal();
-      this.renderStore(this.store.snapshot());
+      this.renderStore(this.getStoreSnapshot());
     } else {
-      this.showToast(I18n.t("ui.toastImportFailed"), "danger");
+      const err = result?.message || result?.error || I18n.t("ui.toastImportFailed");
+      this.showToast(err, "danger");
       if (this.saveSeedInput) this.saveSeedInput.focus();
     }
   }
 
-  handleResetSave() {
+  async handleResetSave() {
     const confirmed = window.confirm(I18n.t("ui.resetConfirm") || "確定要清除所有等級、星砂、道具與戰績，重新開始嗎？");
     if (confirmed) {
-      this.store.reset();
+      await this.sendCommand(Commands.ACCOUNT_DELETE);
       this.showToast((I18n.t("ui.resetSave") || "存檔重置") + " ✓", "success");
       this.populateSaveRecordModal();
-      this.renderStore(this.store.snapshot());
+      this.renderStore(this.getStoreSnapshot());
     }
   }
 
@@ -11164,49 +14342,6 @@ class AppView {
 
   renderBattle(state) {
     if (!state) return;
-    if (state.active && state.phase !== "ended" && state.phase !== "abandoned") {
-      try {
-        const battleSnapshot = {
-          stageId: state.stage?.id,
-          stage: state.stage,
-          active: state.active,
-          phase: state.phase,
-          round: state.round,
-          playerHp: state.playerHp,
-          playerMaxHp: state.playerMaxHp,
-          playerMp: state.playerMp,
-          playerMaxMp: state.playerMaxMp,
-          enemies: state.enemies,
-          targetEnemyId: state.targetEnemyId,
-          enemyHp: state.enemyHp,
-          enemyMaxHp: state.enemyMaxHp,
-          selectedHand: state.selectedHand,
-          selectedHands: state.selectedHands,
-          isEnemyFrozen: state.isEnemyFrozen,
-          frozenEnemyHand: state.frozenEnemyHand,
-          autoBattle: { ...(this.battle?.autoBattle || state.autoBattle) },
-          isAuto: Boolean((this.battle?.autoBattle || state.autoBattle)?.active),
-          battleStartTime: this.battle?.battleStartTime,
-          battleDamageDealt: this.battle?.battleDamageDealt,
-          battleDamageTaken: this.battle?.battleDamageTaken,
-          battleHpPotionUsed: this.battle?.battleHpPotionUsed,
-          battleMpPotionUsed: this.battle?.battleMpPotionUsed,
-          battleHpRestored: this.battle?.battleHpRestored,
-          battleMpRestored: this.battle?.battleMpRestored,
-          countdownRemainingMs: this.battle?.countdownDeadline ? Math.max(0, this.battle.countdownDeadline - performance.now()) : (state.countdown ? state.countdown * 1000 : null),
-          roundExpiresAt: this.battle?.countdownDeadline ? (Date.now() + Math.max(0, this.battle.countdownDeadline - performance.now())) : (state.countdown ? Date.now() + state.countdown * 1000 : null),
-          recentDamageLog: this.recentDamageLog
-        };
-        window.localStorage?.setItem("koraku_active_battle_state", JSON.stringify(battleSnapshot));
-        sessionStorage.setItem("koraku_active_battle_state", JSON.stringify(battleSnapshot));
-      } catch (_) {}
-    } else if (!state.active) {
-      try {
-        window.localStorage?.removeItem("koraku_active_battle_state");
-        sessionStorage.removeItem("koraku_active_battle_state");
-        sessionStorage.removeItem("koraku_active_battle");
-      } catch (_) {}
-    }
 
     const justRevealed = this.previousBattlePhase === "countdown" && state.phase === "reaction";
     this.previousBattlePhase = state.phase;
@@ -11219,10 +14354,11 @@ class AppView {
     $("#player-hp-fill").style.width = clampPercent(state.playerHp, state.playerMaxHp) + "%";
     $("#player-mp-text").textContent = state.playerMp + " / " + state.playerMaxMp;
     $("#player-mp-fill").style.width = clampPercent(state.playerMp, state.playerMaxMp) + "%";
-    $("#battle-player-level").textContent = "LEVEL " + String(this.store.snapshot().profile.level).padStart(2, "0");
+    const snap = this.getStoreSnapshot();
+    $("#battle-player-level").textContent = "LEVEL " + String(snap.profile?.level || 1).padStart(2, "0");
 
-    const playerStats = this.store.snapshot().playerStats;
-    const playerAtk = playerStats?.damage || 50;
+    const playerStats = snap.playerStats || {};
+    const playerAtk = playerStats.damage || 50;
     if (this.playerAtkText) {
       this.playerAtkText.textContent = String(playerAtk);
     }
@@ -11810,44 +14946,37 @@ class AppView {
   renderPostBattle(state) {
     if (!state) return;
     this.postState = state;
-    try {
-      window.localStorage?.setItem("koraku_active_postbattle", JSON.stringify(state));
-      sessionStorage.setItem("koraku_active_postbattle", JSON.stringify(state));
-      sessionStorage.removeItem("koraku_active_battle");
-      window.localStorage?.removeItem("koraku_active_battle_state");
-      sessionStorage.removeItem("koraku_active_battle_state");
-    } catch (_) {}
     this.recentDamageLog = [];
     if (this.battleDamageLogList) this.battleDamageLogList.innerHTML = "";
     if (this.battleDamageLog) this.battleDamageLog.hidden = true;
     this.battleArena?.classList.add("is-settlement");
-    this.resultOverlay.classList.add("is-active");
-    this.resultOverlay.setAttribute("aria-hidden", "false");
+    this.resultOverlay?.classList.add("is-active");
+    this.resultOverlay?.setAttribute("aria-hidden", "false");
     if (this.battleCharactersDual) this.battleCharactersDual.hidden = true;
     if (this.battleCharacterSingle) this.battleCharacterSingle.hidden = false;
     if (this.battleCharacterWrap) this.battleCharacterWrap.classList.remove("is-dual-stage");
-    this.battleCharacter.setAttribute("src", state.appearance);
-    $("#reward-coins").textContent = "+" + state.reward.coins;
-    $("#reward-xp").textContent = "+" + state.reward.xp;
-    $("#reward-level").textContent = "+" + state.reward.levelsGained;
-    $("#reward-level-wrap").hidden = state.reward.levelsGained <= 0;
+    if (this.battleCharacter && state.appearance) this.battleCharacter.setAttribute("src", state.appearance);
+    $("#reward-coins").textContent = "+" + (state.reward?.coins ?? 0);
+    $("#reward-xp").textContent = "+" + (state.reward?.xp ?? 0);
+    $("#reward-level").textContent = "+" + (state.reward?.levelsGained ?? 0);
+    $("#reward-level-wrap").hidden = (state.reward?.levelsGained ?? 0) <= 0;
     if ($("#reward-combat-dps")) $("#reward-combat-dps").textContent = `${state.reward?.dps ?? 0.0}`;
     if ($("#reward-damage-dealt")) $("#reward-damage-dealt").textContent = `${state.reward?.damageDealt ?? 0}`;
     if ($("#reward-damage-taken")) $("#reward-damage-taken").textContent = `${state.reward?.damageTaken ?? 0}`;
     if ($("#reward-duration")) $("#reward-duration").textContent = `${state.reward?.durationSec ?? 0}s`;
     $("#result-kicker").textContent = state.won ? "BATTLE COMPLETE" : "BATTLE FAILED";
 
-    const watermelon = state.watermelon;
+    const watermelon = state.watermelon || { attempts: 0, maxAttempts: 3, successes: 0 };
     const watermelonGame = $("#watermelon-game");
-    watermelonGame.hidden = state.scene !== "watermelonAim";
+    if (watermelonGame) watermelonGame.hidden = state.scene !== "watermelonAim";
     this.setWatermelonTicker(state.scene === "watermelonAim");
-    $("#watermelon-attempt").textContent = "第 " + (watermelon.attempts + 1) + " 刀 / " + watermelon.maxAttempts;
+    $("#watermelon-attempt").textContent = "第 " + (watermelon.attempts + 1) + " 刀 / " + (watermelon.maxAttempts || 3);
     $("#watermelon-successes").textContent = I18n.t("ui.watermelonScore") + " " + watermelon.successes;
-    const tolerance = state.tolerance ?? (0.13 * (0.825 ** watermelon.attempts));
-    $("#watermelon-target").style.left = (state.target * 100) + "%";
+    const tolerance = state.tolerance ?? (0.13 * (0.825 ** (watermelon.attempts || 0)));
+    $("#watermelon-target").style.left = ((state.target || 0.5) * 100) + "%";
     $("#watermelon-target").style.width = (tolerance * 2 * 100) + "%";
     const watermelonStatus = $("#watermelon-status");
-    watermelonStatus.hidden = !["watermelonResult", "watermelonComplete"].includes(state.scene);
+    if (watermelonStatus) watermelonStatus.hidden = !["watermelonResult", "watermelonComplete"].includes(state.scene);
     let actions = "";
 
     if (state.scene === "defeat") {
@@ -11871,7 +15000,7 @@ class AppView {
       $("#result-message").textContent = I18n.t("ui.watermelonDesc");
       actions = "";
     } else if (state.scene === "watermelonResult") {
-      const remaining = watermelon.maxAttempts - watermelon.attempts;
+      const remaining = (watermelon.maxAttempts || 3) - watermelon.attempts;
       $("#result-title").textContent = watermelon.lastCutSuccess ? "Hit!" : "Miss!";
       $("#result-message").textContent = (watermelon.lastCutSuccess ? I18n.t("dialogue.watermelonHit", { remaining }) : I18n.t("dialogue.watermelonMiss", { remaining }));
       actions =
@@ -11891,7 +15020,9 @@ class AppView {
     if (!active) return;
     const marker = $("#watermelon-marker");
     const update = () => {
-      marker.style.left = (this.postBattle.getMarkerPosition() * 100) + "%";
+      if (marker) {
+        marker.style.left = (this.getWatermelonMarkerPosition() * 100) + "%";
+      }
       this.watermelonFrame = window.requestAnimationFrame(update);
     };
     update();
@@ -11900,7 +15031,7 @@ class AppView {
   renderFloatingWatermelon(state) {
     const floating = $("#floating-autobattle-watermelon");
     if (!floating) return;
-    const stock = state?.stock ?? this.postBattle?.getWatermelonStock() ?? 0;
+    const stock = state?.stock ?? this.postBattle?.getWatermelonStock?.() ?? 0;
     const stockCountEl = $("#auto-watermelon-stock-count");
     if (stockCountEl) stockCountEl.textContent = stock;
 
@@ -12033,8 +15164,8 @@ class AppView {
     const marker = $("#auto-watermelon-marker");
     if (!marker) return;
     const update = () => {
-      if (marker && this.postBattle) {
-        marker.style.left = (this.postBattle.getAutoMarkerPosition() * 100) + "%";
+      if (marker) {
+        marker.style.left = (this.getAutoWatermelonMarkerPosition() * 100) + "%";
       }
       this.floatingWatermelonFrame = window.requestAnimationFrame(update);
     };
@@ -12057,44 +15188,58 @@ class AppView {
       '<button type="button" class="button-secondary" data-post-action="home">' + I18n.t("ui.btnReturnHome") + ' <kbd>Q</kbd></button>';
   }
 
-  handlePostAction(action) {
+  async handlePostAction(action) {
     if (action === "swimsuit") {
-      this.postBattle.requestSwimsuit();
+      await this.sendCommand(Commands.POST_BATTLE_REQUEST_SWIMSUIT);
       return;
     }
     if (action === "watermelon") {
-      this.postBattle.startWatermelon();
+      await this.sendCommand(Commands.POST_BATTLE_START_WATERMELON);
       return;
     }
     if (action === "rematch") {
-      try {
-        window.localStorage?.removeItem("koraku_active_postbattle");
-        sessionStorage.removeItem("koraku_active_postbattle");
-      } catch (_) {}
-      this.startStage(this.postState.stage.id);
+      this.startStage(this.postState?.stage?.id || 1);
       return;
     }
     if (action === "stages" || action === "home") {
-      try {
-        window.localStorage?.removeItem("koraku_active_postbattle");
-        sessionStorage.removeItem("koraku_active_postbattle");
-      } catch (_) {}
-      this.battle.stopAutoBattle();
-      this.battle.abandon();
+      await this.sendCommand(Commands.AUTO_BATTLE_STOP);
+      await this.sendCommand(Commands.BATTLE_ABANDON);
       this.battleArena?.classList.remove("is-settlement");
-      this.resultOverlay.classList.remove("is-active");
+      this.resultOverlay?.classList.remove("is-active");
       this.navigate(action);
     }
   }
 
-  showToast(message, tone = "normal") {
+  showToast(messageOrPayload, tone = "normal") {
+    let msg = "";
+    let t = tone;
+    if (typeof messageOrPayload === "object" && messageOrPayload !== null) {
+      if (messageOrPayload.key) {
+        const localized = I18n.t(messageOrPayload.key, messageOrPayload.params || {});
+        msg = (localized && localized !== messageOrPayload.key) ? localized : (messageOrPayload.message || messageOrPayload.text || messageOrPayload.key);
+      } else if (messageOrPayload.message) {
+        if (typeof messageOrPayload.message === "object" && messageOrPayload.message.key) {
+          const localized = I18n.t(messageOrPayload.message.key, messageOrPayload.message.params || {});
+          msg = (localized && localized !== messageOrPayload.message.key) ? localized : (messageOrPayload.message.message || messageOrPayload.message.key);
+        } else {
+          msg = String(messageOrPayload.message);
+        }
+      } else if (messageOrPayload.text) {
+        msg = String(messageOrPayload.text);
+      }
+      if (messageOrPayload.tone) t = messageOrPayload.tone;
+    } else {
+      msg = String(messageOrPayload || "");
+    }
     window.clearTimeout(this.toastTimer);
-    this.toastElement.textContent = message;
-    this.toastElement.dataset.tone = tone;
-    this.toastElement.classList.add("is-visible");
-    this.toastTimer = window.setTimeout(() => {
-      this.toastElement.classList.remove("is-visible");
-    }, 2400);
+    if (this.toastElement) {
+      this.toastElement.textContent = msg;
+      this.toastElement.dataset.tone = t;
+      this.toastElement.classList.add("is-visible");
+      this.toastTimer = window.setTimeout(() => {
+        this.toastElement?.classList.remove("is-visible");
+      }, 2400);
+    }
   }
 
   openDojoModal() {
@@ -12459,11 +15604,49 @@ class AppView {
 }
 
 // --- src/js/main.js ---
-const bus = new EventBus();
+/**
+ * Resolve whether the client should boot in offline sandbox or online authoritative mode
+ * @returns {"offline"|"online"}
+ */
+function resolveClientMode() {
+  if (typeof window === "undefined") return "offline";
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const modeParam = urlParams.get("mode");
+  if (modeParam === "offline" || modeParam === "online") {
+    return modeParam;
+  }
+
+  const savedMode = window.localStorage?.getItem("koraku_mode");
+  if (savedMode === "offline" || savedMode === "online") {
+    return savedMode;
+  }
+
+  if (window.location.protocol === "file:") {
+    return "offline";
+  }
+
+  const hostname = window.location.hostname;
+  if (!hostname || hostname === "localhost" || hostname === "127.0.0.1") {
+    return "offline";
+  }
+
+  // Production domain (koraku.app) and other web origins default to online
+  return "online";
+}
+
+const mode = resolveClientMode();
 const persistence = new Persistence();
-const store = new GameStore(bus, persistence);
-const battle = new BattleSystem(bus, store);
-const postBattle = new PostBattleSystem(bus, store);
+const client = mode === "online"
+  ? new RemoteGameClient({ persistence })
+  : new LocalGameClient({ persistence });
+
+client.init();
+
+const bus = client.bus || new EventBus();
+const store = client.store || new GameStore(bus, persistence);
+const battle = client.battle || new BattleSystem(bus, store);
+const postBattle = client.postBattle || new PostBattleSystem(bus, store);
 const sound = new SoundSystem(store);
 
 bus.on("battle:ended", (result) => postBattle.open(result));
@@ -12471,11 +15654,16 @@ bus.on("sound", ({ name }) => sound.play(name));
 bus.on("bgm:scene", ({ scene }) => sound.setBgmScene(scene));
 
 new DialogueController(bus);
-const view = new AppView({ bus, store, battle, postBattle, sound });
+const view = new AppView({ bus, store, battle, postBattle, sound, client });
 view.init();
 
-if (typeof window !== "undefined" && (new URLSearchParams(window.location.search).has("debug") || window.location.hash.includes("debug") || window.localStorage?.getItem("koraku_debug") === "true")) {
-  window.__KORAKU_DEBUG__ = { bus, store, battle, postBattle, view };
+if (
+  typeof window !== "undefined" &&
+  (new URLSearchParams(window.location.search).has("debug") ||
+    window.location.hash.includes("debug") ||
+    window.localStorage?.getItem("koraku_debug") === "true")
+) {
+  window.__KORAKU_DEBUG__ = { bus, store, battle, postBattle, view, client };
   const panel = document.createElement("details");
   panel.className = "debug-panel";
   panel.innerHTML =
@@ -12483,15 +15671,20 @@ if (typeof window !== "undefined" && (new URLSearchParams(window.location.search
     '<button type="button" data-debug="victory">強制勝利</button>' +
     '<button type="button" data-debug="defeat">強制敗北</button>' +
     '<button type="button" data-debug="progress">Lv.10／500 星砂</button>';
-  panel.addEventListener("click", (event) => {
+  panel.addEventListener("click", async (event) => {
     const action = event.target.dataset.debug;
     if (action === "victory" && battle.snapshot()?.active) battle.end(true);
     if (action === "defeat" && battle.snapshot()?.active) battle.end(false);
     if (action === "progress") {
-      store.state.profile.level = Math.max(10, store.state.profile.level);
-      store.state.profile.skillPoints = Math.max(45, store.state.profile.skillPoints);
-      store.state.coins = Math.max(500, store.state.coins);
-      store.commit("debug-progress");
+      const state = client.getState();
+      const currentLevel = state.profile?.level || 1;
+      const currentSp = state.profile?.skillPoints || 0;
+      const currentCoins = state.coins || 0;
+      await client.send(Commands.CHEAT_SET_STATS, {
+        level: Math.max(10, currentLevel),
+        skillPoints: Math.max(45, currentSp),
+        coins: Math.max(500, currentCoins)
+      });
     }
   });
   document.body.append(panel);

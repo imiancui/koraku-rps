@@ -1,11 +1,23 @@
 import { ASSETS } from "../config/gameConfig.js";
-import { I18n } from "../services/I18n.js";
 
 export class PostBattleSystem {
-  constructor(bus, store, random = Math.random) {
+  constructor(bus, store, random = Math.random, now = null) {
     this.bus = bus;
     this.store = store;
-    this.random = random;
+    const resolvedRandom = typeof random === "function"
+      ? random
+      : (typeof random === "object" && random !== null && typeof random.random === "function"
+        ? random.random
+        : Math.random);
+    const resolvedNow = (typeof random === "object" && random !== null && typeof random.now === "function")
+      ? random.now
+      : (typeof now === "function"
+        ? now
+        : (typeof globalThis.performance !== "undefined" && typeof globalThis.performance.now === "function"
+          ? () => globalThis.performance.now()
+          : () => Date.now()));
+    this.random = resolvedRandom;
+    this.now = resolvedNow;
     this.state = null;
     this.autoWatermelonState = {
       active: false,
@@ -66,9 +78,9 @@ export class PostBattleSystem {
     };
     this.emit();
     if (result.won) {
-      this.say(I18n.t("dialogue.postBattleWin"));
+      this.say({ key: "dialogue.postBattleWin" });
     } else {
-      this.say(I18n.t("dialogue.postBattleLoss"));
+      this.say({ key: "dialogue.postBattleLoss" });
     }
   }
 
@@ -78,7 +90,7 @@ export class PostBattleSystem {
     this.state.scene = "swimsuit";
     this.state.appearance = ASSETS.swimsuit;
     this.emit();
-    this.say(I18n.t("dialogue.askSwimsuitLine"));
+    this.say({ key: "dialogue.askSwimsuitLine" });
   }
 
   startWatermelon() {
@@ -95,15 +107,19 @@ export class PostBattleSystem {
     const minTarget = this.state.tolerance + 0.05;
     const maxTarget = 1 - this.state.tolerance - 0.05;
     this.state.target = minTarget + this.random() * Math.max(0.1, maxTarget - minTarget);
-    this.state.strikeStartedAt = performance.now();
+    this.state.strikeStartedAt = this.now();
     this.emit();
     const nextAttempt = this.state.watermelon.attempts + 1;
-    this.say(I18n.t("dialogue.watermelonAttempt", { nextAttempt }));
+    this.say({
+      key: "dialogue.watermelonAttempt",
+      params: { nextAttempt }
+    });
   }
 
-  strike() {
+  strike(declaredAt = null) {
     if (this.state?.scene !== "watermelonAim") return;
-    const marker = this.getMarkerPosition();
+    const timestamp = declaredAt || this.now();
+    const marker = this.getMarkerPosition(timestamp);
     const distance = Math.abs(marker - this.state.target);
     const tolerance = this.state.tolerance ?? (0.13 * (0.825 ** this.state.watermelon.attempts));
     const success = distance <= tolerance;
@@ -125,9 +141,15 @@ export class PostBattleSystem {
     this.bus.emit("sound", { name: success ? "victory" : "hurt" });
     const remaining = this.state.watermelon.maxAttempts - this.state.watermelon.attempts;
     if (success) {
-      this.say(I18n.t("dialogue.watermelonHit", { remaining }));
+      this.say({
+        key: "dialogue.watermelonHit",
+        params: { remaining }
+      });
     } else {
-      this.say(I18n.t("dialogue.watermelonMiss", { remaining }));
+      this.say({
+        key: "dialogue.watermelonMiss",
+        params: { remaining }
+      });
     }
   }
 
@@ -140,15 +162,21 @@ export class PostBattleSystem {
     this.emit();
     this.bus.emit("sound", { name: watermelon.successes ? "victory" : "defeat" });
     if (watermelon.successes > 0) {
-      this.say(I18n.t("dialogue.watermelonAllHit", { successes: watermelon.successes }));
+      this.say({
+        key: "dialogue.watermelonAllHit",
+        params: { successes: watermelon.successes }
+      });
     } else {
-      this.say(I18n.t("dialogue.watermelonDone"));
+      this.say({
+        key: "dialogue.watermelonDone"
+      });
     }
   }
 
-  getMarkerPosition(now = performance.now()) {
+  getMarkerPosition(now = null) {
     if (!this.state?.strikeStartedAt) return 0;
-    const elapsed = (now - this.state.strikeStartedAt) % this.state.strikeDuration;
+    const currentNow = now ?? this.now();
+    const elapsed = (currentNow - this.state.strikeStartedAt) % this.state.strikeDuration;
     const normalized = elapsed / this.state.strikeDuration;
     return normalized <= 0.5 ? normalized * 2 : (1 - normalized) * 2;
   }
@@ -167,7 +195,7 @@ export class PostBattleSystem {
         appearance: ASSETS.swimsuit,
         target: 0,
         tolerance: 0.13,
-        strikeStartedAt: performance.now(),
+        strikeStartedAt: this.now(),
         strikeDuration: 1800,
         watermelon: {
           attempts: 0,
@@ -184,7 +212,7 @@ export class PostBattleSystem {
       this.autoWatermelonState.strikeDuration = 1800 / (1.175 ** attempts);
       this.autoWatermelonState.scene = "watermelonAim";
       this.autoWatermelonState.appearance = ASSETS.swimsuit;
-      this.autoWatermelonState.strikeStartedAt = performance.now();
+      this.autoWatermelonState.strikeStartedAt = this.now();
     }
 
     const minTarget = this.autoWatermelonState.tolerance + 0.05;
@@ -193,13 +221,17 @@ export class PostBattleSystem {
     this.autoWatermelonState.active = true;
     this.emitAutoWatermelon();
     const nextAttempt = this.autoWatermelonState.watermelon.attempts + 1;
-    this.say(I18n.t("dialogue.watermelonAttempt", { nextAttempt }));
+    this.say({
+      key: "dialogue.watermelonAttempt",
+      params: { nextAttempt }
+    });
     return true;
   }
 
-  autoWatermelonStrike() {
+  autoWatermelonStrike(declaredAt = null) {
     if (!this.autoWatermelonState || this.autoWatermelonState.scene !== "watermelonAim") return;
-    const marker = this.getAutoMarkerPosition();
+    const timestamp = declaredAt || this.now();
+    const marker = this.getAutoMarkerPosition(timestamp);
     const distance = Math.abs(marker - this.autoWatermelonState.target);
     const tolerance = this.autoWatermelonState.tolerance ?? (0.13 * (0.825 ** this.autoWatermelonState.watermelon.attempts));
     const success = distance <= tolerance;
@@ -221,9 +253,15 @@ export class PostBattleSystem {
     this.bus.emit("sound", { name: success ? "victory" : "hurt" });
     const remaining = this.autoWatermelonState.watermelon.maxAttempts - this.autoWatermelonState.watermelon.attempts;
     if (success) {
-      this.say(I18n.t("dialogue.watermelonHit", { remaining }));
+      this.say({
+        key: "dialogue.watermelonHit",
+        params: { remaining }
+      });
     } else {
-      this.say(I18n.t("dialogue.watermelonMiss", { remaining }));
+      this.say({
+        key: "dialogue.watermelonMiss",
+        params: { remaining }
+      });
     }
   }
 
@@ -237,15 +275,21 @@ export class PostBattleSystem {
     this.emitAutoWatermelon();
     this.bus.emit("sound", { name: watermelon.successes ? "victory" : "defeat" });
     if (watermelon.successes > 0) {
-      this.say(I18n.t("dialogue.watermelonAllHit", { successes: watermelon.successes }));
+      this.say({
+        key: "dialogue.watermelonAllHit",
+        params: { successes: watermelon.successes }
+      });
     } else {
-      this.say(I18n.t("dialogue.watermelonDone"));
+      this.say({
+        key: "dialogue.watermelonDone"
+      });
     }
   }
 
-  getAutoMarkerPosition(now = performance.now()) {
+  getAutoMarkerPosition(now = null) {
     if (!this.autoWatermelonState?.strikeStartedAt) return 0;
-    const elapsed = (now - this.autoWatermelonState.strikeStartedAt) % this.autoWatermelonState.strikeDuration;
+    const currentNow = now ?? this.now();
+    const elapsed = (currentNow - this.autoWatermelonState.strikeStartedAt) % this.autoWatermelonState.strikeDuration;
     const normalized = elapsed / this.autoWatermelonState.strikeDuration;
     return normalized <= 0.5 ? normalized * 2 : (1 - normalized) * 2;
   }
@@ -258,8 +302,26 @@ export class PostBattleSystem {
     this.emitAutoWatermelon();
   }
 
-  say(text) {
-    this.bus.emit("dialogue", { speaker: I18n.t("dialogue.speakerKohaku"), text });
+  say(keyOrPayload) {
+    let key = null;
+    let params = {};
+    let text = "";
+
+    if (typeof keyOrPayload === "object" && keyOrPayload !== null) {
+      key = keyOrPayload.key || null;
+      params = keyOrPayload.params || {};
+      text = keyOrPayload.text || "";
+    } else {
+      text = String(keyOrPayload || "");
+    }
+
+    this.bus.emit("dialogue", {
+      key,
+      params,
+      speakerKey: "dialogue.speakerKohaku",
+      speaker: "小樂",
+      text
+    });
   }
 
   restore(savedState) {
@@ -279,3 +341,4 @@ export class PostBattleSystem {
     });
   }
 }
+

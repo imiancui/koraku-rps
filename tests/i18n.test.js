@@ -253,3 +253,91 @@ test("I18n 完整性檢查：繁中、簡中、英文、日文所有關卡、道
     }
   }
 });
+
+test("I18n 完整性檢查：所有 52 個系統與戰鬥提示/對話鍵在 4 語系下皆存在且非回退字串", () => {
+  const i18n = new I18nService();
+  const keysToVerify = [
+    // Toast
+    "toast.levelRequirementNotMet",
+    // Combat
+    "combat.morphWindowOnly",
+    "combat.morphWindowExpired",
+    "combat.insufficientMp",
+    "combat.tookDamage",
+    "combat.notInBattle",
+    "combat.itemNotFound",
+    "combat.resourceFull",
+    "combat.itemDepleted",
+    // Dialogue
+    "dialogue.winDualMorphBoth",
+    "dialogue.winDualBoth",
+    "dialogue.winDualMorphSingle",
+    "dialogue.winDualSingle",
+    "dialogue.winDualMorphDoubleDmg",
+    "dialogue.winDualDoubleDmg",
+    "dialogue.winSingleMorph",
+    "dialogue.winSingleNormal",
+    "dialogue.drawMomoDodge",
+    "dialogue.drawMomoHit",
+    "dialogue.drawNormal",
+    "dialogue.deflectedSingleAttack",
+    "dialogue.dualQteMiss",
+    "dialogue.dualQteSuccess",
+    "dialogue.qteMiss",
+    "dialogue.freezeNarration",
+    "dialogue.dodgeDodge",
+    "dialogue.dodgeDodgeDual",
+    // Narration
+    "narration.qteCounterPaper",
+    "narration.qteCounterScissors",
+    "narration.qteCounterRock",
+    // Shop
+    "shop.itemNotFound",
+    "shop.insufficientCoins",
+    "shop.itemPurchased",
+    "shop.equipmentPurchased",
+    // Equip
+    "equip.invalidItem",
+    "equip.notInInventory",
+    "equip.invalidSlot",
+    "equip.incompatibleSlot",
+    "equip.equipped",
+    "equip.slotEmpty",
+    "equip.unequipped",
+    // Growth
+    "growth.invalidStat",
+    "growth.noPoints",
+    "growth.statIncreased",
+    "growth.invalidSkill",
+    "growth.levelRequirementNotMet",
+    "growth.skillMaxLevel",
+    "growth.insufficientPoints",
+    "growth.skillUpgraded",
+    // Cheat
+    "cheat.updated",
+    "cheat.unlockedAll",
+    "cheat.unlockedGallery",
+    // Save
+    "save.invalidCode",
+    "save.corruptCode",
+    "save.imported"
+  ];
+
+  for (const locale of LOCALE_ORDER) {
+    i18n.setLocale(locale);
+    for (const key of keysToVerify) {
+      const translated = i18n.t(key, {
+        resource: "HP",
+        name: "Item",
+        target: "Kohaku",
+        damage: 10,
+        hand: "Rock",
+        slotName: "Weapon",
+        level: 5
+      });
+      assert.ok(translated, `Key '${key}' is empty in locale '${locale}'`);
+      assert.notEqual(translated, key, `Key '${key}' is untranslated/missing in locale '${locale}'`);
+    }
+  }
+});
+

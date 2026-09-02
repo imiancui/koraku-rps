@@ -3,7 +3,7 @@ import { applyExperience, computePlayerStats, xpNeededForLevel } from "../system
 import { encodeSaveData, decodeSaveData } from "../services/Persistence.js";
 
 const DEFAULT_SAVE = Object.freeze({
-  version: 1,
+  version: 2,
   profile: {
     level: 1,
     xp: 0,
@@ -28,6 +28,7 @@ const DEFAULT_SAVE = Object.freeze({
     badge: null
   },
   inventoryEquipment: [],
+  ledger: [],
   records: {
     wins: 0,
     losses: 0,
@@ -92,14 +93,54 @@ const DEFAULT_SAVE = Object.freeze({
   }
 });
 
-function freshSave() {
+export function createEquipmentInstance(itemOrId, options = {}) {
+  const typeId = typeof itemOrId === "object" && itemOrId !== null ? (itemOrId.typeId || itemOrId.id) : String(itemOrId);
+  const nowMs = typeof options.now === "function" ? options.now() : (typeof options.now === "number" ? options.now : Date.now());
+  const randomStr = typeof options.random === "function"
+    ? options.random().toString(36).substring(2, 9)
+    : Math.random().toString(36).substring(2, 9);
+  const uid = (typeof itemOrId === "object" && itemOrId !== null && itemOrId.uid)
+    ? itemOrId.uid
+    : (options.uid || `eq_${nowMs}_${randomStr}`);
+  const level = (typeof itemOrId === "object" && itemOrId !== null && typeof itemOrId.level === "number")
+    ? itemOrId.level
+    : (options.level || 1);
+  return { uid, typeId, level };
+}
+
+export function getEquipmentTypeId(itemOrId) {
+  if (!itemOrId) return null;
+  if (typeof itemOrId === "object" && itemOrId !== null) {
+    return itemOrId.typeId || itemOrId.id || null;
+  }
+  return String(itemOrId);
+}
+
+export function freshSave() {
   return structuredClone(DEFAULT_SAVE);
 }
 
-function sanitizeSave(candidate) {
-  if (!candidate || candidate.version !== 1) return freshSave();
+export function migrateSave(candidate, fromVersion = 1, toVersion = 2) {
+  if (!candidate || typeof candidate !== "object") return freshSave();
+  const migrated = structuredClone(candidate);
+  const currentVersion = migrated.version || fromVersion || 1;
+
+  if (currentVersion === 1 && toVersion >= 2) {
+    migrated.version = 2;
+    if (!Array.isArray(migrated.ledger)) {
+      migrated.ledger = [];
+    }
+  }
+
+  return migrated;
+}
+
+export function sanitizeSave(candidate) {
+  if (!candidate || typeof candidate !== "object") return freshSave();
+  const migrated = candidate.version === 2 ? candidate : migrateSave(candidate, candidate.version || 1, 2);
   const base = freshSave();
-  const rawStats = candidate.records?.stageStats || {};
+
+  const rawStats = migrated.records?.stageStats || {};
   const stageStats = {
     1: { totalAttempts: 0, manualWins: 0, manualLosses: 0, autoWins: 0, autoLosses: 0, ...(rawStats[1] || {}) },
     2: { totalAttempts: 0, manualWins: 0, manualLosses: 0, autoWins: 0, autoLosses: 0, ...(rawStats[2] || {}) },
@@ -107,125 +148,149 @@ function sanitizeSave(candidate) {
     4: { totalAttempts: 0, manualWins: 0, manualLosses: 0, autoWins: 0, autoLosses: 0, ...(rawStats[4] || {}) }
   };
 
-  const rawCleared = candidate.records?.clearedStages;
+  const rawCleared = migrated.records?.clearedStages;
   let clearedStages = Array.isArray(rawCleared) ? [...rawCleared] : [];
   clearedStages = clearedStages.filter((stageId) => {
     if (stageId >= 1 && stageId <= 4) {
       const s = stageStats[stageId];
       if (s && ((s.manualWins || 0) + (s.autoWins || 0) > 0)) return true;
-      if (stageId === 1 && ((candidate.records?.wins || 0) > 0 || (candidate.records?.manualWins || 0) > 0)) return true;
-      if (candidate.records?.bestStage && candidate.records.bestStage >= stageId) return true;
+      if (stageId === 1 && ((migrated.records?.wins || 0) > 0 || (migrated.records?.manualWins || 0) > 0)) return true;
+      if (migrated.records?.bestStage && migrated.records.bestStage >= stageId) return true;
     }
     return false;
   });
 
   return {
     ...base,
-    ...candidate,
+    ...migrated,
+    version: 2,
     profile: {
       ...base.profile,
-      ...candidate.profile,
+      ...migrated.profile,
       allocations: {
         ...base.profile.allocations,
-        ...candidate.profile?.allocations
+        ...migrated.profile?.allocations
       },
       skills: {
         ...base.profile.skills,
-        ...candidate.profile?.skills
+        ...migrated.profile?.skills
       }
     },
-    inventory: { ...base.inventory, ...candidate.inventory },
-    equipment: { ...base.equipment, ...candidate.equipment },
-    inventoryEquipment: Array.isArray(candidate.inventoryEquipment) ? [...candidate.inventoryEquipment] : [],
+    inventory: { ...base.inventory, ...migrated.inventory },
+    equipment: { ...base.equipment, ...migrated.equipment },
+    inventoryEquipment: Array.isArray(migrated.inventoryEquipment) ? [...migrated.inventoryEquipment] : [],
+    ledger: Array.isArray(migrated.ledger) ? [...migrated.ledger].slice(-500) : [],
     records: {
       ...base.records,
-      ...candidate.records,
+      ...migrated.records,
       clearedStages,
-      totalCoinsEarned: candidate.records?.totalCoinsEarned ?? candidate.coins ?? 0,
-      totalXpEarned: candidate.records?.totalXpEarned ?? 0,
-      totalBattles: candidate.records?.totalBattles ?? ((candidate.records?.wins || 0) + (candidate.records?.losses || 0)),
-      manualWins: candidate.records?.manualWins ?? candidate.records?.wins ?? 0,
-      manualLosses: candidate.records?.manualLosses ?? candidate.records?.losses ?? 0,
-      autoWins: candidate.records?.autoWins ?? 0,
-      autoLosses: candidate.records?.autoLosses ?? 0,
-      watermelonStock: Math.max(0, Math.min(999, candidate.records?.watermelonStock ?? 0)),
-      watermelonSlices: candidate.records?.watermelonSlices ?? 0,
+      totalCoinsEarned: migrated.records?.totalCoinsEarned ?? migrated.coins ?? 0,
+      totalXpEarned: migrated.records?.totalXpEarned ?? 0,
+      totalBattles: migrated.records?.totalBattles ?? ((migrated.records?.wins || 0) + (migrated.records?.losses || 0)),
+      manualWins: migrated.records?.manualWins ?? migrated.records?.wins ?? 0,
+      manualLosses: migrated.records?.manualLosses ?? migrated.records?.losses ?? 0,
+      autoWins: migrated.records?.autoWins ?? 0,
+      autoLosses: migrated.records?.autoLosses ?? 0,
+      watermelonStock: Math.max(0, Math.min(999, migrated.records?.watermelonStock ?? 0)),
+      watermelonSlices: migrated.records?.watermelonSlices ?? 0,
       consumablesUsed: {
-        hpPotion: candidate.records?.consumablesUsed?.hpPotion || 0,
-        mpPotion: candidate.records?.consumablesUsed?.mpPotion || 0
+        hpPotion: migrated.records?.consumablesUsed?.hpPotion || 0,
+        mpPotion: migrated.records?.consumablesUsed?.mpPotion || 0
       },
-      morphUses: candidate.records?.morphUses || 0,
+      morphUses: migrated.records?.morphUses || 0,
       momoStats: {
-        attempts: candidate.records?.momoStats?.attempts || 0,
-        successes: candidate.records?.momoStats?.successes || 0,
-        damage: candidate.records?.momoStats?.damage || 0
+        attempts: migrated.records?.momoStats?.attempts || 0,
+        successes: migrated.records?.momoStats?.successes || 0,
+        damage: migrated.records?.momoStats?.damage || 0
       },
       morphStats: {
-        attempts: candidate.records?.morphStats?.attempts || 0,
-        successes: candidate.records?.morphStats?.successes || 0,
-        damage: candidate.records?.morphStats?.damage || 0
+        attempts: migrated.records?.morphStats?.attempts || 0,
+        successes: migrated.records?.morphStats?.successes || 0,
+        damage: migrated.records?.morphStats?.damage || 0
       },
       restoredTotal: {
-        hp: candidate.records?.restoredTotal?.hp || 0,
-        mp: candidate.records?.restoredTotal?.mp || 0
+        hp: migrated.records?.restoredTotal?.hp || 0,
+        mp: migrated.records?.restoredTotal?.mp || 0
       },
       watermelonStageStats: {
-        1: { attempts: candidate.records?.watermelonStageStats?.[1]?.attempts || 0, successes: candidate.records?.watermelonStageStats?.[1]?.successes || 0 },
-        2: { attempts: candidate.records?.watermelonStageStats?.[2]?.attempts || 0, successes: candidate.records?.watermelonStageStats?.[2]?.successes || 0 },
-        3: { attempts: candidate.records?.watermelonStageStats?.[3]?.attempts || 0, successes: candidate.records?.watermelonStageStats?.[3]?.successes || 0 }
+        1: { attempts: migrated.records?.watermelonStageStats?.[1]?.attempts || 0, successes: migrated.records?.watermelonStageStats?.[1]?.successes || 0 },
+        2: { attempts: migrated.records?.watermelonStageStats?.[2]?.attempts || 0, successes: migrated.records?.watermelonStageStats?.[2]?.successes || 0 },
+        3: { attempts: migrated.records?.watermelonStageStats?.[3]?.attempts || 0, successes: migrated.records?.watermelonStageStats?.[3]?.successes || 0 }
       },
       damageDealt: {
-        total: candidate.records?.damageDealt?.total || 0,
+        total: migrated.records?.damageDealt?.total || 0,
         byStage: {
-          1: candidate.records?.damageDealt?.byStage?.[1] || 0,
-          2: candidate.records?.damageDealt?.byStage?.[2] || 0,
-          3: candidate.records?.damageDealt?.byStage?.[3] || 0,
-          4: candidate.records?.damageDealt?.byStage?.[4] || 0
+          1: migrated.records?.damageDealt?.byStage?.[1] || 0,
+          2: migrated.records?.damageDealt?.byStage?.[2] || 0,
+          3: migrated.records?.damageDealt?.byStage?.[3] || 0,
+          4: migrated.records?.damageDealt?.byStage?.[4] || 0
         }
       },
       damageTaken: {
-        total: candidate.records?.damageTaken?.total || 0,
+        total: migrated.records?.damageTaken?.total || 0,
         byStage: {
-          1: candidate.records?.damageTaken?.byStage?.[1] || 0,
-          2: candidate.records?.damageTaken?.byStage?.[2] || 0,
-          3: candidate.records?.damageTaken?.byStage?.[3] || 0,
-          4: candidate.records?.damageTaken?.byStage?.[4] || 0
+          1: migrated.records?.damageTaken?.byStage?.[1] || 0,
+          2: migrated.records?.damageTaken?.byStage?.[2] || 0,
+          3: migrated.records?.damageTaken?.byStage?.[3] || 0,
+          4: migrated.records?.damageTaken?.byStage?.[4] || 0
         }
       },
       qteStats: {
-        totalAttempts: candidate.records?.qteStats?.totalAttempts || 0,
-        totalSuccesses: candidate.records?.qteStats?.totalSuccesses || 0,
+        totalAttempts: migrated.records?.qteStats?.totalAttempts || 0,
+        totalSuccesses: migrated.records?.qteStats?.totalSuccesses || 0,
         byStage: {
-          1: { attempts: candidate.records?.qteStats?.byStage?.[1]?.attempts || 0, successes: candidate.records?.qteStats?.byStage?.[1]?.successes || 0 },
-          2: { attempts: candidate.records?.qteStats?.byStage?.[2]?.attempts || 0, successes: candidate.records?.qteStats?.byStage?.[2]?.successes || 0 },
-          3: { attempts: candidate.records?.qteStats?.byStage?.[3]?.attempts || 0, successes: candidate.records?.qteStats?.byStage?.[3]?.successes || 0 },
-          4: { attempts: candidate.records?.qteStats?.byStage?.[4]?.attempts || 0, successes: candidate.records?.qteStats?.byStage?.[4]?.successes || 0 }
+          1: { attempts: migrated.records?.qteStats?.byStage?.[1]?.attempts || 0, successes: migrated.records?.qteStats?.byStage?.[1]?.successes || 0 },
+          2: { attempts: migrated.records?.qteStats?.byStage?.[2]?.attempts || 0, successes: migrated.records?.qteStats?.byStage?.[2]?.successes || 0 },
+          3: { attempts: migrated.records?.qteStats?.byStage?.[3]?.attempts || 0, successes: migrated.records?.qteStats?.byStage?.[3]?.successes || 0 },
+          4: { attempts: migrated.records?.qteStats?.byStage?.[4]?.attempts || 0, successes: migrated.records?.qteStats?.byStage?.[4]?.successes || 0 }
         }
       },
       rewardsByStage: {
-        1: { coins: candidate.records?.rewardsByStage?.[1]?.coins || 0, xp: candidate.records?.rewardsByStage?.[1]?.xp || 0 },
-        2: { coins: candidate.records?.rewardsByStage?.[2]?.coins || 0, xp: candidate.records?.rewardsByStage?.[2]?.xp || 0 },
-        3: { coins: candidate.records?.rewardsByStage?.[3]?.coins || 0, xp: candidate.records?.rewardsByStage?.[3]?.xp || 0 },
-        4: { coins: candidate.records?.rewardsByStage?.[4]?.coins || 0, xp: candidate.records?.rewardsByStage?.[4]?.xp || 0 }
+        1: { coins: migrated.records?.rewardsByStage?.[1]?.coins || 0, xp: migrated.records?.rewardsByStage?.[1]?.xp || 0 },
+        2: { coins: migrated.records?.rewardsByStage?.[2]?.coins || 0, xp: migrated.records?.rewardsByStage?.[2]?.xp || 0 },
+        3: { coins: migrated.records?.rewardsByStage?.[3]?.coins || 0, xp: migrated.records?.rewardsByStage?.[3]?.xp || 0 },
+        4: { coins: migrated.records?.rewardsByStage?.[4]?.coins || 0, xp: migrated.records?.rewardsByStage?.[4]?.xp || 0 }
       },
-      recentBattles: Array.isArray(candidate.records?.recentBattles) ? candidate.records.recentBattles.slice(0, 100) : [],
+      recentBattles: Array.isArray(migrated.records?.recentBattles) ? migrated.records.recentBattles.slice(0, 100) : [],
       stageStats
     },
-    settings: { ...base.settings, ...candidate.settings }
+    settings: { ...base.settings, ...migrated.settings }
   };
 }
 
 export class GameStore {
-  constructor(bus, persistence) {
+  constructor(bus, persistence, options = {}) {
     this.bus = bus;
     this.persistence = persistence;
+    this.now = options.now || (() => Date.now());
     this.state = sanitizeSave(persistence.load());
   }
 
+  _recordLedger(entry) {
+    if (!Array.isArray(this.state.ledger)) {
+      this.state.ledger = [];
+    }
+    const timestamp = typeof this.now === "function" ? this.now() : Date.now();
+    this.state.ledger.push({
+      id: `led_${timestamp}_${Math.random().toString(36).substring(2, 7)}`,
+      timestamp,
+      configVersion: "2026.09.03",
+      ...entry
+    });
+    if (this.state.ledger.length > 500) {
+      this.state.ledger = this.state.ledger.slice(-500);
+    }
+  }
+
   snapshot() {
+    const rawEquip = this.state.equipment || {};
+    const normalizedEquip = {};
+    for (const [slot, val] of Object.entries(rawEquip)) {
+      normalizedEquip[slot] = getEquipmentTypeId(val);
+    }
     return structuredClone({
       ...this.state,
-      playerStats: computePlayerStats(this.state.profile, this.state.equipment),
+      playerStats: computePlayerStats(this.state.profile, normalizedEquip),
       xpToNext: xpNeededForLevel(this.state.profile.level)
     });
   }
@@ -237,61 +302,94 @@ export class GameStore {
 
   buyItem(itemId) {
     const item = ITEMS[itemId];
-    if (!item) return { ok: false, message: "找不到這件商品。" };
+    if (!item) return { ok: false, key: "shop.itemNotFound", message: "找不到這件商品。" };
     if (this.state.coins < item.price) {
-      return { ok: false, message: "星砂不足，完成對局後再來吧。" };
+      return { ok: false, key: "shop.insufficientCoins", message: "星砂不足，完成對局後再來吧。" };
     }
     this.state.coins -= item.price;
     this.state.inventory[itemId] += 1;
+    this._recordLedger({
+      action: "buy_item",
+      itemId,
+      coinsDelta: -item.price,
+      source: "shop"
+    });
     this.commit("purchase");
-    return { ok: true, message: "購入「" + item.name + "」！" };
+    return { ok: true, key: "shop.itemPurchased", params: { name: item.name }, message: "購入「" + item.name + "」！" };
   }
 
   buyEquipment(itemId) {
-    const item = EQUIPMENT_ITEMS[itemId];
-    if (!item) return { ok: false, message: "找不到這件裝備。" };
+    const typeId = getEquipmentTypeId(itemId);
+    const item = EQUIPMENT_ITEMS[typeId];
+    if (!item) return { ok: false, key: "shop.itemNotFound", message: "找不到這件裝備。" };
     if (this.state.coins < item.price) {
-      return { ok: false, message: "星砂不足，完成對局後再來吧。" };
+      return { ok: false, key: "shop.insufficientCoins", message: "星砂不足，完成對局後再來吧。" };
     }
     this.state.coins -= item.price;
-    this.state.inventoryEquipment.push(itemId);
+    const entryToPush = typeof itemId === "object" && itemId !== null ? itemId : typeId;
+    this.state.inventoryEquipment.push(entryToPush);
+    this._recordLedger({
+      action: "buy_equipment",
+      typeId,
+      item: entryToPush,
+      coinsDelta: -item.price,
+      source: "shop"
+    });
     this.commit("purchase-equipment");
-    return { ok: true, message: "購入「" + item.name + "」並已放入裝備背包！" };
+    return { ok: true, key: "shop.equipmentPurchased", params: { name: item.name }, message: "購入「" + item.name + "」並已放入裝備背包！" };
   }
 
-  equipItem(itemId, targetSlot = null) {
-    const item = EQUIPMENT_ITEMS[itemId];
-    if (!item) return { ok: false, message: "無效的裝備。" };
+  equipItem(itemOrId, targetSlot = null) {
+    const typeId = getEquipmentTypeId(itemOrId);
+    const item = EQUIPMENT_ITEMS[typeId];
+    if (!item) return { ok: false, key: "equip.invalidItem", message: "無效的裝備。" };
 
-    const invIndex = this.state.inventoryEquipment.indexOf(itemId);
+    const invIndex = this.state.inventoryEquipment.findIndex((entry) => {
+      if (typeof entry === "string") return entry === itemOrId || entry === typeId;
+      if (typeof entry === "object" && entry !== null) {
+        if (typeof itemOrId === "string") return entry.uid === itemOrId || entry.typeId === itemOrId;
+        if (typeof itemOrId === "object" && itemOrId !== null) return entry.uid === itemOrId.uid || entry.typeId === itemOrId.typeId;
+      }
+      return false;
+    });
+
     if (invIndex === -1) {
-      return { ok: false, message: "背包中沒有這件裝備。" };
+      return { ok: false, key: "equip.notInInventory", message: "背包中沒有這件裝備。" };
     }
+
+    const matchedEntry = this.state.inventoryEquipment[invIndex];
 
     let slot = targetSlot;
     if (!slot) {
+      const mainTypeId = getEquipmentTypeId(this.state.equipment.mainHand);
+      const offTypeId = getEquipmentTypeId(this.state.equipment.offHand);
+      const ring1TypeId = getEquipmentTypeId(this.state.equipment.ring1);
+      const ring2TypeId = getEquipmentTypeId(this.state.equipment.ring2);
+      const earring1TypeId = getEquipmentTypeId(this.state.equipment.earring1);
+      const earring2TypeId = getEquipmentTypeId(this.state.equipment.earring2);
+
       if (item.slotType === "weapon") {
         if (item.twoHanded) {
           slot = "mainHand";
         } else if (!this.state.equipment.mainHand) {
           slot = "mainHand";
-        } else if (!this.state.equipment.offHand && !EQUIPMENT_ITEMS[this.state.equipment.mainHand]?.twoHanded) {
+        } else if (!this.state.equipment.offHand && !EQUIPMENT_ITEMS[mainTypeId]?.twoHanded) {
           slot = "offHand";
-        } else if (this.state.equipment.mainHand === itemId && this.state.equipment.offHand !== itemId && !EQUIPMENT_ITEMS[this.state.equipment.mainHand]?.twoHanded) {
+        } else if (mainTypeId === typeId && offTypeId !== typeId && !EQUIPMENT_ITEMS[mainTypeId]?.twoHanded) {
           slot = "offHand";
-        } else if (this.state.equipment.offHand === itemId && this.state.equipment.mainHand !== itemId) {
+        } else if (offTypeId === typeId && mainTypeId !== typeId) {
           slot = "mainHand";
         } else {
           slot = "mainHand";
         }
       } else if (item.slotType === "offHand") {
-        if (!this.state.equipment.offHand && !EQUIPMENT_ITEMS[this.state.equipment.mainHand]?.twoHanded) {
+        if (!this.state.equipment.offHand && !EQUIPMENT_ITEMS[mainTypeId]?.twoHanded) {
           slot = "offHand";
         } else if (!this.state.equipment.mainHand) {
           slot = "mainHand";
-        } else if (this.state.equipment.offHand === itemId && this.state.equipment.mainHand !== itemId) {
+        } else if (offTypeId === typeId && mainTypeId !== typeId) {
           slot = "mainHand";
-        } else if (this.state.equipment.mainHand === itemId && this.state.equipment.offHand !== itemId && !EQUIPMENT_ITEMS[this.state.equipment.mainHand]?.twoHanded) {
+        } else if (mainTypeId === typeId && offTypeId !== typeId && !EQUIPMENT_ITEMS[mainTypeId]?.twoHanded) {
           slot = "offHand";
         } else {
           slot = "offHand";
@@ -301,9 +399,9 @@ export class GameStore {
           slot = "ring1";
         } else if (!this.state.equipment.ring2) {
           slot = "ring2";
-        } else if (this.state.equipment.ring1 === itemId && this.state.equipment.ring2 !== itemId) {
+        } else if (ring1TypeId === typeId && ring2TypeId !== typeId) {
           slot = "ring2";
-        } else if (this.state.equipment.ring2 === itemId && this.state.equipment.ring1 !== itemId) {
+        } else if (ring2TypeId === typeId && ring1TypeId !== typeId) {
           slot = "ring1";
         } else {
           slot = "ring1";
@@ -313,9 +411,9 @@ export class GameStore {
           slot = "earring1";
         } else if (!this.state.equipment.earring2) {
           slot = "earring2";
-        } else if (this.state.equipment.earring1 === itemId && this.state.equipment.earring2 !== itemId) {
+        } else if (earring1TypeId === typeId && earring2TypeId !== typeId) {
           slot = "earring2";
-        } else if (this.state.equipment.earring2 === itemId && this.state.equipment.earring1 !== itemId) {
+        } else if (earring2TypeId === typeId && earring1TypeId !== typeId) {
           slot = "earring1";
         } else {
           slot = "earring1";
@@ -326,7 +424,7 @@ export class GameStore {
     }
 
     if (!EQUIPMENT_SLOTS[slot]) {
-      return { ok: false, message: "無效的裝備欄位。" };
+      return { ok: false, key: "equip.invalidSlot", message: "無效的裝備欄位。" };
     }
 
     // Validate slot compatibility
@@ -338,7 +436,7 @@ export class GameStore {
       (item.slotType === slot);
 
     if (!isValidSlot) {
-      return { ok: false, message: `無法將「${item.name}」穿戴至 ${EQUIPMENT_SLOTS[slot]?.label || slot}。` };
+      return { ok: false, key: "equip.incompatibleSlot", params: { name: item.name, slotName: EQUIPMENT_SLOTS[slot]?.label || slot }, message: `無法將「${item.name}」穿戴至 ${EQUIPMENT_SLOTS[slot]?.label || slot}。` };
     }
 
     // Two-handed logic
@@ -350,7 +448,8 @@ export class GameStore {
       }
     } else if (slot === "offHand") {
       const currentMain = this.state.equipment.mainHand;
-      if (currentMain && EQUIPMENT_ITEMS[currentMain]?.twoHanded) {
+      const currentMainTypeId = getEquipmentTypeId(currentMain);
+      if (currentMain && EQUIPMENT_ITEMS[currentMainTypeId]?.twoHanded) {
         this.state.inventoryEquipment.push(currentMain);
         this.state.equipment.mainHand = null;
       }
@@ -365,59 +464,89 @@ export class GameStore {
       this.state.inventoryEquipment.push(oldItem);
     }
 
-    this.state.equipment[slot] = itemId;
+    this.state.equipment[slot] = matchedEntry;
+    this._recordLedger({
+      action: "equip_item",
+      slot,
+      item: matchedEntry,
+      typeId,
+      source: "equipment"
+    });
     this.commit("equip-item");
-    return { ok: true, message: "已穿戴「" + item.name + "」。" };
+    return { ok: true, key: "equip.equipped", params: { name: item.name }, message: "已穿戴「" + item.name + "」。" };
   }
 
   unequipItem(slotKey) {
     if (!this.state.equipment[slotKey]) {
-      return { ok: false, message: "此欄位未裝備任何物品。" };
+      return { ok: false, key: "equip.slotEmpty", message: "此欄位未裝備任何物品。" };
     }
     const itemId = this.state.equipment[slotKey];
     this.state.equipment[slotKey] = null;
     this.state.inventoryEquipment.push(itemId);
+    this._recordLedger({
+      action: "unequip_item",
+      slot: slotKey,
+      item: itemId,
+      typeId: getEquipmentTypeId(itemId),
+      source: "equipment"
+    });
     this.commit("unequip-item");
-    return { ok: true, message: "已卸下裝備。" };
+    return { ok: true, key: "equip.unequipped", message: "已卸下裝備。" };
   }
 
   consumeItem(itemId) {
     if (!ITEMS[itemId] || this.state.inventory[itemId] <= 0) return false;
     this.state.inventory[itemId] -= 1;
+    this._recordLedger({
+      action: "consume_item",
+      itemId,
+      source: "inventory"
+    });
     this.commit("consume-item");
     return true;
   }
 
   allocateStat(stat) {
     if (!Object.hasOwn(this.state.profile.allocations, stat)) {
-      return { ok: false, message: "無效的能力項目。" };
+      return { ok: false, key: "growth.invalidStat", message: "無效的能力項目。" };
     }
     if (this.state.profile.skillPoints <= 0) {
-      return { ok: false, message: "目前沒有可用點數。" };
+      return { ok: false, key: "growth.noPoints", message: "目前沒有可用點數。" };
     }
     this.state.profile.skillPoints -= 1;
     this.state.profile.allocations[stat] += 1;
+    this._recordLedger({
+      action: "allocate_stat",
+      stat,
+      source: "growth"
+    });
     this.commit("allocate-stat");
-    return { ok: true, message: "能力提升了。" };
+    return { ok: true, key: "growth.statIncreased", message: "能力提升了。" };
   }
 
   allocateSkill(skillId) {
     const skill = SKILLS[skillId];
-    if (!skill) return { ok: false, message: "無效的技能項目。" };
+    if (!skill) return { ok: false, key: "growth.invalidSkill", message: "無效的技能項目。" };
     if (this.state.profile.level < skill.unlockLevel) {
-      return { ok: false, message: "等級需達 Lv. " + skill.unlockLevel + " 方可學習此技能。" };
+      return { ok: false, key: "growth.levelRequirementNotMet", params: { level: skill.unlockLevel }, message: "等級需達 Lv. " + skill.unlockLevel + " 方可學習此技能。" };
     }
     const currentLvl = this.state.profile.skills[skillId] || 0;
     if (currentLvl >= skill.maxLevel) {
-      return { ok: false, message: "此技能已達最高等級。" };
+      return { ok: false, key: "growth.skillMaxLevel", message: "此技能已達最高等級。" };
     }
     if (this.state.profile.skillPoints < skill.costPerLevel) {
-      return { ok: false, message: "技能點數不足。" };
+      return { ok: false, key: "growth.insufficientPoints", message: "技能點數不足。" };
     }
     this.state.profile.skillPoints -= skill.costPerLevel;
     this.state.profile.skills[skillId] = (currentLvl || 0) + 1;
+    this._recordLedger({
+      action: "allocate_skill",
+      skillId,
+      level: this.state.profile.skills[skillId],
+      source: "growth"
+    });
     this.commit("allocate-skill");
-    return { ok: true, message: "「" + skill.name + "」升級至 Lv. " + this.state.profile.skills[skillId] + "！" };
+    return { ok: true, key: "growth.skillUpgraded", params: { name: skill.name, level: this.state.profile.skills[skillId] }, message: "「" + skill.name + "」升級至 Lv. " + this.state.profile.skills[skillId] + "！" };
   }
 
   unlockSwimsuit() {
@@ -428,11 +557,13 @@ export class GameStore {
   }
 
   getTheoreticalDPS() {
-    const stats = computePlayerStats(this.state.profile, this.state.equipment);
+    const stats = this.snapshot().playerStats;
     const baseDamage = stats.damage || 25;
 
     // Greatsword multiplier
-    const mainItem = EQUIPMENT_ITEMS[this.state.equipment.mainHand];
+    const mainSlot = this.state.equipment.mainHand;
+    const mainTypeId = getEquipmentTypeId(mainSlot);
+    const mainItem = EQUIPMENT_ITEMS[mainTypeId];
     const greatswordMult = mainItem?.twoHanded && mainItem?.effect?.type === "greatsword_damage_boost"
       ? (mainItem.effect.multiplier || 1.5)
       : 1.0;
@@ -445,7 +576,8 @@ export class GameStore {
     let passiveDamagePerTurn = 0;
     for (const slotKey of Object.values(this.state.equipment)) {
       if (!slotKey) continue;
-      const item = EQUIPMENT_ITEMS[slotKey];
+      const typeId = getEquipmentTypeId(slotKey);
+      const item = EQUIPMENT_ITEMS[typeId];
       if (item?.effect?.type === "burn_on_round_end") {
         passiveDamagePerTurn += (item.effect.damage || 30);
       } else if (item?.effect?.type === "reflect_damage") {
@@ -586,7 +718,9 @@ export class GameStore {
       stageCoins = stage?.winCoins ?? BATTLE_RULES.winCoins;
       stageXp = stage?.xpWin ?? 0;
       // Badge of bond 20% coin boost
-      const badgeItem = EQUIPMENT_ITEMS[this.state.equipment.badge];
+      const badgeSlot = this.state.equipment.badge;
+      const badgeTypeId = getEquipmentTypeId(badgeSlot);
+      const badgeItem = EQUIPMENT_ITEMS[badgeTypeId];
       if (badgeItem?.effect?.type === "coin_boost") {
         stageCoins = Math.round(stageCoins * (badgeItem.effect.coinMultiplier || 1.2));
       }
@@ -699,7 +833,7 @@ export class GameStore {
       dps,
       rewardCoins: reward.coins,
       rewardXp: reward.xp,
-      timestamp: Date.now(),
+      timestamp: typeof this.now === "function" ? this.now() : Date.now(),
       watermelonSlices: options.watermelonSlices ?? null,
       qteHits: options.qteHits ?? null,
       qteTotal: options.qteTotal ?? null,
@@ -724,6 +858,16 @@ export class GameStore {
     reward.damageDealt = damageDealt;
     reward.damageTaken = damageTaken;
     reward.durationSec = durationSec;
+
+    this._recordLedger({
+      action: "battle_reward",
+      won,
+      stageId: stage?.id,
+      coinsDelta: reward.coins,
+      xpDelta: reward.xp,
+      source: isAuto ? "auto_battle" : "manual_battle"
+    });
+
     this.commit("battle-result");
     return reward;
   }
@@ -741,6 +885,11 @@ export class GameStore {
 
     const gained = applyExperience(this.state.profile, safeAmount);
     this.state.profile = gained.profile;
+    this._recordLedger({
+      action: "grant_experience",
+      xpDelta: safeAmount,
+      source: reason
+    });
     this.commit(reason);
     return { xp: safeAmount, levelsGained: gained.levelsGained };
   }
@@ -777,8 +926,13 @@ export class GameStore {
       if (typeof updates.skills.momo === "number") this.state.profile.skills.momo = Math.max(0, Math.min(10, updates.skills.momo));
       if (typeof updates.skills.dualHand === "number") this.state.profile.skills.dualHand = Math.max(0, Math.min(1, updates.skills.dualHand));
     }
+    this._recordLedger({
+      action: "cheat_set_values",
+      updates,
+      source: "dev"
+    });
     this.commit("cheat-update");
-    return { ok: true, message: "數值已更新！" };
+    return { ok: true, key: "cheat.updated", message: "數值已更新！" };
   }
 
   cheatUnlockAll() {
@@ -793,15 +947,23 @@ export class GameStore {
         this.state.records.stageStats[s].totalAttempts = Math.max(1, this.state.records.stageStats[s].totalAttempts || 1);
       }
     }
+    this._recordLedger({
+      action: "cheat_unlock_all",
+      source: "dev"
+    });
     this.commit("cheat-unlock-all");
-    return { ok: true, message: "已解鎖全部 4 個關卡與 BOSS 說明！" };
+    return { ok: true, key: "cheat.unlockedAll", message: "已解鎖全部 4 個關卡與 BOSS 說明！" };
   }
 
   cheatUnlockGallery() {
     this.state.records.unlockedSwimsuit = true;
     this.state.records.unlockedGalleryAll = true;
+    this._recordLedger({
+      action: "cheat_unlock_gallery",
+      source: "dev"
+    });
     this.commit("cheat-unlock-gallery");
-    return { ok: true, message: "已解鎖全部圖鑑立繪！" };
+    return { ok: true, key: "cheat.unlockedGallery", message: "已解鎖全部圖鑑立繪！" };
   }
 
   toggleMusicMuted() {
@@ -827,22 +989,28 @@ export class GameStore {
 
   importSaveCode(code) {
     if (!code || typeof code !== "string" || !code.trim()) {
-      return { ok: false, message: "請輸入有效的種子碼。" };
+      return { ok: false, key: "save.invalidCode", message: "請輸入有效的種子碼。" };
     }
     const decoded = decodeSaveData(code);
     if (!decoded || typeof decoded !== "object") {
-      return { ok: false, message: "無效或損毀的存檔種子碼。" };
+      return { ok: false, key: "save.corruptCode", message: "無效或損毀的存檔種子碼。" };
     }
     this.state = sanitizeSave(decoded);
     this.persistence.save(this.state);
+    this._recordLedger({
+      action: "import_save",
+      source: "save_code"
+    });
     this.commit("import-save");
-    return { ok: true, message: "存檔已成功載入！" };
+    return { ok: true, key: "save.imported", message: "存檔已成功載入！" };
   }
 
   reset() {
     this.state = freshSave();
     this.persistence.clear();
+    this._recordLedger({ action: "reset", source: "system" });
     this.commit("reset");
   }
 }
 
+export default GameStore;

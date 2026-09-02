@@ -366,6 +366,8 @@
       <li><a href="#section-save" class="nav-link">🗄️ 存檔紀錄與種子碼</a></li>
       <li><a href="#section-dojo" class="nav-link">⛩️ 修練場、ATK 與傷害日誌</a></li>
       <li><a href="#section-rwd" class="nav-link">📐 響應式佈局與跨引擎門檻</a></li>
+      <li><a href="#section-draggable-hud" class="nav-link">✨ 戰鬥 HUD 自由拖曳</a></li>
+      <li><a href="#section-online" class="nav-link">🌐 Online 權威架構與協定</a></li>
     </ul>
   </aside>
 
@@ -904,6 +906,31 @@
             </div>
             <p><strong>無衝突預設生成原則</strong>：重構各介面初始生成座標，自動刷關切西瓜卡片預設停靠於戰鬥紀錄下方（top: 180~220px），根除生成互相重疊遮擋問題。</p>
             <p style="margin-top:8px;"><strong>座標記憶與雙擊重設</strong>：自訂座標自動儲存於 localStorage（<code>koraku_hud_positions_v1</code>）跨對局持久化；雙擊標題列或手柄即可一鍵重設回預設位置。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 23: Online Architecture & Protocol -->
+      <section id="section-online" class="section-card">
+        <h2 class="section-title">🌐 Online 權威架構、通訊協定與資料治理 (v2.0)</h2>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">
+              <span>十六大權威原則與三類判定模型</span>
+              <span class="badge badge-crimson">Server Authoritative</span>
+            </div>
+            <p><strong>純意圖傳遞</strong>：客戶端僅發送操作意圖指令，傷害、勝負、獎勵與 RNG 全由伺服器權威計算。</p>
+            <p style="margin-top:8px;"><strong>三類判定模型</strong>：QTE/變拳/切西瓜具 150ms 網路延遲寬限期事後審查；出拳手勢需在揭曉前抵達封存；裝備與配點為帶有 cmdId 的冪等指令。</p>
+            <p style="margin-top:8px;"><strong>單一寫入者與 10s 斷線保護</strong>：新連線踢出舊連線；戰鬥斷線享有 10 秒寬限期保留 Session，逾時自動結算。</p>
+          </div>
+          <div class="card">
+            <div class="card-title">
+              <span>帳號轉移碼、資料匯出與備份契約</span>
+              <span class="badge badge-gold">Data Governance & Ops</span>
+            </div>
+            <p><strong>15 分鐘一次性轉移碼</strong>：透過 <code>account.issueTransferCode</code> 產生跨裝置轉移碼，在新設備輸入 <code>account.claimTransferCode</code> 即可繼承全部進度。</p>
+            <p style="margin-top:8px;"><strong>JSON 完整匯出與徹底刪除</strong>：支援 <code>account.exportJson</code> 下載完整裝備實例與經濟審計帳本；支援輸入「DELETE」徹底銷毀帳號。</p>
+            <p style="margin-top:8px;"><strong>每日備份與復原演練</strong>：伺服器每日自動執行備份腳本並異地同步備援，具備 3 分鐘災難冷啟動復原契約。</p>
           </div>
         </div>
       </section>

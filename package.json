@@ -27,8 +27,12 @@
     "test:rwd:accept-baseline": "node scripts/accept-rwd-baseline.mjs",
     "test:rwd:visual": "node scripts/run-rwd.mjs visual",
     "test:rwd:full": "node scripts/run-rwd-full.mjs",
-    "test:rwd:repeat": "node scripts/run-rwd-repeat.mjs",
-    "report:rwd": "playwright show-report"
+    "start:server": "node server/index.js",
+    "test:server": "node --test server/test/server.test.js",
+    "backup:server": "node server/scripts/backup.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
   },
   "devDependencies": {
     "@playwright/test": "1.62.1"

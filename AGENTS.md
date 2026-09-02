@@ -128,6 +128,38 @@ For completed gameplay features/fixes/releases, preserve the existing release re
 - Verify the exact remote and project-only publication scope first. Do not push the entire multi-project workspace, sibling files, or unrelated changes. If safe isolation is unclear, stop and request direction.
 - No version bump, commit/push, or deployment is implied by read-only review, governance edits, or skill installation alone.
 
+## Online Authority Policies
+
+1. Intent only. The client sends commands that express intent; it never sends outcomes, damage, rewards, stats, or RNG results. Every outcome is computed by the kernel running on the server.
+2. Three-class adjudication.
+   - Timing claims (QTE inputs, watermelon strike, morph trigger) are judged on the client and audited on the server against packet arrival time with a 150 ms grace.
+   - Secret commitments (hand selection) must reach the server before reveal; late arrivals are ignored.
+   - Inventory mutations (potions, purchases, equip/unequip, allocation) are idempotent server commands keyed by cmdId.
+3. Commands are applied in the player's declared order, bounded by arrival time, never in raw arrival order.
+4. Offline mode never syncs to the server. Offline saves are sandboxes.
+5. Equipment and stat allocation are locked while a battle session is active. (ASSUMPTION pending human decision.)
+6. One writer per account: the newest connection wins; all commands for an account are serialized through one queue.
+7. Pause is allowed only during the countdown phase, at most 3 times per battle. Reaction and QTE timers keep running. A disconnected battle gets a 10 s grace, then settles with the current state.
+8. The server emits no player-visible text. Dialogue, toasts, and battle log entries are `{ key, params }`; translation happens only on the client. Persisted records store ids, never localized strings.
+9. All outcome-affecting RNG runs on the server through the injected RNG (crypto-backed). Seeds are never sent to the client. Each battle persists its seed and command log for deterministic replay.
+10. Every economic mutation (coins, xp, items, equipment instances) appends a ledger entry with source, server time, and config version.
+11. Server time is authoritative; persisted state never stores client Date.now().
+12. Every inbound command is schema-validated (field whitelist, size cap, origin check, WSS only); rejected commands are logged with reason.
+13. Cheat commands require the dev entitlement online; the offline cheat panel is unchanged.
+14. The kernel uses no Node-only APIs; ws, storage, and clock adapters live in `server/`. `server/` never enters the bundle; `bundle.js` is never hand-edited.
+15. Client and server exchange a config version at handshake; a mismatch prompts a refresh.
+16. Daily backups with a tested restore procedure are required before public launch (ops; document in HANDOFF).
+
+## Concurrent Agent Rules (online refactor)
+
+- Agents share one checkout; no worktrees (the git root is D:\game-dev). Each agent edits only the files it owns in the change's tasks.md. Cross-cutting needs go to the integrator, never into another agent's files.
+- protocol.js (command and event names, payload shapes, new module paths) is frozen after Phase 0; changes require the integrator.
+- Never hand-edit src/js/bundle.js. `npm test` regenerates it; only the integrator commits the rebuilt bundle. Do not commit during Phase 1 unless told.
+- Keep `npm test` green within your own scope before reporting; do not modify other agents' tests.
+- Presentation files (AppView.js, index.html, src/styles) keep Ponytail OFF and preserve visuals; kernel, server, and net code may use Ponytail.
+- New player-visible strings go through I18n keys in all four locales.
+- Report per AGENTS.md Final Reporting with changed files, commands run, limitations, and ASSUMPTION / NEEDS HUMAN DECISION markers.
+
 ## Final Reporting
 
 Lead with the result. Report changed files, relevant skills used or meaningfully skipped, actual commands/checks, limitations, and remaining decisions. For UI implementation include affected screens/states, viewport and input coverage, console findings, and evidence paths. Distinguish proposed, source-reviewed, browser-emulated, and real-device-verified results; never claim testing or regression protection that was not performed.
