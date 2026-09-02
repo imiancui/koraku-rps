@@ -2,10 +2,10 @@
 
 > 文件用途：AI 代理人與開發者快速上手、架構交接與開發合約指引  
 > 專案根目錄：`D:\game-dev\New-game-project-4`  
-> 當前版本：`v0.0.13`（顯示於首頁頁腳最左側 `0.0.13`，自最後一位遞增，每 100 個版本進一位：`0.0.100` -> `0.1.0`）  
-> 最新更新日期：2026-08-31  
+> 當前版本：`v0.0.14`（顯示於首頁頁腳最左側 `0.0.14`，自最後一位遞增，每 100 個版本進一位：`0.0.100` -> `0.1.0`）  
+> 最新更新日期：2026-09-02  
 > 基準規範：`OPENSPEC.md` 與 `AGENTS.md`  
-> 測試狀態：`npm test` 107/107 全部通過 (100% Pass)
+> 測試狀態：`npm test` 107/107 全部通過 (100% Pass)；RWD Repeat 2,286 跨引擎驗證全數通過
 
 ---
 
@@ -233,6 +233,15 @@ npm run specs:excel
   - 徹底修復短螢幕/橫向查詢中 `.avg-dialogue` 同時設定 `left: 14px; right: 14px;` 與 `transform: translateX(-50%)` 疊加導致對話框向左偏離螢幕 50% 造成左半邊裁切的 Bug，恢復左右對稱置中。
 - **橫向猜拳儀表板與立繪安全避讓 (Round Oracle Facial Clearance)**：
   - 緊湊優化橫向模式下回合儀表板尺寸與頂距（`top: clamp(62px, 8.5vh, 74px); width: min(40vw, 390px); padding: 6px 14px 8px;`），並將橫向立繪定位至 `left: 54%`，確保小樂面部、五官與狐耳 100% 完整顯露，絕無圖層遮擋。
+
+### 5.14 響應式佈局強化、寬螢幕道場擴展與跨引擎回歸門檻 (v0.0.14 Updates)
+- **平板與緊湊直向戰鬥控制定位修復 (768px Containing Block Repair)**：
+  - 修復 768×1024 平板等直向版型下玩家 HUD、手勢選擇器與快捷欄因包含塊變形導致向左偏移裁切的問題，確保控制按鈕等寬對齊、同屏且無多重外溢。
+- **寬螢幕修練道場工作區置中與 1040px 擴展 (Dojo Workspace Centering & Expansion)**：
+  - 於 ≥1280px 大螢幕下將修練道場題目與方向盤工作區由 820px 置中擴展至 1040px，按鈕尺寸同步放大提升可讀性與操作舒適度。
+- **全自動三引擎 2,286 案例 RWD 回歸驗證系統 (Playwright Cross-Engine Gate)**：
+  - 建立全自動 Chromium / Firefox 153.0 / WebKit 26.5 三引擎 2,286 案例回歸驗收門檻與分離證據契約（Chromium trusted native touch-pan；Firefox/WebKit touch-capable layout + real wheel 內容可達性驗證；手勢 handler 隔離驗證）。嚴格防範佈局裁切、元素遮擋與動畫非決定性抖動。
+
 
 
 

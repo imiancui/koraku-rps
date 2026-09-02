@@ -15,9 +15,11 @@ Read entries related to the affected component, not an unrelated full-device che
 ## Final-source supersession — seventh-round approval
 
 - Current product source is identified by bundle SHA-256 `69919fb879995a299934f1a91b2a8a752de2abba722b2c169365100b5b2bd3cd` and responsive CSS SHA-256 `32591787e64260221c46a39794a49c10eda9d9c9c68bb7b31c0d675c48cc7787`.
-- Same-source Chromium evidence: Stage B140/140, core30/30, complement93/93, boundary39/39, content/input/animation stress27/14/12 and sweep400/400 PASS. The user explicitly approved all61 seventh-round candidates; maintained visual comparison passed61/61.
-- The current golden tree SHA-256 is `9fa0cbeb9c71a70425babafd6df5564467e0c8f66188202c453a298aaf30ba0f`. Per-case1700/3000 text-raster bounds have a negative control: unchanged states pass2/2 and a12px card shift fails2/2 at16031/19748 pixels (`C:\Users\Administrator\AppData\Local\Temp\koraku-rwd-0J6dxl`).
-- Entries below retain historical Red/attempt chronology. Their current status lines and final-source notes supersede older candidate-round wording; none of this is Firefox/WebKit or real-device evidence.
+- Same-source cross-engine repeat evidence: `npm run test:rwd:repeat` completed with Smoke3 (30/30 x 3) and Full2 (2,286/2,286 x 2 across Chromium 808, Firefox 739, WebKit 739), 0 retries, 0 issues, code 0 (`C:\Users\Administrator\AppData\Local\Temp\koraku-rwd-repeat-7mE7Sl`).
+- The user explicitly approved all 61 seventh-round candidates; maintained visual comparison passed 61/61 without baseline updates.
+- The current golden tree SHA-256 is `9fa0cbeb9c71a70425babafd6df5564467e0c8f66188202c453a298aaf30ba0f`. Per-case 1700/3000 text-raster bounds have a negative control: unchanged states pass 2/2 and a 12px card shift fails 2/2 at 16031/19748 pixels (`C:\Users\Administrator\AppData\Local\Temp\koraku-rwd-0J6dxl`).
+- Split evidence contract: Chromium trusted native touch-pan; Firefox/WebKit touch-capable layout with real wheel for content reachability (`nativeTouchPan:false`); manual pointer for app swipe handlers (`trusted:false`). WebKit is desktop browser emulation, NOT physical Safari/iPad.
+- Entries below retain historical Red/attempt chronology. Real devices, software keyboards, hardware safe areas, browser zoom, and OS font scaling remain unverified.
 
 ## RWD-REG-001 — Dual QTE Sequence Overflow
 

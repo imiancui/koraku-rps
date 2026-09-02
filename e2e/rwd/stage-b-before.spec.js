@@ -15,7 +15,8 @@ for (const item of cases) {
       let assertion;
       try {
         prepared = await prepareStageB(page, appUrl, item);
-        expect(prepared.environment.input.maxTouchPoints > 0).toBe(item.input === "touch" || item.input === "hybrid");
+        const touchCapable = prepared.environment.input.maxTouchPoints > 0 || prepared.environment.input.coarse || prepared.environment.input.anyCoarse;
+        expect(touchCapable).toBe(item.input === "touch" || item.input === "hybrid");
         if (item.kind === "scroll") {
           evidence = await reachEnd(page, item, { assertReach: false });
           assertion = () => expect(evidence.audit.violations, "End content/footer must be genuinely reachable after real input").toEqual([]);

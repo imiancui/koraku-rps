@@ -104,7 +104,7 @@ async function resizeAndAudit(page, sizes, audit) {
 async function exerciseResize(page, appUrl, item) {
   if (item.state === "guide-scroll-focus") {
     const prepared = await prepareSurface(page, appUrl, "guide");
-    await touchDrag(page, "#screen-guide", 0, -320);
+    const inputEvidence = await touchDrag(page, "#screen-guide", 0, -320, "content-pan");
     const before = await scrollSnapshot(page, "#screen-guide");
     expect(before.scrollTop).toBeGreaterThan(0);
     const focus = page.locator('#screen-guide button[data-nav="home"]');
@@ -120,7 +120,7 @@ async function exerciseResize(page, appUrl, item) {
       expectedScroll = scroll.scrollTop;
       return layout(page, ["#screen-guide", '#screen-guide button[data-nav="home"]']);
     });
-    return { prepared, before, snapshots, finalScroll: await scrollSnapshot(page, "#screen-guide") };
+    return { prepared, before, snapshots, finalScroll: await scrollSnapshot(page, "#screen-guide"), inputEvidence };
   }
   if (item.state === "battle-dual-qte") {
     const prepared = await prepareState(page, appUrl, "battle-qte-dual");

@@ -7869,9 +7869,15 @@
         "fullRuns": 2,
         "retries": 0
       },
+      "splitEvidenceContract": {
+        "chromiumContentPan": "trusted CDP touch drag; nativeTouchPan:true",
+        "firefoxWebkitContentReachability": "touch-capable layout plus trusted real mouse wheel; nativeTouchPan:false",
+        "firefoxWebkitAppSwipe": "manual pointer/touch event; trusted:false; app handler only",
+        "claimBoundary": "Firefox/WebKit results do not certify native touch-pan or physical Safari/iPad behavior."
+      },
       "limitations": [
         "WebKit is browser emulation, not physical iPhone/iPad Safari evidence.",
-        "Playwright touchscreen exposes trusted tap only. Chromium swipe uses trusted CDP touch input; Firefox/WebKit use manually dispatched legacy TouchEvents with isTrusted=false, recorded per interaction. Native touch-pan still must change scrollTop or the case fails.",
+        "Playwright touchscreen exposes trusted tap only. Under the explicitly approved split evidence contract, Chromium swipe uses trusted CDP touch input; Firefox/WebKit app swipe uses manual events with isTrusted=false, while content reachability uses real wheel on a touch-capable layout and records nativeTouchPan:false.",
         "Software keyboards, hardware safe areas, browser zoom and OS font scaling remain NOT_RUN unless separately measured.",
         "A missing required browser or capability makes Full nonzero and cannot be reclassified optional after execution."
       ]

@@ -439,6 +439,27 @@ $$\text{Theoretical DPS} = \frac{(\text{Base DMG} \times \text{Greatsword Mult} 
 ### 19.3 iOS 背景音訊防搶佔機制 (Ambient AudioSession)
 - **背景音訊共存混音**：將 `navigator.audioSession.type` 設為 `"ambient"`，使遊戲內的 Web Audio API 合成音效不會中斷或暫停玩家於背景播放之 YouTube、Spotify 或 Podcast，達到完美的遊戲體驗。
 
+---
+
+## 20. 響應式佈局強化、寬螢幕道場擴展與跨引擎回歸門檻 (v0.0.14)
+
+### 20.1 平板直向戰鬥控制定位修復 (768px Portrait Battle Layout)
+- **包含塊幾何解耦**：徹底解決 768×1024 等直向平板環境下，祖先容器樣式衝突導致固定定位的手勢按鈕向左偏出螢幕之問題。
+- **等寬出拳與快捷欄對齊**：單手三拳按鈕維持等寬排列，雙手四鍵/六鍵按鈕同行等高對齊，所有控制項同屏完整可達。
+
+### 20.2 寬螢幕修練道場工作區置中擴展 (Wide Screen Dojo Centering & Expansion)
+- **1040px 寬版工作區**：在 ≥1280px 大螢幕下，道場 QTE 題目與八方向操作盤寬度由 820px 居中擴展至 1040px，按鈕尺寸同步放大提升可讀性與操作手感。
+- **頂部資訊錨定穩定**：頂部標題、模式切換與退出按鈕維持錨定，大螢幕練習體驗更為舒適。
+
+### 20.3 跨引擎 2,286 案例回歸驗收門檻 (Cross-Engine 2,286 Regression Gate)
+- **全自動跨引擎測試**：涵蓋 Chromium、Firefox 153.0、WebKit 26.5 三引擎全量 2,286 案例回歸驗證門檻。
+- **分離證據契約 (Split Evidence Contract)**：
+  - Chromium 保留原生 trusted touch-pan。
+  - Firefox / WebKit 在 touch 佈局上以真實 wheel 驗證內容可達性（`nativeTouchPan: false`）。
+  - 手勢分發事件獨立隔離驗證遊戲手勢處理（`trusted: false`）。
+- **嚴格驗收守護**：四向裁切、元素遮擋、必要控制項到達性與動畫時序穩定性均受自動化回歸門檻嚴格防護。
+
+
 
 
 

@@ -2,7 +2,7 @@
 
 > 文件狀態：現況規格基準 (Live Specification Baseline)  
 > 版本：2.0.0  
-> 最後整理：2026-08-30  
+> 最後整理：2026-09-02  
 > 專案根目錄：`D:\game-dev\New-game-project-4`
 
 ---
@@ -317,6 +317,27 @@ xpNeededForLevel(level) = 100 + Math.max(0, level - 1) * 75
     - **GIVEN** 玩家選擇「模式二：單體假人對決」，預設 10,000 HP / 0 傷害
     - **WHEN** 猜拳失敗且 QTE 失敗
     - **THEN** 玩家受到 0 傷害不扣血，戰鬥繼續進行，實戰 DPS 即時更新
+
+---
+
+## 10. 響應式佈局規格與跨引擎回歸驗證合約 (RWD Specification & Verification Gate)
+
+### 10.1 平板與緊湊直向戰鬥控制定位 (768px Containing Block Invariant)
+- **包含塊幾何解耦**：消除直向與緊湊平板模式下祖先變形（`translateX(-50%)`）對固定定位手勢選擇器的負面影響，使玩家 HUD、快捷欄與出拳按鈕在直向視口完整顯示且左右對稱。
+- **等寬出拳與快捷欄對齊**：單手三拳按鈕維持等寬排列，雙手四鍵/六鍵按鈕同行等高對齊，無水平捲軸外溢與元素重疊。
+
+### 10.2 寬螢幕修練道場工作區置中與 1040px 擴展 (Dojo Workspace Centering)
+- **大螢幕擴展規則**：在視口寬度 `≥1280px` 條件下，修練道場 QTE 題目與八方向操作盤由 820px 居中擴展至 1040px，按鈕尺寸同步優化放大（單軌 80px、雙軌 52px）。
+- **頂部資訊錨定不變**：道場標題、模式切換與退出按鈕維持錨定，不隨工作區拉伸變形。
+
+### 10.3 跨引擎 2,286 案例回歸驗收門檻 (Playwright Cross-Engine Regression Gate)
+- **測試矩陣**：涵蓋 Chromium、Firefox、WebKit 跨引擎共 29 個子批次、2,286 個 unique composite required case IDs。
+- **分離證據契約 (Split Evidence Contract)**：
+  - Chromium：保留 trusted native touch-pan。
+  - Firefox / WebKit：touch-capable layout + real wheel 驗證內容可達與末端操作（標記 `nativeTouchPan: false`）。
+  - 手動分發 pointer/touch 事件僅驗證遊戲手勢處理（標記 `trusted: false`）。
+- **嚴格驗收防線**：任何四向裁切（Clipping）、元素遮擋（Occlusion）、必要控制可達性缺失或動畫抖動皆視為非零阻擋缺陷。
+
 
 
 

@@ -3,7 +3,7 @@ import http from "node:http";
 import path from "node:path";
 import os from "node:os";
 import { readFile, realpath } from "node:fs/promises";
-import { createHash } from "node:crypto";
+import { createHash, randomInt } from "node:crypto";
 import { fileURLToPath } from "node:url";
 
 const projectRoot = fileURLToPath(new URL("../../", import.meta.url));
@@ -29,7 +29,23 @@ export async function startStaticServer() {
       response.writeHead(error.code === "ENOENT" ? 404 : 500).end("Resource unavailable");
     }
   });
-  await new Promise((resolve, reject) => { server.once("error", reject); server.listen(0, "127.0.0.1", resolve); });
+  let listening = false;
+  for (let attempt = 0; attempt < 50 && !listening; attempt++) {
+    const port = randomInt(20000, 50000);
+    try {
+      await new Promise((resolve, reject) => {
+        const onError = error => { server.off("listening", onListening); reject(error); };
+        const onListening = () => { server.off("error", onError); resolve(); };
+        server.once("error", onError);
+        server.once("listening", onListening);
+        server.listen(port, "127.0.0.1");
+      });
+      listening = true;
+    } catch (error) {
+      if (error.code !== "EADDRINUSE") throw error;
+    }
+  }
+  if (!listening) throw new Error("Unable to allocate a safe task-owned loopback port");
   return {
     url: "http://127.0.0.1:" + server.address().port,
     close: () => new Promise((resolve, reject) => {

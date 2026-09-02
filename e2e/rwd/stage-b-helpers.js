@@ -1,7 +1,7 @@
 import { expect } from "@playwright/test";
 import { attachJson } from "./fixtures.js";
 import { openApp, prepareState, readAppState, settleFiniteLayout } from "./application.js";
-import { auditLayout } from "./layout-audit.js";
+import { auditLayout, auditScrollEnd } from "./layout-audit.js";
 
 const contentSurfaces = new Set(["stages", "growth", "equipment", "shop", "records", "gallery", "guide"]);
 
@@ -29,12 +29,21 @@ export async function prepareStageB(page, appUrl, item) {
   return result;
 }
 
-export async function touchDrag(page, selector, dx, dy) {
+export async function touchDrag(page, selector, dx, dy, purpose = "qte-swipe") {
   const locator = page.locator(selector);
   const box = await locator.boundingBox();
   if (!box) throw new Error("Touch target has no rendered box: " + selector);
   const start = { x: box.x + box.width / 2, y: box.y + box.height / 2 };
   const engine = page.context().browser()?.browserType().name() || "unknown";
+  if (engine !== "chromium" && purpose === "content-pan") {
+    const before = await locator.evaluate(element => element.scrollTop);
+    await locator.hover({ position: { x: Math.min(8, box.width / 2), y: Math.min(8, box.height / 2) } });
+    await page.mouse.wheel(0, -dy);
+    try { await page.clock.runFor(100); } catch {}
+    await page.waitForTimeout(50);
+    const after = await locator.evaluate(element => element.scrollTop);
+    return { engine, method: "mouse-wheel-split-evidence", trusted: true, nativeTouchPan: false, before, after };
+  }
   if (engine === "chromium") {
     const session = await page.context().newCDPSession(page);
     try {
@@ -46,7 +55,7 @@ export async function touchDrag(page, selector, dx, dy) {
     } finally {
       await session.detach();
     }
-    return { engine, method: "cdp-touch", trusted: true };
+    return { engine, method: "cdp-touch", trusted: true, nativeTouchPan: purpose === "content-pan" };
   }
 
   const pointerEvents = await page.evaluate(() => Boolean(window.PointerEvent));
@@ -60,7 +69,7 @@ export async function touchDrag(page, selector, dx, dy) {
       await locator.dispatchEvent("pointermove", { ...coordinates(step), pointerId: 1, pointerType: "touch", isPrimary: true, buttons: 1 });
     }
     await locator.dispatchEvent("pointerup", { ...coordinates(5), pointerId: 1, pointerType: "touch", isPrimary: true, buttons: 0 });
-    return { engine, method: "manual-pointer-event", trusted: false };
+    return { engine, method: "manual-pointer-event", trusted: false, nativeTouchPan: false };
   }
 
   const point = (step = 0) => [{
@@ -73,7 +82,7 @@ export async function touchDrag(page, selector, dx, dy) {
     await locator.dispatchEvent("touchmove", { touches, changedTouches: touches, targetTouches: touches });
   }
   await locator.dispatchEvent("touchend", { touches: [], changedTouches: [], targetTouches: [] });
-  return { engine, method: "manual-touch-event", trusted: false };
+  return { engine, method: "manual-touch-event", trusted: false, nativeTouchPan: false };
 }
 
 export async function scrollSnapshot(page, selector) {
@@ -112,17 +121,29 @@ export async function reachEnd(page, item, { assertReach = true, forceInput = fa
   if (item.input === "keyboard") {
     const focusable = page.locator(`${container} button:not([disabled]), ${container} a[href], ${container} input:not([disabled]), ${container} select:not([disabled]), ${container} textarea:not([disabled])`).first();
     await focusable.focus();
-    await page.keyboard.press("End");
-    await page.clock.runFor(1000);
+    const maxSteps = Math.min(50, Math.max(1, Math.ceil(before.scrollHeight / Math.max(1, before.clientHeight)) + 2));
+    for (let step = 0; step < maxSteps; step++) {
+      await page.keyboard.press("End");
+      try { await page.clock.runFor(100); } catch {}
+      await page.waitForTimeout(50);
+      const current = await scrollSnapshot(page, container);
+      if (current.scrollTop >= current.scrollHeight - current.clientHeight - 1) break;
+      await page.keyboard.press("PageDown");
+    }
   } else if (item.input === "touch") {
     for (let i = 0; i < 30; i++) {
       const current = await page.evaluate(auditLayout, { elements: [{ selector: target, hitTest: true }] });
       if (!current.violations.length && (!forceInput || i > 0)) break;
-      inputEvidence.push(await touchDrag(page, container, 0, -Math.max(120, item.viewport[1] * 0.65)));
+      inputEvidence.push(await touchDrag(page, container, 0, -Math.max(120, item.viewport[1] * 0.65), "content-pan"));
     }
   } else {
-    await page.locator(container).hover({ position: { x: 10, y: 10 } });
-    await page.mouse.wheel(0, before.scrollHeight + item.viewport[1]);
+    const audit = await auditScrollEnd(page, container, target);
+    const result = {
+      surface, container, target, before: audit.before, after: audit.after, targetBefore, audit, input: item.input,
+      inputEvidence: [{ engine: page.context().browser()?.browserType().name() || "unknown", method: "mouse-wheel", trusted: true, nativeTouchPan: false }]
+    };
+    if (assertReach) expect(audit.violations, "End target must be reachable after real input").toEqual([]);
+    return result;
   }
   const after = await scrollSnapshot(page, container);
   const audit = await page.evaluate(auditLayout, { elements: [{ selector: target, hitTest: true, text: true }] });

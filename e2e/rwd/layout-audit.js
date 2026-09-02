@@ -67,6 +67,26 @@ export async function auditLayout(contract) {
     const entry = intersection.get(element);
     const box = rect(entry.boundingClientRect);
     const intersectionBox = rect(entry.intersectionRect);
+    const manualClip = { left: 0, top: 0, right: viewport.width, bottom: viewport.height };
+    for (let node = element.parentElement; node; node = node.parentElement) {
+      const css = getComputedStyle(node);
+      const ancestorBox = node.getBoundingClientRect();
+      if (css.overflowX !== "visible") {
+        manualClip.left = Math.max(manualClip.left, ancestorBox.left);
+        manualClip.right = Math.min(manualClip.right, ancestorBox.right);
+      }
+      if (css.overflowY !== "visible") {
+        manualClip.top = Math.max(manualClip.top, ancestorBox.top);
+        manualClip.bottom = Math.min(manualClip.bottom, ancestorBox.bottom);
+      }
+    }
+    const manualIntersection = {
+      left: Math.max(box.left, manualClip.left), right: Math.min(box.right, manualClip.right),
+      top: Math.max(box.top, manualClip.top), bottom: Math.min(box.bottom, manualClip.bottom)
+    };
+    manualIntersection.width = Math.max(0, manualIntersection.right - manualIntersection.left);
+    manualIntersection.height = Math.max(0, manualIntersection.bottom - manualIntersection.top);
+    const manualLoss = { width: Math.max(0, box.width - manualIntersection.width), height: Math.max(0, box.height - manualIntersection.height) };
     const sample = {
       selector: spec.selector, box, intersection: intersectionBox, shown,
       disabled: element.matches(":disabled") || element.getAttribute("aria-disabled") === "true",
@@ -76,7 +96,9 @@ export async function auditLayout(contract) {
         right: Math.min(box.width, Math.max(0, box.right - viewport.width)),
         top: Math.min(box.height, Math.max(0, -box.top)),
         bottom: Math.min(box.height, Math.max(0, box.bottom - viewport.height))
-      }
+      },
+      manualIntersection,
+      manualLoss
     };
     measurements.push(sample);
     if (spec.state === "hidden") {
@@ -92,7 +114,8 @@ export async function auditLayout(contract) {
     }
     if (spec.contained !== false) {
       const loss = { width: Math.max(0, box.width - intersectionBox.width), height: Math.max(0, box.height - intersectionBox.height) };
-      if (loss.width > tolerance || loss.height > tolerance) {
+      const observerQuantizationOnly = loss.width <= 1 && loss.height <= 1 && manualLoss.width <= tolerance && manualLoss.height <= tolerance && Object.values(sample.viewportLoss).every(value => value <= tolerance);
+      if ((loss.width > tolerance || loss.height > tolerance) && !observerQuantizationOnly) {
         fail(spec.kind === "overlay" ? "overlay-bounds" : "clipping", spec.selector, { tolerance }, { ...sample, loss });
       }
     }

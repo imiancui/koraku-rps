@@ -27,12 +27,12 @@ async function contentPan(page, appUrl, item) {
   await settleFiniteLayout(page, "#screen-guide");
   const before = await scrollSnapshot(page, "#screen-guide");
   const outerBefore = await pageScroll(page);
-  await touchDrag(page, "#screen-guide", 0, -Math.max(220, item.viewport[1] * 0.6));
+  const inputEvidence = await touchDrag(page, "#screen-guide", 0, -Math.max(220, item.viewport[1] * 0.6), "content-pan");
   const after = await scrollSnapshot(page, "#screen-guide");
   const outerAfter = await pageScroll(page);
   expect(after.scrollTop).toBeGreaterThan(before.scrollTop);
   expect({ html: outerAfter.html, body: outerAfter.body }).toEqual({ html: outerBefore.html, body: outerBefore.body });
-  return { environment, capabilities: await capabilities(page), before, after, outerBefore, outerAfter };
+  return { environment, capabilities: await capabilities(page), before, after, outerBefore, outerAfter, inputEvidence };
 }
 
 function track(snapshot, state, slot = "left") {

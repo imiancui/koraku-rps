@@ -86,6 +86,7 @@ async function overlayCase(page, appUrl, item) {
   await page.clock.runFor(80);
   const middle = await sample(page, "#qte-overlay", true);
   await page.clock.runFor(120);
+  await expect(page.locator("#qte-overlay")).toHaveCSS("opacity", "1");
   const after = await sample(page, "#qte-overlay", true);
   expect(after.style.opacity).toBe("1");
   const audit = await criticalAudit(page, "battle-qte-single", { includeTouchControls: item.input === "touch" });

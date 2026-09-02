@@ -12,12 +12,13 @@ async function reachSaveEnd(page, item) {
     const audit = await auditScrollEnd(page, container, target);
     return { before, after: audit.after, audit, inputEvidence: { method: "mouse-wheel", trusted: true } };
   }
+  const inputEvidence = [];
   for (let i = 0; i < 20; i++) {
     const audit = await page.evaluate(auditLayout, { elements: [{ selector: target, hitTest: true, text: true }] });
     if (!audit.violations.length) break;
-    await touchDrag(page, container, 0, -Math.max(120, item.viewport[1] * 0.55));
+    inputEvidence.push(await touchDrag(page, container, 0, -Math.max(120, item.viewport[1] * 0.55), "content-pan"));
   }
-  return { before, after: await scrollSnapshot(page, container), audit: await page.evaluate(auditLayout, { elements: [{ selector: target, hitTest: true, text: true }] }) };
+  return { before, after: await scrollSnapshot(page, container), audit: await page.evaluate(auditLayout, { elements: [{ selector: target, hitTest: true, text: true }] }), inputEvidence };
 }
 
 for (const item of requiredCases("smoke-core")) {

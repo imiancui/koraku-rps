@@ -30,6 +30,18 @@ export async function readyAssets(page) {
 }
 
 export async function settleFiniteLayout(page, selector) {
+  if (page.context().browser()?.browserType().name() !== "chromium") {
+    await page.waitForFunction(selector => {
+      const target = document.querySelector(selector);
+      if (!target) return false;
+      const finite = animation => animation.playState === "running" && animation.effect.getTiming().iterations !== Infinity;
+      const running = target.getAnimations({ subtree: true }).filter(finite);
+      for (let element = target.parentElement; element; element = element.parentElement) running.push(...element.getAnimations().filter(finite));
+      for (const animation of running) animation.finish();
+      return running.length === 0;
+    }, selector);
+    return;
+  }
   await page.waitForFunction(selector => {
     const target = document.querySelector(selector);
     if (!target) return false;

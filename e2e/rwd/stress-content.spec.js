@@ -1,7 +1,7 @@
 import { test, expect, attachJson } from "./fixtures.js";
 import { requiredCases } from "./coverage.js";
 import { openApp, prepareState, readAppState, settleFiniteLayout } from "./application.js";
-import { auditLayout } from "./layout-audit.js";
+import { auditLayout, auditScrollEnd } from "./layout-audit.js";
 import { criticalAudit, scrollSnapshot, touchDrag } from "./stage-b-helpers.js";
 
 async function audit(page, elements) {
@@ -95,27 +95,24 @@ async function maxListCase(page, appUrl, item) {
   });
   const surface = "#screen-records";
   const before = await scrollSnapshot(page, surface);
+  const inputEvidence = [];
+  let endAudit = null;
   if (item.input === "touch") {
     for (let index = 0; index < 60; index++) {
       const current = await scrollSnapshot(page, surface);
       if (current.scrollTop >= current.scrollHeight - current.clientHeight - 1) break;
-      await touchDrag(page, surface, 0, -Math.max(180, item.viewport[1] * 0.65));
+      inputEvidence.push(await touchDrag(page, surface, 0, -Math.max(180, item.viewport[1] * 0.65), "content-pan"));
     }
   } else {
-    await page.locator(surface).hover({ position: { x: 2, y: 120 } });
-    for (let index = 0; index < 5; index++) {
-      const current = await scrollSnapshot(page, surface);
-      if (current.scrollTop >= current.scrollHeight - current.clientHeight - 1) break;
-      await page.mouse.wheel(0, current.scrollHeight + current.clientHeight);
-      await page.clock.runFor(1000);
-    }
+    endAudit = await auditScrollEnd(page, surface, ".rwd-stress-row:last-child");
+    inputEvidence.push({ method: "mouse-wheel", trusted: true, nativeTouchPan: false });
   }
   const after = await scrollSnapshot(page, surface);
   expect(after.scrollTop).toBeGreaterThan(0);
   expect(after.scrollTop).toBeGreaterThanOrEqual(after.scrollHeight - after.clientHeight - 1);
-  const result = await audit(page, [{ selector: ".rwd-stress-row:last-child", text: true }]);
+  const result = endAudit || await audit(page, [{ selector: ".rwd-stress-row:last-child", text: true }]);
   expect(result.violations).toEqual([]);
-  return { environment, before, after, audit: result, injectedRows: 100 };
+  return { environment, before, after, audit: result, injectedRows: 100, inputEvidence };
 }
 
 async function fontScaleCase(page, appUrl, item) {

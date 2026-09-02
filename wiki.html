@@ -365,6 +365,7 @@
       <li><a href="#section-i18n" class="nav-link">🌐 四國語系在地化</a></li>
       <li><a href="#section-save" class="nav-link">🗄️ 存檔紀錄與種子碼</a></li>
       <li><a href="#section-dojo" class="nav-link">⛩️ 修練場、ATK 與傷害日誌</a></li>
+      <li><a href="#section-rwd" class="nav-link">📐 響應式佈局與跨引擎門檻</a></li>
     </ul>
   </aside>
 
@@ -814,6 +815,29 @@
             </div>
             <p><strong>模式一（純 QTE 反應練習）</strong>：第一式為單軌 8 方向連續輸入，第二式為雙軌（WASD + 方向鍵）鍵盤情境，無戰鬥環節，即時統計 Combo、最高 Combo、平均反應時間 (ms) 與成功率。</p>
             <p style="margin-top:8px;"><strong>模式二（全黑剪影戰鬥沙盒）</strong>：標準戰鬥循環，對手為全黑預設小樂剪影（<code>filter: brightness(0)</code>），小樂預設 10,000 HP（可自訂）且對玩家 0 傷害（可自訂），支援第一式（單體木樁）與第二式（雙生木樁，模擬第 4 關雙手雙血條）。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 19: RWD & Cross-Engine Regression Gate -->
+      <section id="section-rwd" class="section-card">
+        <h2 class="section-title">📐 響應式佈局強化、寬螢幕道場與跨引擎回歸門檻 (v0.0.14)</h2>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">
+              <span>平板與緊湊直向戰鬥控制定位修復</span>
+              <span class="badge badge-gold">768px 包含塊解耦</span>
+            </div>
+            <p><strong>直向包含塊幾何修復</strong>：徹底修復 768×1024 平板等直向視口下，祖先變形導致固定手勢按鈕向左偏出螢幕之問題，消除外溢裁切。</p>
+            <p style="margin-top:8px;"><strong>等寬與對齊防護</strong>：單手三拳按鈕維持等寬排列，雙手四鍵/六鍵按鈕同行等高對齊，所有操作項在各種比例下同屏完整可達。</p>
+          </div>
+          <div class="card">
+            <div class="card-title">
+              <span>寬螢幕道場擴展與跨引擎 2,286 回歸驗證</span>
+              <span class="badge badge-crimson">1040px 寬版 / 三引擎門檻</span>
+            </div>
+            <p><strong>≥1280px 道場工作區擴展</strong>：在寬螢幕下將道場題目與八方向操作盤由 820px 置中擴展至 1040px，按鈕尺寸同步優化放大（單軌 80px、雙軌 52px）。</p>
+            <p style="margin-top:8px;"><strong>全自動三引擎回歸門檻</strong>：涵蓋 Chromium、Firefox 153.0、WebKit 26.5 全量 2,286 案例自動驗收，嚴格守護四向裁切、元素遮擋與動畫穩定性。</p>
           </div>
         </div>
       </section>

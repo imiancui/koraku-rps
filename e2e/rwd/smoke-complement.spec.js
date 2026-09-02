@@ -1,7 +1,7 @@
 import { test, expect, attachJson } from "./fixtures.js";
 import { requiredCases } from "./coverage.js";
 import { openApp, prepareState, readAppState, settleFiniteLayout } from "./application.js";
-import { auditLayout } from "./layout-audit.js";
+import { auditLayout, auditScrollEnd } from "./layout-audit.js";
 import { advanceQte, advanceQteKeyboard, criticalAudit, reachEnd, scrollSnapshot, touchDrag } from "./stage-b-helpers.js";
 
 async function openSurface(page, appUrl, surface) {
@@ -22,7 +22,7 @@ async function homeFooter(page, appUrl, item) {
 
 async function contentEnd(page, appUrl, item) {
   const prepared = await openSurface(page, appUrl, item.state);
-  const reach = await reachEnd(page, { ...item, surface: item.state, input: item.input === "mouse-keyboard" ? "keyboard" : item.input === "touch" ? "touch" : "mouse" }, { forceInput: true });
+  const reach = await reachEnd(page, { ...item, surface: item.state, input: item.input === "touch" ? "touch" : "mouse" }, { forceInput: true });
   await page.locator(`#screen-${item.state} button[data-nav="home"]`).click();
   await expect(page.locator("#app")).toHaveAttribute("data-screen", "home");
   return { prepared, reach, result: await readAppState(page) };
@@ -72,6 +72,7 @@ async function postCase(page, appUrl, item) {
   if (item.state === "settlement") {
     await page.evaluate(state => window.__KORAKU_DEBUG__.bus.emit("postbattle:state", state), postState(appearance));
     await expect(page.locator("#result-overlay")).toHaveClass(/is-active/);
+    await settleFiniteLayout(page, "#result-overlay");
     const audit = await page.evaluate(auditLayout, { documentOverflow: true, elements: [
       { selector: "#result-overlay" }, { selector: ".result-card" },
       { selector: '#postbattle-actions button[data-post-action="home"]', hitTest: true, text: true }
@@ -106,20 +107,20 @@ async function postCase(page, appUrl, item) {
 async function scrollInnerEnd(page, selector, input) {
   const before = await scrollSnapshot(page, selector);
   if (before.scrollHeight <= before.clientHeight) return { before, after: before };
-  if (input !== "mouse-keyboard") {
-    for (let index = 0; index < 30; index++) {
-      const current = await scrollSnapshot(page, selector);
-      if (current.scrollTop >= current.scrollHeight - current.clientHeight - 1) break;
-      await touchDrag(page, selector, 0, -300);
-    }
-  } else {
-    await page.locator(selector).hover({ position: { x: 8, y: 8 } });
-    await page.mouse.wheel(0, before.scrollHeight + before.clientHeight);
-    await page.clock.runFor(1000);
+  const inputEvidence = [];
+  if (input === "mouse-keyboard") {
+    const audit = await auditScrollEnd(page, selector, `${selector} > :last-child`);
+    expect(audit.violations).toEqual([]);
+    return { before, after: audit.after, inputEvidence: [{ method: "mouse-wheel", trusted: true, nativeTouchPan: false }] };
+  }
+  for (let index = 0; index < 30; index++) {
+    const current = await scrollSnapshot(page, selector);
+    if (current.scrollTop >= current.scrollHeight - current.clientHeight - 1) break;
+    inputEvidence.push(await touchDrag(page, selector, 0, -300, "content-pan"));
   }
   const after = await scrollSnapshot(page, selector);
   expect(after.scrollTop).toBeGreaterThanOrEqual(after.scrollHeight - after.clientHeight - 1);
-  return { before, after };
+  return { before, after, inputEvidence };
 }
 
 async function overlayCase(page, appUrl, item) {
@@ -196,6 +197,7 @@ async function galleryOpenCase(page, appUrl, item) {
   }
   await page.locator("#btn-gallery-zoom").click();
   await expect(page.locator("#gallery-lightbox-modal")).toBeVisible();
+  await settleFiniteLayout(page, "#gallery-lightbox-modal");
   const audit = await page.evaluate(auditLayout, { documentOverflow: true, elements: [
     { selector: "#gallery-lightbox-modal" }, { selector: "#gallery-lightbox-image" }, { selector: "#btn-close-lightbox", hitTest: true }
   ] });

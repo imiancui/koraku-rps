@@ -22,6 +22,33 @@ export const LOCALE_STORAGE_KEY = "koraku-rps-locale";
 
 export const CHANGELOG_DATA = [
   {
+    version: "0.0.14",
+    date: "2026-09-02",
+    tag: "RWD Regression Gate, Tablet Battle Positioning & Expanded Wide Dojo Workspace",
+    changes: {
+      "zh-Hant": [
+        "【平板與緊湊直向戰鬥控制定位修復】修復 768×1024 平板等直向版型下玩家 HUD、手勢選擇器與快捷欄因包含塊變形導致向左偏移裁切的問題，確保控制按鈕等寬對齊且無外溢。",
+        "【寬螢幕道場工作區置中擴展】於 ≥1280px 螢幕將修練道場題目與方向盤工作區由 820px 置中擴展至 1040px，按鈕尺寸同步優化放大，提供更寬敞舒適的操作體驗。",
+        "【跨引擎 RWD 契約回歸門檻】建立全自動三引擎（Chromium / Firefox / WebKit）2,286 案例回歸驗收門檻，嚴格保護四向裁切、遮擋、必要控制可達性與動畫狀態穩定。"
+      ],
+      "zh-Hans": [
+        "【平板与紧凑直向战斗控制定位修复】修复 768×1024 平板等直向版型下玩家 HUD、手势选择器与快捷栏因包含块变形导致向左偏移裁切的问题，确保控制按钮等宽对齐且无外溢。",
+        "【宽屏幕道场工作区居中扩展】于 ≥1280px 屏幕将修炼道场题目与方向盘工作区由 820px 居中扩展至 1040px，按钮尺寸同步优化放大，提供更宽敞舒适的操作体验。",
+        "【跨引擎 RWD 契约回归门槛】建立全自动三引擎（Chromium / Firefox / WebKit）2,286 案例回归验收门槛，严格保护四向裁切、遮挡、必要控制可达性与动画状态稳定。"
+      ],
+      "en": [
+        "【Tablet Portrait Battle Control Positioning Fix】Fixed a containing-block transform issue on 768x1024 portrait layouts causing player HUD and hand selector to shift left and clip, restoring aligned and fully reachable controls.",
+        "【Wide Screen Dojo Workspace Centering & Expansion】Expanded the Dojo QTE workspace and direction pads on screens ≥1280px from 820px to a centered 1040px with scaled direction buttons for an enhanced practice experience.",
+        "【Cross-Engine RWD Regression Verification Gate】Established a 2,286-case regression test gate across Chromium, Firefox, and WebKit ensuring clipping, occlusion, reachability, and animation invariants are protected."
+      ],
+      "ja": [
+        "【タブレット縦向き戦闘UIの配置修正】768×1024等の縦向きタブレット環境で包含ブロックの変形によりプレイヤーHUDや手勢選択枠が左にズレて見切れていた問題を修正し、均等幅で操作可能な配置に復元。",
+        "【ワイド画面向け道場ワークスペースの中央配置と拡大】1280px以上の大画面において、修練道場の問題・方向パッド表示幅を820pxから1040pxへ中央揃えで拡大し、ボタン視認性と操作性を向上。",
+        "【クロスエンジンRWDリグレッション検証ゲート確立】Chromium・Firefox・WebKitの3エンジン全2,286ケースに及ぶ自動回帰検証ゲートを整備し、表示崩れや到達不能、アニメーション安定性を厳格に保証。"
+      ]
+    }
+  },
+  {
     version: "0.0.13",
     date: "2026-08-31",
     tag: "Battle RWD Calibration: Portrait Standee Elevation & Landscape Dialogue Centering",

@@ -2,9 +2,10 @@
 
 > 文件用途：AI 代理人與開發者快速上手、架構交接與開發合約指引  
 > 專案根目錄：`D:\game-dev\New-game-project-4`  
-> 最新更新日期：2026-08-30  
+> 當前版本：`v0.0.14`  
+> 最新更新日期：2026-09-02  
 > 基準規範：`OPENSPEC.md` 與 `AGENTS.md`  
-> 測試狀態：`npm test` 94/94 全部通過
+> 測試狀態：`npm test` 107/107 全部通過 (100% Pass)；RWD 跨引擎 2,286 案例驗收全數通過
 
 ---
 
@@ -13,7 +14,8 @@
 本專案為純原生（Vanilla ES Modules / HTML5 / CSS3 / Web Audio API）架構的日式 ACGN 猜拳 RPG 對決遊戲。無前端框架、無外部執行期套件相依，可直接於本機或透過 GitHub Pages / 自訂網域（`https://koraku.app/`）部署運行。
 
 ### 1.1 核心命令
-- **執行測試**：`npm test`（Node.js 原生測試執行器，89 項測試）
+- **執行核心測試**：`npm test`（Node.js 原生測試執行器與 i18n 完整性校驗）
+- **RWD 回歸驗證**：`npm run test:rwd:repeat`（Smoke3 + Full2 跨引擎零 retry 驗證門檻）
 - **打包發布**：`npm run build` 或 `node scripts/build.mjs`（生成 `src/js/bundle.js`）
 - **產生 Excel 規格表**：`npm run specs:excel`
 - **線上網址**：`https://koraku.app/`
