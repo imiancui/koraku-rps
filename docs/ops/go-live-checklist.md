@@ -1,4 +1,4 @@
-﻿# Koraku RPS 上線檢查清單 (Go-Live Checklist)
+# Koraku RPS 上線檢查清單 (Go-Live Checklist)
 
 本文件整理正式上線前**無法在本地 Docker / 本機環境模擬、必須於真實 VPS / 公網環境驗證**的檢查項目。每一項均明確標示「僅真機驗證」，供維運與發布負責人逐項簽核。
 
@@ -68,7 +68,7 @@
 
 | 檢驗項目 | 驗證環境 | 判定標準 | 狀態 |
 | :--- | :--- | :--- | :--- |
-| 單元與合約測試 | 本機 Node | `npm test` 207/207 全綠 | PASS |
+| 單元與合約測試 | 本機 Node | `npm test` 213/213 全綠 | PASS |
 | 伺服器權威與防作弊 | 本機 Node | `npm run test:server` 17/17 全綠 | PASS |
 | 跨裝置 RWD 煙霧 | 本機 Chromium | `npm run test:rwd:smoke` 30/30 全綠 | PASS |
 | Docker 缺變數 Fail-fast | Docker Staging | 缺 JWT_SECRET / ANON_SALT 立即退出 1 | PASS |
@@ -77,7 +77,35 @@
 | Docker 完整戰鬥全迴路 | Docker Staging | 戰鬥 -> 放棄 -> 結算 -> 帳本寫入磁碟 | PASS |
 | Docker 備份與還原演練 | Docker Staging | 備份 -> 刪資料卷 -> 還原 100% 完整 | PASS |
 | Docker 崩潰自動重啟 | Docker Staging | PID 1 SIGKILL 後 restart:always 自動拉起 | PASS |
-| Docker 併發負載煙霧 | Docker Staging | 20 併發帳號 100% 成功、平均 97ms、記憶體無增長 | PASS |
-| 公開域名 SSL 憑證 | 真實 VPS | Let''s Encrypt 真憑證且無瀏覽器告警 | 待真機執行 |
+| Docker 併發負載煙霧 | Docker Staging | 20 併發帳號 100% 成功、平均 99ms、記憶體無增長 | PASS |
+| 公開域名 SSL 憑證 | 真實 VPS | Let's Encrypt 真憑證且無瀏覽器告警 | 待真機執行 |
 | 公網延遲與斷線 10 秒 | 真實 VPS | 真實 4G/5G/跨國網路延遲與結算 | 待真機執行 |
 | 防火牆與安全群組 | 真實 VPS | 僅 80/443/SSH 放行，8080 不對外暴露 | 待真機執行 |
+
+---
+
+## 6. 上線日標準作業程序與驗證流程 (Go-Live Day Runbook)
+
+當 VPS 採購完成並準備上線時，依以下時序逐項執行驗證與發布：
+
+### 階段一：T-24h 基礎設施建置
+1. **安全配置**：雲端安全群組與主機防火牆 (UFW) 嚴格設定僅放行 Port 22 (SSH)、Port 80 (HTTP)、Port 443 (HTTPS)。
+2. **DNS 指向**：設定 `api.koraku.app` A/AAAA 記錄指向 VPS 固定 IP，調降 TTL 至 300 秒。
+3. **備份環境**：建立 `/data` 存檔目錄與每日備份掛載點，設定目錄權限。
+
+### 階段二：T-2h 伺服器部署
+1. **環境變數注入**：建立 `.env`（生產環境 `JWT_SECRET`、`ANON_SALT`、`NODE_ENV=production`、`BATTLE_LOCK_POLICY=always`、`ALLOWED_ORIGINS=https://koraku.app`）。
+2. **啟動容器**：執行 `docker compose up -d`，Caddy 自動向 Let's Encrypt 申請 SSL 憑證。
+3. **排程設定**：設定 Host cron 於每日 03:00 執行備份腳本並設定 14 天保留輪轉。
+
+### 階段三：T-0h 真機驗證簽核（依序執行）
+1. **SSL 憑證簽核**：造訪 `https://api.koraku.app/health`，確認回傳 HTTP 200 OK，瀏覽器無安全憑證告警。
+2. **來源隔離簽核**：使用非允許 Origin 測試 WebSocket 握手，確認回傳 1006 阻擋。
+3. **公網延遲簽核**：從行動裝置 (4G/5G) 連線，確認 Ping 延遲穩定且小於 180ms。
+4. **10s 斷線寬限簽核**：戰鬥中切換飛航模式 10 秒內恢復重連正常；超過 10 秒確認自動結算並寫入帳本。
+5. **重開機自啟簽核**：執行 `sudo reboot`，確認開機後 30 秒內容器自動恢復服務。
+
+### 階段四：T+0h 客戶端啟用
+1. 客戶端靜態站（`koraku.app`）正式指向 `wss://api.koraku.app/ws`，完成線上模式啟用。
+2. 若上線後評估需調整戰鬥中換裝/配點策略，僅需修改伺服器環境變數 `BATTLE_LOCK_POLICY=countdown` 或 `never` 並重啟伺服器，客戶端無須重新發版。
+
