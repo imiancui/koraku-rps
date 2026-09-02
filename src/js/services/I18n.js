@@ -22,6 +22,142 @@ export const LOCALE_STORAGE_KEY = "koraku-rps-locale";
 
 export const CHANGELOG_DATA = [
   {
+    version: "0.0.21",
+    date: "2026-09-03",
+    tag: "Battle Mutation Lock UI, Multi-Viewport RWD Verification & Go-Live Runbook",
+    changes: {
+      "zh-Hant": [
+        "【戰鬥中換裝與配點鎖定灰化 UI】依據 battleLockPolicy 政策，在線上對決與離線沙盒中，戰鬥進行期間自動灰化禁用換裝、卸裝、屬性配點與技能升級按鈕（添加 disabled 與 aria-disabled=\"true\"）。",
+        "【即時鎖定提示與點擊防護】於能力成長與裝備畫面顯示專屬提示行，點擊鎖定中按鈕立即彈出「戰鬥進行中已鎖定換裝與配點」Toast 通知，戰鬥結算後即時自動恢復。",
+        "【RWD 跨視口與動態 Resize 驗證 (RWD-REG-009)】實機通過手機 (375px)、平板 (768px)、桌面 (1280px/1920px) 響應式驗證，包含跨 12 格紙娃娃斷點動態縮放與中英雙語系排版防推擠。",
+        "【上線日標準作業程序 (Go-Live Runbook)】完備 VPS 採購後 T-24h 基礎設施、T-2h 容器部署與 T-0h 公網真機簽核清單。"
+      ],
+      "zh-Hans": [
+        "【战斗中换装与配点锁定灰化 UI】依据 battleLockPolicy 政策，在线上对决与离线沙盒中，战斗进行期间自动灰化禁用换装、卸装、属性配点与技能升级按钮（添加 disabled 与 aria-disabled=\"true\"）。",
+        "【即时锁定提示与点击防护】于能力成长与装备画面显示专属提示行，点击锁定中按钮立即弹出“战斗进行中已锁定换装与配点”Toast 通知，战斗结算后即时自动恢复。",
+        "【RWD 跨视口与动态 Resize 验证 (RWD-REG-009)】实机通过手机 (375px)、平板 (768px)、桌面 (1280px/1920px) 响应式验证，包含跨 12 格纸娃娃断点动态缩放与中英双语系排版防推挤。",
+        "【上线日标准作业程序 (Go-Live Runbook)】完备 VPS 采购后 T-24h 基础设施、T-2h 容器部署与 T-0h 公网真机签核清单。"
+      ],
+      "en": [
+        "【In-Battle Mutation Lock UI & Graying】According to battleLockPolicy, equip, unequip, stat allocation, and skill upgrade buttons are automatically disabled and grayed out (with disabled and aria-disabled=\"true\") during active combat.",
+        "【Real-time Lock Notice & Click Interception】Displays dedicated lock notice text in Growth and Equipment panels; clicking locked buttons triggers an immediate \"Mutations locked during battle\" Toast alert, recovering automatically post-battle.",
+        "【Multi-Viewport RWD & Dynamic Resize Verification (RWD-REG-009)】Verified on mobile (375px), tablet (768px), and desktop (1280px/1920px), ensuring flawless 12-slot paperdoll scaling and non-wrapping multi-language layouts.",
+        "【Go-Live Day Runbook】Finalized complete operational runbook covering T-24h infrastructure setup, T-2h container deployment, and T-0h live environment verification."
+      ],
+      "ja": [
+        "【戦闘中装備変更・ステータス割り振りロックUI】battleLockPolicyに基づき、戦闘中は装備の着脱、ステータス強化、スキル習得ボタンを自動的にグレーアウト・無効化（disabledおよびaria-disabled=\"true\"）。",
+        "【リアルタイムロック通知＆タップ防止】能力成長および装備画面に専用の警告テキストを表示。ロック中のボタン操作時に「戦闘中は装備変更と能力配分がロックされています」Toastを表示し、戦闘終了時に自動復帰。",
+        "【マルチビューポートRWD＆動的リサイズ検証 (RWD-REG-009)】モバイル (375px)、タブレット (768px)、デスクトップ (1280px/1920px) の実機描画を検証。12枠着せ替え欄の動的スケールと多言語レイアウトを保証。",
+        "【本番リリース手順書 (Go-Live Runbook)】VPS調達後のT-24hインフラ構築、T-2hコンテナ配備、T-0h実機検証サインオフ手順を整備。"
+      ]
+    }
+  },
+  {
+    version: "0.0.20",
+    date: "2026-09-03",
+    tag: "Online Authority Formalization, Real WebSocket E2E & Docker Staging Environment",
+    changes: {
+      "zh-Hant": [
+        "【OpenSpec 線上權威行為規格化】正式建立 koraku-online-authority-formalization 規格變更提案，涵蓋三類裁決模型、單一寫入者保證、暫停次數限制、斷線 10 秒寬限自動結算與作弊指令 Dev 權限審計。",
+        "【真實 WebSocket 雙端 E2E 整合測試】補齊真實 KorakuServer 與 RemoteGameClient 連線、出拳、QTE 判定至戰鬥結算全迴路測試，以及雙手出拳（hand2）左右拳槽位映射驗證。",
+        "【戰鬥重放 (Replay) 全迴路保存與還原】實作 GameSession 戰鬥軌跡至 JsonStorage 儲存、讀回與 dispatchCommand 確定性重放驗證。",
+        "【Docker Staging 演練環境】提供包含 Node.js 伺服器、Caddy (wss 反向代理) 與靜態 Client 的完整 Docker Compose 測試環境，完成缺變數 fail-fast、Origin 阻擋、10s 心跳保活與 20 併發負載煙霧實測。",
+        "【可配置戰鬥中鎖定策略 (battleLockPolicy)】支援 always（全時鎖定）、countdown（倒數與結算開放）與 never（不鎖定）伺服器端環境變數配置。"
+      ],
+      "zh-Hans": [
+        "【OpenSpec 线上权威行为规格化】正式建立 koraku-online-authority-formalization 规格变更提案，涵盖三类裁决模型、单一写入者保证、暂停次数限制、断线 10 秒宽限自动结算与作弊指令 Dev 权限审计。",
+        "【真实 WebSocket 双端 E2E 集成测试】补齐真实 KorakuServer 与 RemoteGameClient 连线、出拳、QTE 判定至战斗结算全回路测试，以及双手出拳（hand2）左右拳槽位映射验证。",
+        "【战斗重放 (Replay) 全回路保存与还原】实现 GameSession 战斗轨迹至 JsonStorage 储存、读回与 dispatchCommand 确定性重放验证。",
+        "【Docker Staging 演练环境】提供包含 Node.js 服务器、Caddy (wss 反向代理) 与静态 Client 的完整 Docker Compose 测试环境，完成缺变量 fail-fast、Origin 阻挡、10s 心跳保活与 20 并发负载烟雾实测。",
+        "【可配置战斗中锁定策略 (battleLockPolicy)】支持 always（全时锁定）、countdown（倒数与结算开放）与 never（不锁定）服务端环境变量配置。"
+      ],
+      "en": [
+        "【OpenSpec Online Authority Formalization】Formally registered online authority specifications covering the three-class adjudication model, single writer guarantee (4001 kickout), pause limits, 10s disconnect auto-settlement, and cheat dev entitlement audit.",
+        "【Real WebSocket Full E2E Integration Suite】Built comprehensive E2E tests using live KorakuServer and RemoteGameClient over real WebSockets, validating battle progression, post-battle ledger appending, and dual-hand slot mapping.",
+        "【End-to-End Battle Replay Lifecycle】Implemented complete battle replay recording to JsonStorage, deserialization, and deterministic command replay verification.",
+        "【Docker Staging Environment】Added multi-service Docker Compose suite (Server, Caddy wss proxy, static Client), verified with fail-fast env validation, Origin checks, 10s idle ping/pong, and 20-client load smoke test.",
+        "【Configurable Battle Lock Policy】Added battleLockPolicy supporting 'always' (default), 'countdown' (open during countdown/settlement), and 'never' via server environment variables."
+      ],
+      "ja": [
+        "【OpenSpec オンライン権威仕様の正式策定】3分類判定モデル、単一ライター保証（4001切断）、一時停止制限、切断10秒猶予自動精算、チートコマンドDev権限監査を正式仕様化。",
+        "【実WebSocket双方向E2E統合テスト】実稼働KorakuServerとRemoteGameClientによるWebSocket接続、出拳、QTE判定、戦闘精算、両手出拳スロットマッピングの完全検証テストを構築。",
+        "【戦闘リプレイ全工程の保存と再現】GameSessionの対戦ログをJsonStorageへ保存・復元し、dispatchCommandによる確定性リプレイ一致を実証。",
+        "【Docker Staging検証環境】Node.jsサーバー、Caddy (wssリバースプロキシ)、静的ClientからなるDocker Compose環境を構築。環境変数検証、Origin遮断、10秒心拍維持、20並行負荷テストを実施。",
+        "【戦闘中ロック方針の設定可能化 (battleLockPolicy)】always（常時ロック）、countdown（カウントダウン・精算時開放）、never（非ロック）の環境変数設定に対応。"
+      ]
+    }
+  },
+  {
+    version: "0.0.19",
+    date: "2026-09-02",
+    tag: "PRNG Chi-Square Verification, Burst Rate Limiting & Anti-Cheat Audit",
+    changes: {
+      "zh-Hant": [
+        "【確定性偽隨機數 (PRNG) 卡方分佈檢驗】通過卡方擬合優度檢定 (Chi-Square Goodness-of-Fit Test)，驗證剪刀石頭布出拳、摸摸技能與小樂閃避機率統計分佈均勻性與種子隔離性。",
+        "【短視窗流量突發限制 (Burst Rate Limiting)】RateLimiter 升級支援 200ms 短週期微突發請求限制，有效防禦高頻腳本與連點外掛。",
+        "【跨裝置轉移碼原子互斥保證】TransferManager 實作轉移碼兌換狀態原子鎖定，防止併發重複兌換 (Race Condition)。",
+        "【4KB 封包大小上限與嚴格 Schema 白名單】Validator 全面檢驗客戶端入站指令信封，封包超過 4KB 或注入未宣告欄位立即攔截並記錄審計日誌。",
+        "【追加專用經濟帳本 (Append-only Ledger)】玩家星砂、經驗值、藥水與裝備異動均寫入不可竄改之經濟帳本，記錄伺服器權威時間戳與來源。"
+      ],
+      "zh-Hans": [
+        "【确定性伪随机数 (PRNG) 卡方分布检验】通过卡方拟合优度检验 (Chi-Square Goodness-of-Fit Test)，验证剪刀石头布出拳、摸摸技能与小乐闪避机率统计分布均匀性与种子隔离性。",
+        "【短视窗流量突发限制 (Burst Rate Limiting)】RateLimiter 升级支持 200ms 短周期微突发请求限制，有效防御高频脚本与连点外挂。",
+        "【跨装置转移码原子互斥保证】TransferManager 实现转移码兑换状态原子锁定，防止并发重复兑换 (Race Condition)。`",
+        "【4KB 封包大小上限与严格 Schema 白名单】Validator 全面检验客户端入站指令信封，封包超过 4KB 或注入未宣告栏位立即拦截并记录审计日志。",
+        "【追加专用经济账本 (Append-only Ledger)】玩家星砂、经验值、药水与装备异动均写入不可篡改之经济账本，记录服务器权威时间戳与来源。"
+      ],
+      "en": [
+        "【Deterministic PRNG Chi-Square Statistical Verification】Passed Chi-Square Goodness-of-Fit Tests confirming statistical uniformity and seed isolation across RPS gestures, Momo skill activations, and dodge rates.",
+        "【Burst Rate Limiting】Enhanced RateLimiter with 200ms micro-burst window protection to defend against high-frequency automated scripts and autoclickers.",
+        "【Cross-Device Transfer Code Mutex Guarantee】Implemented atomic state locks in TransferManager to eliminate concurrent double-claim race conditions.",
+        "【4KB Envelope Size Cap & Strict Schema Whitelist】Validator enforces strict field whitelisting and 4KB payload limits on all inbound client commands with security audit logging.",
+        "【Append-Only Economic Ledger】Every mutation to star sand, XP, consumables, and equipment instances appends to an immutable audit ledger stamped with authoritative server time."
+      ],
+      "ja": [
+        "【確定性擬似乱数 (PRNG) カイ二乗適合度検定】ジャンケン出拳、なでなでスキル発動、回避率の統計的均一性とシード隔離性をカイ二乗検定により実証。",
+        "【バーストトラフィック制限】RateLimiterに200ms短周期マイクロバースト制限を導入し、高速自動スクリプトや連打ツールを防御。",
+        "【引き継ぎコードのアトミック排他制御】TransferManagerに引き継ぎ状態の排他ロックを実装し、並行引き換えによる重複利用（Race Condition）を防止。",
+        "【4KBパケット上限＆厳格スキーマ検証】Validatorが受信コマンドのスキーマと4KBサイズ上限を厳格審査し、不正パラメータ注入を遮断。",
+        "【追記専用経済台帳 (Append-only Ledger)】星砂、経験値、アイテム、装備の全変動を不変の監査台帳に記録し、サーバー権威時刻を刻印。"
+      ]
+    }
+  },
+  {
+    version: "0.0.18",
+    date: "2026-09-02",
+    tag: "Online-Ready Architecture, Zero-DOM Kernel Decoupling & Single Writer Guarantee",
+    changes: {
+      "zh-Hant": [
+        "【零 DOM 核心解耦與雙客戶端架構】將戰鬥、摸摸技能、裝備計算與數值核心重構為零 DOM 純邏輯模組，支援 LocalGameClient（離線沙盒）與 RemoteGameClient（線上權威）無縫切換。",
+        "【線上權威核心架構 (Authoritative Kernel)】所有戰鬥裁決、傷害計算、時序判定與數值結算皆由伺服器權威核心主導，客戶端僅表達操作意圖。",
+        "【單一寫入者保證 (Single Writer Guarantee)】帳號於新裝置連線登入時，舊連線平滑斷開並收到 4001 踢出代碼（NEW_CONNECTION_ESTABLISHED），杜絕多開雙寫衝突。",
+        "【三類判定模型與 150ms 時序寬限】QTE/切西瓜時序判定採客戶端主張與伺服器 150ms 寬限審計；出拳手勢採秘密承諾防過期；背包裝備採 cmdId 冪等指令序列化執行。",
+        "【匿名裝置 Token 與帳號轉移】透過 HMAC-SHA256 簽發匿名裝置金鑰，支援產生一次性轉移碼進行無痛跨裝置繼承。"
+      ],
+      "zh-Hans": [
+        "【零 DOM 核心解耦与双客户端架构】将战斗、摸摸技能、装备计算与数值核心重构为零 DOM 纯逻辑模块，支持 LocalGameClient（离线沙盒）与 RemoteGameClient（线上权威）无缝切换。",
+        "【线上权威核心架构 (Authoritative Kernel)】所有战斗裁决、伤害计算、时序判定与数值结算皆由服务器权威核心主导，客户端仅表达操作意图。",
+        "【单一写入者保证 (Single Writer Guarantee)】账号于新装置连线登入时，旧连线平滑断开并收到 4001 踢出代码（NEW_CONNECTION_ESTABLISHED），杜绝多开双写冲突。",
+        "【三类判定模型与 150ms 时序宽限】QTE/切西瓜时序判定采客户端主张与服务器 150ms 宽限审计；出拳手势采秘密承诺防过期；背包装备采 cmdId 幂等指令序列化执行。",
+        "【匿名装置 Token 与账号转移】透过 HMAC-SHA256 签发匿名装置金钥，支持产生一次性转移码进行无痛跨装置继承。"
+      ],
+      "en": [
+        "【Zero-DOM Kernel Decoupling & Dual-Client Architecture】Refactored combat, Momo skills, equipment math, and stat progression into zero-DOM pure modules, enabling seamless switching between LocalGameClient (offline sandbox) and RemoteGameClient (online authoritative).",
+        "【Authoritative Online Kernel】All combat outcomes, damage calculations, and rewards are computed authoritatively on the server; the client strictly sends intent commands.",
+        "【Single Writer Guarantee (4001 Kickout)】When an account connects from a new device, active sessions receive a clean 4001 kickout code (NEW_CONNECTION_ESTABLISHED), permanently preventing concurrent write conflicts.",
+        "【Three-Class Adjudication & 150ms Grace】Timing claims (QTE/watermelon) audited with 150ms network grace; RPS commitments expire upon round reveal; inventory mutations serialized with idempotent cmdIds.",
+        "【Anonymous Device Tokens & Account Transfer】Cryptographic HMAC-SHA256 device tokens with one-time transfer code generation for smooth cross-device account migration."
+      ],
+      "ja": [
+        "【ゼロDOMカーネル分離＆デュアルクライアント構造】戦闘、なでなでスキル、装備計算、ステータス計算をDOM非依存の純粋ロジックへ分離。LocalGameClient（オフライン）とRemoteGameClient（オンライン）を完全統一。",
+        "【サーバー権威型ゲームカーネル】勝敗判定、ダメージ計算、報酬付与の全権をサーバーが掌握し、クライアントは操作意図のみを送信。",
+        "【単一ライター保証（4001切断）】同一アカウントが新規接続された際、旧セッションを4001コード（NEW_CONNECTION_ESTABLISHED）で円滑に切断し多重ログインを防止。",
+        "【3分類判定モデル＆150msネットワーク猶予】QTE・スイカ割り判定は150msの到着猶予で監査。ジャンケン出拳は秘密コミット方式で期限管理。アイテム操作はcmdId冪等キューで順序実行。",
+        "【匿名端末トークン＆アカウント引き継ぎ】HMAC-SHA256署名による匿名端末認証とワンタイム引き継ぎコードによる端末間移行に対応。"
+      ]
+    }
+  },
+  {
     version: "0.0.17",
     date: "2026-09-02",
     tag: "Battle HUD Drag-and-Drop & Non-Overlapping Spawn Layout",
