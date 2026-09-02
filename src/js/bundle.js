@@ -4,7 +4,7 @@
   "use strict";
 
 // --- src/js/config/gameConfig.js ---
-const APP_VERSION = "0.0.14";
+const APP_VERSION = "0.0.15";
 
 const DOJO_CONFIG = Object.freeze({
   defaultHp: 10000,
@@ -508,6 +508,33 @@ const DEFAULT_LOCALE = "en";
 const LOCALE_STORAGE_KEY = "koraku-rps-locale";
 
 const CHANGELOG_DATA = [
+  {
+    version: "0.0.15",
+    date: "2026-09-02",
+    tag: "4K & Ultra-Wide RWD Calibration: Home Dialogue Proximity Anchoring & Theater Settlement Stage",
+    changes: {
+      "zh-Hant": [
+        "【4K 與大螢幕首頁對話氣泡緊密貼頭】修復高解析度下對話氣泡鎖定頂部導致與立繪脫節浮空的問題，動態計算小樂頭頂高度並將指針精準錨定於狐耳上方。",
+        "【戰鬥結算雙欄劇場舞台與立繪無裁切】解除結算立繪容器高度限制，徹底解決 4K 下雙腿腳部被推落裁切的缺陷；實作中央雙欄舞台置中排版，消除中央巨大黑洞。",
+        "【4K 戰鬥主場景比例均衡校準】優化大尺寸顯示器下 Boss HUD、神諭框、立繪與玩家操作面板的縱向比例與間距，呈現更具張力的對決體驗。"
+      ],
+      "zh-Hans": [
+        "【4K 与大屏幕首页对话气泡紧密贴头】修复高分辨率下对话气泡锁定顶部导致与立绘脱节浮空的问题，动态计算小乐头顶高度并将指针精准锚定于狐耳上方。",
+        "【战斗结算双栏剧场舞台与立绘无裁切】解除结算立绘容器高度限制，彻底解决 4K 下双腿脚部被推落裁切的缺陷；实作中央双栏舞台居中排版，消除中央巨大黑洞。",
+        "【4K 战斗主场景比例均衡校准】优化大尺寸显示器下 Boss HUD、神谕框、立绘与玩家操作面板的纵向比例与间距，呈现更具张力的对决体验。"
+      ],
+      "en": [
+        "【4K & Ultra-Wide Home Dialogue Bubble Proximity Anchoring】Fixed an issue where speech bubbles stayed locked near the top header on high-resolution screens; bubbles now anchor dynamically right above Little Raku's head with arrow pointing to her ears.",
+        "【Victory Settlement Centered Stage & Full Standee Visibility】Decoupled settlement standee vertical constraints to prevent feet cutoff on 4K displays and introduced a centered dual-column stage eliminating vast empty voids.",
+        "【4K Combat Arena Proportional Calibration】Balanced Boss HUD, round oracle, standee, and player controls on large monitors for a majestic and responsive battle presentation."
+      ],
+      "ja": [
+        "【4K・大画面ホーム画面吹き出し頭部追従】高解像度環境で吹き出しが上部に固定されて立ち絵と乖離する問題を修正し、小楽の頭頂部・狐耳の真上へ的確に指すよう動的アンカーを実装。",
+        "【勝利リザルト中央シアター配置＆立ち絵全身表示】リザルト立ち絵の縦制限を解除し、4K環境で足元が見切れる不具合を解消。左右カードと立ち絵を中央舞台に収容し広大な余白を最適化。",
+        "【4K戦闘画面バランス調整】大画面でのBoss HUD、神託枠、立ち絵、操作UIの縦方向比率を再調整し、より迫力ある和風対決画面を構成。"
+      ]
+    }
+  },
   {
     version: "0.0.14",
     date: "2026-09-02",

@@ -174,6 +174,22 @@ Do not attribute a regression to Ponytail without evidence.
 - Green evidence: targeted14/14; Stage B140/140 `C:\Users\Administrator\AppData\Local\Temp\koraku-rwd-quAwld`; core30/30 `koraku-rwd-kkxK9v`; complement93/93 `koraku-rwd-bGw1Th`; boundary39/39 `koraku-rwd-V41GG0`; stress27/14/12 at `koraku-rwd-w2bnq3`, `koraku-rwd-FPEZei`, `koraku-rwd-50er1F`; sweep400/400 `koraku-rwd-n72NAI`; candidates `C:\Users\Administrator\AppData\Local\Temp\koraku-rwd-GS0OAR`.
 - Final visual evidence:61/61 at `C:\Users\Administrator\AppData\Local\Temp\koraku-rwd-dgmgpd`; golden tree SHA-256 `9fa0cbeb9c71a70425babafd6df5564467e0c8f66188202c453a298aaf30ba0f`.
 
+## RWD-REG-015 — 4K Home Dialogue Bubble Sky-Floating and Victory Settlement Standee Sinkage
+
+- Classification/status: 4K ultra-wide (3840×2160, 2560×1440, 21:9) layout and vertical anchoring defect; identified, diagnosed, repaired and verified.
+- Affected states: Home screen (#screen-home) dialogue bubble, decorative halo and seal; Victory settlement overlay (#result-overlay) and standee (#battle-character-wrap) in normal and swimsuit variants on viewports >= 1920px.
+- Symptoms:
+  1. On 4K (height 2160px), home dialogue was locked to `top: 160px` while Little Raku's standee was anchored at `bottom: 40px` (head at Y ≈ 1148px), leaving a ~1000px detached black void between head and bubble.
+  2. In victory settlement, `.battle-character-wrap` was forced to `height: 96%` with `object-position: center bottom`. Container extended 143px below viewport bottom, pushing legs and feet completely off-screen and cutting off the standee.
+  3. Victory card remained locked to extreme left (600px width at left: 110px) while standee was at center (700px width), creating an 860px central black void.
+- Root cause: Missing media query containment and scaling for viewports >= 1921px; hardcoded `top` anchoring for home speech bubble; unconstrained `height: 96%` during settlement overlay.
+- Correct fix:
+  1. In `src/styles/screens.css`, updated settlement `.battle-character-wrap` to `top: clamp(100px, 12vh, 180px); bottom: clamp(50px, 7vh, 110px); height: auto;`, ensuring standee renders 100% within viewport with 110px bottom clearance.
+  2. In `src/styles/responsive.css`, added `@media (min-width: 1441px)` and `@media (min-width: 1921px)`:
+     - Home: anchored `.home-dialogue` dynamically via bottom distance to character head (`bottom: calc(min(84vh, 1300px) * 0.88 + clamp(25px, 3.5vh, 60px));`), keeping bubble caret directly over Little Raku's head.
+     - Settlement: wrapped layout in a centered stage (`padding-left: max(80px, calc(50vw - 960px));`), expanded card to `min(32vw, 720px)`, and shifted standee to `left: calc(50vw + 160px)` with `width: min(38vw, 1100px)`, creating a balanced 2220px centered dual-column stage.
+- Guard & Evidence: Verified via Playwright at 3840×2160 (`home-4k.png`, `victory-4k.png`, `swimsuit-4k.png`); `npm test` 108/108 pass; `npm run test:rwd:smoke` 30/30 pass.
+
 ## Entry Template
 
 For a new entry record:

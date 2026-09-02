@@ -323,9 +323,9 @@
 .home-dialogue {
   position: absolute;
   z-index: 14;
-  right: clamp(20px, 4.5vw, 88px);
-  top: clamp(110px, 14vh, 160px);
-  bottom: auto;
+  right: clamp(140px, 12vw, 320px);
+  top: auto;
+  bottom: calc(min(86vh, 1000px) * 0.92 + clamp(15px, 3vh, 40px));
   width: min(34vw, 460px);
   padding: 15px 20px 16px 62px;
   border: 1px solid rgba(216, 182, 106, 0.42);
@@ -2491,8 +2491,9 @@ body.has-touch .dual-qte-touch-controls {
   z-index: 80;
   pointer-events: none;
   opacity: 1 !important;
-  bottom: clamp(140px, 22vh, 260px);
-  height: 96%;
+  top: clamp(100px, 12vh, 180px);
+  bottom: clamp(50px, 7vh, 110px);
+  height: auto;
 }
 
 .battle-arena.is-settlement .battle-character-wrap::after,
