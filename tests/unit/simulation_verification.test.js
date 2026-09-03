@@ -590,6 +590,7 @@ test("7.1 AppView 戰鬥倒數 Ticker：在無中途伺服器封包下，客戶�
     return { classList: { remove() {}, add() {} }, offsetWidth: 0 };
   };
 
+  view.countdownValue = mockCountdownVal;
   view._startCountdownTicker(view.battleState);
   assert.equal(countdownText, "5", "初始值為 5");
   assert.ok(view._countdownTickerId !== null, "已啟動客戶端 countdown ticker");
@@ -622,6 +623,7 @@ test("7.2 AppView 反應時間 Ticker：進入 reaction 階段平滑遞減 react
     return null;
   };
 
+  view.countdownValue = mockCountdownVal;
   view._startReactionTicker(view.battleState);
   assert.ok(view._reactionTickerId !== null, "已啟動反應時間 ticker");
 

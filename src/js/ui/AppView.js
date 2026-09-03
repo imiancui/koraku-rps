@@ -308,7 +308,7 @@ export class AppView {
     this._lastCountdownSec = initialSec;
 
     const tick = () => {
-      const countdownValue = $("#countdown-value");
+      const countdownValue = this.countdownValue || (typeof document !== "undefined" ? $("#countdown-value") : null);
       if (!countdownValue || this.battleState?.phase !== "countdown" || this.battleState?.isPaused) return;
       const now = (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now();
       const elapsed = now - this._countdownStartTime;
@@ -319,29 +319,31 @@ export class AppView {
       if (sec !== this._lastCountdownSec) {
         this._lastCountdownSec = sec;
         if (sec <= 3 && sec >= 1) {
-          const playerHand = $("#player-hand-display");
-          const enemyHand = $("#enemy-hand-display");
-          const countdownBox = $("#round-countdown");
-          [playerHand, enemyHand].forEach((el) => {
-            if (!el) return;
-            el.classList.remove("is-fist-shaking");
-            void el.offsetWidth;
-            el.classList.add("is-fist-shaking");
-          });
-          if (countdownBox) {
-            countdownBox.classList.remove("is-beat");
-            void countdownBox.offsetWidth;
-            countdownBox.classList.add("is-beat");
+          if (typeof document !== "undefined") {
+            const playerHand = $("#player-hand-display");
+            const enemyHand = $("#enemy-hand-display");
+            const countdownBox = $("#round-countdown");
+            [playerHand, enemyHand].forEach((el) => {
+              if (!el) return;
+              el.classList.remove("is-fist-shaking");
+              void el.offsetWidth;
+              el.classList.add("is-fist-shaking");
+            });
+            if (countdownBox) {
+              countdownBox.classList.remove("is-beat");
+              void countdownBox.offsetWidth;
+              countdownBox.classList.add("is-beat");
+            }
+            const lbl = $("#enemy-hand-label");
+            if (lbl) lbl.textContent = I18n.t("ui.preparing");
+            const leftLbl = $("#enemy-left-hand-label");
+            if (leftLbl) leftLbl.textContent = I18n.t("ui.preparing");
+            const rightLbl = $("#enemy-right-hand-label");
+            if (rightLbl) rightLbl.textContent = I18n.t("ui.preparing");
           }
           try {
             this.sound?.play("select");
           } catch (_) {}
-          const lbl = $("#enemy-hand-label");
-          if (lbl) lbl.textContent = I18n.t("ui.preparing");
-          const leftLbl = $("#enemy-left-hand-label");
-          if (leftLbl) leftLbl.textContent = I18n.t("ui.preparing");
-          const rightLbl = $("#enemy-right-hand-label");
-          if (rightLbl) rightLbl.textContent = I18n.t("ui.preparing");
         }
       }
       if (remainingMs <= 0) {
@@ -350,6 +352,9 @@ export class AppView {
     };
 
     this._countdownTickerId = setInterval(tick, 100);
+    if (this._countdownTickerId && typeof this._countdownTickerId.unref === "function") {
+      this._countdownTickerId.unref();
+    }
   }
 
   _stopCountdownTicker() {
@@ -368,7 +373,7 @@ export class AppView {
     this._reactionTotalMs = initialSec * 1000;
 
     const tick = () => {
-      const countdownValue = $("#countdown-value");
+      const countdownValue = this.countdownValue || (typeof document !== "undefined" ? $("#countdown-value") : null);
       if (!countdownValue || this.battleState?.phase !== "reaction" || this.battleState?.isPaused) return;
       const now = (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now();
       const elapsed = now - this._reactionStartTime;
@@ -381,6 +386,9 @@ export class AppView {
     };
 
     this._reactionTickerId = setInterval(tick, 100);
+    if (this._reactionTickerId && typeof this._reactionTickerId.unref === "function") {
+      this._reactionTickerId.unref();
+    }
   }
 
   _stopReactionTicker() {

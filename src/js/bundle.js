@@ -4,7 +4,7 @@
   "use strict";
 
 // --- src/js/config/gameConfig.js ---
-const APP_VERSION = "0.0.26";
+const APP_VERSION = "0.0.27";
 
 const DOJO_CONFIG = Object.freeze({
   defaultHp: 10000,
@@ -508,6 +508,29 @@ const DEFAULT_LOCALE = "en";
 const LOCALE_STORAGE_KEY = "koraku-rps-locale";
 
 const CHANGELOG_DATA = [
+  {
+    version: "0.0.27",
+    date: "2026-09-04",
+    tag: "Online Battle Countdown Client Ticker & Save Modal Mode Switching Normalization",
+    changes: {
+      "zh-Hant": [
+        "【連線版回合倒數平滑化】客戶端戰鬥介面內建高精度時間步進器（Ticker），擺脫網路封包廣播頻率依賴，平滑展現 5 秒至 1 秒之節奏倒數、出拳搖晃與反應時間遞減，徹底根除秒數停留與跳秒問題。",
+        "【存檔紀錄線上模式切換修復】修復首頁「存檔紀錄」彈窗內「切換回線上模式」按鈕，主動清理殘留 URL 參數並注入模式標記，確保本機與正式環境皆能順暢重啟切換回線上伺服器。"
+      ],
+      "zh-Hans": [
+        "【连线版回合倒数平滑化】客户端战斗界面内建高精度时间步进器（Ticker），摆脱网络封包广播频率依赖，平滑展现 5 秒至 1 秒之节奏倒数、出拳摇晃与反应时间递减，彻底根除秒数停留与跳秒问题。",
+        "【存档纪录线上模式切换修复】修复首页“存档纪录”弹窗内“切换回线上模式”按钮，主动清理残留 URL 参数并注入模式标记，确保本机与正式环境皆能顺畅重启切换回线上服务器。"
+      ],
+      "en": [
+        "【Online Battle Countdown Smooth Ticker】Built high-precision client-side countdown and reaction tickers in AppView, eliminating reliance on packet broadcast frequency and ensuring flawless 5s-to-1s countdown pacing, fist shaking, and reaction timer progression.",
+        "【Save Modal Online Mode Switch Normalization】Fixed the 'Switch to Online Mode' button in Save Records modal by purging stale URL mode params and injecting active online flags, guaranteeing reliable reboots into online authoritative mode across all environments."
+      ],
+      "ja": [
+        "【オンライン対戦カウントダウン平滑化】戦闘UIに高精度クライアントTickerを実装し、パケット配信頻度への依存を解消。5秒から1秒への滑らかなカウントダウン、拳の揺れ、反応時間の減少を完璧に再現し、秒数の停止やスキップを根本解消。",
+        "【セーブデータ管理のオンライン復帰修正】セーブデータモーダルの「オンラインモードに切り替え」ボタンを修正。古いURLパラメータを自動整理して確実にオンライン権威サーバーへ再接続できるように改善。"
+      ]
+    }
+  },
   {
     version: "0.0.26",
     date: "2026-09-04",
@@ -12598,6 +12621,109 @@ class AppView {
     }
   }
 
+  _startCountdownTicker(state) {
+    this._stopCountdownTicker();
+    const initialSec = Number(state.countdown) || Number(state.stage?.roundSeconds) || 5;
+    this._countdownStartTime = (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now();
+    this._countdownTotalMs = initialSec * 1000;
+    this._lastCountdownSec = initialSec;
+
+    const tick = () => {
+      const countdownValue = this.countdownValue || (typeof document !== "undefined" ? $("#countdown-value") : null);
+      if (!countdownValue || this.battleState?.phase !== "countdown" || this.battleState?.isPaused) return;
+      const now = (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now();
+      const elapsed = now - this._countdownStartTime;
+      const remainingMs = Math.max(0, this._countdownTotalMs - elapsed);
+      const sec = Math.ceil(remainingMs / 1000);
+      countdownValue.textContent = String(sec);
+
+      if (sec !== this._lastCountdownSec) {
+        this._lastCountdownSec = sec;
+        if (sec <= 3 && sec >= 1) {
+          if (typeof document !== "undefined") {
+            const playerHand = $("#player-hand-display");
+            const enemyHand = $("#enemy-hand-display");
+            const countdownBox = $("#round-countdown");
+            [playerHand, enemyHand].forEach((el) => {
+              if (!el) return;
+              el.classList.remove("is-fist-shaking");
+              void el.offsetWidth;
+              el.classList.add("is-fist-shaking");
+            });
+            if (countdownBox) {
+              countdownBox.classList.remove("is-beat");
+              void countdownBox.offsetWidth;
+              countdownBox.classList.add("is-beat");
+            }
+            const lbl = $("#enemy-hand-label");
+            if (lbl) lbl.textContent = I18n.t("ui.preparing");
+            const leftLbl = $("#enemy-left-hand-label");
+            if (leftLbl) leftLbl.textContent = I18n.t("ui.preparing");
+            const rightLbl = $("#enemy-right-hand-label");
+            if (rightLbl) rightLbl.textContent = I18n.t("ui.preparing");
+          }
+          try {
+            this.sound?.play("select");
+          } catch (_) {}
+        }
+      }
+      if (remainingMs <= 0) {
+        this._stopCountdownTicker();
+      }
+    };
+
+    this._countdownTickerId = setInterval(tick, 100);
+    if (this._countdownTickerId && typeof this._countdownTickerId.unref === "function") {
+      this._countdownTickerId.unref();
+    }
+  }
+
+  _stopCountdownTicker() {
+    if (this._countdownTickerId) {
+      clearInterval(this._countdownTickerId);
+      this._countdownTickerId = null;
+    }
+  }
+
+  _startReactionTicker(state) {
+    this._stopReactionTicker();
+    const initialSec = typeof state.reactionRemaining === "number" && state.reactionRemaining > 0
+      ? state.reactionRemaining
+      : ((state.stage?.reactionWindowMs || 1000) / 1000);
+    this._reactionStartTime = (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now();
+    this._reactionTotalMs = initialSec * 1000;
+
+    const tick = () => {
+      const countdownValue = this.countdownValue || (typeof document !== "undefined" ? $("#countdown-value") : null);
+      if (!countdownValue || this.battleState?.phase !== "reaction" || this.battleState?.isPaused) return;
+      const now = (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now();
+      const elapsed = now - this._reactionStartTime;
+      const remainingMs = Math.max(0, this._reactionTotalMs - elapsed);
+      const secText = (remainingMs / 1000).toFixed(1);
+      countdownValue.textContent = secText;
+      if (remainingMs <= 0) {
+        this._stopReactionTicker();
+      }
+    };
+
+    this._reactionTickerId = setInterval(tick, 100);
+    if (this._reactionTickerId && typeof this._reactionTickerId.unref === "function") {
+      this._reactionTickerId.unref();
+    }
+  }
+
+  _stopReactionTicker() {
+    if (this._reactionTickerId) {
+      clearInterval(this._reactionTickerId);
+      this._reactionTickerId = null;
+    }
+  }
+
+  _clearBattleTickers() {
+    this._stopCountdownTicker();
+    this._stopReactionTicker();
+  }
+
   getConnectionLabel(state) {
     const key = `connection.${state}`;
     const translated = I18n.t(key);
@@ -12713,6 +12839,19 @@ class AppView {
     if (this.floatingWatermelon) {
       this.hudDragController.register("watermelon", this.floatingWatermelon, { handleSelector: ".floating-watermelon-header" });
     }
+
+    this._countdownTickerId = null;
+    this._countdownStartTime = 0;
+    this._countdownTotalMs = 0;
+    this._lastCountdownSec = 0;
+    this._currentCountdownRound = null;
+
+    this._reactionTickerId = null;
+    this._reactionStartTime = 0;
+    this._reactionTotalMs = 0;
+    this._currentReactionRound = null;
+    this._morphReactionStarted = false;
+    this._wasPaused = false;
   }
 
   init() {
@@ -13089,11 +13228,17 @@ class AppView {
       }
     };
     this.bus.on("battle:state", handleMutationLockUpdate);
-    this.bus.on("battle:ended", handleMutationLockUpdate);
+    this.bus.on("battle:ended", () => {
+      handleMutationLockUpdate();
+      this._clearBattleTickers();
+    });
     this.bus.on("battle:start", handleMutationLockUpdate);
     if (this.client && typeof this.client.on === "function") {
       this.client.on("battle:state", handleMutationLockUpdate);
-      this.client.on("battle:ended", handleMutationLockUpdate);
+      this.client.on("battle:ended", () => {
+        handleMutationLockUpdate();
+        this._clearBattleTickers();
+      });
       this.client.on("battle:start", handleMutationLockUpdate);
     }
     this.bus.on("battle:countdown-beat", (beat) => this.handleCountdownBeat(beat));
@@ -13174,8 +13319,11 @@ class AppView {
     const countdownBox = $("#round-countdown");
     const countdownVal = $("#countdown-value");
 
-    if (beat && typeof beat.count === "number" && countdownVal) {
-      countdownVal.textContent = String(beat.count);
+    if (beat && typeof beat.count === "number") {
+      this._lastCountdownSec = beat.count;
+      if (countdownVal) {
+        countdownVal.textContent = String(beat.count);
+      }
     }
 
     [playerHand, enemyHand].forEach((el) => {
@@ -13738,8 +13886,17 @@ class AppView {
 
     if (event.target.closest("#btn-switch-to-online")) {
       if (typeof window !== "undefined") {
-        window.localStorage?.setItem("koraku_mode", "online");
-        window.location.reload();
+        try {
+          window.localStorage?.setItem("koraku_mode", "online");
+        } catch (_) {}
+        try {
+          const url = new URL(window.location.href);
+          url.searchParams.delete("mode");
+          url.searchParams.set("mode", "online");
+          window.location.href = url.toString();
+        } catch (_) {
+          window.location.reload();
+        }
       }
       return;
     }
@@ -14105,6 +14262,7 @@ class AppView {
     if (screenName !== "battle") {
       this.hideFloatingWatermelon();
       this.postBattle?.closeAutoWatermelon?.();
+      this._clearBattleTickers();
     }
     try {
       sessionStorage.setItem("koraku_active_screen", screenName);
@@ -15415,7 +15573,7 @@ class AppView {
 
     const switchSection = $("#save-mode-switch-section");
     if (switchSection) {
-      const serverUrl = typeof window !== "undefined" ? (window.__KORAKU_CONFIG__?.serverUrl || window.KORAKU_SERVER_URL) : null;
+      const serverUrl = typeof window !== "undefined" ? (window.__KORAKU_CONFIG__?.serverUrl || window.KORAKU_SERVER_URL || (location.protocol !== "file:" ? "wss://ws.koraku.app" : null)) : null;
       const isOffline = this.client ? (this.client.connectionState === ConnectionStates.OFFLINE || this.client.connectionState === "offline") : true;
       switchSection.hidden = !(serverUrl && isOffline);
     }
@@ -15773,15 +15931,34 @@ class AppView {
     const countdownValue = $("#countdown-value");
     const countdownCaption = $("#countdown-caption");
     if (state.phase === "countdown") {
-      countdownValue.textContent = state.countdown;
+      this._stopReactionTicker();
+      if (!this._countdownTickerId || this._currentCountdownRound !== state.round || (this._wasPaused && !state.isPaused)) {
+        this._currentCountdownRound = state.round;
+        this._startCountdownTicker(state);
+      }
+      this._wasPaused = Boolean(state.isPaused);
+      if (typeof state.countdown === "number" && !this._countdownTickerId) {
+        countdownValue.textContent = state.countdown;
+      }
       countdownCaption.textContent = I18n.t("ui.countdownCaption");
     } else if (state.phase === "reaction") {
-      countdownValue.textContent = state.reactionRemaining.toFixed(1);
+      this._stopCountdownTicker();
+      if (!this._reactionTickerId || justRevealed || this._currentReactionRound !== state.round || (state.morphActive && !this._morphReactionStarted) || (this._wasPaused && !state.isPaused)) {
+        this._currentReactionRound = state.round;
+        this._morphReactionStarted = Boolean(state.morphActive);
+        this._startReactionTicker(state);
+      }
+      this._wasPaused = Boolean(state.isPaused);
+      if (typeof state.reactionRemaining === "number" && !this._reactionTickerId) {
+        countdownValue.textContent = state.reactionRemaining.toFixed(1);
+      }
       countdownCaption.textContent = state.morphActive ? I18n.t("ui.morphSelectCaption") : I18n.t("ui.morphCaption");
     } else if (state.phase === "qte") {
+      this._clearBattleTickers();
       countdownValue.textContent = "!";
       countdownCaption.textContent = I18n.t("ui.qteCaption");
     } else {
+      this._clearBattleTickers();
       countdownValue.textContent = state.lastResult === "win" ? I18n.t("ui.battleWon") : state.lastResult === "loss" ? I18n.t("ui.battleLost") : I18n.t("ui.battleDraw");
       countdownCaption.textContent = I18n.t("ui.settleCaption");
     }
