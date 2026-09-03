@@ -1,0 +1,16 @@
+=== [Restore Drill Start] ===
+Timestamp: 2026-09-03T07:14:55.489Z
+Backup source: D:\game-dev\New-game-project-4\server\backups\backup-2026-09-03T07-14-24-959Z
+Step 1: Renaming server/data to server/data.drill_bak...
+server/data moved successfully.
+Step 2: Executing restoreBackup from D:\game-dev\New-game-project-4\server\backups\backup-2026-09-03T07-14-24-959Z...
+Restore completed: {"restoredFiles":3}
+Step 3: Verifying restored files in server/data...
+Restored files verified: account (261B), ledger (176B), replay (208B)
+Step 4: Starting server against restored data and testing /health...
+Server started on port 6106
+/health status: 200, body: {"status":"ok","protocolVersion":"2.0.0","configVersion":"2026.09.03","onlineConnections":0,"serverTime":1788419695520}
+Server stopped.
+Step 5: Cleaning up drill temporary backup...
+Cleanup finished.
+=== [Restore Drill Completed Successfully] ===

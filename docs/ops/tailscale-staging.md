@@ -1,4 +1,4 @@
-﻿# Tailscale 內網預備環境維運手冊 (Tailscale Staging Runbook)
+# Tailscale 內網預備環境維運手冊 (Tailscale Staging Runbook)
 
 ## 1. 網路與架構拓撲 (Topology)
 
@@ -53,18 +53,18 @@ tailscale serve --https=8443 off
 
 ### Windows 排程任務
 已透過 Windows 工作排程器建立每日凌晨 03:00 自動備份：
-`powershell
-schtasks /create /sc daily /st 03:00 /tn KorakuBackup /tr "node D:\game-dev\New-game-project-4\server\scripts\backup.js" /f
-`
+```powershell
+schtasks /create /sc daily /st 03:00 /tn KorakuBackup /tr "cmd /c cd /d D:\game-dev\New-game-project-4 && node server\scripts\backup.js" /f
+```
 
 ### CLI 手動備份與還原
-`ash
+```bash
 # 手動建立一次快照備份並校驗 SHA-256 完整性
 npm run backup:server
 
 # 災難復原：指定備份目錄進行還原
 node server/scripts/backup.js --restore "server/backups/backup-YYYY-MM-DDTHH-mm-ss-sssZ"
-`
+```
 
 ---
 

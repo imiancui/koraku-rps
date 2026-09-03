@@ -1,0 +1,1 @@
+<script>window.__KORAKU_CONFIG__ = { serverUrl: "wss://20250606-120834.tailfe8b74.ts.net:8443/ws" };</script>

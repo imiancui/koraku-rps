@@ -68,15 +68,15 @@
 
 | 檢驗項目 | 驗證環境 | 判定標準 | 狀態 |
 | :--- | :--- | :--- | :--- |
-| 單元與合約測試 | 本機 Node | `npm test` 217/217 全綠 | PASS |
+| 單元與合約測試 | 本機 Node | `npm test` 227/227 全綠 | PASS |
 | 伺服器權威與防作弊 | 本機 Node | `npm run test:server` 20/20 全綠 | PASS |
 | 跨裝置 RWD 煙霧 | 本機 Chromium | `npm run test:rwd:smoke` 30/30 全綠 | PASS |
-| 雙模式存檔隔離 (A1/A2) | 本機 Node / 前端 | `tests/modeSwitching.test.js` 全綠 | PASS (Tailscale 內網已驗證) |
-| 排隊指令 8s 逾時 (A1) | 本機 Node / 前端 | 未連線發送指令 8s 逾時 reject NOT_CONNECTED | PASS (Tailscale 內網已驗證) |
-| 種子與指令紀錄防外洩 (C1) | 伺服器出口 | 快照與轉發事件徹底剝除 seed/commandLog | PASS (Tailscale 內網已驗證) |
-| 斷線 10 秒寬限自動結算 (C2) | 伺服器 / 內網真機 | 斷線 10 秒計時器啟動，超時自動結算；10s 內重連恢復 | PASS (Tailscale 內網已驗證 / 仍待公網真機) |
-| 拒絕指令伺服器日誌審計 (C3) | 伺服器端日誌 | 被拒絕指令記錄至 console.warn 稽核 | PASS (Tailscale 內網已驗證) |
-| Windows 備份排程與還原 (B3) | Windows / CLI | 每日 03:00 KorakuBackup 排程；--restore 驗證完整還原 | PASS (Tailscale 內網已驗證 / 仍待 Linux crontab) |
+| 雙模式存檔隔離 (A1/A2) | 本機 Node / 前端 | `tests/modeSwitching.test.js` 全綠 | PASS (已驗證：`tests/modeSwitching.test.js`) |
+| 排隊指令逾時拒絕 (A1) | 本機 Node / 前端 | 未連線發送指令逾時 reject NOT_CONNECTED | PASS (已驗證：`tests/modeSwitching.test.js`) |
+| 種子與指令紀錄防外洩 (C1) | 伺服器出口 | 快照與轉發事件徹底剝除 seed/commandLog | PASS (已驗證：`server/test/server.test.js`) |
+| 斷線 10 秒寬限自動結算 (C2) | 伺服器 / 內網真機 | 斷線 10 秒計時器啟動，超時自動結算；10s 內重連恢復 | 待驗證 (真機連線未留存 trace；單元測試通過 `server/test/server.test.js`) |
+| 拒絕指令伺服器日誌審計 (C3) | 伺服器端日誌 | 被拒絕指令記錄至 console.warn 稽核 (RATE_LIMITED, NOT_FOUND, FORBIDDEN_ORIGIN, VERSION_MISMATCH) | PASS (已驗證：`server/test/server.test.js:865`) |
+| Windows 備份排程與還原 (B3) | Windows / CLI | 每日 03:00 KorakuBackup 排程；--restore 驗證完整還原 | PASS (已驗證：排程產出 `server/backups/backup-2026-09-03T07-14-24-959Z`，還原紀錄：`docs/ops/evidence/tailscale-20260903/restore_drill_log.txt`；Linux 仍待驗證) |
 | Docker 缺變數 Fail-fast | Docker Staging | 缺 JWT_SECRET / ANON_SALT 立即退出 1 | PASS |
 | Docker 來源 Origin 阻擋 | Docker Staging | 非法 Origin 升級攔截拒絕 (1006) | PASS |
 | Docker 閒置心跳不中斷 | Docker Staging | 10s 閒置連續 5 次 ping/pong 保持 ONLINE | PASS |

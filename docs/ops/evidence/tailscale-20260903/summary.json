@@ -1,0 +1,24 @@
+{
+  "local_4173": {
+    "status": 200,
+    "hasConfig": true,
+    "hasDns": true,
+    "snippet": "<script>window.__KORAKU_CONFIG__ = { serverUrl: \"wss://20250606-120834.tailfe8b74.ts.net:8443/ws\" };</script>"
+  },
+  "local_8080_health": {
+    "status": 200,
+    "data": {
+      "status": "ok",
+      "protocolVersion": "2.0.0",
+      "configVersion": "2026.09.03",
+      "onlineConnections": 0,
+      "serverTime": 1788419613488
+    }
+  },
+  "tailscale_8443_health": {
+    "error": "fetch failed"
+  },
+  "tailscale_443_root": {
+    "error": "fetch failed"
+  }
+}

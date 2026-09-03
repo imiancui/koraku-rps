@@ -1,4 +1,4 @@
-﻿import http from "node:http";
+import http from "node:http";
 import { spawn } from "node:child_process";
 import { readFile, stat } from "node:fs/promises";
 import fs from "node:fs";
@@ -92,12 +92,27 @@ async function main() {
   // 3. Load server/.env and start server/index.js as child process
   const envFile = path.join(root, "server", ".env");
   const parsedEnv = parseEnvFile(envFile);
+  const configuredOrigins = parsedEnv.ALLOWED_ORIGINS
+    ? parsedEnv.ALLOWED_ORIGINS.split(",").map((s) => s.trim()).filter(Boolean)
+    : [];
+  const originsSet = new Set([
+    `https://${dnsName}`,
+    "https://koraku.app",
+    `http://127.0.0.1:${staticPort}`,
+    `http://localhost:${staticPort}`,
+    ...configuredOrigins
+  ]);
+  if (identity.ipv4 && identity.ipv4 !== "127.0.0.1") {
+    originsSet.add(`http://${identity.ipv4}:${staticPort}`);
+    originsSet.add(`https://${identity.ipv4}`);
+  }
+
   const serverEnv = {
     ...process.env,
+    ...parsedEnv,
     HOST: "127.0.0.1",
     PORT: String(serverPort),
-    ALLOWED_ORIGINS: https://,https://koraku.app,http://127.0.0.1:,
-    ...parsedEnv
+    ALLOWED_ORIGINS: Array.from(originsSet).join(",")
   };
 
   const serverProc = spawn("node", ["server/index.js"], {
@@ -111,7 +126,7 @@ async function main() {
   });
 
   // 4. Static web server on 4173 with HTML injection
-  const injectionScript = <script>window.__KORAKU_CONFIG__={serverUrl:"wss://:8443/ws"};</script>;
+  const injectionScript = `<script>window.__KORAKU_CONFIG__ = { serverUrl: "wss://${dnsName}:8443/ws" };</script>`;
 
   const staticServer = http.createServer(async (req, res) => {
     try {
@@ -132,18 +147,11 @@ async function main() {
 
       if (path.basename(filePath) === "index.html") {
         let html = await readFile(filePath, "utf8");
-        if (html.includes('<script type="module" src="src/js/bundle.js">')) {
-          html = html.replace(
-            '<script type="module" src="src/js/bundle.js">',
-            injectionScript + '\n    <script type="module" src="src/js/bundle.js">'
-          );
-        } else if (html.includes('<script type="module" src="./src/js/bundle.js">')) {
-          html = html.replace(
-            '<script type="module" src="./src/js/bundle.js">',
-            injectionScript + '\n    <script type="module" src="./src/js/bundle.js">'
-          );
-        } else if (html.includes('</head>')) {
-          html = html.replace('</head>', injectionScript + '\n</head>');
+        const bundlePattern = /<script\s+src=["'](?:\.\/)?src\/js\/bundle\.js[^"']*["']><\/script>/i;
+        if (bundlePattern.test(html)) {
+          html = html.replace(bundlePattern, (match) => `${injectionScript}\n    ${match}`);
+        } else if (html.includes("</head>")) {
+          html = html.replace("</head>", `${injectionScript}\n</head>`);
         }
         res.writeHead(200, {
           "Content-Type": "text/html; charset=utf-8",
@@ -167,7 +175,7 @@ async function main() {
   });
 
   await new Promise((resolve) => staticServer.listen(staticPort, host, resolve));
-  console.log([Static Client] Listening locally on http://System.Management.Automation.Internal.Host.InternalHost:);
+  console.log(`[Static Client] Listening locally on http://${host}:${staticPort}`);
 
   // 5. Run tailscale serve
   try {
@@ -179,7 +187,7 @@ async function main() {
 
   try {
     console.log("[Tailscale] Configuring Tailscale Serve on 8443 (server proxy)...");
-    await runCommand("tailscale", ["serve", "--bg", "--yes", "--https=8443", http://127.0.0.1:]);
+    await runCommand("tailscale", ["serve", "--bg", "--yes", "--https=8443", `http://127.0.0.1:${serverPort}`]);
   } catch (err) {
     console.warn("[Tailscale] Serve backend warning:", err.message);
   }
@@ -188,10 +196,10 @@ async function main() {
   console.log("\n========================================================");
   console.log("  狐樂・絆之勝負 Tailscale Staging 站點已就緒");
   console.log("========================================================");
-  console.log("  手機/內網客戶端 URL:  https://" + dnsName + "/");
-  console.log("  本機客戶端 URL:        http://" + host + ":" + staticPort + "/");
-  console.log("  權威伺服器端點 (WSS): wss://" + dnsName + ":8443/ws");
-  console.log("  健康檢查端點 (HTTPS): https://" + dnsName + ":8443/health");
+  console.log(`  手機/內網客戶端 URL:  https://${dnsName}/`);
+  console.log(`  本機客戶端 URL:        http://${host}:${staticPort}/`);
+  console.log(`  權威伺服器端點 (WSS): wss://${dnsName}:8443/ws`);
+  console.log(`  健康檢查端點 (HTTPS): https://${dnsName}:8443/health`);
   console.log("========================================================\n");
 
   function shutdown() {
