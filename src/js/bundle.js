@@ -4,7 +4,7 @@
   "use strict";
 
 // --- src/js/config/gameConfig.js ---
-const APP_VERSION = "0.0.24";
+const APP_VERSION = "0.0.25";
 
 const DOJO_CONFIG = Object.freeze({
   defaultHp: 10000,
@@ -508,6 +508,25 @@ const DEFAULT_LOCALE = "en";
 const LOCALE_STORAGE_KEY = "koraku-rps-locale";
 
 const CHANGELOG_DATA = [
+  {
+    version: "0.0.25",
+    date: "2026-09-04",
+    tag: "Production VPS Server Online Launch & Cloudflare Dynamic WSS Auto-Injection",
+    changes: {
+      "zh-Hant": [
+        "【線上服務正式上線與動態注入】完成 Linode 東京 VPS 權威伺服器 (ws.koraku.app) 與 Caddy 自動 SSL 憑證簽發；正式環境 (koraku.app) 自動注入連線與權威存檔功能。"
+      ],
+      "zh-Hans": [
+        "【线上服务正式上线与动态注入】完成 Linode 东京 VPS 权威服务器 (ws.koraku.app) 与 Caddy 自动 SSL 证书签发；正式环境 (koraku.app) 自动注入连线与权威存档功能。"
+      ],
+      "en": [
+        "【Production VPS Online Launch & Auto Injection】Deployed authoritative server (ws.koraku.app) on Linode Tokyo VPS with Caddy automatic SSL; production site (koraku.app) auto-connects to online battle & server saves."
+      ],
+      "ja": [
+        "【オンラインサービス正式運用開始と自動注入】Linode東京VPS (ws.koraku.app) とCaddy自動SSL証明書を構築。正式環境 (koraku.app) で自動オンライン対戦・権威保存に接続。"
+      ]
+    }
+  },
   {
     version: "0.0.24",
     date: "2026-09-03",
