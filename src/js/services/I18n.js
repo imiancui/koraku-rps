@@ -22,6 +22,33 @@ export const LOCALE_STORAGE_KEY = "koraku-rps-locale";
 
 export const CHANGELOG_DATA = [
   {
+    version: "0.0.24",
+    date: "2026-09-03",
+    tag: "Offline Fallback Single-Prompt Guard, RWD Monotonic Log Indexing & Ops Evidence Archival",
+    changes: {
+      "zh-Hant": [
+        "【離線降級單次提示保護】在未配置伺服器端點而自動退回離線模式時，主動清除殘留之 localStorage.koraku_mode，根除每次頁面重新整理均重複跳出提示之問題。",
+        "【響應式回歸日誌重編號】全面校準 docs/ui/rwd-regression-log.md 編號衝突，確立全檔唯一單調遞增鐵律；補正戰鬥中配點換裝鎖定 (RWD-REG-016) 與離線降級雙按鈕 (RWD-REG-017)。",
+        "【維運與 RWD 驗證留證入庫】正式入庫 Tailscale Staging 端點實測、Windows 每日備份與冷啟動還原演練日誌，以及離線降級按鈕 27 項全量視口 RWD 截圖與驗證報告。"
+      ],
+      "zh-Hans": [
+        "【离线降级单次提示保护】在未配置服务器端点而自动退回离线模式时，主动清除残留之 localStorage.koraku_mode，根除每次页面刷新均重复弹出提示之问题。",
+        "【响应式回归日志重编号】全面校准 docs/ui/rwd-regression-log.md 编号冲突，确立全档唯一单调递增铁律；补正战斗中配点换装锁定 (RWD-REG-016) 与离线降级双按钮 (RWD-REG-017)。",
+        "【运维与 RWD 验证留证入库】正式入库 Tailscale Staging 端点实测、Windows 每日备份与冷启动还原演练日志，以及离线降级按钮 27 项全量视口 RWD 截图与验证报告。"
+      ],
+      "en": [
+        "【Offline Fallback Single-Prompt Protection】Clears residual localStorage.koraku_mode on offline fallback when no server is configured, ensuring warning toasts trigger only once.",
+        "【RWD Regression Log Monotonic Indexing】Resolved log numbering collisions in docs/ui/rwd-regression-log.md with strict monotonic uniqueness; indexed in-battle mutation lock (RWD-REG-016) and offline fallback buttons (RWD-REG-017).",
+        "【Operations & RWD Evidence Archival】Archived Tailscale staging verification, Windows daily backup and cold-start restore drill logs, alongside 27-case offline fallback button RWD screenshots and test report."
+      ],
+      "ja": [
+        "【オフラインフォールバック単一通知保護】サーバー未設定時のオフライン降格時に残留 localStorage.koraku_mode を自動クリアし、ページ更新ごとの重複通知を解消。",
+        "【RWD回帰ログ再採番と単調増加規則】docs/ui/rwd-regression-log.md の採番衝突を解消し、戦闘中ロック (RWD-REG-016) とオフライン降格ボタン (RWD-REG-017) の検証記録を正式登録。",
+        "【運用・RWD検証証跡の正式登録】Tailscaleステージング検証、日次バックアップとコールドスタート復元演練ログ、オフライン降格ボタンの27ケースRWDスクリーンショットとレポートを登録。"
+      ]
+    }
+  },
+  {
     version: "0.0.23",
     date: "2026-09-03",
     tag: "Offline Default & Fallback Protection, Disjoint Storage, Server Hardening & Tailscale Staging",

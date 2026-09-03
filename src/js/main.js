@@ -23,15 +23,18 @@ export function resolveClientModeDetails(env = {}) {
   let storageValue = null;
   let protocol = "";
   let serverUrl = null;
+  let storage = null;
 
   if (typeof window !== "undefined") {
     search = window.location?.search || "";
+    storage = window.localStorage;
     storageValue = window.localStorage?.getItem("koraku_mode");
     protocol = window.location?.protocol || "";
     serverUrl = getInjectedServerUrl();
   }
 
   if (env.search !== undefined) search = env.search;
+  if (env.storage !== undefined) storage = env.storage;
   if (env.storageValue !== undefined) storageValue = env.storageValue;
   if (env.protocol !== undefined) protocol = env.protocol;
   if (env.serverUrl !== undefined) serverUrl = env.serverUrl;
@@ -59,6 +62,12 @@ export function resolveClientModeDetails(env = {}) {
       return { mode: "online", warningKey: null };
     }
     // Online requested without injected server URL: cannot derive from origin, downgrade to offline
+    // Clear residual localStorage.koraku_mode so the warning only shows once
+    if (storage && typeof storage.removeItem === "function") {
+      try {
+        storage.removeItem("koraku_mode");
+      } catch (_) {}
+    }
     return { mode: "offline", warningKey: "connection.noServerConfigured" };
   }
 

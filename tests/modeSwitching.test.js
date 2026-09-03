@@ -71,10 +71,31 @@ test("模式解析策略：預設 offline，刪除 hostname 判斷，無配置�
     resolveClientMode({ search: "", storageValue: "online", serverUrl: "wss://staging.koraku.ts.net:8443/ws" }),
     "online"
   );
-  // localStorage 為 online 但無伺服器注入 -> 降級 offline
-  const localOnlineNoServer = resolveClientModeDetails({ search: "", storageValue: "online", serverUrl: null });
+  // localStorage 為 online 但無伺服器注入 -> 降級 offline 並清除殘留的 koraku_mode，後續不再重複提示
+  const mockStorage = {
+    _map: new Map([["koraku_mode", "online"]]),
+    getItem(k) { return this._map.get(k) || null; },
+    removeItem(k) { this._map.delete(k); }
+  };
+  const localOnlineNoServer = resolveClientModeDetails({
+    search: "",
+    storage: mockStorage,
+    storageValue: mockStorage.getItem("koraku_mode"),
+    serverUrl: null
+  });
   assert.equal(localOnlineNoServer.mode, "offline");
   assert.equal(localOnlineNoServer.warningKey, "connection.noServerConfigured");
+  assert.equal(mockStorage.getItem("koraku_mode"), null, "應清除殘留之 localStorage.koraku_mode");
+
+  // 下次載入時無殘留設定，提示只出現一次
+  const nextLoadRes = resolveClientModeDetails({
+    search: "",
+    storage: mockStorage,
+    storageValue: mockStorage.getItem("koraku_mode"),
+    serverUrl: null
+  });
+  assert.equal(nextLoadRes.mode, "offline");
+  assert.equal(nextLoadRes.warningKey, null, "殘留鍵清除後，提示不再重複出現");
 
   // 6. 皆未設定但有伺服器注入配置 -> 走 online
   assert.equal(
