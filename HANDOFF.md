@@ -2,10 +2,10 @@
 
 > **文件用途**：AI 代理人與開發者快速上手、架構交接、開發合約指引與校對基準  
 > **專案根目錄**：`D:\game-dev\New-game-project-4`  
-> **當前版本**：`v0.0.23`（顯示於首頁頁腳最左側 `0.0.23`，自最後一位遞增，每 100 個版本進一位：`0.0.100` -> `0.1.0`）  
+> **當前版本**：`v0.0.24`（顯示於首頁頁腳最左側 `0.0.24`，自最後一位遞增，每 100 個版本進一位：`0.0.100` -> `0.1.0`）  
 > **最新更新日期**：2026-09-03  
 > **基準規範**：`OPENSPEC.md` 與 `AGENTS.md`  
-> **測試狀態**：`npm test` 227/227、`npm run test:server` 20/20、`npm run test:rwd:smoke` 30/30 全部通過 (100% Pass)；雙端合約、反作弊專項、確定性重放、高延遲寬限審查、多開踢出保證、Phase 4 Docker Staging 演練 (Server/Caddy/Client)、20 併發帳號負載煙霧、戰鬥中鎖定策略 (battleLockPolicy)、AppView 換裝配點鎖定灰化 UI (RWD-REG-009 跨 4 視口與雙語系驗證)、預設離線與注入設定 (Policy 17)、雙模式存檔隔離、排隊指令逾時、種子防外洩、10s 斷線寬限修復、Tailscale Staging 內網環境、Changelog 頂部最新版保證與當前版本標籤全數綠燈就位。
+> **測試狀態**：`npm test` 227/227、`npm run test:server` 20/20、`npm run test:rwd:smoke` 30/30 全部通過 (100% Pass)；雙端合約、反作弊專項、確定性重放、高延遲寬限審查、多開踢出保證、Phase 4 Docker Staging 演練 (Server/Caddy/Client)、20 併發帳號負載煙霧、戰鬥中鎖定策略 (battleLockPolicy)、AppView 換裝配點鎖定灰化 UI (RWD-REG-016 跨 4 視口與雙語系驗證)、預設離線與注入設定 (Policy 17)、雙模式存檔隔離、排隊指令逾時、種子防外洩、10s 斷線寬限修復、Tailscale Staging 內網環境、Changelog 頂部最新版保證與當前版本標籤全數綠燈就位。
 
 ---
 
@@ -30,17 +30,17 @@
 
 ### 1.2 預設離線與伺服器設定注入政策 (Policy 17 & Disjoint Storage)
 - **模式解析順序**：`?mode=offline|online` → `localStorage.koraku_mode` → 若存在 `window.__KORAKU_CONFIG__.serverUrl` 或 `window.KORAKU_SERVER_URL` 則 `online` → 否則一律預設 `offline`。刪除依 hostname 判斷 online 的分支；`file://` 永遠離線。
-- **無注入配置退回保護**：若指定 `online` 但無注入配置，嚴格禁止回退同源 `/ws`，一律直接以 `offline` 沙盒啟動並提示 Toast `connection.noServerConfigured`。
+- **無注入配置退回保護與殘留清除**：若指定 `online` 但無注入配置，嚴格禁止回退同源 `/ws`，一律直接以 `offline` 沙盒啟動並提示 Toast `connection.noServerConfigured`；同時主動清除殘留之 `localStorage.koraku_mode`，確保提示只在首次降級時出現一次。
 - **雙模式存檔隔離 (Disjoint Storage Keys)**：離線沙盒存檔使用 `koraku-rps-save-v1`；線上客戶端 Token 使用 `koraku-rps-online-token`，線上狀態快取使用 `koraku-rps-online-state`。兩者鍵空間完全獨立，切換模式互不影響。
-- **斷線 Banner 與存檔面板雙向切換**：斷線 Banner 在 `reconnecting` 與 `disconnected` 狀態顯示「改用離線模式」按鈕；存檔紀錄面板在偵測到注入伺服器時顯示「切換回線上模式」按鈕。
+- **斷線 Banner 與存檔面板雙向切換**：斷線 Banner 在 `reconnecting` 與 `disconnected` 狀態顯示「改用離線模式」按鈕；存檔紀錄面板在偵測到注入伺服器時顯示「切換回線上模式」按鈕（通過 RWD-REG-017 跨 4 大視口與中英雙語系驗證，按鈕高 ≥ 40px）。
 - **排隊指令 8 秒超時**：未連線（非 ONLINE）狀態下進入 `_commandQueue` 的指令套用 8 秒超時，逾時自佇列移除並以 `NOT_CONNECTED` reject，Toast 提示 `connection.commandFailedOffline`。
-- **伺服器安全性增強**：
+- **伺服器安全性增強與審計日誌**：
   1. 快照與事件廣播徹底剝除 `seed` 與 `commandLog`，伺服器日誌保留 Replay 檔案（C1）。
   2. 修復 ConnectionManager -> GameSession -> BattleSystem 10 秒斷線寬限鏈與自動結算（C2）。
-  3. 伺服器端對所有被拒絕指令（限流、Schema、無權作弊、執行失敗）記錄 `console.warn` 審計日誌（C3）。
+  3. 伺服器端對所有被拒絕指令（限流 RATE_LIMITED、Schema、無權作弊、執行失敗 NOT_FOUND、Origin 違規 FORBIDDEN_ORIGIN、版本不相容 VERSION_MISMATCH）記錄包含 IP 與連線識別之 `console.warn` 審計日誌（C3）。
 - **Tailscale 內網測試站與營運工具**：
-  - `npm run start:tailscale:full`：啟動後端權威伺服器、靜態端並伺服端注入 WSS 設定，掛載 Tailscale HTTPS 443 與 8443 代理。
-  - Windows 工作排程器每日 03:00 自動執行備份（`KorakuBackup`），支援 `node server/scripts/backup.js --restore <dir>` CLI 快速還原。
+  - `npm run start:tailscale:full`：啟動後端權威伺服器、靜態端並於 `<script src="./src/js/bundle.js">` 前伺服端動態注入 WSS 設定，掛載 Tailscale HTTPS 443 與 8443 代理；實測端點留證於 `docs/ops/evidence/tailscale-20260903/`。
+  - Windows 工作排程器每日 03:00 自動執行備份（`KorakuBackup`），路徑解析採專案根目錄絕對路徑；支援 `node server/scripts/backup.js --restore <dir>` CLI 快速還原，演練日誌留證於 `docs/ops/evidence/tailscale-20260903/restore_drill_log.txt`。
 
 ---
 
@@ -221,10 +221,12 @@ New-game-project-4/
 | **重放與 PRNG** | `tests/rngAndReplay.test.js` | 7 | 卡方均勻度檢定、相同種子 + 日誌 100% 確定性重放 |
 | **高延遲壓力** | `tests/highLatencyStress.test.js` | 4 | 200ms+ 高延遲下 150ms 寬限判定與切西瓜物理時鐘 |
 | **多開踢出** | `tests/singleWriterKickout.test.js` | 1 | 單一寫入者保證，舊連線平滑踢出與防重連風暴 |
-| **模式切換** | `tests/modeSwitching.test.js` | 4 | `?mode=online`/`offline` 路由、沙盒存檔隔離與轉移碼 |
+| **模式切換** | `tests/modeSwitching.test.js` | 6 | `?mode=online`/`offline` 路由、沙盒存檔隔離、轉移碼、殘留模式清除 |
 | **四語系完整性** | `tests/i18n.test.js` | 6 | 繁中、簡中、英文、日文所有鍵值 100% 完整翻譯 |
-| **伺服器單元** | `server/test/server.test.js` | 11 | Token 簽發、Schema 驗證、轉移碼、備份還原、每帳號佇列 |
+| **伺服器單元** | `server/test/server.test.js` | 20 | Token 簽發、Schema 驗證、轉移碼、備份還原、每帳號佇列、10s 寬限、日誌審計 (RATE_LIMITED, EXECUTION_FAILURE, FORBIDDEN_ORIGIN, VERSION_MISMATCH) |
 | **RWD 跨設備** | `scripts/run-rwd.mjs` (smoke-core) | 30 | Mobile (375px/390px)、Tablet (768px/820px)、Desktop (1280px) 視口驗證 |
+| **RWD 離線降級按鈕** | `scripts/verify-offline-fallback-rwd.mjs` | 27 | 375×812 ~ 1920×1080、雙語系、斷線與存檔切換按鈕、動態 resize (`docs/ui/evidence/offline-fallback-20260903/`) |
+| **Tailscale 預備環境** | `scripts/serve-tailscale.mjs` | 4 端點 + 還原演練 | 4173 靜態注入、8080 權威、8443 WSS/HTTPS、每日備份排程 (`docs/ops/evidence/tailscale-20260903/`) |
 
 ---
 
@@ -242,6 +244,17 @@ New-game-project-4/
   - **Docker Staging 演練**：建立 `docs/ops/docker-compose.staging.yml`（Node 伺服器 + Caddy 反向代理 + 獨立 Origin 靜態客戶端），完成缺變數 fail-fast、Origin 拒絕/放行、WebSocket 閒置心跳、完整戰鬥、資料備份與還原、容器崩潰 restart:always、20 併發帳號負載煙霧（100% 成功，平均延遲 99ms）。實測全項留證於目錄 `%LOCALAPPDATA%\Temp\koraku-staging-evidence\20260903-0535\`。
   - **上線整備文件**：產出 `docs/ops/go-live-checklist.md`（標明「僅真機驗證」）與 `docs/ops/deployment.md`（標明「Docker 已驗證 / 僅文件化」），落實 AGENTS.md 政策 16 之每日備份排程與還原 SOP。
   - **動態 WSS 注入**：支援 `window.__KORAKU_CONFIG__.serverUrl` 與 `window.KORAKU_SERVER_URL`，保證正式主機名不寫死於程式碼。
+- **Phase 4.5：v0.0.23 收尾與完整整備（已 100% 達成）**：
+  - **Tailscale 腳本重構與 Staging 驗收**：修復 `scripts/serve-tailscale.mjs` 字串展開與語法錯誤，精確於 bundle 標籤前注入；以 `curl` 實測 4173 靜態注入、8080 `/health`、8443 HTTPS `/health` 與 443 靜態首頁，產出留證於 `docs/ops/evidence/tailscale-20260903/`。
+  - **自動備份排程與災難還原演練**：`backup.js` 路徑解析獨立於 cwd；重建 Windows `KorakuBackup` 排程並執行冷啟動還原演練（備份 -> 覆蓋 -> restore -> /health 200 -> 復原），日誌留存 `restore_drill_log.txt`。
+  - **伺服器拒絕日誌四分支審計**：補全 Origin 拒絕（WS verifyClient / HTTP CORS）與版本不符之 `console.warn` 記錄，C3 測試覆蓋率達 20/20 全綠。
+  - **客戶端單次提示保護**：`main.js` 於無配置降級離線時自動清除殘留 `localStorage.koraku_mode`，根除每次重新整理均彈出警告之問題。
+  - **RWD 離線降級按鈕專項驗收 (RWD-REG-017)**：在 Playwright 中覆蓋 4 視口（375px/768px/1280px/1920px）、雙語系、斷線/重連/存檔開啟狀態與動態 resize 27 項全量測試，留證 27 張截圖與 JSON 報告於 `docs/ui/evidence/offline-fallback-20260903/`，主控台 0 新增錯誤。
+  - **OpenSpec 規格歸檔與收尾報告**：`koraku-offline-default-and-fallback` 18 項任務全數核實完成並歸檔為 `2026-09-03-koraku-offline-default-and-fallback`，主規格同步新增 7 項需求；產出整合收尾報告 `docs/engineering/online-closeout-20260903.md`。
+- **Phase 4.6：v0.0.24 升版與發布整備（已 100% 達成）**：
+  - **客戶端快取失效機制與版本跳升**：因應 `main.js` 模式降級行為修復，依 AGENTS.md 升版至 `v0.0.24`；更新首頁頁腳版本標籤、更換所有 CSS 與 bundle 之快取查詢字串 `?v=202609031548`，確保線上玩家立即載入最新邏輯。
+  - **回歸日誌重編號與遞增規則鐵律**：全面修正 `docs/ui/rwd-regression-log.md` 編號衝突，確立全檔唯一、單調遞增原則；正式將戰鬥中配點換裝鎖定納入 `RWD-REG-016`、離線降級雙按鈕納入 `RWD-REG-017`。
+  - **四語系更新日誌與維運證據入庫**：於 `I18n.js` 與百科同步新增 v0.0.24 更新條目；完成 `koraku-gh` 遠端發布隔離與線上驗證。
 - **Phase 5（後續演進待辦）**：
   - 第三方帳號登入整合（Discord / Google OAuth2 與匿名裝置 Token 綁定遷移）。
   - 全球伺服器多節點部署與 Redis 分散式 Session 支援。

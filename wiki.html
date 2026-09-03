@@ -367,7 +367,7 @@
       <li><a href="#section-dojo" class="nav-link">⛩️ 修練場、ATK 與傷害日誌</a></li>
       <li><a href="#section-rwd" class="nav-link">📐 響應式佈局與跨引擎門檻</a></li>
       <li><a href="#section-draggable-hud" class="nav-link">✨ 戰鬥 HUD 自由拖曳</a></li>
-      <li><a href="#section-online" class="nav-link">🌐 Online 權威架構與協定</a></li>
+      <li><a href="#section-online" class="nav-link">🌐 Online 權威架構與模式切換 (v0.0.24)</a></li>
     </ul>
   </aside>
 
@@ -912,8 +912,17 @@
 
       <!-- Section 23: Online Architecture & Protocol -->
       <section id="section-online" class="section-card">
-        <h2 class="section-title">🌐 Online 權威架構、通訊協定與資料治理 (v2.0)</h2>
+        <h2 class="section-title">🌐 Online 權威架構、預設離線與雙模式平滑降級 (v0.0.24 / Protocol v2.0)</h2>
         <div class="grid-2">
+          <div class="card" style="grid-column: 1 / -1;">
+            <div class="card-title">
+              <span>v0.0.24 雙模式平滑降級與離線沙盒</span>
+              <span class="badge badge-gold">v0.0.24 Release</span>
+            </div>
+            <p><strong>預設離線保護 (Default Offline)</strong>：未偵測到注入伺服器設定時，遊戲預設啟動於完全離線的單機沙盒模式，絕不產生連線錯誤彈窗。離線存檔鍵（<code>koraku-rps-save-v1</code>）與線上快取鍵（<code>koraku-rps-online-*</code>）嚴格隔離。</p>
+            <p style="margin-top:8px;"><strong>雙按鈕平滑切換</strong>：頂部連線橫幅於斷線或重連狀態下顯示「改用離線模式」按鈕；存檔管理視窗於離線且具備注入設定時提供「切換回線上模式」按鈕。通過 RWD-REG-017 跨 375px~1920px 4 視口與雙語系 RWD 驗證（按鈕高 ≥ 40px，留證於 <code>docs/ui/evidence/offline-fallback-20260903/</code>）。</p>
+            <p style="margin-top:8px;"><strong>單次提示與殘留清理</strong>：無伺服器配置時請求 online 自動降級為 offline，並自動清除殘留之 <code>localStorage.koraku_mode</code>，確保提示只出現一次。</p>
+          </div>
           <div class="card">
             <div class="card-title">
               <span>十七大權威原則與三類判定模型</span>

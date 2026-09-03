@@ -518,9 +518,38 @@ $$\text{Theoretical DPS} = \frac{(\text{Base DMG} \times \text{Greatsword Mult} 
 - **徹底刪除帳號**：輸入確認文字「DELETE」呼叫 `account.delete`，徹底銷毀雲端與本機所有進度。
 
 ### 22.4 運維備份、災難復原與 Tailscale Staging 內網測試
-- **每日定時備份**：Windows 工作排程器每日 03:00 自動執行 `KorakuBackup`（`node server/scripts/backup.js`），產生帶有 SHA-256 Manifest 驗證之時間戳備份。
+- **每日定時備份**：Windows 工作排程器每日 03:00 自動執行 `KorakuBackup`（`cmd /c cd /d D:\game-dev\New-game-project-4 && node server\scripts\backup.js`），產生帶有 SHA-256 Manifest 驗證之時間戳備份。
 - **CLI 災難還原**：支援 `node server/scripts/backup.js --restore <backup-dir>` 在 3 分鐘內完成冷啟動完整還原驗收。
 - **Tailscale Staging 內網環境**：支援 `npm run start:tailscale:full` 一鍵啟動後端權威伺服器、前端靜態站（伺服端動態注入 WSS 端點）並掛載 Tailscale HTTPS 443 與 8443 代理，供行動裝置（iOS/Android 4G/5G）進行真實延遲、斷線 10 秒結算與跨模式隔離驗證。
+
+---
+
+## 23. v0.0.23 版本更新：預設離線沙盒、動態伺服器注入與雙模式平滑降級 (v0.0.23)
+
+### 23.1 核心特性與規格落地
+- **預設離線沙盒 (Default Offline Guarantee)**：落實 Online Authority Policy 17，遊戲預設啟動於完全離線的單機沙盒模式，永不上傳或污染線上伺服器資料。離線存檔鍵（`koraku-rps-save-v1`）與線上快取鍵（`koraku-rps-online-*`）物理隔離。
+- **動態伺服器注入 (Dynamic Config Injection)**：廢除依據頁面 hostname 自動連線邏輯，僅在偵測到 `window.__KORAKU_CONFIG__.serverUrl` 或 `window.KORAKU_SERVER_URL` 時啟用線上模式。
+- **單次提示與殘留設定清理**：若本機殘留 `localStorage.koraku_mode=online` 但環境未注入伺服器設定，系統自動降級為離線模式並清除該殘留鍵，保證 `connection.noServerConfigured` 提示只跳出一次。
+- **雙按鈕平滑切換 UI**：
+  - 頂部連線橫幅 (`#connection-status-banner`) 於斷線或重連狀態下顯示「改用離線模式」按鈕 (`#connection-banner-switch-offline`)。
+  - 存檔管理視窗 (`#save-record-modal`) 於離線且具備注入設定時提供「切換回線上模式」按鈕 (`#btn-switch-to-online`)。
+  - 跨 4 大視口（375px~1920px）與中英雙語系通過嚴格 RWD 驗證（最低按鈕高度 ≥ 40px，留存於 `docs/ui/evidence/offline-fallback-20260903/`）。
+- **運維自動化與留證**：
+  - 修復 `scripts/serve-tailscale.mjs` 樣板字串展開錯誤，正確在 `<script src="./src/js/bundle.js">` 前注入 WSS 配置。
+  - Windows `KorakuBackup` 排程每日 03:00 自動執行，路徑解析不依賴 cwd，完成完整還原演練。
+
+相關互動說明請參見離線百科：[Online 權威架構與模式切換 (wiki.html#section-online)](wiki.html#section-online)。
+
+---
+
+## 24. v0.0.24 版本更新：單次降級提示防護、回歸日誌重編號與維運留證入庫 (v0.0.24)
+
+### 24.1 核心修復與發布整備
+- **離線降級單次提示保護**：在無注入伺服器設定而自動退回離線沙盒時，主動清除殘留之 `localStorage.koraku_mode`，根除每次頁面重新整理均重複跳出切換警告之問題。
+- **快取失效與版本跳升**：全面更新首頁頁腳版本為 `0.0.24`，並更換所有 CSS 與 bundle 標籤之快取查詢字串（`?v=202609031548`），確保已發布之線上訪客立即獲得最新降級修復邏輯。
+- **響應式回歸日誌重編號 (RWD-REG-016 & 017)**：全面修正 `docs/ui/rwd-regression-log.md` 歷史條目編號衝突，確立全檔唯一、單調遞增原則；正式編號戰鬥中配點換裝鎖定為 `RWD-REG-016`、離線降級雙按鈕為 `RWD-REG-017`。
+- **維運與 RWD 驗證留證正式入庫**：正式入庫 Tailscale Staging 4 端點實測日誌、Windows 每日備份排程與冷啟動還原演練日誌 (`docs/ops/evidence/tailscale-20260903/`)，以及離線降級雙按鈕 27 項全量視口與雙語系 RWD 截圖與測試報告 (`docs/ui/evidence/offline-fallback-20260903/`)。
+
 
 
 

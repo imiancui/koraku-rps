@@ -1,0 +1,597 @@
+{
+  "testDate": "2026-09-03T07:20:08.280Z",
+  "feature": "Offline Fallback & Mode Switching Buttons RWD",
+  "testedComponents": [
+    "#connection-banner-switch-offline",
+    "#btn-switch-to-online",
+    "#save-mode-switch-section"
+  ],
+  "invariants": [
+    "RWD-G001",
+    "RWD-G003",
+    "RWD-G006",
+    "RWD-G008"
+  ],
+  "viewports": [
+    {
+      "name": "mobile",
+      "width": 375,
+      "height": 812,
+      "hasTouch": true
+    },
+    {
+      "name": "tablet",
+      "width": 768,
+      "height": 1024,
+      "hasTouch": true
+    },
+    {
+      "name": "desktop-compact",
+      "width": 1280,
+      "height": 800,
+      "hasTouch": false
+    },
+    {
+      "name": "desktop-fullhd",
+      "width": 1920,
+      "height": 1080,
+      "hasTouch": false
+    }
+  ],
+  "locales": [
+    "zh-Hant",
+    "en"
+  ],
+  "results": [
+    {
+      "caseId": "fallback-banner.reconnecting.zh-Hant.mobile",
+      "component": "#connection-banner-switch-offline",
+      "state": "reconnecting",
+      "locale": "zh-Hant",
+      "viewport": "375x812",
+      "measurement": {
+        "visible": true,
+        "rect": {
+          "x": 33.75,
+          "y": 111,
+          "width": 307.5,
+          "height": 40
+        },
+        "text": "改用離線模式",
+        "minHeightOk": true
+      },
+      "screenshot": "banner-reconnecting-zh-Hant-mobile-375x812.png",
+      "pass": true
+    },
+    {
+      "caseId": "fallback-banner.disconnected.zh-Hant.mobile",
+      "component": "#connection-banner-switch-offline",
+      "state": "disconnected",
+      "locale": "zh-Hant",
+      "viewport": "375x812",
+      "measurement": {
+        "visible": true,
+        "rect": {
+          "x": 33.75,
+          "y": 121.14189910888672,
+          "width": 307.5,
+          "height": 40.00000762939453
+        },
+        "text": "改用離線模式",
+        "minHeightOk": true
+      },
+      "screenshot": "banner-disconnected-zh-Hant-mobile-375x812.png",
+      "pass": true
+    },
+    {
+      "caseId": "save-modal.mode-switch.zh-Hant.mobile",
+      "component": "#btn-switch-to-online",
+      "state": "save-modal-open",
+      "locale": "zh-Hant",
+      "viewport": "375x812",
+      "measurement": {
+        "sectionVisible": true,
+        "btnVisible": true,
+        "btnRect": {
+          "x": 173.265625,
+          "y": 516.46875,
+          "width": 144.734375,
+          "height": 48
+        },
+        "btnMinHeightOk": true,
+        "btnText": "切換回線上模式"
+      },
+      "screenshot": "save-modal-mode-switch-zh-Hant-mobile-375x812.png",
+      "pass": true
+    },
+    {
+      "caseId": "fallback-banner.reconnecting.zh-Hant.tablet",
+      "component": "#connection-banner-switch-offline",
+      "state": "reconnecting",
+      "locale": "zh-Hant",
+      "viewport": "768x1024",
+      "measurement": {
+        "visible": true,
+        "rect": {
+          "x": 339.875,
+          "y": 65,
+          "width": 111.125,
+          "height": 40
+        },
+        "text": "改用離線模式",
+        "minHeightOk": true
+      },
+      "screenshot": "banner-reconnecting-zh-Hant-tablet-768x1024.png",
+      "pass": true
+    },
+    {
+      "caseId": "fallback-banner.disconnected.zh-Hant.tablet",
+      "component": "#connection-banner-switch-offline",
+      "state": "disconnected",
+      "locale": "zh-Hant",
+      "viewport": "768x1024",
+      "measurement": {
+        "visible": true,
+        "rect": {
+          "x": 339.875,
+          "y": 76.85527038574219,
+          "width": 111.125,
+          "height": 40
+        },
+        "text": "改用離線模式",
+        "minHeightOk": true
+      },
+      "screenshot": "banner-disconnected-zh-Hant-tablet-768x1024.png",
+      "pass": true
+    },
+    {
+      "caseId": "save-modal.mode-switch.zh-Hant.tablet",
+      "component": "#btn-switch-to-online",
+      "state": "save-modal-open",
+      "locale": "zh-Hant",
+      "viewport": "768x1024",
+      "measurement": {
+        "sectionVisible": true,
+        "btnVisible": true,
+        "btnRect": {
+          "x": 507.265625,
+          "y": 731.5,
+          "width": 144.734375,
+          "height": 48
+        },
+        "btnMinHeightOk": true,
+        "btnText": "切換回線上模式"
+      },
+      "screenshot": "save-modal-mode-switch-zh-Hant-tablet-768x1024.png",
+      "pass": true
+    },
+    {
+      "caseId": "fallback-banner.reconnecting.zh-Hant.desktop-compact",
+      "component": "#connection-banner-switch-offline",
+      "state": "reconnecting",
+      "locale": "zh-Hant",
+      "viewport": "1280x800",
+      "measurement": {
+        "visible": true,
+        "rect": {
+          "x": 595.875,
+          "y": 85,
+          "width": 111.125,
+          "height": 40
+        },
+        "text": "改用離線模式",
+        "minHeightOk": true
+      },
+      "screenshot": "banner-reconnecting-zh-Hant-desktop-compact-1280x800.png",
+      "pass": true
+    },
+    {
+      "caseId": "fallback-banner.disconnected.zh-Hant.desktop-compact",
+      "component": "#connection-banner-switch-offline",
+      "state": "disconnected",
+      "locale": "zh-Hant",
+      "viewport": "1280x800",
+      "measurement": {
+        "visible": true,
+        "rect": {
+          "x": 595.875,
+          "y": 96.98668670654297,
+          "width": 111.125,
+          "height": 40.00000762939453
+        },
+        "text": "改用離線模式",
+        "minHeightOk": true
+      },
+      "screenshot": "banner-disconnected-zh-Hant-desktop-compact-1280x800.png",
+      "pass": true
+    },
+    {
+      "caseId": "save-modal.mode-switch.zh-Hant.desktop-compact",
+      "component": "#btn-switch-to-online",
+      "state": "save-modal-open",
+      "locale": "zh-Hant",
+      "viewport": "1280x800",
+      "measurement": {
+        "sectionVisible": true,
+        "btnVisible": true,
+        "btnRect": {
+          "x": 763.265625,
+          "y": 521.0625,
+          "width": 144.734375,
+          "height": 48
+        },
+        "btnMinHeightOk": true,
+        "btnText": "切換回線上模式"
+      },
+      "screenshot": "save-modal-mode-switch-zh-Hant-desktop-compact-1280x800.png",
+      "pass": true
+    },
+    {
+      "caseId": "fallback-banner.reconnecting.zh-Hant.desktop-fullhd",
+      "component": "#connection-banner-switch-offline",
+      "state": "reconnecting",
+      "locale": "zh-Hant",
+      "viewport": "1920x1080",
+      "measurement": {
+        "visible": true,
+        "rect": {
+          "x": 915.875,
+          "y": 85,
+          "width": 111.125,
+          "height": 40
+        },
+        "text": "改用離線模式",
+        "minHeightOk": true
+      },
+      "screenshot": "banner-reconnecting-zh-Hant-desktop-fullhd-1920x1080.png",
+      "pass": true
+    },
+    {
+      "caseId": "fallback-banner.disconnected.zh-Hant.desktop-fullhd",
+      "component": "#connection-banner-switch-offline",
+      "state": "disconnected",
+      "locale": "zh-Hant",
+      "viewport": "1920x1080",
+      "measurement": {
+        "visible": true,
+        "rect": {
+          "x": 915.875,
+          "y": 97,
+          "width": 111.125,
+          "height": 40
+        },
+        "text": "改用離線模式",
+        "minHeightOk": true
+      },
+      "screenshot": "banner-disconnected-zh-Hant-desktop-fullhd-1920x1080.png",
+      "pass": true
+    },
+    {
+      "caseId": "save-modal.mode-switch.zh-Hant.desktop-fullhd",
+      "component": "#btn-switch-to-online",
+      "state": "save-modal-open",
+      "locale": "zh-Hant",
+      "viewport": "1920x1080",
+      "measurement": {
+        "sectionVisible": true,
+        "btnVisible": true,
+        "btnRect": {
+          "x": 1083.265625,
+          "y": 783.859375,
+          "width": 144.734375,
+          "height": 48
+        },
+        "btnMinHeightOk": true,
+        "btnText": "切換回線上模式"
+      },
+      "screenshot": "save-modal-mode-switch-zh-Hant-desktop-fullhd-1920x1080.png",
+      "pass": true
+    },
+    {
+      "caseId": "fallback-banner.reconnecting.en.mobile",
+      "component": "#connection-banner-switch-offline",
+      "state": "reconnecting",
+      "locale": "en",
+      "viewport": "375x812",
+      "measurement": {
+        "visible": true,
+        "rect": {
+          "x": 33.75,
+          "y": 111,
+          "width": 307.5,
+          "height": 40
+        },
+        "text": "Play offline",
+        "minHeightOk": true
+      },
+      "screenshot": "banner-reconnecting-en-mobile-375x812.png",
+      "pass": true
+    },
+    {
+      "caseId": "fallback-banner.disconnected.en.mobile",
+      "component": "#connection-banner-switch-offline",
+      "state": "disconnected",
+      "locale": "en",
+      "viewport": "375x812",
+      "measurement": {
+        "visible": true,
+        "rect": {
+          "x": 33.75,
+          "y": 120.02896118164062,
+          "width": 307.5,
+          "height": 40
+        },
+        "text": "Play offline",
+        "minHeightOk": true
+      },
+      "screenshot": "banner-disconnected-en-mobile-375x812.png",
+      "pass": true
+    },
+    {
+      "caseId": "save-modal.mode-switch.en.mobile",
+      "component": "#btn-switch-to-online",
+      "state": "save-modal-open",
+      "locale": "en",
+      "viewport": "375x812",
+      "measurement": {
+        "sectionVisible": true,
+        "btnVisible": true,
+        "btnRect": {
+          "x": 112.078125,
+          "y": 480.40625,
+          "width": 205.921875,
+          "height": 48
+        },
+        "btnMinHeightOk": true,
+        "btnText": "Switch to online mode"
+      },
+      "screenshot": "save-modal-mode-switch-en-mobile-375x812.png",
+      "pass": true
+    },
+    {
+      "caseId": "fallback-banner.reconnecting.en.tablet",
+      "component": "#connection-banner-switch-offline",
+      "state": "reconnecting",
+      "locale": "en",
+      "viewport": "768x1024",
+      "measurement": {
+        "visible": true,
+        "rect": {
+          "x": 347.734375,
+          "y": 65,
+          "width": 103.265625,
+          "height": 40
+        },
+        "text": "Play offline",
+        "minHeightOk": true
+      },
+      "screenshot": "banner-reconnecting-en-tablet-768x1024.png",
+      "pass": true
+    },
+    {
+      "caseId": "fallback-banner.disconnected.en.tablet",
+      "component": "#connection-banner-switch-offline",
+      "state": "disconnected",
+      "locale": "en",
+      "viewport": "768x1024",
+      "measurement": {
+        "visible": true,
+        "rect": {
+          "x": 347.734375,
+          "y": 76.85517883300781,
+          "width": 103.265625,
+          "height": 40
+        },
+        "text": "Play offline",
+        "minHeightOk": true
+      },
+      "screenshot": "banner-disconnected-en-tablet-768x1024.png",
+      "pass": true
+    },
+    {
+      "caseId": "save-modal.mode-switch.en.tablet",
+      "component": "#btn-switch-to-online",
+      "state": "save-modal-open",
+      "locale": "en",
+      "viewport": "768x1024",
+      "measurement": {
+        "sectionVisible": true,
+        "btnVisible": true,
+        "btnRect": {
+          "x": 446.078125,
+          "y": 714.75,
+          "width": 205.921875,
+          "height": 48
+        },
+        "btnMinHeightOk": true,
+        "btnText": "Switch to online mode"
+      },
+      "screenshot": "save-modal-mode-switch-en-tablet-768x1024.png",
+      "pass": true
+    },
+    {
+      "caseId": "fallback-banner.reconnecting.en.desktop-compact",
+      "component": "#connection-banner-switch-offline",
+      "state": "reconnecting",
+      "locale": "en",
+      "viewport": "1280x800",
+      "measurement": {
+        "visible": true,
+        "rect": {
+          "x": 603.734375,
+          "y": 85,
+          "width": 103.265625,
+          "height": 40
+        },
+        "text": "Play offline",
+        "minHeightOk": true
+      },
+      "screenshot": "banner-reconnecting-en-desktop-compact-1280x800.png",
+      "pass": true
+    },
+    {
+      "caseId": "fallback-banner.disconnected.en.desktop-compact",
+      "component": "#connection-banner-switch-offline",
+      "state": "disconnected",
+      "locale": "en",
+      "viewport": "1280x800",
+      "measurement": {
+        "visible": true,
+        "rect": {
+          "x": 603.734375,
+          "y": 96.85552978515625,
+          "width": 103.265625,
+          "height": 40
+        },
+        "text": "Play offline",
+        "minHeightOk": true
+      },
+      "screenshot": "banner-disconnected-en-desktop-compact-1280x800.png",
+      "pass": true
+    },
+    {
+      "caseId": "save-modal.mode-switch.en.desktop-compact",
+      "component": "#btn-switch-to-online",
+      "state": "save-modal-open",
+      "locale": "en",
+      "viewport": "1280x800",
+      "measurement": {
+        "sectionVisible": true,
+        "btnVisible": true,
+        "btnRect": {
+          "x": 702.078125,
+          "y": 504.3125,
+          "width": 205.921875,
+          "height": 48
+        },
+        "btnMinHeightOk": true,
+        "btnText": "Switch to online mode"
+      },
+      "screenshot": "save-modal-mode-switch-en-desktop-compact-1280x800.png",
+      "pass": true
+    },
+    {
+      "caseId": "fallback-banner.reconnecting.en.desktop-fullhd",
+      "component": "#connection-banner-switch-offline",
+      "state": "reconnecting",
+      "locale": "en",
+      "viewport": "1920x1080",
+      "measurement": {
+        "visible": true,
+        "rect": {
+          "x": 923.734375,
+          "y": 85,
+          "width": 103.265625,
+          "height": 40
+        },
+        "text": "Play offline",
+        "minHeightOk": true
+      },
+      "screenshot": "banner-reconnecting-en-desktop-fullhd-1920x1080.png",
+      "pass": true
+    },
+    {
+      "caseId": "fallback-banner.disconnected.en.desktop-fullhd",
+      "component": "#connection-banner-switch-offline",
+      "state": "disconnected",
+      "locale": "en",
+      "viewport": "1920x1080",
+      "measurement": {
+        "visible": true,
+        "rect": {
+          "x": 923.734375,
+          "y": 97,
+          "width": 103.265625,
+          "height": 40
+        },
+        "text": "Play offline",
+        "minHeightOk": true
+      },
+      "screenshot": "banner-disconnected-en-desktop-fullhd-1920x1080.png",
+      "pass": true
+    },
+    {
+      "caseId": "save-modal.mode-switch.en.desktop-fullhd",
+      "component": "#btn-switch-to-online",
+      "state": "save-modal-open",
+      "locale": "en",
+      "viewport": "1920x1080",
+      "measurement": {
+        "sectionVisible": true,
+        "btnVisible": true,
+        "btnRect": {
+          "x": 1022.078125,
+          "y": 767.109375,
+          "width": 205.921875,
+          "height": 48
+        },
+        "btnMinHeightOk": true,
+        "btnText": "Switch to online mode"
+      },
+      "screenshot": "save-modal-mode-switch-en-desktop-fullhd-1920x1080.png",
+      "pass": true
+    },
+    {
+      "caseId": "dynamic-resize.mobile-375",
+      "component": "both-buttons",
+      "state": "resized",
+      "viewport": "375x812",
+      "measurement": {
+        "bannerBtn": {
+          "width": 307.5,
+          "height": 40,
+          "minHeightOk": true
+        },
+        "saveBtn": {
+          "width": 144.734375,
+          "height": 48,
+          "minHeightOk": true
+        }
+      },
+      "screenshot": "dynamic-resize-mobile-375-375x812.png",
+      "pass": true
+    },
+    {
+      "caseId": "dynamic-resize.tablet-768",
+      "component": "both-buttons",
+      "state": "resized",
+      "viewport": "768x1024",
+      "measurement": {
+        "bannerBtn": {
+          "width": 111.125,
+          "height": 40,
+          "minHeightOk": true
+        },
+        "saveBtn": {
+          "width": 144.734375,
+          "height": 48,
+          "minHeightOk": true
+        }
+      },
+      "screenshot": "dynamic-resize-tablet-768-768x1024.png",
+      "pass": true
+    },
+    {
+      "caseId": "dynamic-resize.desktop-1280",
+      "component": "both-buttons",
+      "state": "resized",
+      "viewport": "1280x800",
+      "measurement": {
+        "bannerBtn": {
+          "width": 111.125,
+          "height": 40,
+          "minHeightOk": true
+        },
+        "saveBtn": {
+          "width": 144.734375,
+          "height": 48,
+          "minHeightOk": true
+        }
+      },
+      "screenshot": "dynamic-resize-desktop-1280-1280x800.png",
+      "pass": true
+    }
+  ],
+  "consoleErrors": [],
+  "overallPass": true
+}

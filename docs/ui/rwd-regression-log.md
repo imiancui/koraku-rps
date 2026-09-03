@@ -4,6 +4,8 @@ Last reviewed: 2026-09-02.
 This log indexes source/history evidence; it does not certify current browser behavior.
 Read entries related to the affected component, not an unrelated full-device checklist.
 
+> **編號規則**：`RWD-REG-XXX` 全檔唯一、嚴格單調遞增、不得重用或回溯跳號。新增條目前必先檢索檔內最新最大編號。
+
 ## How to Use
 
 - Distinguish a documented historical defect, a newly reproduced defect, and an unconfirmed risk.
@@ -190,7 +192,7 @@ Do not attribute a regression to Ponytail without evidence.
      - Settlement: wrapped layout in a centered stage (`padding-left: max(80px, calc(50vw - 960px));`), expanded card to `min(32vw, 720px)`, and shifted standee to `left: calc(50vw + 160px)` with `width: min(38vw, 1100px)`, creating a balanced 2220px centered dual-column stage.
 - Guard & Evidence: Verified via Playwright at 3840×2160 (`home-4k.png`, `victory-4k.png`, `swimsuit-4k.png`); `npm test` 108/108 pass; `npm run test:rwd:smoke` 30/30 pass.
 
-## RWD-REG-009 — In-Battle Mutation Lock State UI (Growth & Equipment)
+## RWD-REG-016 — In-Battle Mutation Lock State UI (Growth & Equipment)
 
 - Classification/status: Verified implementation & responsive protection; verified green in Playwright Chromium across 4 viewports, dynamic resize across 12-slot breakpoint, 2 locales (zh-Hant & en), and policy variants.
 - Date: 2026-09-03.
@@ -215,6 +217,34 @@ Do not attribute a regression to Ponytail without evidence.
 - Browser console: 0 new errors across all test passes.
 - Automated guards: `tests/unit/appViewMutationLock.test.js` (5/5 pass), `npm test` (213/213 pass), `npm run test:server` (17/17 pass), `npm run test:rwd:smoke` (30/30 pass).
 - Visual evidence root: `C:\Users\Administrator\AppData\Local\Temp\koraku-staging-evidence\20260903-0535\rwd\` (25 PNG screenshots + `rwd_verification_report.json`).
+
+## RWD-REG-017 — Offline Fallback Buttons (Connection Banner & Save Modal Switch)
+
+- Classification/status: Verified implementation & responsive protection; verified green in Playwright Chromium across 4 viewports (375×812, 768×1024, 1280×800, 1920×1080), 2 locales (zh-Hant & en), dynamic runtime resize (375 -> 768 -> 1280), and multiple connection states.
+- Date: 2026-09-03.
+- Surface: Top connection status banner (`#connection-status-banner`, `#connection-banner-switch-offline`), Save record modal (`#save-record-modal`, `#save-mode-switch-section`, `#btn-switch-to-online`).
+- Verified Invariants: RWD-G001, RWD-G003, RWD-G006, RWD-G008 in the [baseline](responsive-spec.md). Minimum button height >= 40px preserved across all viewports (`.connection-banner-action` height = 40px, `#btn-switch-to-online` height = 48px); dark shrine palette and gold accents maintained; no overflow.
+- Viewports & Measurements covered:
+  - 375×812 (Mobile portrait, touch=true):
+    - Banner switch button: width 307.5px (full-width stacked below text via `@media (max-width: 480px)`), height 40px (`min-height >= 40px` PASS).
+    - Save switch button: width 144.7px, height 48px (`min-height >= 40px` PASS).
+  - 768×1024 (Tablet portrait, touch=true):
+    - Banner switch button: width 111.1px (zh-Hant) / 147.2px (en), height 40px (`min-height >= 40px` PASS).
+    - Save switch button: width 144.7px (zh-Hant) / 164.2px (en), height 48px (`min-height >= 40px` PASS).
+  - 1280×800 (Desktop compact, touch=false):
+    - Banner switch button: width 111.1px (zh-Hant) / 147.2px (en), height 40px (`min-height >= 40px` PASS).
+    - Save switch button: width 144.7px (zh-Hant) / 164.2px (en), height 48px (`min-height >= 40px` PASS).
+  - 1920×1080 (Desktop full HD, touch=false):
+    - Banner switch button: width 111.1px (zh-Hant) / 147.2px (en), height 40px (`min-height >= 40px` PASS).
+    - Save switch button: width 144.7px (zh-Hant) / 164.2px (en), height 48px (`min-height >= 40px` PASS).
+  - Dynamic runtime resize across 375 -> 768 -> 1280 in active state passes with clean reflow and 0 clipped text.
+- States verified:
+  - Reconnecting banner: `#connection-banner-switch-offline` displayed, minimum 40px height.
+  - Disconnected banner: `#connection-banner-switch-offline` displayed, minimum 40px height.
+  - Save modal open: `#save-mode-switch-section` unhidden, `#btn-switch-to-online` displayed, minimum 48px height.
+- Browser console: 0 new errors across all test passes.
+- Automated guards: `scripts/verify-offline-fallback-rwd.mjs`, `npm test` (227/227 pass), `npm run test:server` (20/20 pass), `npm run test:rwd:smoke` (30/30 pass).
+- Visual evidence root: `docs/ui/evidence/offline-fallback-20260903/` (27 PNG screenshots + `rwd_verification_report.json`).
 
 ## Entry Template
 
