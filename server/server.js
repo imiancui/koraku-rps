@@ -63,8 +63,11 @@ export class KorakuServer {
 
       this.wsAdapter = new WsAdapter(this.httpServer, {
         verifyClient: ({ req, origin }, cb) => {
-          const isAllowed = this.validator.validateOrigin(origin || req.headers.origin, { isWsUpgrade: true });
+          const clientOrigin = origin || req.headers.origin || "";
+          const isAllowed = this.validator.validateOrigin(clientOrigin, { isWsUpgrade: true });
           if (!isAllowed) {
+            const clientIp = this._resolveClientIp(req);
+            console.warn(`[KorakuServer] Command rejected (FORBIDDEN_ORIGIN) origin=${clientOrigin || "empty"}, ip=${clientIp}: WebSocket upgrade forbidden`);
             cb(false, 403, "Forbidden Origin");
             return;
           }
@@ -98,10 +101,15 @@ export class KorakuServer {
     const origin = req.headers.origin;
 
     // CORS headers
-    if (this.validator.validateOrigin(origin)) {
-      res.setHeader("Access-Control-Allow-Origin", origin || "*");
-      res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-      res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    if (origin) {
+      if (this.validator.validateOrigin(origin)) {
+        res.setHeader("Access-Control-Allow-Origin", origin);
+        res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+        res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+      } else {
+        const clientIp = this._resolveClientIp(req);
+        console.warn(`[KorakuServer] Command rejected (FORBIDDEN_ORIGIN) origin=${origin}, ip=${clientIp}: HTTP CORS origin rejected`);
+      }
     }
 
     if (req.method === "OPTIONS") {
@@ -284,9 +292,13 @@ export class KorakuServer {
     // 3. Schema and envelope validation
     const validation = this.validator.validateRawMessage(rawMessage);
     if (!validation.valid) {
-      console.warn(`[KorakuServer] Command rejected (${validation.code || ErrorCodes.INVALID_SCHEMA}) for account=${accountId || "unknown"}, cmdId=${validation.envelope?.cmdId}: ${validation.error}`);
+      if (validation.code === ErrorCodes.VERSION_MISMATCH) {
+        console.warn(`[KorakuServer] Command rejected (VERSION_MISMATCH) for account=${accountId || "unknown"}, ip=${clientIp}, clientVersion=${parsedObj?.configVersion || "unknown"}, serverVersion=${this.config.configVersion}: ${validation.error}`);
+      } else {
+        console.warn(`[KorakuServer] Command rejected (${validation.code || ErrorCodes.INVALID_SCHEMA}) for account=${accountId || "unknown"}, cmdId=${validation.envelope?.cmdId}: ${validation.error}`);
+      }
       this.connectionManager.sendToSocket(socket, Events.COMMAND_REJECTED, {
-        cmdId: validation.envelope?.cmdId || null,
+        cmdId: validation.envelope?.cmdId || parsedObj?.cmdId || null,
         code: validation.code || ErrorCodes.INVALID_SCHEMA,
         error: validation.error
       });

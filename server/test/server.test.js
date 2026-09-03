@@ -901,6 +901,50 @@ test("Part C - C3: 伺服器端拒絕非法指令日誌審計記錄", async () =
 
     assert.ok(warnings.some(w => w.includes("[KorakuServer] Command rejected (UNAUTHORIZED_CHEAT)")), "伺服器應記錄 UNAUTHORIZED_CHEAT 拒絕日誌");
 
+    // 3. 觸發 Rate Limit 分支記錄
+    for (let i = 0; i < 35; i++) {
+      server.rateLimiter.check("acc_ratelimit_log");
+    }
+    await server._handleSocketMessage(fakeSocket, "acc_ratelimit_log", false, "127.0.0.1", JSON.stringify({
+      cmdId: "cmd_rate_limited",
+      command: Commands.BUY_ITEM,
+      payload: { itemId: "item_hp_potion", count: 1 },
+      configVersion: CONFIG_VERSION
+    }));
+    assert.ok(warnings.some(w => w.includes("[KorakuServer] Command rejected (RATE_LIMITED)")), "伺服器應記錄 RATE_LIMITED 拒絕日誌");
+
+    // 4. 觸發 Execution Failure 分支記錄（如購買不存在物品）
+    await server._handleSocketMessage(fakeSocket, "acc_test_log", false, "127.0.0.1", JSON.stringify({
+      cmdId: "cmd_exec_fail",
+      command: Commands.BUY_ITEM,
+      payload: { itemId: "nonexistent_item_999", count: 1 },
+      configVersion: CONFIG_VERSION
+    }));
+    assert.ok(warnings.some(w => w.includes("[KorakuServer] Command rejected") && (w.includes("NOT_FOUND") || w.includes("Command execution failed"))), "伺服器應記錄 Execution failure 拒絕日誌");
+
+    // 5. 觸發 Origin 拒絕分支記錄（HTTP CORS 處）
+    server._handleHttpRequest({
+      headers: { origin: "https://unauthorized-attacker.com", host: "localhost" },
+      method: "GET",
+      url: "/health",
+      socket: { remoteAddress: "127.0.0.1" }
+    }, {
+      setHeader: () => {},
+      writeHead: () => {},
+      end: () => {}
+    });
+    assert.ok(warnings.some(w => w.includes("[KorakuServer] Command rejected (FORBIDDEN_ORIGIN)") && w.includes("unauthorized-attacker.com")), "伺服器應記錄 FORBIDDEN_ORIGIN 拒絕日誌");
+
+    // 6. 觸發 Version Mismatch 分支記錄
+    await server._handleSocketMessage(fakeSocket, "acc_test_log", false, "127.0.0.1", JSON.stringify({
+      cmdId: "cmd_ver_mismatch",
+      command: Commands.BUY_ITEM,
+      payload: { itemId: "item_hp_potion", count: 1 },
+      configVersion: "1999.01.01"
+    }));
+    assert.ok(warnings.some(w => w.includes("[KorakuServer] Command rejected (VERSION_MISMATCH)") && w.includes("1999.01.01")), "伺服器應記錄 VERSION_MISMATCH 拒絕日誌");
+
+    await server.close();
     await fs.rm(tmpDir, { recursive: true, force: true });
   } finally {
     console.warn = originalWarn;
