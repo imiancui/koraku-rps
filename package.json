@@ -8,6 +8,7 @@
     "dev": "node scripts/serve.mjs",
     "start": "node scripts/serve.mjs",
     "start:tailscale": "node scripts/serve.mjs --tailscale",
+    "start:tailscale:full": "node scripts/serve-tailscale.mjs",
     "specs:excel": "node scripts/generate_excel_specs.mjs",
     "test": "node --test",
     "test:rwd:stage-a": "node scripts/run-rwd.mjs stage-a",

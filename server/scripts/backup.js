@@ -139,18 +139,41 @@ export async function restoreBackup(backupPath, targetDataDir = SERVER_CONFIG.da
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  createBackup()
-    .then(async ({ backupPath }) => {
-      const verify = await verifyBackupIntegrity(backupPath);
-      if (verify.valid) {
-        console.log("[BACKUP] Backup integrity verified 100% OK.");
-      } else {
-        console.error("[BACKUP] Integrity check failed:", verify.errors);
-        process.exit(1);
-      }
-    })
-    .catch((err) => {
-      console.error("[BACKUP] Error running backup:", err);
+  const args = process.argv.slice(2);
+  const restoreIdx = args.indexOf("--restore");
+
+  if (restoreIdx !== -1) {
+    const backupDir = args[restoreIdx + 1];
+    if (!backupDir) {
+      console.error("[RESTORE] Usage: node server/scripts/backup.js --restore <backup-directory> [--target <target-data-dir>]");
       process.exit(1);
-    });
+    }
+    const targetIdx = args.indexOf("--target");
+    const targetDir = targetIdx !== -1 ? args[targetIdx + 1] : SERVER_CONFIG.dataDir;
+
+    restoreBackup(path.resolve(backupDir), path.resolve(targetDir))
+      .then(({ restoredFiles }) => {
+        console.log(`[RESTORE] Restore completed successfully (${restoredFiles} files).`);
+        process.exit(0);
+      })
+      .catch((err) => {
+        console.error("[RESTORE] Error restoring backup:", err);
+        process.exit(1);
+      });
+  } else {
+    createBackup()
+      .then(async ({ backupPath }) => {
+        const verify = await verifyBackupIntegrity(backupPath);
+        if (verify.valid) {
+          console.log("[BACKUP] Backup integrity verified 100% OK.");
+        } else {
+          console.error("[BACKUP] Integrity check failed:", verify.errors);
+          process.exit(1);
+        }
+      })
+      .catch((err) => {
+        console.error("[BACKUP] Error running backup:", err);
+        process.exit(1);
+      });
+  }
 }

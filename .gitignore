@@ -1,3 +1,9 @@
 /node_modules/
 __pycache__/
 *.py[cod]
+.env
+.env.*
+server/.env
+server/.env.*
+!server/.env.tailscale.example
+server/backups/

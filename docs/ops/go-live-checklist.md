@@ -68,9 +68,15 @@
 
 | 檢驗項目 | 驗證環境 | 判定標準 | 狀態 |
 | :--- | :--- | :--- | :--- |
-| 單元與合約測試 | 本機 Node | `npm test` 213/213 全綠 | PASS |
-| 伺服器權威與防作弊 | 本機 Node | `npm run test:server` 17/17 全綠 | PASS |
+| 單元與合約測試 | 本機 Node | `npm test` 217/217 全綠 | PASS |
+| 伺服器權威與防作弊 | 本機 Node | `npm run test:server` 20/20 全綠 | PASS |
 | 跨裝置 RWD 煙霧 | 本機 Chromium | `npm run test:rwd:smoke` 30/30 全綠 | PASS |
+| 雙模式存檔隔離 (A1/A2) | 本機 Node / 前端 | `tests/modeSwitching.test.js` 全綠 | PASS (Tailscale 內網已驗證) |
+| 排隊指令 8s 逾時 (A1) | 本機 Node / 前端 | 未連線發送指令 8s 逾時 reject NOT_CONNECTED | PASS (Tailscale 內網已驗證) |
+| 種子與指令紀錄防外洩 (C1) | 伺服器出口 | 快照與轉發事件徹底剝除 seed/commandLog | PASS (Tailscale 內網已驗證) |
+| 斷線 10 秒寬限自動結算 (C2) | 伺服器 / 內網真機 | 斷線 10 秒計時器啟動，超時自動結算；10s 內重連恢復 | PASS (Tailscale 內網已驗證 / 仍待公網真機) |
+| 拒絕指令伺服器日誌審計 (C3) | 伺服器端日誌 | 被拒絕指令記錄至 console.warn 稽核 | PASS (Tailscale 內網已驗證) |
+| Windows 備份排程與還原 (B3) | Windows / CLI | 每日 03:00 KorakuBackup 排程；--restore 驗證完整還原 | PASS (Tailscale 內網已驗證 / 仍待 Linux crontab) |
 | Docker 缺變數 Fail-fast | Docker Staging | 缺 JWT_SECRET / ANON_SALT 立即退出 1 | PASS |
 | Docker 來源 Origin 阻擋 | Docker Staging | 非法 Origin 升級攔截拒絕 (1006) | PASS |
 | Docker 閒置心跳不中斷 | Docker Staging | 10s 閒置連續 5 次 ping/pong 保持 ONLINE | PASS |
@@ -78,9 +84,9 @@
 | Docker 備份與還原演練 | Docker Staging | 備份 -> 刪資料卷 -> 還原 100% 完整 | PASS |
 | Docker 崩潰自動重啟 | Docker Staging | PID 1 SIGKILL 後 restart:always 自動拉起 | PASS |
 | Docker 併發負載煙霧 | Docker Staging | 20 併發帳號 100% 成功、平均 99ms、記憶體無增長 | PASS |
-| 公開域名 SSL 憑證 | 真實 VPS | Let's Encrypt 真憑證且無瀏覽器告警 | 待真機執行 |
-| 公網延遲與斷線 10 秒 | 真實 VPS | 真實 4G/5G/跨國網路延遲與結算 | 待真機執行 |
-| 防火牆與安全群組 | 真實 VPS | 僅 80/443/SSH 放行，8080 不對外暴露 | 待真機執行 |
+| 公開域名 SSL 憑證 | 真實 VPS | Let's Encrypt 真憑證且無瀏覽器告警 | 仍待公網真機 |
+| 公網延遲與多地域跨國 | 真實 VPS | 真實 4G/5G/跨國海外網路延遲與結算 | 仍待公網真機 |
+| 防火牆與安全群組 | 真實 VPS | 僅 80/443/SSH 放行，8080 不對外暴露 | 仍待公網真機 |
 
 ---
 
