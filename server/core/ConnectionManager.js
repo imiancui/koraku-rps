@@ -85,6 +85,9 @@ export class ConnectionManager {
       if (this.battleLockPolicy && !session.battleLockPolicy) session.battleLockPolicy = this.battleLockPolicy;
       // Update session emit callback in case it changed
       session.emitFn = (event, payload) => this.sendToAccount(accountId, event, payload);
+      if (typeof session.handleReconnect === "function") {
+        session.handleReconnect();
+      }
     }
 
     session.touch();
@@ -129,9 +132,8 @@ export class ConnectionManager {
       const session = this.sessions.get(accountId);
       if (session) {
         session.touch();
-        // If battle in progress, allow 10s grace before battle settling
-        if (session.activeBattle) {
-          session.activeBattle.disconnectedAt = Date.now();
+        if (typeof session.handleDisconnect === "function") {
+          session.handleDisconnect();
         }
       }
     }

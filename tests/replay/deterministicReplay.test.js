@@ -260,7 +260,8 @@ test("Tier 4 - F6: GameSession 全迴路戰鬥重放（打完一場 -> saveBattl
   });
   assert.equal(startRes.ack, true);
   const battleId = session.activeBattle.battleId;
-  const originalSeed = session.activeBattle.seed;
+  assert.equal(session.activeBattle.seed, undefined, "Client-facing activeBattle must strip seed");
+  const originalSeed = session.battle.battleSeed;
 
   await session.executeCommand({
     cmdId: "replay_hand_1",

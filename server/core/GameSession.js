@@ -168,6 +168,8 @@ export class GameSession {
         snap.deadline = deadline;
         snap.pauseCount = this.battle.pauseCount || 0;
         snap.roundSeconds = snap.stage?.roundSeconds || 3;
+        delete snap.seed;
+        delete snap.commandLog;
       }
       return snap;
     }
@@ -255,8 +257,37 @@ export class GameSession {
 
     for (const evt of forwardEvents) {
       this.bus.on(evt, (payload) => {
-        this.emit(evt, payload);
+        let forwardedPayload = payload;
+        if (evt === Events.BATTLE_STATE && payload && typeof payload === "object") {
+          forwardedPayload = { ...payload };
+          delete forwardedPayload.seed;
+          delete forwardedPayload.commandLog;
+        } else if (evt === Events.BATTLE_ENDED && payload && typeof payload === "object") {
+          forwardedPayload = { ...payload };
+          delete forwardedPayload.seed;
+          delete forwardedPayload.commandLog;
+          if (forwardedPayload.battle && typeof forwardedPayload.battle === "object") {
+            forwardedPayload.battle = { ...forwardedPayload.battle };
+            delete forwardedPayload.battle.seed;
+            delete forwardedPayload.battle.commandLog;
+          }
+        }
+        this.emit(evt, forwardedPayload);
       });
+    }
+  }
+
+  handleDisconnect() {
+    this.touch();
+    if (this.battle && typeof this.battle.handleDisconnect === "function" && this.battle.isBattleActive()) {
+      this.battle.handleDisconnect();
+    }
+  }
+
+  handleReconnect() {
+    this.touch();
+    if (this.battle && typeof this.battle.handleReconnect === "function" && this.battle.isBattleActive()) {
+      this.battle.handleReconnect();
     }
   }
 

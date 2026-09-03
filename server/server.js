@@ -272,6 +272,7 @@ export class KorakuServer {
     const ipMsgCheck = clientIp ? this.rateLimiter.check(`ip_${clientIp}`) : { allowed: true };
     if (!rateCheck.allowed || !ipMsgCheck.allowed) {
       const retryAfterMs = Math.max(rateCheck.retryAfterMs || 0, ipMsgCheck.retryAfterMs || 0) || 1000;
+      console.warn(`[KorakuServer] Command rejected (RATE_LIMITED) for account=${accountId || "unknown"}, ip=${clientIp}: Rate limit exceeded, retry after ${retryAfterMs}ms`);
       this.connectionManager.sendToSocket(socket, Events.COMMAND_REJECTED, {
         code: ErrorCodes.RATE_LIMITED,
         error: `Rate limit exceeded. Retry after ${retryAfterMs}ms.`,
@@ -283,6 +284,7 @@ export class KorakuServer {
     // 3. Schema and envelope validation
     const validation = this.validator.validateRawMessage(rawMessage);
     if (!validation.valid) {
+      console.warn(`[KorakuServer] Command rejected (${validation.code || ErrorCodes.INVALID_SCHEMA}) for account=${accountId || "unknown"}, cmdId=${validation.envelope?.cmdId}: ${validation.error}`);
       this.connectionManager.sendToSocket(socket, Events.COMMAND_REJECTED, {
         cmdId: validation.envelope?.cmdId || null,
         code: validation.code || ErrorCodes.INVALID_SCHEMA,
@@ -302,6 +304,7 @@ export class KorakuServer {
     });
 
     if (!entitlementCheck.allowed) {
+      console.warn(`[KorakuServer] Command rejected (${entitlementCheck.error || ErrorCodes.UNAUTHORIZED_CHEAT}) for account=${accountId}, cmdId=${envelope.cmdId}: ${entitlementCheck.message}`);
       this.connectionManager.sendToSocket(socket, Events.COMMAND_REJECTED, {
         cmdId: envelope.cmdId,
         code: entitlementCheck.error || ErrorCodes.UNAUTHORIZED_CHEAT,
@@ -318,6 +321,7 @@ export class KorakuServer {
       });
 
       if (outcome && outcome.ack === false) {
+        console.warn(`[KorakuServer] Command rejected (${outcome.error || ErrorCodes.INTERNAL_ERROR}) for account=${accountId}, cmdId=${envelope.cmdId}: ${outcome.message || "Command execution failed"}`);
         this.connectionManager.sendToSocket(socket, Events.COMMAND_REJECTED, {
           cmdId: envelope.cmdId,
           code: outcome.error || ErrorCodes.INTERNAL_ERROR,

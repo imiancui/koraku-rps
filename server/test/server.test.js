@@ -753,3 +753,156 @@ test("Phase 4 - Step D: GameSession battleLockPolicy 三種策略 (always / coun
 
   await fs.rm(tmpDir, { recursive: true, force: true });
 });
+
+test("Part C - C1: GameSession 剝除 seed 與 commandLog 防止種子外洩", async () => {
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "koraku-test-seed-strip-"));
+  const storage = new JsonStorage({ dataDir: tmpDir });
+  const transferManager = new TransferManager({ storage });
+
+  const emittedBattleEvents = [];
+  const session = new GameSession({
+    accountId: "acc_seed_strip_test",
+    storage,
+    transferManager,
+    emitFn: (event, payload) => {
+      if (event === Events.BATTLE_STATE || event === Events.BATTLE_ENDED) {
+        emittedBattleEvents.push({ event, payload });
+      }
+    }
+  });
+  await session.load();
+
+  // 啟動戰鬥
+  const startRes = await session.executeCommand({
+    cmdId: "start_seed_test",
+    command: Commands.BATTLE_START,
+    payload: { stageId: 1 }
+  });
+  assert.equal(startRes.ack, true);
+
+  // 1. activeBattle getter 斷言無 seed / commandLog
+  const snap = session.activeBattle;
+  assert.ok(snap, "應有活躍戰鬥快照");
+  assert.equal(snap.seed, undefined, "activeBattle 不得洩漏 seed");
+  assert.equal(snap.commandLog, undefined, "activeBattle 不得洩漏 commandLog");
+
+  // 2. 指令回傳之 battleState 斷言無 seed / commandLog
+  assert.equal(startRes.battleState.seed, undefined, "BATTLE_START ACK 不得洩漏 seed");
+  assert.equal(startRes.battleState.commandLog, undefined, "BATTLE_START ACK 不得洩漏 commandLog");
+
+  // 3. 事件推送之 battle:state 斷言無 seed / commandLog
+  const stateEvts = emittedBattleEvents.filter(e => e.event === Events.BATTLE_STATE);
+  assert.ok(stateEvts.length > 0, "應有推送 battle:state 事件");
+  for (const evt of stateEvts) {
+    assert.equal(evt.payload.seed, undefined, "推送的 battle:state 不得包含 seed");
+    assert.equal(evt.payload.commandLog, undefined, "推送的 battle:state 不得包含 commandLog");
+  }
+
+  // 4. 戰鬥結束時，內部 replay 仍完整記錄 seed 與 commandLog，但客戶端推送剝除
+  const battleId = session._currentBattleId;
+  await session.executeCommand({ cmdId: "ab_seed", command: Commands.BATTLE_ABANDON });
+  if (session._battleEndedPromise) await session._battleEndedPromise;
+  const replay = await storage.getBattleReplay("acc_seed_strip_test", battleId);
+  assert.ok(replay, "伺服器內部 replay 應已儲存");
+  assert.ok(replay.seed !== undefined, "伺服器 replay 應保留 seed");
+  assert.ok(Array.isArray(replay.commandLog), "伺服器 replay 應保留 commandLog");
+
+  await fs.rm(tmpDir, { recursive: true, force: true });
+});
+
+test("Part C - C2: ConnectionManager 斷線後經 GameSession 觸發 10 秒寬限期與自動結算完整生命週期", async () => {
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "koraku-test-disconnect-grace-"));
+  const storage = new JsonStorage({ dataDir: tmpDir });
+  const transferManager = new TransferManager({ storage });
+  const connManager = new ConnectionManager({ storage, transferManager });
+
+  const accountId = "acc_disconnect_grace_flow";
+  const fakeSocket = {
+    readyState: 1,
+    send: () => {},
+    close: () => {}
+  };
+
+  connManager.registerConnection(accountId, fakeSocket, "conn_dc_1");
+  const session = await connManager.getOrCreateSession(accountId);
+
+  // 啟動戰鬥
+  await session.executeCommand({
+    cmdId: "cmd_start_dc_test",
+    command: Commands.BATTLE_START,
+    payload: { stageId: 1 }
+  });
+  assert.ok(session.battle?.isBattleActive(), "戰鬥應處於活躍狀態");
+  assert.equal(session.battle.state.disconnected, undefined);
+
+  // 1. 斷線觸發 (經 ConnectionManager.handleDisconnect)
+  connManager.handleDisconnect(fakeSocket);
+  assert.equal(session.battle.state.disconnected, true, "經 ConnectionManager 斷線後 battle.state.disconnected 應為 true");
+  assert.ok(session.battle.disconnectTimeoutId !== null, "應啟動 10 秒寬限定時器");
+
+  // 2. 測試重連恢復 (經 ConnectionManager.registerConnection)
+  const fakeSocketReconn = {
+    readyState: 1,
+    send: () => {},
+    close: () => {}
+  };
+  connManager.registerConnection(accountId, fakeSocketReconn, "conn_dc_2");
+  assert.equal(session.battle.state.disconnected, false, "重新連線後 battle.state.disconnected 應恢復為 false");
+  assert.equal(session.battle.disconnectTimeoutId, null, "寬限定時器應已清除");
+
+  // 3. 再次斷線，模擬 10 秒超時結算
+  connManager.handleDisconnect(fakeSocketReconn);
+  assert.equal(session.battle.state.disconnected, true);
+  // 直接觸發定時器回呼函式 settleDisconnect
+  session.battle.settleDisconnect();
+  assert.equal(session.battle.state.active, false, "10 秒逾時後戰鬥應已自動結算終止");
+
+  if (session._battleEndedPromise) await session._battleEndedPromise;
+  connManager.destroy();
+  await fs.rm(tmpDir, { recursive: true, force: true });
+});
+
+test("Part C - C3: 伺服器端拒絕非法指令日誌審計記錄", async () => {
+  const originalWarn = console.warn;
+  const warnings = [];
+  console.warn = (...args) => warnings.push(args.join(" "));
+
+  try {
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "koraku-test-reject-log-"));
+    const server = new KorakuServer({
+      port: 0,
+      host: "127.0.0.1",
+      dataDir: tmpDir,
+      env: "development"
+    });
+
+    const sent = [];
+    const fakeSocket = {
+      readyState: 1,
+      send: (data) => sent.push(JSON.parse(data)),
+      on: () => {},
+      close: () => {}
+    };
+
+    // 1. 發送非法 Schema 訊息（缺少 cmdId）
+    await server._handleSocketMessage(fakeSocket, "acc_test_log", false, "127.0.0.1", JSON.stringify({
+      command: Commands.BUY_ITEM
+    }));
+
+    assert.ok(warnings.some(w => w.includes("[KorakuServer] Command rejected (INVALID_SCHEMA)")), "伺服器應記錄 INVALID_SCHEMA 拒絕日誌");
+
+    // 2. 發送未授權的作弊指令
+    await server._handleSocketMessage(fakeSocket, "acc_test_log", false, "127.0.0.1", JSON.stringify({
+      cmdId: "cmd_unauth_cheat",
+      command: Commands.CHEAT_ADD_COINS,
+      payload: { amount: 1000 },
+      configVersion: CONFIG_VERSION
+    }));
+
+    assert.ok(warnings.some(w => w.includes("[KorakuServer] Command rejected (UNAUTHORIZED_CHEAT)")), "伺服器應記錄 UNAUTHORIZED_CHEAT 拒絕日誌");
+
+    await fs.rm(tmpDir, { recursive: true, force: true });
+  } finally {
+    console.warn = originalWarn;
+  }
+});
