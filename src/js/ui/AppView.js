@@ -300,6 +300,101 @@ export class AppView {
     }
   }
 
+  _startCountdownTicker(state) {
+    this._stopCountdownTicker();
+    const initialSec = Number(state.countdown) || Number(state.stage?.roundSeconds) || 5;
+    this._countdownStartTime = (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now();
+    this._countdownTotalMs = initialSec * 1000;
+    this._lastCountdownSec = initialSec;
+
+    const tick = () => {
+      const countdownValue = $("#countdown-value");
+      if (!countdownValue || this.battleState?.phase !== "countdown" || this.battleState?.isPaused) return;
+      const now = (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now();
+      const elapsed = now - this._countdownStartTime;
+      const remainingMs = Math.max(0, this._countdownTotalMs - elapsed);
+      const sec = Math.ceil(remainingMs / 1000);
+      countdownValue.textContent = String(sec);
+
+      if (sec !== this._lastCountdownSec) {
+        this._lastCountdownSec = sec;
+        if (sec <= 3 && sec >= 1) {
+          const playerHand = $("#player-hand-display");
+          const enemyHand = $("#enemy-hand-display");
+          const countdownBox = $("#round-countdown");
+          [playerHand, enemyHand].forEach((el) => {
+            if (!el) return;
+            el.classList.remove("is-fist-shaking");
+            void el.offsetWidth;
+            el.classList.add("is-fist-shaking");
+          });
+          if (countdownBox) {
+            countdownBox.classList.remove("is-beat");
+            void countdownBox.offsetWidth;
+            countdownBox.classList.add("is-beat");
+          }
+          try {
+            this.sound?.play("select");
+          } catch (_) {}
+          const lbl = $("#enemy-hand-label");
+          if (lbl) lbl.textContent = I18n.t("ui.preparing");
+          const leftLbl = $("#enemy-left-hand-label");
+          if (leftLbl) leftLbl.textContent = I18n.t("ui.preparing");
+          const rightLbl = $("#enemy-right-hand-label");
+          if (rightLbl) rightLbl.textContent = I18n.t("ui.preparing");
+        }
+      }
+      if (remainingMs <= 0) {
+        this._stopCountdownTicker();
+      }
+    };
+
+    this._countdownTickerId = setInterval(tick, 100);
+  }
+
+  _stopCountdownTicker() {
+    if (this._countdownTickerId) {
+      clearInterval(this._countdownTickerId);
+      this._countdownTickerId = null;
+    }
+  }
+
+  _startReactionTicker(state) {
+    this._stopReactionTicker();
+    const initialSec = typeof state.reactionRemaining === "number" && state.reactionRemaining > 0
+      ? state.reactionRemaining
+      : ((state.stage?.reactionWindowMs || 1000) / 1000);
+    this._reactionStartTime = (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now();
+    this._reactionTotalMs = initialSec * 1000;
+
+    const tick = () => {
+      const countdownValue = $("#countdown-value");
+      if (!countdownValue || this.battleState?.phase !== "reaction" || this.battleState?.isPaused) return;
+      const now = (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now();
+      const elapsed = now - this._reactionStartTime;
+      const remainingMs = Math.max(0, this._reactionTotalMs - elapsed);
+      const secText = (remainingMs / 1000).toFixed(1);
+      countdownValue.textContent = secText;
+      if (remainingMs <= 0) {
+        this._stopReactionTicker();
+      }
+    };
+
+    this._reactionTickerId = setInterval(tick, 100);
+  }
+
+  _stopReactionTicker() {
+    if (this._reactionTickerId) {
+      clearInterval(this._reactionTickerId);
+      this._reactionTickerId = null;
+    }
+  }
+
+  _clearBattleTickers() {
+    this._stopCountdownTicker();
+    this._stopReactionTicker();
+  }
+
   getConnectionLabel(state) {
     const key = `connection.${state}`;
     const translated = I18n.t(key);
@@ -415,6 +510,19 @@ export class AppView {
     if (this.floatingWatermelon) {
       this.hudDragController.register("watermelon", this.floatingWatermelon, { handleSelector: ".floating-watermelon-header" });
     }
+
+    this._countdownTickerId = null;
+    this._countdownStartTime = 0;
+    this._countdownTotalMs = 0;
+    this._lastCountdownSec = 0;
+    this._currentCountdownRound = null;
+
+    this._reactionTickerId = null;
+    this._reactionStartTime = 0;
+    this._reactionTotalMs = 0;
+    this._currentReactionRound = null;
+    this._morphReactionStarted = false;
+    this._wasPaused = false;
   }
 
   init() {
@@ -791,11 +899,17 @@ export class AppView {
       }
     };
     this.bus.on("battle:state", handleMutationLockUpdate);
-    this.bus.on("battle:ended", handleMutationLockUpdate);
+    this.bus.on("battle:ended", () => {
+      handleMutationLockUpdate();
+      this._clearBattleTickers();
+    });
     this.bus.on("battle:start", handleMutationLockUpdate);
     if (this.client && typeof this.client.on === "function") {
       this.client.on("battle:state", handleMutationLockUpdate);
-      this.client.on("battle:ended", handleMutationLockUpdate);
+      this.client.on("battle:ended", () => {
+        handleMutationLockUpdate();
+        this._clearBattleTickers();
+      });
       this.client.on("battle:start", handleMutationLockUpdate);
     }
     this.bus.on("battle:countdown-beat", (beat) => this.handleCountdownBeat(beat));
@@ -876,8 +990,11 @@ export class AppView {
     const countdownBox = $("#round-countdown");
     const countdownVal = $("#countdown-value");
 
-    if (beat && typeof beat.count === "number" && countdownVal) {
-      countdownVal.textContent = String(beat.count);
+    if (beat && typeof beat.count === "number") {
+      this._lastCountdownSec = beat.count;
+      if (countdownVal) {
+        countdownVal.textContent = String(beat.count);
+      }
     }
 
     [playerHand, enemyHand].forEach((el) => {
@@ -1440,8 +1557,17 @@ export class AppView {
 
     if (event.target.closest("#btn-switch-to-online")) {
       if (typeof window !== "undefined") {
-        window.localStorage?.setItem("koraku_mode", "online");
-        window.location.reload();
+        try {
+          window.localStorage?.setItem("koraku_mode", "online");
+        } catch (_) {}
+        try {
+          const url = new URL(window.location.href);
+          url.searchParams.delete("mode");
+          url.searchParams.set("mode", "online");
+          window.location.href = url.toString();
+        } catch (_) {
+          window.location.reload();
+        }
       }
       return;
     }
@@ -1807,6 +1933,7 @@ export class AppView {
     if (screenName !== "battle") {
       this.hideFloatingWatermelon();
       this.postBattle?.closeAutoWatermelon?.();
+      this._clearBattleTickers();
     }
     try {
       sessionStorage.setItem("koraku_active_screen", screenName);
@@ -3117,7 +3244,7 @@ export class AppView {
 
     const switchSection = $("#save-mode-switch-section");
     if (switchSection) {
-      const serverUrl = typeof window !== "undefined" ? (window.__KORAKU_CONFIG__?.serverUrl || window.KORAKU_SERVER_URL) : null;
+      const serverUrl = typeof window !== "undefined" ? (window.__KORAKU_CONFIG__?.serverUrl || window.KORAKU_SERVER_URL || (location.protocol !== "file:" ? "wss://ws.koraku.app" : null)) : null;
       const isOffline = this.client ? (this.client.connectionState === ConnectionStates.OFFLINE || this.client.connectionState === "offline") : true;
       switchSection.hidden = !(serverUrl && isOffline);
     }
@@ -3475,15 +3602,34 @@ export class AppView {
     const countdownValue = $("#countdown-value");
     const countdownCaption = $("#countdown-caption");
     if (state.phase === "countdown") {
-      countdownValue.textContent = state.countdown;
+      this._stopReactionTicker();
+      if (!this._countdownTickerId || this._currentCountdownRound !== state.round || (this._wasPaused && !state.isPaused)) {
+        this._currentCountdownRound = state.round;
+        this._startCountdownTicker(state);
+      }
+      this._wasPaused = Boolean(state.isPaused);
+      if (typeof state.countdown === "number" && !this._countdownTickerId) {
+        countdownValue.textContent = state.countdown;
+      }
       countdownCaption.textContent = I18n.t("ui.countdownCaption");
     } else if (state.phase === "reaction") {
-      countdownValue.textContent = state.reactionRemaining.toFixed(1);
+      this._stopCountdownTicker();
+      if (!this._reactionTickerId || justRevealed || this._currentReactionRound !== state.round || (state.morphActive && !this._morphReactionStarted) || (this._wasPaused && !state.isPaused)) {
+        this._currentReactionRound = state.round;
+        this._morphReactionStarted = Boolean(state.morphActive);
+        this._startReactionTicker(state);
+      }
+      this._wasPaused = Boolean(state.isPaused);
+      if (typeof state.reactionRemaining === "number" && !this._reactionTickerId) {
+        countdownValue.textContent = state.reactionRemaining.toFixed(1);
+      }
       countdownCaption.textContent = state.morphActive ? I18n.t("ui.morphSelectCaption") : I18n.t("ui.morphCaption");
     } else if (state.phase === "qte") {
+      this._clearBattleTickers();
       countdownValue.textContent = "!";
       countdownCaption.textContent = I18n.t("ui.qteCaption");
     } else {
+      this._clearBattleTickers();
       countdownValue.textContent = state.lastResult === "win" ? I18n.t("ui.battleWon") : state.lastResult === "loss" ? I18n.t("ui.battleLost") : I18n.t("ui.battleDraw");
       countdownCaption.textContent = I18n.t("ui.settleCaption");
     }

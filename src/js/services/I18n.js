@@ -22,6 +22,29 @@ export const LOCALE_STORAGE_KEY = "koraku-rps-locale";
 
 export const CHANGELOG_DATA = [
   {
+    version: "0.0.27",
+    date: "2026-09-04",
+    tag: "Online Battle Countdown Client Ticker & Save Modal Mode Switching Normalization",
+    changes: {
+      "zh-Hant": [
+        "【連線版回合倒數平滑化】客戶端戰鬥介面內建高精度時間步進器（Ticker），擺脫網路封包廣播頻率依賴，平滑展現 5 秒至 1 秒之節奏倒數、出拳搖晃與反應時間遞減，徹底根除秒數停留與跳秒問題。",
+        "【存檔紀錄線上模式切換修復】修復首頁「存檔紀錄」彈窗內「切換回線上模式」按鈕，主動清理殘留 URL 參數並注入模式標記，確保本機與正式環境皆能順暢重啟切換回線上伺服器。"
+      ],
+      "zh-Hans": [
+        "【连线版回合倒数平滑化】客户端战斗界面内建高精度时间步进器（Ticker），摆脱网络封包广播频率依赖，平滑展现 5 秒至 1 秒之节奏倒数、出拳摇晃与反应时间递减，彻底根除秒数停留与跳秒问题。",
+        "【存档纪录线上模式切换修复】修复首页“存档纪录”弹窗内“切换回线上模式”按钮，主动清理残留 URL 参数并注入模式标记，确保本机与正式环境皆能顺畅重启切换回线上服务器。"
+      ],
+      "en": [
+        "【Online Battle Countdown Smooth Ticker】Built high-precision client-side countdown and reaction tickers in AppView, eliminating reliance on packet broadcast frequency and ensuring flawless 5s-to-1s countdown pacing, fist shaking, and reaction timer progression.",
+        "【Save Modal Online Mode Switch Normalization】Fixed the 'Switch to Online Mode' button in Save Records modal by purging stale URL mode params and injecting active online flags, guaranteeing reliable reboots into online authoritative mode across all environments."
+      ],
+      "ja": [
+        "【オンライン対戦カウントダウン平滑化】戦闘UIに高精度クライアントTickerを実装し、パケット配信頻度への依存を解消。5秒から1秒への滑らかなカウントダウン、拳の揺れ、反応時間の減少を完璧に再現し、秒数の停止やスキップを根本解消。",
+        "【セーブデータ管理のオンライン復帰修正】セーブデータモーダルの「オンラインモードに切り替え」ボタンを修正。古いURLパラメータを自動整理して確実にオンライン権威サーバーへ再接続できるように改善。"
+      ]
+    }
+  },
+  {
     version: "0.0.26",
     date: "2026-09-04",
     tag: "Countdown, Watermelon Marker, Skill Points & Battle Rules Full Repair",

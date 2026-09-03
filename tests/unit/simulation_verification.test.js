@@ -567,3 +567,80 @@ test("6.2 AppView.handleQteFinished: 正確抓取 #qte-panel-single 並在失敗
   view.handleQteFinished({ mode: "single", success: false });
   assert.equal(failedClassAdded, true, "QTE 失敗時正確對 #qte-panel-single 套用 is-qte-failed 動畫樣式");
 });
+
+// -------------------------------------------------------------
+// 7. 連線版倒數平滑 Ticker 與模式切換正規化
+// -------------------------------------------------------------
+test("7.1 AppView 戰鬥倒數 Ticker：在無中途伺服器封包下，客戶端平滑遞減 #countdown-value", async () => {
+  const view = Object.create(AppView.prototype);
+  const bus = new EventBus();
+  const soundsPlayed = [];
+  view.bus = bus;
+  view.sound = { play(name) { soundsPlayed.push(name); }, setBgmScene() {} };
+  view.battleState = { phase: "countdown", countdown: 5, round: 1 };
+  view._countdownTickerId = null;
+
+  let countdownText = "5";
+  const mockCountdownVal = {
+    set textContent(val) { countdownText = String(val); },
+    get textContent() { return countdownText; }
+  };
+  globalThis.$ = (sel) => {
+    if (sel === "#countdown-value") return mockCountdownVal;
+    return { classList: { remove() {}, add() {} }, offsetWidth: 0 };
+  };
+
+  view._startCountdownTicker(view.battleState);
+  assert.equal(countdownText, "5", "初始值為 5");
+  assert.ok(view._countdownTickerId !== null, "已啟動客戶端 countdown ticker");
+
+  view._countdownStartTime -= 1050;
+  await new Promise((resolve) => setTimeout(resolve, 150));
+  assert.equal(countdownText, "4", "經過 1 秒後遞減為 4");
+
+  view._countdownStartTime -= 1000;
+  await new Promise((resolve) => setTimeout(resolve, 150));
+  assert.equal(countdownText, "3", "經過 2 秒後遞減為 3");
+  assert.ok(soundsPlayed.includes("select"), "進入最後 3 秒時觸發節奏提示音");
+
+  view._clearBattleTickers();
+  assert.equal(view._countdownTickerId, null, "Ticker 已正確清理");
+});
+
+test("7.2 AppView 反應時間 Ticker：進入 reaction 階段平滑遞減 reactionRemaining", async () => {
+  const view = Object.create(AppView.prototype);
+  view.battleState = { phase: "reaction", reactionRemaining: 1.0, round: 1 };
+  view._reactionTickerId = null;
+
+  let countdownText = "1.0";
+  const mockCountdownVal = {
+    set textContent(val) { countdownText = String(val); },
+    get textContent() { return countdownText; }
+  };
+  globalThis.$ = (sel) => {
+    if (sel === "#countdown-value") return mockCountdownVal;
+    return null;
+  };
+
+  view._startReactionTicker(view.battleState);
+  assert.ok(view._reactionTickerId !== null, "已啟動反應時間 ticker");
+
+  view._reactionStartTime -= 350;
+  await new Promise((resolve) => setTimeout(resolve, 150));
+
+  const val = parseFloat(countdownText);
+  assert.ok(val <= 0.7 && val >= 0.4, `反應時間應已平滑遞減至 ~0.6，目前為 ${val}`);
+
+  view._clearBattleTickers();
+  assert.equal(view._reactionTickerId, null, "Ticker 已正確清理");
+});
+
+test("7.3 存檔紀錄「切換回線上模式」：URL 參數正規化清除 mode=offline 並覆蓋為 mode=online", () => {
+  const originalHref = "https://koraku.app/?mode=offline&player=alice";
+  const url = new URL(originalHref);
+  url.searchParams.delete("mode");
+  url.searchParams.set("mode", "online");
+
+  assert.equal(url.searchParams.get("mode"), "online", "mode 參數成功覆蓋為 online");
+  assert.equal(url.searchParams.get("player"), "alice", "其餘 URL 查詢參數保持不變");
+});
