@@ -1,4 +1,4 @@
-import { DIRECTIONS, DIRECTION_SVGS, getDirectionSvg, GALLERY_ITEMS, HANDS, ITEMS, SKILLS, STAGES, EQUIPMENT_ITEMS, EQUIPMENT_SLOTS, BATTLE_RULES, DOJO_CONFIG } from "../config/gameConfig.js";
+import { APP_VERSION, DIRECTIONS, DIRECTION_SVGS, getDirectionSvg, GALLERY_ITEMS, HANDS, ITEMS, SKILLS, STAGES, EQUIPMENT_ITEMS, EQUIPMENT_SLOTS, BATTLE_RULES, DOJO_CONFIG } from "../config/gameConfig.js";
 import { I18n, LOCALES, LOCALE_ORDER } from "../services/I18n.js";
 import { TimerRegistry } from "../core/TimerRegistry.js";
 import { QTESystem, DualQTESystem } from "../systems/QTESystem.js";
@@ -131,6 +131,8 @@ export class AppView {
       } catch (err) {
         if (err?.code === ErrorCodes.BATTLE_IN_PROGRESS_LOCKED || err?.code === "BATTLE_IN_PROGRESS_LOCKED" || err?.message === "BATTLE_IN_PROGRESS_LOCKED" || err?.key === "battle.lockedDuringBattle") {
           this.showToast(I18n.t("battle.lockedDuringBattle"), "danger");
+        } else if (err?.code === ErrorCodes.NOT_CONNECTED || err?.code === "NOT_CONNECTED" || err?.errorCode === ErrorCodes.NOT_CONNECTED) {
+          this.showToast(I18n.t("connection.commandFailedOffline"), "warning");
         } else {
           console.error(`[AppView] Command failed (${command}):`, err);
         }
@@ -227,6 +229,9 @@ export class AppView {
     if (banner && bannerText) {
       if (state === ConnectionStates.RECONNECTING || state === ConnectionStates.DISCONNECTED) {
         banner.hidden = false;
+        if (this.connectionBannerSwitchOffline) {
+          this.connectionBannerSwitchOffline.hidden = false;
+        }
         if (this.battleState?.active) {
           const deadline = meta?.deadline || (Date.now() + 10000);
           this._startDisconnectCountdown(deadline);
@@ -239,6 +244,9 @@ export class AppView {
       } else {
         this._stopDisconnectCountdown();
         banner.hidden = true;
+        if (this.connectionBannerSwitchOffline) {
+          this.connectionBannerSwitchOffline.hidden = true;
+        }
       }
     }
   }
@@ -356,6 +364,18 @@ export class AppView {
     this.connectionStatusBanner = $("#connection-status-banner");
     this.connectionBannerText = $("#connection-banner-text");
     this.connectionBannerClose = $("#connection-banner-close");
+    this.connectionBannerSwitchOffline = $("#connection-banner-switch-offline");
+
+    if (this.connectionBannerSwitchOffline) {
+      this.connectionBannerSwitchOffline.addEventListener("click", () => {
+        if (typeof window !== "undefined") {
+          window.localStorage?.setItem("koraku_mode", "offline");
+          const url = new URL(window.location.href);
+          url.searchParams.delete("mode");
+          window.location.href = url.toString();
+        }
+      });
+    }
 
     if (this.connectionBannerClose) {
       this.connectionBannerClose.addEventListener("click", () => {
@@ -1399,6 +1419,14 @@ export class AppView {
 
     if (event.target.closest("#btn-import-save-seed")) {
       this.handleImportSaveSeed();
+      return;
+    }
+
+    if (event.target.closest("#btn-switch-to-online")) {
+      if (typeof window !== "undefined") {
+        window.localStorage?.setItem("koraku_mode", "online");
+        window.location.reload();
+      }
       return;
     }
 
@@ -2977,10 +3005,30 @@ export class AppView {
   renderChangelog() {
     const listEl = $("#changelog-modal-list");
     if (!listEl) return;
-    const changelogs = I18n.getChangelog();
+    let changelogs = I18n.getChangelog();
+
+    // Guard: Guarantee the running APP_VERSION is present and at the top
+    if (!changelogs.some((e) => e.version === APP_VERSION)) {
+      changelogs = [
+        {
+          version: APP_VERSION,
+          date: new Date().toISOString().slice(0, 10),
+          tag: "Latest Version",
+          changes: [
+            I18n.t("ui.currentVersionStatus")
+              ? `${I18n.t("ui.currentVersion")} (v${APP_VERSION}): ${I18n.t("ui.currentVersionStatus")}`
+              : `v${APP_VERSION}`
+          ]
+        },
+        ...changelogs
+      ];
+    }
+
+    const currentBadgeText = I18n.t("ui.currentVersion") || "當前版本";
+
     listEl.innerHTML = changelogs
-      .map((entry, idx) => {
-        const isCurrent = idx === 0;
+      .map((entry) => {
+        const isCurrent = entry.version === APP_VERSION;
         const changesHtml = entry.changes
           .map((c) => `<li>${c}</li>`)
           .join("");
@@ -2988,6 +3036,7 @@ export class AppView {
           <div class="changelog-entry ${isCurrent ? "is-current" : ""}">
             <div class="changelog-entry-header">
               <span class="changelog-ver">v${entry.version}</span>
+              ${isCurrent ? `<span class="changelog-current-badge">${currentBadgeText}</span>` : ""}
               <span class="changelog-date">${entry.date}</span>
               <span class="changelog-tag">${entry.tag}</span>
             </div>
@@ -3028,6 +3077,13 @@ export class AppView {
     }
     if (this.saveSeedInput) {
       this.saveSeedInput.value = "";
+    }
+
+    const switchSection = $("#save-mode-switch-section");
+    if (switchSection) {
+      const serverUrl = typeof window !== "undefined" ? (window.__KORAKU_CONFIG__?.serverUrl || window.KORAKU_SERVER_URL) : null;
+      const isOffline = this.client ? (this.client.connectionState === ConnectionStates.OFFLINE || this.client.connectionState === "offline") : true;
+      switchSection.hidden = !(serverUrl && isOffline);
     }
   }
 

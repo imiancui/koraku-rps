@@ -18,22 +18,22 @@ import { computePlayerStats } from "../systems/progressionRules.js";
 import { I18n } from "../services/I18n.js";
 import { ASSETS } from "../config/gameConfig.js";
 
+export const ONLINE_STORAGE_PREFIX = "koraku-rps-online-";
+export const ONLINE_TOKEN_KEY = "koraku-rps-online-token";
+export const ONLINE_STATE_CACHE_KEY = "koraku-rps-online-state";
+
 /**
  * Determine default WebSocket URL based on current runtime environment
  * @param {string} [customUrl]
- * @returns {string}
+ * @returns {string|null}
  */
 export function resolveWebSocketUrl(customUrl) {
   if (customUrl) return customUrl;
   if (typeof window !== "undefined") {
     if (window.KORAKU_SERVER_URL) return window.KORAKU_SERVER_URL;
     if (window.__KORAKU_CONFIG__?.serverUrl) return window.__KORAKU_CONFIG__.serverUrl;
-    if (window.location && window.location.host) {
-      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      return `${protocol}//${window.location.host}/ws`;
-    }
   }
-  return "ws://localhost:8080/ws";
+  return null;
 }
 
 /**
@@ -88,13 +88,20 @@ export class RemoteGameClient extends GameClient {
 
     this._ws = null;
     this._connectionState = ConnectionStates.OFFLINE;
-    this._token = this.options.token;
+    this._storage = options.storage || (typeof window !== "undefined" ? window.localStorage : null);
+    this._token = this.options.token || (this._storage ? this._storage.getItem(ONLINE_TOKEN_KEY) : null) || null;
     this._deviceId = this.options.deviceId;
     this._eventBus = this.options.eventBus || new EventBus();
     this._devEntitlement = Boolean(options.devEntitlement);
 
     // State snapshot cache
     this._state = {};
+    if (this._storage) {
+      try {
+        const raw = this._storage.getItem(ONLINE_STATE_CACHE_KEY);
+        if (raw) this._state = JSON.parse(raw);
+      } catch (_) {}
+    }
     this._storeProxy = null;
     this._battleProxy = null;
     this._postBattleProxy = null;
@@ -413,6 +420,14 @@ export class RemoteGameClient extends GameClient {
   _connect() {
     if (this._isExplicitlyClosed) return;
 
+    if (!this.options.url) {
+      const err = new Error("No WebSocket URL configured");
+      err.code = ErrorCodes.NOT_CONNECTED;
+      this._setConnectionState(ConnectionStates.DISCONNECTED, { reason: "NO_SERVER_URL" });
+      this._rejectInit(err);
+      return;
+    }
+
     const WebSocketClass = this.options.WebSocketClass;
     if (!WebSocketClass) {
       const err = new Error("WebSocket constructor not available in current environment");
@@ -579,10 +594,20 @@ export class RemoteGameClient extends GameClient {
     }
 
     // Handshake successful
-    if (msg.token) this._token = msg.token;
+    if (msg.token) {
+      this._token = msg.token;
+      try {
+        if (this._storage) this._storage.setItem(ONLINE_TOKEN_KEY, msg.token);
+      } catch (_) {}
+    }
     if (msg.devEntitlement !== undefined) this._devEntitlement = Boolean(msg.devEntitlement);
     if (msg.serverConfig) this._serverConfig = msg.serverConfig;
-    if (msg.state) this._state = msg.state;
+    if (msg.state) {
+      this._state = msg.state;
+      try {
+        if (this._storage) this._storage.setItem(ONLINE_STATE_CACHE_KEY, JSON.stringify(msg.state));
+      } catch (_) {}
+    }
 
     this._reconnectAttempts = 0;
     this._setConnectionState(ConnectionStates.ONLINE, {
@@ -689,6 +714,15 @@ export class RemoteGameClient extends GameClient {
     const stateObj = msg.state || (payload && payload.state);
     if (stateObj && typeof stateObj === "object") {
       this._state = { ...this._state, ...stateObj };
+      try {
+        if (this._storage) this._storage.setItem(ONLINE_STATE_CACHE_KEY, JSON.stringify(this._state));
+      } catch (_) {}
+    }
+    if (payload?.token) {
+      this._token = payload.token;
+      try {
+        if (this._storage) this._storage.setItem(ONLINE_TOKEN_KEY, payload.token);
+      } catch (_) {}
     }
 
     const pending = this._pendingCommands.get(cmdId);
@@ -712,28 +746,19 @@ export class RemoteGameClient extends GameClient {
    */
   _handleCommandReject(msg) {
     const cmdId = msg.cmdId || msg.payload?.cmdId;
+    if (!cmdId) return;
+
+    const code = msg.code || msg.payload?.code || ErrorCodes.INTERNAL_ERROR;
+    const reason = msg.error || msg.reason || msg.payload?.error || msg.payload?.message || "Command rejected";
     const payload = msg.payload !== undefined ? msg.payload : msg;
-    const code = msg.code || payload?.code || ErrorCodes.INTERNAL_ERROR;
-    const key = msg.key || payload?.key;
-    const params = msg.params || payload?.params || {};
-    let reason = msg.reason || msg.error || payload?.reason || payload?.error || "Command rejected by server";
-    if (key && typeof I18n !== "undefined" && typeof I18n.t === "function") {
-      const localized = I18n.t(key, params);
-      if (localized && localized !== key) {
-        reason = localized;
-      }
-    }
 
-    const err = new Error(reason);
-    err.code = code;
-    err.key = key;
-    err.params = params;
-    err.payload = payload;
-
-    const pending = cmdId ? this._pendingCommands.get(cmdId) : null;
+    const pending = this._pendingCommands.get(cmdId);
     if (pending) {
       if (pending.timer) clearTimeout(pending.timer);
       this._pendingCommands.delete(cmdId);
+      const err = new Error(reason);
+      err.code = code;
+      err.payload = payload;
       pending.reject(err);
     }
 
@@ -759,6 +784,9 @@ export class RemoteGameClient extends GameClient {
     if (eventName === Events.STORE_CHANGED || eventName === "store:changed") {
       if (payload && typeof payload === "object") {
         this._state = { ...this._state, ...payload };
+        try {
+          if (this._storage) this._storage.setItem(ONLINE_STATE_CACHE_KEY, JSON.stringify(this._state));
+        } catch (_) {}
       }
     } else if (eventName === Events.BATTLE_STATE || eventName === "battle:state") {
       if (payload) {
@@ -827,8 +855,29 @@ export class RemoteGameClient extends GameClient {
         this._dispatchCommand(cmdId);
       } else {
         this._commandQueue.push(cmdId);
+        entry.timer = setTimeout(() => {
+          this._onQueuedCommandTimeout(cmdId);
+        }, this.options.commandTimeout);
       }
     });
+  }
+
+  /**
+   * Handle queued command timeout when disconnected or not online
+   * @private
+   * @param {string} cmdId
+   */
+  _onQueuedCommandTimeout(cmdId) {
+    const entry = this._pendingCommands.get(cmdId);
+    if (!entry) return;
+    this._pendingCommands.delete(cmdId);
+    const idx = this._commandQueue.indexOf(cmdId);
+    if (idx !== -1) {
+      this._commandQueue.splice(idx, 1);
+    }
+    const err = new Error("Command timed out while waiting for server connection.");
+    err.code = ErrorCodes.NOT_CONNECTED;
+    entry.reject(err);
   }
 
   /**

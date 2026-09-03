@@ -4,36 +4,23 @@
 
 import test from "node:test";
 import assert from "node:assert/strict";
-import { ConnectionStates, Commands } from "../src/js/kernel/protocol.js";
+import { ConnectionStates, Commands, ErrorCodes } from "../src/js/kernel/protocol.js";
 import { LocalGameClient } from "../src/js/kernel/LocalGameClient.js";
-import { RemoteGameClient } from "../src/js/net/RemoteGameClient.js";
+import {
+  RemoteGameClient,
+  ONLINE_STORAGE_PREFIX,
+  ONLINE_TOKEN_KEY,
+  ONLINE_STATE_CACHE_KEY
+} from "../src/js/net/RemoteGameClient.js";
 import { encodeSaveData, decodeSaveData } from "../src/js/services/Persistence.js";
+import { STORAGE_KEY } from "../src/js/config/gameConfig.js";
+import { resolveClientMode, resolveClientModeDetails } from "../src/js/main.js";
 import {
   AuthoritativeKernelServer,
   MemoryPersistence,
   TestLocalGameClient,
   TestRemoteGameClient
 } from "./helpers/testHarness.js";
-
-/**
- * Pure mode resolver utility (matches main.js resolution contract)
- * @param {object} env - { search: string, storageValue: string|null, hostname: string }
- * @returns {"offline"|"online"} Resolved mode
- */
-export function resolveClientMode(env = {}) {
-  const search = env.search || "";
-  const params = new URLSearchParams(search.startsWith("?") ? search : `?${search}`);
-  const modeParam = params.get("mode")?.trim().toLowerCase();
-
-  if (modeParam === "offline") return "offline";
-  if (modeParam === "online") return "online";
-
-  const storageMode = env.storageValue?.trim().toLowerCase();
-  if (storageMode === "offline") return "offline";
-  if (storageMode === "online") return "online";
-
-  return "online"; // Default mode
-}
 
 /**
  * Client factory function (matches kernel factory contract)
@@ -49,41 +36,70 @@ export function createClientForMode(mode, options = {}) {
   return new TestRemoteGameClient(server, options);
 }
 
-test("模式解析策略：URL 參數優先於 localStorage 與預設值", () => {
-  // 1. URL 顯式指定 ?mode=offline
+test("模式解析策略：預設 offline，刪除 hostname 判斷，無配置時要求 online 降級並提供 warningKey", () => {
+  // 1. URL 顯式指定 ?mode=offline -> 永遠 offline
   assert.equal(
-    resolveClientMode({ search: "?mode=offline", storageValue: "online", hostname: "koraku.app" }),
+    resolveClientMode({ search: "?mode=offline", storageValue: "online", serverUrl: "wss://example.com/ws" }),
     "offline",
     "?mode=offline 應具有最高優先級"
   );
 
-  // 2. URL 顯式指定 ?mode=online
+  // 2. URL 顯式指定 ?mode=online 且有注入伺服器 -> online
   assert.equal(
-    resolveClientMode({ search: "?mode=online", storageValue: "offline", hostname: "koraku.app" }),
+    resolveClientMode({ search: "?mode=online", storageValue: "offline", serverUrl: "wss://example.com/ws" }),
     "online",
-    "?mode=online 應具有最高優先級"
+    "?mode=online 在有注入 URL 時為 online"
   );
 
-  // 3. 大小寫與空白容錯（如 ?mode=Offline）
+  // 3. URL 顯式指定 ?mode=online 但無注入伺服器 -> 降級為 offline 並給出 connection.noServerConfigured
+  const noServerRes = resolveClientModeDetails({ search: "?mode=online", serverUrl: null });
+  assert.equal(noServerRes.mode, "offline", "無注入伺服器時要求 online 必須降級為 offline");
+  assert.equal(noServerRes.warningKey, "connection.noServerConfigured", "應標記 noServerConfigured 警告鍵");
+
+  // 4. 大小寫與空白容錯（如 ?mode=Offline）
   assert.equal(
     resolveClientMode({ search: "?mode=  OFFLINE  ", storageValue: "online" }),
     "offline"
   );
 
-  // 4. 無 URL 參數時回退至 localStorage
+  // 5. 無 URL 參數時依 localStorage.koraku_mode
   assert.equal(
     resolveClientMode({ search: "", storageValue: "offline" }),
     "offline"
   );
   assert.equal(
-    resolveClientMode({ search: "", storageValue: "online" }),
+    resolveClientMode({ search: "", storageValue: "online", serverUrl: "wss://staging.koraku.ts.net:8443/ws" }),
+    "online"
+  );
+  // localStorage 為 online 但無伺服器注入 -> 降級 offline
+  const localOnlineNoServer = resolveClientModeDetails({ search: "", storageValue: "online", serverUrl: null });
+  assert.equal(localOnlineNoServer.mode, "offline");
+  assert.equal(localOnlineNoServer.warningKey, "connection.noServerConfigured");
+
+  // 6. 皆未設定但有伺服器注入配置 -> 走 online
+  assert.equal(
+    resolveClientMode({ search: "", storageValue: null, serverUrl: "wss://staging.koraku.ts.net:8443/ws" }),
     "online"
   );
 
-  // 5. 皆未設定時回退至預設 online 模式
+  // 7. 皆未設定且無伺服器注入配置 -> 預設 offline（止血保護！）
   assert.equal(
-    resolveClientMode({ search: "", storageValue: null }),
-    "online"
+    resolveClientMode({ search: "", storageValue: null, serverUrl: null }),
+    "offline",
+    "未注入伺服器時預設必須為 offline"
+  );
+
+  // 8. 即使運行在 koraku.app 或任何生產網域，無注入時亦不再判定為 online
+  assert.equal(
+    resolveClientMode({ search: "", storageValue: null, serverUrl: null, hostname: "koraku.app" }),
+    "offline",
+    "已廢除依 hostname 自動 online 邏輯"
+  );
+
+  // 9. file:// 協定永遠 offline
+  assert.equal(
+    resolveClientMode({ protocol: "file:", serverUrl: "wss://staging.koraku.ts.net:8443/ws" }),
+    "offline"
   );
 });
 
@@ -165,4 +181,91 @@ test("跨模式資料轉移流程：離線存檔導出與線上轉移碼兌換",
 
   offlineClient.destroy();
   onlineClient.destroy();
+});
+
+test("雙模式 LocalStorage 鍵空間獨立（Disjoint Storage Keys）：koraku-rps-save-v1 與 koraku-rps-online-*", async () => {
+  const mockStorageMap = new Map();
+  const mockLocalStorage = {
+    getItem: (key) => mockStorageMap.get(key) || null,
+    setItem: (key, val) => mockStorageMap.set(key, String(val)),
+    removeItem: (key) => mockStorageMap.delete(key),
+    clear: () => mockStorageMap.clear()
+  };
+
+  // 1. 離線模式寫入資料至 koraku-rps-save-v1
+  const offlineData = { coins: 8888, profile: { level: 25 } };
+  mockLocalStorage.setItem(STORAGE_KEY, JSON.stringify(offlineData));
+
+  // 2. 線上客戶端建立（注入 mockLocalStorage）
+  const fakeSocket = {
+    readyState: 1,
+    send: () => {},
+    close: () => {}
+  };
+  const onlineClient = new RemoteGameClient({
+    url: "wss://staging.koraku.ts.net:8443/ws",
+    storage: mockLocalStorage,
+    WebSocketClass: function() { return fakeSocket; }
+  });
+
+  // 模擬收到 Handshake ACK
+  onlineClient._handleHandshakeAck({
+    token: "jwt_token_online_999",
+    state: { coins: 100, profile: { level: 2 } }
+  });
+
+  // 3. 斷言儲存鍵互斥性
+  assert.ok(mockStorageMap.has(STORAGE_KEY), "離線存檔鍵必須保留");
+  assert.ok(mockStorageMap.has(ONLINE_TOKEN_KEY), "線上 token 必須寫入專屬鍵");
+  assert.ok(mockStorageMap.has(ONLINE_STATE_CACHE_KEY), "線上 state 必須寫入專屬鍵");
+
+  // 4. 斷言線上操作絕不變更離線存檔鍵
+  const readOffline = JSON.parse(mockLocalStorage.getItem(STORAGE_KEY));
+  assert.equal(readOffline.coins, 8888, "離線金幣未被線上 Handshake 影響");
+  assert.equal(readOffline.profile.level, 25, "離線等級未被線上 Handshake 影響");
+
+  // 5. 斷言線上快取讀取的是線上資料，非離線進度
+  const onlineCached = JSON.parse(mockLocalStorage.getItem(ONLINE_STATE_CACHE_KEY));
+  assert.equal(onlineCached.coins, 100, "線上快取金幣為 100");
+  assert.equal(onlineCached.profile.level, 2, "線上快取等級為 2");
+
+  // 6. 模擬離線進度修改，線上快取不變
+  readOffline.coins = 99999;
+  mockLocalStorage.setItem(STORAGE_KEY, JSON.stringify(readOffline));
+  const onlineCachedAfter = JSON.parse(mockLocalStorage.getItem(ONLINE_STATE_CACHE_KEY));
+  assert.equal(onlineCachedAfter.coins, 100, "離線寫入後，線上快取絕不受污染");
+
+  onlineClient.destroy();
+});
+
+test("未連線狀態下佇列中指令超時（Queued Command Timeout）以 NOT_CONNECTED 拒絕", async () => {
+  // 建立未連線且無自動重連之 RemoteGameClient，指令超時設為 60ms
+  const client = new RemoteGameClient({
+    url: "wss://staging.koraku.ts.net:8443/ws",
+    autoReconnect: false,
+    commandTimeout: 60,
+    WebSocketClass: function() {
+      // 模擬永遠無法建立連線的 socket
+      this.readyState = 0; // CONNECTING
+      this.send = () => {};
+      this.close = () => {};
+    }
+  });
+
+  // 客戶端尚未進入 ONLINE 狀態，直接發送指令排入 _commandQueue
+  assert.notEqual(client.connectionState, ConnectionStates.ONLINE);
+
+  let rejectedError = null;
+  const sendPromise = client.send(Commands.BATTLE_START, { stageId: 1 }).catch((err) => {
+    rejectedError = err;
+  });
+
+  // 等待 80ms 使其超過 60ms 佇列超時限制
+  await new Promise((r) => setTimeout(r, 80));
+  await sendPromise;
+
+  assert.ok(rejectedError, "未連線逾時排隊指令應被 reject");
+  assert.equal(rejectedError.code, ErrorCodes.NOT_CONNECTED, "錯誤碼必須為 NOT_CONNECTED");
+
+  client.destroy();
 });

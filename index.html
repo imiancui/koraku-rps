@@ -25,12 +25,12 @@
         } catch (_) {}
       })();
     </script>
-    <link rel="stylesheet" href="./src/styles/tokens.css?v=202609030810">
-    <link rel="stylesheet" href="./src/styles/base.css?v=202609030810">
-    <link rel="stylesheet" href="./src/styles/components.css?v=202609030810">
-    <link rel="stylesheet" href="./src/styles/screens.css?v=202609030810">
-    <link rel="stylesheet" href="./src/styles/animations.css?v=202609030810">
-    <link rel="stylesheet" href="./src/styles/responsive.css?v=202609030810">
+    <link rel="stylesheet" href="./src/styles/tokens.css?v=202609030902">
+    <link rel="stylesheet" href="./src/styles/base.css?v=202609030902">
+    <link rel="stylesheet" href="./src/styles/components.css?v=202609030902">
+    <link rel="stylesheet" href="./src/styles/screens.css?v=202609030902">
+    <link rel="stylesheet" href="./src/styles/animations.css?v=202609030902">
+    <link rel="stylesheet" href="./src/styles/responsive.css?v=202609030902">
   </head>
   <body>
     <div id="app" class="app-shell" data-screen="home">
@@ -84,6 +84,7 @@
             <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14h2v2h-2v-2zm0-10h2v8h-2V6z"/></svg>
           </span>
           <span id="connection-banner-text" class="connection-banner-text"></span>
+          <button id="connection-banner-switch-offline" class="connection-banner-action" type="button" data-i18n="connection.switchToOffline" hidden>改用離線模式</button>
           <button id="connection-banner-close" class="connection-banner-close" type="button" aria-label="關閉提示" data-i18n-attr="aria-label:ui.closeModal">✕</button>
         </div>
       </div>
@@ -166,7 +167,7 @@
               </button>
               <footer class="home-footer" aria-label="頁腳資訊" data-i18n-attr="aria-label:ui.footerInfo">
                 <button type="button" class="footer-version-btn" id="footer-app-version-btn" title="查看更新日誌 (Changelog)" aria-label="查看更新日誌" data-i18n-attr="aria-label:ui.changelog,title:ui.changelog">
-                  <span class="footer-version" id="footer-app-version">0.0.22</span>
+                  <span class="footer-version" id="footer-app-version">0.0.23</span>
                 </button>
                 <span class="footer-plain-sep">/</span>
                 <a href="https://store.steampowered.com/app/1425000" target="_blank" rel="noopener noreferrer" class="footer-plain-link">Endless Alice</a>
@@ -1463,7 +1464,18 @@
               </div>
             </div>
 
-            <!-- 4. Danger Zone: Reset Save -->
+            <!-- 4. Mode Switch Section (displayed when injected server config exists) -->
+            <div id="save-mode-switch-section" class="save-record-section" hidden>
+              <h4 class="save-section-heading" data-i18n="connection.switchToOnline">切換回線上模式</h4>
+              <div class="save-code-actions">
+                <button type="button" id="btn-switch-to-online" class="button-primary save-action-btn">
+                  <svg class="admin-btn-icon" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                  <span data-i18n="connection.switchToOnline">切換回線上模式</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- 5. Danger Zone: Reset Save -->
             <div class="save-record-section save-danger-section">
               <h4 class="save-section-heading danger-heading" data-i18n="ui.dangerZoneTitle">存檔重置與資料刪除</h4>
               <p class="save-section-desc danger-desc" data-i18n="ui.dangerZoneDesc">清除當前帳號的所有遊戲進度（等級、星砂、裝備、技能與戰績），回歸初始狀態：</p>
@@ -1618,6 +1630,6 @@
       <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
     </div>
-    <script src="./src/js/bundle.js?v=202609030810"></script>
+    <script src="./src/js/bundle.js?v=202609030902"></script>
   </body>
 </html>

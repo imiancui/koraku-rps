@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { I18n, I18nService, LOCALES, LOCALE_ORDER, DICTIONARY } from "../src/js/services/I18n.js";
-import { STAGES, EQUIPMENT_ITEMS, SKILLS, ITEMS, GALLERY_ITEMS } from "../src/js/config/gameConfig.js";
+import { APP_VERSION, STAGES, EQUIPMENT_ITEMS, SKILLS, ITEMS, GALLERY_ITEMS } from "../src/js/config/gameConfig.js";
 
 test("I18nService 預設語系與支援語系列表檢查", () => {
   assert.equal(LOCALE_ORDER.length, 4);
@@ -242,9 +242,12 @@ test("I18n 完整性檢查：繁中、簡中、英文、日文所有關卡、道
     assert.ok(i18n.t("ui.changelogTitle"));
     assert.ok(i18n.t("ui.changelogSubtitle"));
     assert.ok(i18n.t("ui.closeChangelog"));
+    assert.ok(i18n.t("ui.currentVersion"));
+    assert.ok(i18n.t("ui.currentVersionStatus"));
 
     const changelogs = i18n.getChangelog();
     assert.ok(Array.isArray(changelogs) && changelogs.length >= 7);
+    assert.equal(changelogs[0].version, APP_VERSION, `Changelog topmost entry (${changelogs[0].version}) must match current APP_VERSION (${APP_VERSION})`);
     for (const log of changelogs) {
       assert.ok(log.version);
       assert.ok(log.date);

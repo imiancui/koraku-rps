@@ -1,7 +1,8 @@
-﻿import test from "node:test";
+import test from "node:test";
 import assert from "node:assert/strict";
 import { AppView } from "../../src/js/ui/AppView.js";
 import { ErrorCodes } from "../../src/js/kernel/protocol.js";
+import { I18n } from "../../src/js/services/I18n.js";
 
 test("AppView.isMutationLocked: Online mode always policy locks during active battle", () => {
   const view = Object.create(AppView.prototype);
@@ -88,4 +89,27 @@ test("AppView.sendCommand: Toasts battle.lockedDuringBattle on BATTLE_IN_PROGRES
   assert.equal(toasts.length, 1);
   assert.equal(toasts[0].type, "danger");
   assert.ok(toasts[0].msg.length > 0);
+});
+
+test("AppView.sendCommand: Toasts connection.commandFailedOffline on NOT_CONNECTED error", async () => {
+  const toasts = [];
+  const view = Object.create(AppView.prototype);
+  view.showToast = (msg, type) => {
+    toasts.push({ msg, type });
+  };
+
+  view.client = {
+    async send() {
+      const err = new Error("Not connected");
+      err.code = ErrorCodes.NOT_CONNECTED;
+      throw err;
+    }
+  };
+
+  const outcome = await view.sendCommand("battleStart", { stageId: 1 });
+  assert.equal(outcome.ok, false);
+  assert.equal(outcome.errorCode, ErrorCodes.NOT_CONNECTED);
+  assert.equal(toasts.length, 1);
+  assert.equal(toasts[0].type, "warning");
+  assert.equal(toasts[0].msg, I18n.t("connection.commandFailedOffline"));
 });

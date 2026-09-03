@@ -2339,6 +2339,18 @@
   letter-spacing: 0.05em;
 }
 
+.changelog-current-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px;
+  border-radius: 3px;
+  background: rgba(181, 37, 55, 0.4);
+  border: 1px solid var(--crimson-bright, #e8394d);
+  color: #fff;
+  font: 700 10px/1.2 var(--sans);
+  letter-spacing: 0.05em;
+}
+
 .changelog-date {
   font-size: 11px;
   color: var(--paper-dim);

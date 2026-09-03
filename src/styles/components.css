@@ -888,6 +888,54 @@ img.is-silhouette {
   color: var(--gold-bright);
 }
 
+.connection-banner-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  padding: 6px 14px;
+  min-height: 40px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: var(--serif);
+  letter-spacing: 0.04em;
+  background: rgba(216, 182, 106, 0.15);
+  border: 1px solid var(--gold);
+  color: var(--gold-bright);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.connection-banner-action:hover {
+  background: rgba(216, 182, 106, 0.3);
+  color: var(--paper-bright);
+  box-shadow: 0 0 8px rgba(216, 182, 106, 0.4);
+}
+
+.connection-banner-action[hidden] {
+  display: none !important;
+}
+
+@media (max-width: 480px) {
+  .connection-banner {
+    padding: 10px 14px;
+    width: 94vw;
+  }
+  .connection-banner-inner {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .connection-banner-text {
+    width: calc(100% - 60px);
+  }
+  .connection-banner-action {
+    width: 100%;
+    order: 3;
+    justify-content: center;
+  }
+}
+
 @keyframes slideDownBanner {
   from {
     opacity: 0;
