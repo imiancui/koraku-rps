@@ -187,11 +187,19 @@ export function createKernel(options = {}) {
         break;
 
       case Commands.POST_BATTLE_START_WATERMELON:
-        result = postBattle.startWatermelon();
+        if (postBattle.autoWatermelonState?.active || payload.auto) {
+          result = postBattle.startAutoWatermelonRound();
+        } else {
+          result = postBattle.startWatermelon();
+        }
         break;
 
       case Commands.POST_BATTLE_STRIKE_WATERMELON:
-        result = postBattle.strike(payload.strikeIndex);
+        if (postBattle.autoWatermelonState?.active) {
+          result = postBattle.autoWatermelonStrike(payload.declaredAt || payload.timestamp);
+        } else {
+          result = postBattle.strike(payload.strikeIndex);
+        }
         break;
 
       case Commands.ACCOUNT_EXPORT_JSON:

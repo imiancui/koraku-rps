@@ -813,6 +813,23 @@ export class BattleSystem {
     this.state.roundExpiresAt = this.countdownDeadline;
     this.emitState(); // Push state ONCE on phase transition!
 
+    // Schedule countdown ticker every 250ms to smoothly update remaining seconds
+    this.countdownId = this.timers.interval(() => {
+      if (!this.state?.active || this.state.phase !== "countdown" || this.state.isPaused) return;
+      const remainingMs = Math.max(0, this.countdownDeadline - this.now());
+      const nextSeconds = Math.ceil(remainingMs / 1000);
+      if (nextSeconds !== this.state.countdown) {
+        this.state.countdown = nextSeconds;
+        this.emitState();
+      }
+      if (remainingMs <= 0) {
+        if (this.countdownId !== null) {
+          this.timers.clearInterval(this.countdownId);
+          this.countdownId = null;
+        }
+      }
+    }, 250);
+
     // Schedule countdown chant beats
     const beatTimes = [
       { count: 3, delay: totalDurationMs - 3000, key: "dialogue.chant3" },
@@ -821,15 +838,18 @@ export class BattleSystem {
     ];
 
     beatTimes.forEach(({ count, delay, key }) => {
-      if (delay > 0) {
+      if (delay >= 0) {
         const timerId = this.timers.timeout(() => {
           if (this.state?.active && this.state.phase === "countdown" && !this.state.isPaused) {
             this.state.lastChant = count;
+            this.state.countdown = count;
             this.say(
               { key },
               { key: "dialogue.speakerKohaku" }
             );
             this.bus.emit("battle:countdown-beat", { count, key });
+            this.bus.emit("sound", { name: "select" });
+            this.emitState();
           }
         }, delay);
         this.beatTimerIds.push(timerId);
@@ -849,8 +869,8 @@ export class BattleSystem {
     const arrival = this.now();
 
     if (this.state.phase === "countdown") {
-      // Secret commitment sealed before reveal
-      if (arrival > this.countdownDeadline) {
+      // Secret commitment sealed before reveal (with 150ms network grace period)
+      if (arrival > this.countdownDeadline + 150) {
         const res = { ok: false, reason: "late_commitment" };
         if (!this._isDispatching) this.recordCommand("select_hand", { handId, slot }, declaredAt, res);
         return res;
@@ -971,6 +991,19 @@ export class BattleSystem {
     this.emitState(); // Push state ONCE on phase transition!
     this.bus.emit("sound", { name: "reveal" });
 
+    this.reactionTickId = this.timers.interval(() => {
+      if (!this.state?.active || this.state.phase !== "reaction" || this.state.isPaused) return;
+      const rem = Math.max(0, this.reactionDeadline - this.now());
+      this.state.reactionRemaining = rem / 1000;
+      this.emitState();
+      if (rem <= 0) {
+        if (this.reactionTickId !== null) {
+          this.timers.clearInterval(this.reactionTickId);
+          this.reactionTickId = null;
+        }
+      }
+    }, 100);
+
     this.reactionTimeoutId = this.timers.timeout(() => {
       this.reactionTimeoutId = null;
       this.resolveRound();
@@ -1029,6 +1062,19 @@ export class BattleSystem {
       { key: "dialogue.speakerKohaku" }
     );
 
+    this.reactionTickId = this.timers.interval(() => {
+      if (!this.state?.active || this.state.phase !== "reaction" || this.state.isPaused) return;
+      const rem = Math.max(0, this.reactionDeadline - this.now());
+      this.state.reactionRemaining = rem / 1000;
+      this.emitState();
+      if (rem <= 0) {
+        if (this.reactionTickId !== null) {
+          this.timers.clearInterval(this.reactionTickId);
+          this.reactionTickId = null;
+        }
+      }
+    }, 100);
+
     this.reactionTimeoutId = this.timers.timeout(() => {
       this.reactionTimeoutId = null;
       this.state.morphActive = false;
@@ -1075,6 +1121,10 @@ export class BattleSystem {
           if (winningOverEnemyId) {
             const wonEnemy = this.state.enemies.find((e) => e.id === winningOverEnemyId && e.alive);
             if (wonEnemy) this.applyDamageToEnemy(wonEnemy, null, false);
+          }
+          if (this.state.enemies.every((e) => !e.alive) || this.state.enemyHp <= 0) {
+            this.finishRound("win", { key: "dialogue.winDualSingle" });
+            return;
           }
           this.state.targetEnemyId = losingToEnemyId;
           this.bus.emit("battle:effect", { type: "player-rps-loss" });
@@ -1131,6 +1181,10 @@ export class BattleSystem {
         if (winningOverEnemyId) {
           const wonEnemy = this.state.enemies.find((e) => e.id === winningOverEnemyId && e.alive);
           if (wonEnemy) this.applyDamageToEnemy(wonEnemy, null, false);
+        }
+        if (this.state.enemies.every((e) => !e.alive) || this.state.enemyHp <= 0) {
+          this.finishRound("win", { key: "dialogue.winDualSingle" });
+          return;
         }
         this.state.targetEnemyId = losingToEnemyId;
         this.bus.emit("battle:effect", { type: "player-rps-loss" });
@@ -1426,7 +1480,7 @@ export class BattleSystem {
     let amount = damageAmount ?? this.state.playerDamage;
     if (countered) {
       amount += this.getAllEquipEffects("thunder").reduce((sum, eff) => sum + (eff.qteBonusDamage || 0), 0);
-    } else if (!damageAmount && this.hasEquipEffect("burst")) {
+    } else if (this.hasEquipEffect("burst")) {
       amount = Math.round(amount * (this.hasEquipEffect("burst")?.winMultiplier || 1.5));
     }
 
@@ -1474,7 +1528,7 @@ export class BattleSystem {
     let logSource = "rps_win";
     if (countered) logSource = "counter";
     else if (this.state.morphUsed) logSource = "morph";
-    else if (!damageAmount && this.hasEquipEffect("burst")) logSource = "burst";
+    else if (this.hasEquipEffect("burst")) logSource = "burst";
 
     this.bus.emit("battle:damage-logged", {
       target: "enemy",

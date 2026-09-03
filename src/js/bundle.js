@@ -4,7 +4,7 @@
   "use strict";
 
 // --- src/js/config/gameConfig.js ---
-const APP_VERSION = "0.0.25";
+const APP_VERSION = "0.0.26";
 
 const DOJO_CONFIG = Object.freeze({
   defaultHp: 10000,
@@ -508,6 +508,37 @@ const DEFAULT_LOCALE = "en";
 const LOCALE_STORAGE_KEY = "koraku-rps-locale";
 
 const CHANGELOG_DATA = [
+  {
+    version: "0.0.26",
+    date: "2026-09-04",
+    tag: "Countdown, Watermelon Marker, Skill Points & Battle Rules Full Repair",
+    changes: {
+      "zh-Hant": [
+        "【回合與反應倒數修復】回合秒數啟用平滑定時器逐秒遞減，修復 3 秒關卡首拍排程，連線版補齊拍點音效與事件轉發；開拳反應時間支援 100ms 平滑倒數與變拳 2.0s 窗口重設。",
+        "【切西瓜跑條與自動戰鬥】切西瓜採用伺服器時鐘並加上正模數防護，根除負數時間指針跳脫問題；自動戰鬥切西瓜實現三角波實時運算與 2.5x 縮放邊界安全定位。",
+        "【技能點與裝備操作相容】修復背包裝備穿戴與技能加點前後端欄位相容性，避免金幣與背包狀態被空覆蓋；成長加點實作按鈕鍵盤焦點保持與 SP 不足多語系文案補全。",
+        "【遊戲規則與數值強化】大劍 burst 效果全面套用 1.5x 傷害倍率；雙生關卡勝拳擊殺敵方全員時直接判定獲勝結算；開放倒數階段藥水快捷鍵操作。"
+      ],
+      "zh-Hans": [
+        "【回合与反应倒数修复】回合秒数启用平滑定时器逐秒递减，修复 3 秒关卡首拍排程，连线版补齐拍点音效与事件转发；开拳反应时间支持 100ms 平滑倒数与变拳 2.0s 窗口重设。",
+        "【切西瓜跑条与自动战斗】切西瓜采用服务器时钟并加上正模数防护，根除负数时间指针跳脱问题；自动战斗切西瓜实现三角波实时运算与 2.5x 缩放边界安全定位。",
+        "【技能点与装备操作兼容】修复背包装备穿戴与技能加点前后端字段兼容性，避免金币与背包状态被空覆盖；成长加点实现按钮键盘焦点保持与 SP 不足多语系文案补全。",
+        "【游戏规则与数值强化】大剑 burst 效果全面套用 1.5x 伤害倍率；双生关卡胜拳击杀敌方全员时直接判定获胜结算；开放倒数阶段药水快捷键操作。"
+      ],
+      "en": [
+        "【Round & Reaction Countdown Smoothness】Enabled smooth interval countdown tickers, fixed Stage 2-4 first chant beat scheduling, and forwarded countdown-beats with select sound in online mode; reaction timer now decrements smoothly every 100ms.",
+        "【Watermelon Motion & Auto-Battle Alignment】Applied server-synced time with positive modulo math to prevent marker overflow; auto-battle watermelon now features real-time triangle wave calculation and safe 2.5x zoom boundary clamping.",
+        "【Skill Points & Equipment Protocol Compatibility】Aligned payload schemas for inventory equipping and skill allocation across client/validator/server; added focus retention and insufficient SP i18n localization in Growth panel.",
+        "【Rules & Combat Enhancements】Greatsword burst affix now applies 1.5x multiplier consistently to single/dual RPS wins; killing all twins on single win now settles immediately without unwanted QTE; enabled potion hotkeys during countdown."
+      ],
+      "ja": [
+        "【カウントダウンと反応時間の平滑化】毎秒減少するタイマーを有効化し、3秒ステージの最初のカウント抜けを修正。オンライン版でのビートイベントとSE転送を補完。反応時間も100ms刻みでスムーズにカウントダウン。",
+        "【スイカ割りゲージとオートバトル修復】サーバー同期時計と正の剰余計算を適用し、ゲージ針の飛び出しを防止。オートバトルスイカ割りに三角波の動的計算と2.5倍ズーム時の安全クランプを実装。",
+        "【スキルポイントと装備プロトコルの互換性向上】インベントリ装備とスキル習得のフィールド仕様を統一し、ステータス上書きによるコイン消失を防止。育成画面でのフォーカス維持とSP不足テキストを追加。",
+        "【ルールとダメージ数値の最適化】大剣の「burst」特性による1.5倍ダメージを全勝利に適用。双子ボスを通常手で全滅させた場合に即座に勝利判定へ移行。カウントダウン中のポーションショートカットに対応。"
+      ]
+    }
+  },
   {
     version: "0.0.25",
     date: "2026-09-04",
@@ -1530,6 +1561,7 @@ const DICTIONARY = {
       btnEquipDirect: "立即穿戴",
       itemOwned: "已持有",
       insufficientCoins: "星砂不足！",
+      insufficientSp: "技能點不足！",
       // Battle
       battleRounds: "回合",
       targetEnemy: "當前鎖定",
@@ -2355,6 +2387,7 @@ const DICTIONARY = {
       btnEquipDirect: "立即穿戴",
       itemOwned: "已持有",
       insufficientCoins: "星砂不足！",
+      insufficientSp: "技能点不足！",
       battleRounds: "回合",
       targetEnemy: "当前锁定",
       playerLeftHand: "左手",
@@ -3161,6 +3194,7 @@ const DICTIONARY = {
       btnEquipDirect: "Equip Now",
       itemOwned: "Owned",
       insufficientCoins: "Not enough Star Sand!",
+      insufficientSp: "Not enough SP!",
       battleRounds: "Round",
       targetEnemy: "Targeting",
       playerLeftHand: "Left Hand",
@@ -3967,6 +4001,7 @@ const DICTIONARY = {
       btnEquipDirect: "今すぐ装備",
       itemOwned: "所持中",
       insufficientCoins: "星砂が足りません！",
+      insufficientSp: "スキルポイント不足！",
       battleRounds: "ターン",
       targetEnemy: "ターゲット",
       playerLeftHand: "左手",
@@ -6291,8 +6326,8 @@ class GameStore {
     const mainSlot = this.state.equipment.mainHand;
     const mainTypeId = getEquipmentTypeId(mainSlot);
     const mainItem = EQUIPMENT_ITEMS[mainTypeId];
-    const greatswordMult = mainItem?.twoHanded && mainItem?.effect?.type === "greatsword_damage_boost"
-      ? (mainItem.effect.multiplier || 1.5)
+    const greatswordMult = (mainItem?.twoHanded && (mainItem?.effect?.type === "burst" || mainItem?.effect?.type === "greatsword_damage_boost"))
+      ? (mainItem.effect.winMultiplier || mainItem.effect.multiplier || 1.5)
       : 1.0;
 
     // Dual hands multiplier (approx 1.5x expected damage factor)
@@ -6305,10 +6340,10 @@ class GameStore {
       if (!slotKey) continue;
       const typeId = getEquipmentTypeId(slotKey);
       const item = EQUIPMENT_ITEMS[typeId];
-      if (item?.effect?.type === "burn_on_round_end") {
-        passiveDamagePerTurn += (item.effect.damage || 30);
-      } else if (item?.effect?.type === "reflect_damage") {
-        passiveDamagePerTurn += (item.effect.damage || 40) * 0.25;
+      if (item?.effect?.type === "burn" || item?.effect?.type === "burn_on_round_end") {
+        passiveDamagePerTurn += (item.effect.burnDamage || item.effect.damage || 30);
+      } else if (item?.effect?.type === "reflect" || item?.effect?.type === "reflect_damage") {
+        passiveDamagePerTurn += (item.effect.reflectDamage || item.effect.damage || 40) * 0.25;
       }
     }
 
@@ -7546,6 +7581,23 @@ class BattleSystem {
     this.state.roundExpiresAt = this.countdownDeadline;
     this.emitState(); // Push state ONCE on phase transition!
 
+    // Schedule countdown ticker every 250ms to smoothly update remaining seconds
+    this.countdownId = this.timers.interval(() => {
+      if (!this.state?.active || this.state.phase !== "countdown" || this.state.isPaused) return;
+      const remainingMs = Math.max(0, this.countdownDeadline - this.now());
+      const nextSeconds = Math.ceil(remainingMs / 1000);
+      if (nextSeconds !== this.state.countdown) {
+        this.state.countdown = nextSeconds;
+        this.emitState();
+      }
+      if (remainingMs <= 0) {
+        if (this.countdownId !== null) {
+          this.timers.clearInterval(this.countdownId);
+          this.countdownId = null;
+        }
+      }
+    }, 250);
+
     // Schedule countdown chant beats
     const beatTimes = [
       { count: 3, delay: totalDurationMs - 3000, key: "dialogue.chant3" },
@@ -7554,15 +7606,18 @@ class BattleSystem {
     ];
 
     beatTimes.forEach(({ count, delay, key }) => {
-      if (delay > 0) {
+      if (delay >= 0) {
         const timerId = this.timers.timeout(() => {
           if (this.state?.active && this.state.phase === "countdown" && !this.state.isPaused) {
             this.state.lastChant = count;
+            this.state.countdown = count;
             this.say(
               { key },
               { key: "dialogue.speakerKohaku" }
             );
             this.bus.emit("battle:countdown-beat", { count, key });
+            this.bus.emit("sound", { name: "select" });
+            this.emitState();
           }
         }, delay);
         this.beatTimerIds.push(timerId);
@@ -7582,8 +7637,8 @@ class BattleSystem {
     const arrival = this.now();
 
     if (this.state.phase === "countdown") {
-      // Secret commitment sealed before reveal
-      if (arrival > this.countdownDeadline) {
+      // Secret commitment sealed before reveal (with 150ms network grace period)
+      if (arrival > this.countdownDeadline + 150) {
         const res = { ok: false, reason: "late_commitment" };
         if (!this._isDispatching) this.recordCommand("select_hand", { handId, slot }, declaredAt, res);
         return res;
@@ -7704,6 +7759,19 @@ class BattleSystem {
     this.emitState(); // Push state ONCE on phase transition!
     this.bus.emit("sound", { name: "reveal" });
 
+    this.reactionTickId = this.timers.interval(() => {
+      if (!this.state?.active || this.state.phase !== "reaction" || this.state.isPaused) return;
+      const rem = Math.max(0, this.reactionDeadline - this.now());
+      this.state.reactionRemaining = rem / 1000;
+      this.emitState();
+      if (rem <= 0) {
+        if (this.reactionTickId !== null) {
+          this.timers.clearInterval(this.reactionTickId);
+          this.reactionTickId = null;
+        }
+      }
+    }, 100);
+
     this.reactionTimeoutId = this.timers.timeout(() => {
       this.reactionTimeoutId = null;
       this.resolveRound();
@@ -7762,6 +7830,19 @@ class BattleSystem {
       { key: "dialogue.speakerKohaku" }
     );
 
+    this.reactionTickId = this.timers.interval(() => {
+      if (!this.state?.active || this.state.phase !== "reaction" || this.state.isPaused) return;
+      const rem = Math.max(0, this.reactionDeadline - this.now());
+      this.state.reactionRemaining = rem / 1000;
+      this.emitState();
+      if (rem <= 0) {
+        if (this.reactionTickId !== null) {
+          this.timers.clearInterval(this.reactionTickId);
+          this.reactionTickId = null;
+        }
+      }
+    }, 100);
+
     this.reactionTimeoutId = this.timers.timeout(() => {
       this.reactionTimeoutId = null;
       this.state.morphActive = false;
@@ -7808,6 +7889,10 @@ class BattleSystem {
           if (winningOverEnemyId) {
             const wonEnemy = this.state.enemies.find((e) => e.id === winningOverEnemyId && e.alive);
             if (wonEnemy) this.applyDamageToEnemy(wonEnemy, null, false);
+          }
+          if (this.state.enemies.every((e) => !e.alive) || this.state.enemyHp <= 0) {
+            this.finishRound("win", { key: "dialogue.winDualSingle" });
+            return;
           }
           this.state.targetEnemyId = losingToEnemyId;
           this.bus.emit("battle:effect", { type: "player-rps-loss" });
@@ -7864,6 +7949,10 @@ class BattleSystem {
         if (winningOverEnemyId) {
           const wonEnemy = this.state.enemies.find((e) => e.id === winningOverEnemyId && e.alive);
           if (wonEnemy) this.applyDamageToEnemy(wonEnemy, null, false);
+        }
+        if (this.state.enemies.every((e) => !e.alive) || this.state.enemyHp <= 0) {
+          this.finishRound("win", { key: "dialogue.winDualSingle" });
+          return;
         }
         this.state.targetEnemyId = losingToEnemyId;
         this.bus.emit("battle:effect", { type: "player-rps-loss" });
@@ -8159,7 +8248,7 @@ class BattleSystem {
     let amount = damageAmount ?? this.state.playerDamage;
     if (countered) {
       amount += this.getAllEquipEffects("thunder").reduce((sum, eff) => sum + (eff.qteBonusDamage || 0), 0);
-    } else if (!damageAmount && this.hasEquipEffect("burst")) {
+    } else if (this.hasEquipEffect("burst")) {
       amount = Math.round(amount * (this.hasEquipEffect("burst")?.winMultiplier || 1.5));
     }
 
@@ -8207,7 +8296,7 @@ class BattleSystem {
     let logSource = "rps_win";
     if (countered) logSource = "counter";
     else if (this.state.morphUsed) logSource = "morph";
-    else if (!damageAmount && this.hasEquipEffect("burst")) logSource = "burst";
+    else if (this.hasEquipEffect("burst")) logSource = "burst";
 
     this.bus.emit("battle:damage-logged", {
       target: "enemy",
@@ -10182,11 +10271,19 @@ function createKernel(options = {}) {
         break;
 
       case Commands.POST_BATTLE_START_WATERMELON:
-        result = postBattle.startWatermelon();
+        if (postBattle.autoWatermelonState?.active || payload.auto) {
+          result = postBattle.startAutoWatermelonRound();
+        } else {
+          result = postBattle.startWatermelon();
+        }
         break;
 
       case Commands.POST_BATTLE_STRIKE_WATERMELON:
-        result = postBattle.strike(payload.strikeIndex);
+        if (postBattle.autoWatermelonState?.active) {
+          result = postBattle.autoWatermelonStrike(payload.declaredAt || payload.timestamp);
+        } else {
+          result = postBattle.strike(payload.strikeIndex);
+        }
         break;
 
       case Commands.ACCOUNT_EXPORT_JSON:
@@ -10796,12 +10893,20 @@ class RemoteGameClient extends GameClient {
         getMarkerPosition: () => {
           const state = client._postBattleState;
           if (!state || state.scene !== "watermelonAim" || !state.strikeStartedAt) return 0;
-          const elapsed = (Date.now() - state.strikeStartedAt) % state.strikeDuration;
-          const progress = elapsed / state.strikeDuration;
+          const currentNow = client.getServerTime();
+          const dur = state.strikeDuration || 1800;
+          const elapsed = ((currentNow - state.strikeStartedAt) % dur + dur) % dur;
+          const progress = elapsed / dur;
           return progress <= 0.5 ? progress * 2 : (1 - progress) * 2;
         },
         getAutoMarkerPosition: () => {
-          return 0.5;
+          const autoState = client._autoWatermelonState || client._postBattleState?.autoWatermelonState;
+          if (!autoState || autoState.scene !== "watermelonAim" || !autoState.strikeStartedAt) return 0.5;
+          const currentNow = client.getServerTime();
+          const dur = autoState.strikeDuration || 1800;
+          const elapsed = ((currentNow - autoState.strikeStartedAt) % dur + dur) % dur;
+          const progress = elapsed / dur;
+          return progress <= 0.5 ? progress * 2 : (1 - progress) * 2;
         },
         getWatermelonStock: () => {
           return client._state?.records?.watermelonStock || 0;
@@ -11313,6 +11418,10 @@ class RemoteGameClient extends GameClient {
     } else if (eventName === Events.POSTBATTLE_STATE || eventName === "postbattle:state") {
       if (payload) {
         this._postBattleState = payload;
+      }
+    } else if (eventName === Events.POSTBATTLE_AUTO_WATERMELON || eventName === "postbattle:auto-watermelon") {
+      if (payload) {
+        this._autoWatermelonState = payload;
       }
     } else if (eventName === Events.CONNECTION_STATE || eventName === "connection:state") {
       if (payload?.reason === "NEW_CONNECTION_ESTABLISHED" || payload?.reason === "KICKED_BY_NEW_CONNECTION") {
@@ -13059,10 +13168,15 @@ class AppView {
     });
   }
 
-  handleCountdownBeat() {
+  handleCountdownBeat(beat) {
     const playerHand = $("#player-hand-display");
     const enemyHand = $("#enemy-hand-display");
     const countdownBox = $("#round-countdown");
+    const countdownVal = $("#countdown-value");
+
+    if (beat && typeof beat.count === "number" && countdownVal) {
+      countdownVal.textContent = String(beat.count);
+    }
 
     [playerHand, enemyHand].forEach((el) => {
       if (!el) return;
@@ -13076,6 +13190,10 @@ class AppView {
       void countdownBox.offsetWidth;
       countdownBox.classList.add("is-beat");
     }
+
+    try {
+      this.bus.emit("sound", { name: "select" });
+    } catch (_) {}
   }
 
   async handleClick(event) {
@@ -13281,7 +13399,9 @@ class AppView {
         this.showToast(I18n.t("battle.lockedDuringBattle"), "danger");
         return;
       }
-      const result = await this.sendCommand(Commands.EQUIP_ITEM, { uid: bagItemBtn.dataset.equipBagItem, typeId: bagItemBtn.dataset.equipBagItem });
+      const typeId = bagItemBtn.dataset.equipBagItem;
+      const slot = EQUIPMENT_ITEMS[typeId]?.slot || "mainHand";
+      const result = await this.sendCommand(Commands.EQUIP_ITEM, { uid: typeId, typeId, itemId: typeId, slot });
       if (result?.message || result?.key) this.showToast({ ...result, tone: result.ok ? "success" : "danger" });
       if (result?.ok) this.bus.emit("sound", { name: "skill" });
       this.hideTooltip();
@@ -13295,7 +13415,8 @@ class AppView {
         return;
       }
       const itemId = shopEquipBtn.dataset.shopEquip;
-      const result = await this.sendCommand(Commands.EQUIP_ITEM, { uid: itemId, typeId: itemId });
+      const slot = EQUIPMENT_ITEMS[itemId]?.slot || "mainHand";
+      const result = await this.sendCommand(Commands.EQUIP_ITEM, { uid: itemId, typeId: itemId, itemId, slot });
       if (result?.message || result?.key) this.showToast({ ...result, tone: result.ok ? "success" : "danger" });
       if (result?.ok) this.bus.emit("sound", { name: "skill" });
       this.hideTooltip();
@@ -13458,7 +13579,8 @@ class AppView {
         this.showToast(I18n.t("battle.lockedDuringBattle"), "danger");
         return;
       }
-      const result = await this.sendCommand(Commands.ALLOCATE_SKILL, { skill: allocateSkillButton.dataset.allocateSkill });
+      const skillId = allocateSkillButton.dataset.allocateSkill;
+      const result = await this.sendCommand(Commands.ALLOCATE_SKILL, { skillId, skill: skillId });
       if (result?.message || result?.key) this.showToast({ ...result, tone: result.ok ? "success" : "danger" });
       if (result?.ok) this.bus.emit("sound", { name: "skill" });
       return;
@@ -13559,6 +13681,9 @@ class AppView {
       const zoomBtn = $("#btn-toggle-watermelon-zoom");
       if (zoomBtn) {
         zoomBtn.textContent = this.isWatermelonZoomed ? "🔍 1x" : "🔍 2.5x";
+      }
+      if (floating && this.hudDragController) {
+        this.hudDragController.applyPosition("watermelon");
       }
       return;
     }
@@ -13874,37 +13999,45 @@ class AppView {
         };
         if (leftHandByKey[key]) {
           await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: leftHandByKey[key], slot: "left" });
+          return;
         } else if (rightHandByKey[key]) {
           await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: rightHandByKey[key], slot: "right" });
+          return;
         } else if (["numpad7", "numpad1"].includes(event.code.toLowerCase())) {
           await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: "rock", slot: "right" });
+          return;
         } else if (["numpad8", "numpad2"].includes(event.code.toLowerCase())) {
           await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: "paper", slot: "right" });
+          return;
         } else if (["numpad9", "numpad3"].includes(event.code.toLowerCase())) {
           await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: "scissors", slot: "right" });
+          return;
         }
-        return;
+      } else {
+        const handByKey = { "1": "rock", "2": "paper", "3": "scissors", "j": "rock", "k": "paper", "l": "scissors" };
+        if (handByKey[key]) {
+          await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: handByKey[key] });
+          return;
+        } else if (["numpad7", "numpad1"].includes(event.code.toLowerCase())) {
+          await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: "rock" });
+          return;
+        } else if (["numpad8", "numpad2"].includes(event.code.toLowerCase())) {
+          await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: "paper" });
+          return;
+        } else if (["numpad9", "numpad3"].includes(event.code.toLowerCase())) {
+          await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: "scissors" });
+          return;
+        }
       }
-
-      const handByKey = { "1": "rock", "2": "paper", "3": "scissors", "j": "rock", "k": "paper", "l": "scissors" };
-      if (handByKey[key]) {
-        await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: handByKey[key] });
-      } else if (["numpad7", "numpad1"].includes(event.code.toLowerCase())) {
-        await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: "rock" });
-      } else if (["numpad8", "numpad2"].includes(event.code.toLowerCase())) {
-        await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: "paper" });
-      } else if (["numpad9", "numpad3"].includes(event.code.toLowerCase())) {
-        await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: "scissors" });
-      }
-      return;
     }
 
-    if (["4", "h"].includes(key)) {
+    const canUseQeForPotions = !this.battleState.hasDualHandSkill;
+    if (["4", "h"].includes(key) || (canUseQeForPotions && key === "q")) {
       const result = await this.sendCommand(Commands.BATTLE_USE_ITEM, { itemId: "hpPotion" });
       if (result && !result.ok && this.battleState.phase !== "ended" && (result.message || result.key)) {
         this.showToast({ ...result, tone: "danger" });
       }
-    } else if (["5", "m"].includes(key)) {
+    } else if (["5", "m"].includes(key) || (canUseQeForPotions && key === "e")) {
       const result = await this.sendCommand(Commands.BATTLE_USE_ITEM, { itemId: "mpPotion" });
       if (result && !result.ok && this.battleState.phase !== "ended" && (result.message || result.key)) {
         this.showToast({ ...result, tone: "danger" });
@@ -14081,8 +14214,10 @@ class AppView {
   }
 
   renderStore(rawState) {
-    const fallback = this.getStoreSnapshot();
-    const state = rawState?.profile ? rawState : (rawState?.state?.profile ? rawState.state : fallback) || fallback;
+    const fallback = this.getStoreSnapshot() || {};
+    const incoming = rawState?.profile ? rawState : (rawState?.state?.profile ? rawState.state : rawState);
+    const state = { ...fallback, ...(incoming || {}) };
+    if (incoming?.profile) state.profile = { ...(fallback.profile || {}), ...incoming.profile };
     if (!state?.profile) return;
     $("#header-level").textContent = String(state.profile.level || 1).padStart(2, "0");
     $("#header-coins").textContent = (state.coins || 0).toLocaleString("zh-TW");
@@ -14141,7 +14276,7 @@ class AppView {
     const xpPercent = state.xpToNext > 0 ? Math.min(100, Math.round((state.profile.xp / state.xpToNext) * 100)) : 100;
     if ($("#records-xp-text")) $("#records-xp-text").textContent = `${state.profile.xp} / ${state.xpToNext} EXP (${xpPercent}%)`;
     if ($("#records-xp-fill")) $("#records-xp-fill").style.width = `${xpPercent}%`;
-    const theoDps = this.store.getTheoreticalDPS();
+    const theoDps = this.store?.getTheoreticalDPS ? this.store.getTheoreticalDPS() : "0.0";
     if ($("#records-theoretical-dps")) $("#records-theoretical-dps").textContent = theoDps;
 
     // 2. Consumables, Momo & Morph Uses
@@ -14653,11 +14788,12 @@ class AppView {
       }
     }
 
-    const fallback = this.getStoreSnapshot();
-    const state = rawState?.playerStats ? rawState : (rawState?.state?.playerStats ? rawState.state : fallback) || fallback;
-    const profile = state?.profile || fallback?.profile || { level: 1, xp: 0, skillPoints: 0, skills: {} };
-    const playerStats = state?.playerStats || fallback?.playerStats || { damage: 15, maxHp: 100, maxMp: 50 };
-    const xpToNext = state?.xpToNext || fallback?.xpToNext || 100;
+    const fallback = this.getStoreSnapshot() || {};
+    const incoming = rawState?.profile ? rawState : (rawState?.state?.profile ? rawState.state : rawState);
+    const state = { ...fallback, ...(incoming || {}) };
+    const profile = { ...(fallback.profile || {}), ...(incoming?.profile || state.profile || {}) };
+    const playerStats = incoming?.playerStats || fallback?.playerStats || state?.playerStats || { damage: 15, maxHp: 100, maxMp: 50 };
+    const xpToNext = incoming?.xpToNext || fallback?.xpToNext || state?.xpToNext || 100;
 
     $("#skill-points").textContent = profile.skillPoints || 0;
     $("#growth-level").textContent = "Lv. " + (profile.level || 1);
@@ -14692,6 +14828,9 @@ class AppView {
         text: I18n.t("ui.statAllocMpDesc")
       }
     ];
+    const activeAllocStat = typeof document !== "undefined" ? document.activeElement?.dataset?.allocate : null;
+    const activeAllocSkill = typeof document !== "undefined" ? document.activeElement?.dataset?.allocateSkill : null;
+
     if (this.growthGrid) {
       this.growthGrid.innerHTML = cards.map((card) => {
         const disabled = (state.profile.skillPoints <= 0 || isLocked) ? ' disabled aria-disabled="true"' : "";
@@ -14729,7 +14868,7 @@ class AppView {
           buttonText = I18n.t("ui.skillMaxLevel");
           disabled = true;
         } else if (!canAfford) {
-          buttonText = I18n.t("ui.skillCostSp", { sp: skill.costPerLevel }) + " (" + I18n.t("ui.insufficientCoins") + ")";
+          buttonText = I18n.t("ui.skillCostSp", { sp: skill.costPerLevel }) + " (" + I18n.t("ui.insufficientSp") + ")";
           disabled = true;
         }
         if (isLocked) {
@@ -14748,6 +14887,12 @@ class AppView {
           '<button type="button" class="button-primary" data-allocate-skill="' + skill.id + '"' +
           (disabled ? ' disabled aria-disabled="true"' : "") + ">" + buttonText + "</button></article>";
       }).join("");
+    }
+
+    if (activeAllocStat && this.growthGrid) {
+      this.growthGrid.querySelector(`[data-allocate="${activeAllocStat}"]`)?.focus();
+    } else if (activeAllocSkill && this.skillsGrid) {
+      this.skillsGrid.querySelector(`[data-allocate-skill="${activeAllocSkill}"]`)?.focus();
     }
   }
 
@@ -15938,7 +16083,7 @@ class AppView {
       if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function") {
         try { navigator.vibrate([80]); } catch (_) {}
       }
-      const singlePanel = $("#qte-panel");
+      const singlePanel = $("#qte-panel-single") || $("#qte-panel");
       const dualPanel = $("#qte-panel-dual");
       [singlePanel, dualPanel].forEach((panel) => {
         if (panel) {

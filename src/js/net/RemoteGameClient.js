@@ -282,12 +282,20 @@ export class RemoteGameClient extends GameClient {
         getMarkerPosition: () => {
           const state = client._postBattleState;
           if (!state || state.scene !== "watermelonAim" || !state.strikeStartedAt) return 0;
-          const elapsed = (Date.now() - state.strikeStartedAt) % state.strikeDuration;
-          const progress = elapsed / state.strikeDuration;
+          const currentNow = client.getServerTime();
+          const dur = state.strikeDuration || 1800;
+          const elapsed = ((currentNow - state.strikeStartedAt) % dur + dur) % dur;
+          const progress = elapsed / dur;
           return progress <= 0.5 ? progress * 2 : (1 - progress) * 2;
         },
         getAutoMarkerPosition: () => {
-          return 0.5;
+          const autoState = client._autoWatermelonState || client._postBattleState?.autoWatermelonState;
+          if (!autoState || autoState.scene !== "watermelonAim" || !autoState.strikeStartedAt) return 0.5;
+          const currentNow = client.getServerTime();
+          const dur = autoState.strikeDuration || 1800;
+          const elapsed = ((currentNow - autoState.strikeStartedAt) % dur + dur) % dur;
+          const progress = elapsed / dur;
+          return progress <= 0.5 ? progress * 2 : (1 - progress) * 2;
         },
         getWatermelonStock: () => {
           return client._state?.records?.watermelonStock || 0;
@@ -799,6 +807,10 @@ export class RemoteGameClient extends GameClient {
     } else if (eventName === Events.POSTBATTLE_STATE || eventName === "postbattle:state") {
       if (payload) {
         this._postBattleState = payload;
+      }
+    } else if (eventName === Events.POSTBATTLE_AUTO_WATERMELON || eventName === "postbattle:auto-watermelon") {
+      if (payload) {
+        this._autoWatermelonState = payload;
       }
     } else if (eventName === Events.CONNECTION_STATE || eventName === "connection:state") {
       if (payload?.reason === "NEW_CONNECTION_ESTABLISHED" || payload?.reason === "KICKED_BY_NEW_CONNECTION") {

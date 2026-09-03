@@ -252,7 +252,8 @@ export class GameSession {
       Events.AUTOBATTLE_SUMMARY,
       Events.DIALOGUE,
       Events.TOAST,
-      "sound"
+      "sound",
+      "battle:countdown-beat"
     ];
 
     for (const evt of forwardEvents) {
@@ -515,12 +516,12 @@ export class GameSession {
     return { ack: true, itemId, coins: this.state.coins, inventoryEquipment: this.state.inventoryEquipment };
   }
 
-  async _handleEquipItem({ slot, itemId, inventoryIndex }) {
+  async _handleEquipItem({ slot, itemId, typeId, inventoryIndex }) {
     if (this.isMutationLocked()) {
       return { ack: false, error: ErrorCodes.BATTLE_IN_PROGRESS_LOCKED, key: "battle.lockedDuringBattle", message: "Equipment and stat allocation are locked during active battle." };
     }
 
-    let targetItemId = itemId;
+    let targetItemId = itemId || typeId;
     let removeIdx = inventoryIndex;
 
     if (removeIdx !== undefined && this.state.inventoryEquipment[removeIdx]) {
@@ -600,7 +601,13 @@ export class GameSession {
     this.state.profile.skillPoints -= points;
     this.state.profile.allocations[stat] = (this.state.profile.allocations[stat] || 0) + points;
 
-    this.emit(Events.STORE_CHANGED, { profile: this.state.profile });
+    this.emit(Events.STORE_CHANGED, {
+      profile: this.state.profile,
+      coins: this.state.coins,
+      inventory: this.state.inventory,
+      equipment: this.state.equipment,
+      playerStats: computePlayerStats(this.state.profile, this.state.equipment)
+    });
     return { ack: true, stat, allocations: this.state.profile.allocations, skillPoints: this.state.profile.skillPoints };
   }
 
@@ -631,7 +638,13 @@ export class GameSession {
     this.state.profile.skillPoints -= cost;
     this.state.profile.skills[skillId] = currentLvl + 1;
 
-    this.emit(Events.STORE_CHANGED, { profile: this.state.profile });
+    this.emit(Events.STORE_CHANGED, {
+      profile: this.state.profile,
+      coins: this.state.coins,
+      inventory: this.state.inventory,
+      equipment: this.state.equipment,
+      playerStats: computePlayerStats(this.state.profile, this.state.equipment)
+    });
     return { ack: true, skillId, newLevel: this.state.profile.skills[skillId], skillPoints: this.state.profile.skillPoints };
   }
 
@@ -741,8 +754,17 @@ export class GameSession {
         message: "No active battle session."
       };
     }
-    const targetHand = payload.targetHand || null;
-    const res = this.battle.useMorph(targetHand);
+    const now = Date.now();
+    if (this.activeBattle.reactionExpiresAt && now > this.activeBattle.reactionExpiresAt + SERVER_CONFIG.timingGraceMs) {
+      return {
+        ack: false,
+        error: "MORPH_EXPIRED",
+        key: "combat.morphWindowExpired",
+        message: "Morph command arrived after reaction window expired."
+      };
+    }
+    const declaredAt = typeof clientTime === "number" ? clientTime : (typeof payload.declaredAt === "number" ? payload.declaredAt : now);
+    const res = this.battle.useMorph(declaredAt);
     return {
       ack: res?.ok !== false,
       result: res,

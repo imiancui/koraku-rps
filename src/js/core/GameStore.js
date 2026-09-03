@@ -564,8 +564,8 @@ export class GameStore {
     const mainSlot = this.state.equipment.mainHand;
     const mainTypeId = getEquipmentTypeId(mainSlot);
     const mainItem = EQUIPMENT_ITEMS[mainTypeId];
-    const greatswordMult = mainItem?.twoHanded && mainItem?.effect?.type === "greatsword_damage_boost"
-      ? (mainItem.effect.multiplier || 1.5)
+    const greatswordMult = (mainItem?.twoHanded && (mainItem?.effect?.type === "burst" || mainItem?.effect?.type === "greatsword_damage_boost"))
+      ? (mainItem.effect.winMultiplier || mainItem.effect.multiplier || 1.5)
       : 1.0;
 
     // Dual hands multiplier (approx 1.5x expected damage factor)
@@ -578,10 +578,10 @@ export class GameStore {
       if (!slotKey) continue;
       const typeId = getEquipmentTypeId(slotKey);
       const item = EQUIPMENT_ITEMS[typeId];
-      if (item?.effect?.type === "burn_on_round_end") {
-        passiveDamagePerTurn += (item.effect.damage || 30);
-      } else if (item?.effect?.type === "reflect_damage") {
-        passiveDamagePerTurn += (item.effect.damage || 40) * 0.25;
+      if (item?.effect?.type === "burn" || item?.effect?.type === "burn_on_round_end") {
+        passiveDamagePerTurn += (item.effect.burnDamage || item.effect.damage || 30);
+      } else if (item?.effect?.type === "reflect" || item?.effect?.type === "reflect_damage") {
+        passiveDamagePerTurn += (item.effect.reflectDamage || item.effect.damage || 40) * 0.25;
       }
     }
 

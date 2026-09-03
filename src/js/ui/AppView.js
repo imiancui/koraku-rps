@@ -870,10 +870,15 @@ export class AppView {
     });
   }
 
-  handleCountdownBeat() {
+  handleCountdownBeat(beat) {
     const playerHand = $("#player-hand-display");
     const enemyHand = $("#enemy-hand-display");
     const countdownBox = $("#round-countdown");
+    const countdownVal = $("#countdown-value");
+
+    if (beat && typeof beat.count === "number" && countdownVal) {
+      countdownVal.textContent = String(beat.count);
+    }
 
     [playerHand, enemyHand].forEach((el) => {
       if (!el) return;
@@ -887,6 +892,10 @@ export class AppView {
       void countdownBox.offsetWidth;
       countdownBox.classList.add("is-beat");
     }
+
+    try {
+      this.bus.emit("sound", { name: "select" });
+    } catch (_) {}
   }
 
   async handleClick(event) {
@@ -1092,7 +1101,9 @@ export class AppView {
         this.showToast(I18n.t("battle.lockedDuringBattle"), "danger");
         return;
       }
-      const result = await this.sendCommand(Commands.EQUIP_ITEM, { uid: bagItemBtn.dataset.equipBagItem, typeId: bagItemBtn.dataset.equipBagItem });
+      const typeId = bagItemBtn.dataset.equipBagItem;
+      const slot = EQUIPMENT_ITEMS[typeId]?.slot || "mainHand";
+      const result = await this.sendCommand(Commands.EQUIP_ITEM, { uid: typeId, typeId, itemId: typeId, slot });
       if (result?.message || result?.key) this.showToast({ ...result, tone: result.ok ? "success" : "danger" });
       if (result?.ok) this.bus.emit("sound", { name: "skill" });
       this.hideTooltip();
@@ -1106,7 +1117,8 @@ export class AppView {
         return;
       }
       const itemId = shopEquipBtn.dataset.shopEquip;
-      const result = await this.sendCommand(Commands.EQUIP_ITEM, { uid: itemId, typeId: itemId });
+      const slot = EQUIPMENT_ITEMS[itemId]?.slot || "mainHand";
+      const result = await this.sendCommand(Commands.EQUIP_ITEM, { uid: itemId, typeId: itemId, itemId, slot });
       if (result?.message || result?.key) this.showToast({ ...result, tone: result.ok ? "success" : "danger" });
       if (result?.ok) this.bus.emit("sound", { name: "skill" });
       this.hideTooltip();
@@ -1269,7 +1281,8 @@ export class AppView {
         this.showToast(I18n.t("battle.lockedDuringBattle"), "danger");
         return;
       }
-      const result = await this.sendCommand(Commands.ALLOCATE_SKILL, { skill: allocateSkillButton.dataset.allocateSkill });
+      const skillId = allocateSkillButton.dataset.allocateSkill;
+      const result = await this.sendCommand(Commands.ALLOCATE_SKILL, { skillId, skill: skillId });
       if (result?.message || result?.key) this.showToast({ ...result, tone: result.ok ? "success" : "danger" });
       if (result?.ok) this.bus.emit("sound", { name: "skill" });
       return;
@@ -1370,6 +1383,9 @@ export class AppView {
       const zoomBtn = $("#btn-toggle-watermelon-zoom");
       if (zoomBtn) {
         zoomBtn.textContent = this.isWatermelonZoomed ? "🔍 1x" : "🔍 2.5x";
+      }
+      if (floating && this.hudDragController) {
+        this.hudDragController.applyPosition("watermelon");
       }
       return;
     }
@@ -1685,37 +1701,45 @@ export class AppView {
         };
         if (leftHandByKey[key]) {
           await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: leftHandByKey[key], slot: "left" });
+          return;
         } else if (rightHandByKey[key]) {
           await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: rightHandByKey[key], slot: "right" });
+          return;
         } else if (["numpad7", "numpad1"].includes(event.code.toLowerCase())) {
           await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: "rock", slot: "right" });
+          return;
         } else if (["numpad8", "numpad2"].includes(event.code.toLowerCase())) {
           await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: "paper", slot: "right" });
+          return;
         } else if (["numpad9", "numpad3"].includes(event.code.toLowerCase())) {
           await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: "scissors", slot: "right" });
+          return;
         }
-        return;
+      } else {
+        const handByKey = { "1": "rock", "2": "paper", "3": "scissors", "j": "rock", "k": "paper", "l": "scissors" };
+        if (handByKey[key]) {
+          await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: handByKey[key] });
+          return;
+        } else if (["numpad7", "numpad1"].includes(event.code.toLowerCase())) {
+          await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: "rock" });
+          return;
+        } else if (["numpad8", "numpad2"].includes(event.code.toLowerCase())) {
+          await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: "paper" });
+          return;
+        } else if (["numpad9", "numpad3"].includes(event.code.toLowerCase())) {
+          await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: "scissors" });
+          return;
+        }
       }
-
-      const handByKey = { "1": "rock", "2": "paper", "3": "scissors", "j": "rock", "k": "paper", "l": "scissors" };
-      if (handByKey[key]) {
-        await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: handByKey[key] });
-      } else if (["numpad7", "numpad1"].includes(event.code.toLowerCase())) {
-        await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: "rock" });
-      } else if (["numpad8", "numpad2"].includes(event.code.toLowerCase())) {
-        await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: "paper" });
-      } else if (["numpad9", "numpad3"].includes(event.code.toLowerCase())) {
-        await this.sendCommand(Commands.BATTLE_SELECT_HAND, { hand: "scissors" });
-      }
-      return;
     }
 
-    if (["4", "h"].includes(key)) {
+    const canUseQeForPotions = !this.battleState.hasDualHandSkill;
+    if (["4", "h"].includes(key) || (canUseQeForPotions && key === "q")) {
       const result = await this.sendCommand(Commands.BATTLE_USE_ITEM, { itemId: "hpPotion" });
       if (result && !result.ok && this.battleState.phase !== "ended" && (result.message || result.key)) {
         this.showToast({ ...result, tone: "danger" });
       }
-    } else if (["5", "m"].includes(key)) {
+    } else if (["5", "m"].includes(key) || (canUseQeForPotions && key === "e")) {
       const result = await this.sendCommand(Commands.BATTLE_USE_ITEM, { itemId: "mpPotion" });
       if (result && !result.ok && this.battleState.phase !== "ended" && (result.message || result.key)) {
         this.showToast({ ...result, tone: "danger" });
@@ -1892,8 +1916,10 @@ export class AppView {
   }
 
   renderStore(rawState) {
-    const fallback = this.getStoreSnapshot();
-    const state = rawState?.profile ? rawState : (rawState?.state?.profile ? rawState.state : fallback) || fallback;
+    const fallback = this.getStoreSnapshot() || {};
+    const incoming = rawState?.profile ? rawState : (rawState?.state?.profile ? rawState.state : rawState);
+    const state = { ...fallback, ...(incoming || {}) };
+    if (incoming?.profile) state.profile = { ...(fallback.profile || {}), ...incoming.profile };
     if (!state?.profile) return;
     $("#header-level").textContent = String(state.profile.level || 1).padStart(2, "0");
     $("#header-coins").textContent = (state.coins || 0).toLocaleString("zh-TW");
@@ -1952,7 +1978,7 @@ export class AppView {
     const xpPercent = state.xpToNext > 0 ? Math.min(100, Math.round((state.profile.xp / state.xpToNext) * 100)) : 100;
     if ($("#records-xp-text")) $("#records-xp-text").textContent = `${state.profile.xp} / ${state.xpToNext} EXP (${xpPercent}%)`;
     if ($("#records-xp-fill")) $("#records-xp-fill").style.width = `${xpPercent}%`;
-    const theoDps = this.store.getTheoreticalDPS();
+    const theoDps = this.store?.getTheoreticalDPS ? this.store.getTheoreticalDPS() : "0.0";
     if ($("#records-theoretical-dps")) $("#records-theoretical-dps").textContent = theoDps;
 
     // 2. Consumables, Momo & Morph Uses
@@ -2464,11 +2490,12 @@ export class AppView {
       }
     }
 
-    const fallback = this.getStoreSnapshot();
-    const state = rawState?.playerStats ? rawState : (rawState?.state?.playerStats ? rawState.state : fallback) || fallback;
-    const profile = state?.profile || fallback?.profile || { level: 1, xp: 0, skillPoints: 0, skills: {} };
-    const playerStats = state?.playerStats || fallback?.playerStats || { damage: 15, maxHp: 100, maxMp: 50 };
-    const xpToNext = state?.xpToNext || fallback?.xpToNext || 100;
+    const fallback = this.getStoreSnapshot() || {};
+    const incoming = rawState?.profile ? rawState : (rawState?.state?.profile ? rawState.state : rawState);
+    const state = { ...fallback, ...(incoming || {}) };
+    const profile = { ...(fallback.profile || {}), ...(incoming?.profile || state.profile || {}) };
+    const playerStats = incoming?.playerStats || fallback?.playerStats || state?.playerStats || { damage: 15, maxHp: 100, maxMp: 50 };
+    const xpToNext = incoming?.xpToNext || fallback?.xpToNext || state?.xpToNext || 100;
 
     $("#skill-points").textContent = profile.skillPoints || 0;
     $("#growth-level").textContent = "Lv. " + (profile.level || 1);
@@ -2503,6 +2530,9 @@ export class AppView {
         text: I18n.t("ui.statAllocMpDesc")
       }
     ];
+    const activeAllocStat = typeof document !== "undefined" ? document.activeElement?.dataset?.allocate : null;
+    const activeAllocSkill = typeof document !== "undefined" ? document.activeElement?.dataset?.allocateSkill : null;
+
     if (this.growthGrid) {
       this.growthGrid.innerHTML = cards.map((card) => {
         const disabled = (state.profile.skillPoints <= 0 || isLocked) ? ' disabled aria-disabled="true"' : "";
@@ -2540,7 +2570,7 @@ export class AppView {
           buttonText = I18n.t("ui.skillMaxLevel");
           disabled = true;
         } else if (!canAfford) {
-          buttonText = I18n.t("ui.skillCostSp", { sp: skill.costPerLevel }) + " (" + I18n.t("ui.insufficientCoins") + ")";
+          buttonText = I18n.t("ui.skillCostSp", { sp: skill.costPerLevel }) + " (" + I18n.t("ui.insufficientSp") + ")";
           disabled = true;
         }
         if (isLocked) {
@@ -2559,6 +2589,12 @@ export class AppView {
           '<button type="button" class="button-primary" data-allocate-skill="' + skill.id + '"' +
           (disabled ? ' disabled aria-disabled="true"' : "") + ">" + buttonText + "</button></article>";
       }).join("");
+    }
+
+    if (activeAllocStat && this.growthGrid) {
+      this.growthGrid.querySelector(`[data-allocate="${activeAllocStat}"]`)?.focus();
+    } else if (activeAllocSkill && this.skillsGrid) {
+      this.skillsGrid.querySelector(`[data-allocate-skill="${activeAllocSkill}"]`)?.focus();
     }
   }
 
@@ -3749,7 +3785,7 @@ export class AppView {
       if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function") {
         try { navigator.vibrate([80]); } catch (_) {}
       }
-      const singlePanel = $("#qte-panel");
+      const singlePanel = $("#qte-panel-single") || $("#qte-panel");
       const dualPanel = $("#qte-panel-dual");
       [singlePanel, dualPanel].forEach((panel) => {
         if (panel) {

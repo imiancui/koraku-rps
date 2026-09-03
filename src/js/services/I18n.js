@@ -22,6 +22,37 @@ export const LOCALE_STORAGE_KEY = "koraku-rps-locale";
 
 export const CHANGELOG_DATA = [
   {
+    version: "0.0.26",
+    date: "2026-09-04",
+    tag: "Countdown, Watermelon Marker, Skill Points & Battle Rules Full Repair",
+    changes: {
+      "zh-Hant": [
+        "【回合與反應倒數修復】回合秒數啟用平滑定時器逐秒遞減，修復 3 秒關卡首拍排程，連線版補齊拍點音效與事件轉發；開拳反應時間支援 100ms 平滑倒數與變拳 2.0s 窗口重設。",
+        "【切西瓜跑條與自動戰鬥】切西瓜採用伺服器時鐘並加上正模數防護，根除負數時間指針跳脫問題；自動戰鬥切西瓜實現三角波實時運算與 2.5x 縮放邊界安全定位。",
+        "【技能點與裝備操作相容】修復背包裝備穿戴與技能加點前後端欄位相容性，避免金幣與背包狀態被空覆蓋；成長加點實作按鈕鍵盤焦點保持與 SP 不足多語系文案補全。",
+        "【遊戲規則與數值強化】大劍 burst 效果全面套用 1.5x 傷害倍率；雙生關卡勝拳擊殺敵方全員時直接判定獲勝結算；開放倒數階段藥水快捷鍵操作。"
+      ],
+      "zh-Hans": [
+        "【回合与反应倒数修复】回合秒数启用平滑定时器逐秒递减，修复 3 秒关卡首拍排程，连线版补齐拍点音效与事件转发；开拳反应时间支持 100ms 平滑倒数与变拳 2.0s 窗口重设。",
+        "【切西瓜跑条与自动战斗】切西瓜采用服务器时钟并加上正模数防护，根除负数时间指针跳脱问题；自动战斗切西瓜实现三角波实时运算与 2.5x 缩放边界安全定位。",
+        "【技能点与装备操作兼容】修复背包装备穿戴与技能加点前后端字段兼容性，避免金币与背包状态被空覆盖；成长加点实现按钮键盘焦点保持与 SP 不足多语系文案补全。",
+        "【游戏规则与数值强化】大剑 burst 效果全面套用 1.5x 伤害倍率；双生关卡胜拳击杀敌方全员时直接判定获胜结算；开放倒数阶段药水快捷键操作。"
+      ],
+      "en": [
+        "【Round & Reaction Countdown Smoothness】Enabled smooth interval countdown tickers, fixed Stage 2-4 first chant beat scheduling, and forwarded countdown-beats with select sound in online mode; reaction timer now decrements smoothly every 100ms.",
+        "【Watermelon Motion & Auto-Battle Alignment】Applied server-synced time with positive modulo math to prevent marker overflow; auto-battle watermelon now features real-time triangle wave calculation and safe 2.5x zoom boundary clamping.",
+        "【Skill Points & Equipment Protocol Compatibility】Aligned payload schemas for inventory equipping and skill allocation across client/validator/server; added focus retention and insufficient SP i18n localization in Growth panel.",
+        "【Rules & Combat Enhancements】Greatsword burst affix now applies 1.5x multiplier consistently to single/dual RPS wins; killing all twins on single win now settles immediately without unwanted QTE; enabled potion hotkeys during countdown."
+      ],
+      "ja": [
+        "【カウントダウンと反応時間の平滑化】毎秒減少するタイマーを有効化し、3秒ステージの最初のカウント抜けを修正。オンライン版でのビートイベントとSE転送を補完。反応時間も100ms刻みでスムーズにカウントダウン。",
+        "【スイカ割りゲージとオートバトル修復】サーバー同期時計と正の剰余計算を適用し、ゲージ針の飛び出しを防止。オートバトルスイカ割りに三角波の動的計算と2.5倍ズーム時の安全クランプを実装。",
+        "【スキルポイントと装備プロトコルの互換性向上】インベントリ装備とスキル習得のフィールド仕様を統一し、ステータス上書きによるコイン消失を防止。育成画面でのフォーカス維持とSP不足テキストを追加。",
+        "【ルールとダメージ数値の最適化】大剣の「burst」特性による1.5倍ダメージを全勝利に適用。双子ボスを通常手で全滅させた場合に即座に勝利判定へ移行。カウントダウン中のポーションショートカットに対応。"
+      ]
+    }
+  },
+  {
     version: "0.0.25",
     date: "2026-09-04",
     tag: "Production VPS Server Online Launch & Cloudflare Dynamic WSS Auto-Injection",
@@ -1043,6 +1074,7 @@ const DICTIONARY = {
       btnEquipDirect: "立即穿戴",
       itemOwned: "已持有",
       insufficientCoins: "星砂不足！",
+      insufficientSp: "技能點不足！",
       // Battle
       battleRounds: "回合",
       targetEnemy: "當前鎖定",
@@ -1868,6 +1900,7 @@ const DICTIONARY = {
       btnEquipDirect: "立即穿戴",
       itemOwned: "已持有",
       insufficientCoins: "星砂不足！",
+      insufficientSp: "技能点不足！",
       battleRounds: "回合",
       targetEnemy: "当前锁定",
       playerLeftHand: "左手",
@@ -2674,6 +2707,7 @@ const DICTIONARY = {
       btnEquipDirect: "Equip Now",
       itemOwned: "Owned",
       insufficientCoins: "Not enough Star Sand!",
+      insufficientSp: "Not enough SP!",
       battleRounds: "Round",
       targetEnemy: "Targeting",
       playerLeftHand: "Left Hand",
@@ -3480,6 +3514,7 @@ const DICTIONARY = {
       btnEquipDirect: "今すぐ装備",
       itemOwned: "所持中",
       insufficientCoins: "星砂が足りません！",
+      insufficientSp: "スキルポイント不足！",
       battleRounds: "ターン",
       targetEnemy: "ターゲット",
       playerLeftHand: "左手",
