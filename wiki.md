@@ -486,7 +486,7 @@ $$\text{Theoretical DPS} = \frac{(\text{Base DMG} \times \text{Greatsword Mult} 
 
 ## 22. Online 權威架構與通訊協定手冊 (Online Architecture & Protocol)
 
-### 22.1 十六大 Online 權威方針 (16 Online Authority Policies)
+### 22.1 十七大 Online 權威方針 (17 Online Authority Policies)
 1. **意圖傳遞 (Intent Only)**：客戶端僅發送操作意圖指令，勝負、傷害、獎勵與數值全由伺服器權威計算。
 2. **三類判定模型 (3-Class Adjudication)**：時機類操作具 150ms 網路延遲寬限期事後審查；猜拳秘密承諾必須在揭曉前抵達；道具與配點為冪等指令。
 3. **宣告順序 (Declared Order)**：指令依客戶端時間戳排序緩衝，受抵達時間上界約束。
@@ -503,6 +503,7 @@ $$\text{Theoretical DPS} = \frac{(\text{Base DMG} \times \text{Greatsword Mult} 
 14. **核心環境解耦 (Kernel & Adapter Separation)**：Kernel 純 ES Modules，伺服器專屬適配器隔離於 `server/`。
 15. **版本握手檢驗 (Config Version Handshake)**：連線握手互換 `configVersion`（`2026.09.03`），版本不符提示重新整理。
 16. **每日備份與復原演練 (Daily Backup & Restore Contract)**：排程每日自動備份，具備經過實測的冷啟動復原程序。
+17. **預設離線與注入設定 (Default Offline & Config Injection)**：客戶端預設以離線沙盒模式啟動，僅在透過 `window.__KORAKU_CONFIG__.serverUrl` 或 `window.KORAKU_SERVER_URL` 注入伺服器設定時才進入線上模式；嚴禁從頁面域名推導 WebSocket 端點。離線與線上存檔使用完全隔離之 LocalStorage 鍵值空間（`koraku-rps-save-v1` 與 `koraku-rps-online-*`）。
 
 ### 22.2 通訊協定規格 (`protocol.js` v2.0.0)
 - **Protocol Version**：`2.0.0`
@@ -516,9 +517,10 @@ $$\text{Theoretical DPS} = \frac{(\text{Base DMG} \times \text{Greatsword Mult} 
 - **完整 JSON 資料匯出**：呼叫 `account.exportJson` 取得包含等級、12 格位裝備實例、星砂經濟帳本與歷程統計之備份檔案。
 - **徹底刪除帳號**：輸入確認文字「DELETE」呼叫 `account.delete`，徹底銷毀雲端與本機所有進度。
 
-### 22.4 運維備份與災難復原契約 (Ops: Backup & Disaster Recovery)
-- 伺服器每日 UTC 04:00 自動執行 `server/scripts/backup.mjs`，產生時間戳壓縮備份檔並異地同步備援。
-- 提供 `server/scripts/restore.mjs` 確保可在 3 分鐘內完成災難還原驗收。
+### 22.4 運維備份、災難復原與 Tailscale Staging 內網測試
+- **每日定時備份**：Windows 工作排程器每日 03:00 自動執行 `KorakuBackup`（`node server/scripts/backup.js`），產生帶有 SHA-256 Manifest 驗證之時間戳備份。
+- **CLI 災難還原**：支援 `node server/scripts/backup.js --restore <backup-dir>` 在 3 分鐘內完成冷啟動完整還原驗收。
+- **Tailscale Staging 內網環境**：支援 `npm run start:tailscale:full` 一鍵啟動後端權威伺服器、前端靜態站（伺服端動態注入 WSS 端點）並掛載 Tailscale HTTPS 443 與 8443 代理，供行動裝置（iOS/Android 4G/5G）進行真實延遲、斷線 10 秒結算與跨模式隔離驗證。
 
 
 

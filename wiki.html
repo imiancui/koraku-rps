@@ -916,21 +916,23 @@
         <div class="grid-2">
           <div class="card">
             <div class="card-title">
-              <span>十六大權威原則與三類判定模型</span>
+              <span>十七大權威原則與三類判定模型</span>
               <span class="badge badge-crimson">Server Authoritative</span>
             </div>
             <p><strong>純意圖傳遞</strong>：客戶端僅發送操作意圖指令，傷害、勝負、獎勵與 RNG 全由伺服器權威計算。</p>
+            <p style="margin-top:8px;"><strong>預設離線與注入配置 (Policy 17)</strong>：客戶端預設以離線沙盒模式啟動，僅在偵測到注入伺服器 URL 時才進入線上模式；離線與線上存檔使用完全獨立之 LocalStorage 鍵空間，互不污染。</p>
             <p style="margin-top:8px;"><strong>三類判定模型</strong>：QTE/變拳/切西瓜具 150ms 網路延遲寬限期事後審查；出拳手勢需在揭曉前抵達封存；裝備與配點為帶有 cmdId 的冪等指令。</p>
             <p style="margin-top:8px;"><strong>單一寫入者與 10s 斷線保護</strong>：新連線踢出舊連線；戰鬥斷線享有 10 秒寬限期保留 Session，逾時自動結算。</p>
           </div>
           <div class="card">
             <div class="card-title">
-              <span>帳號轉移碼、資料匯出與備份契約</span>
+              <span>帳號轉移碼、備份還原與 Tailscale 內網</span>
               <span class="badge badge-gold">Data Governance & Ops</span>
             </div>
             <p><strong>15 分鐘一次性轉移碼</strong>：透過 <code>account.issueTransferCode</code> 產生跨裝置轉移碼，在新設備輸入 <code>account.claimTransferCode</code> 即可繼承全部進度。</p>
             <p style="margin-top:8px;"><strong>JSON 完整匯出與徹底刪除</strong>：支援 <code>account.exportJson</code> 下載完整裝備實例與經濟審計帳本；支援輸入「DELETE」徹底銷毀帳號。</p>
-            <p style="margin-top:8px;"><strong>每日備份與復原演練</strong>：伺服器每日自動執行備份腳本並異地同步備援，具備 3 分鐘災難冷啟動復原契約。</p>
+            <p style="margin-top:8px;"><strong>排程備份與 CLI 還原</strong>：Windows 每日 03:00 自動執行 <code>KorakuBackup</code> 排程，支援 <code>backup.js --restore</code> CLI 災難冷啟動完整還原。</p>
+            <p style="margin-top:8px;"><strong>Tailscale Staging 內網環境</strong>：支援 <code>npm run start:tailscale:full</code> 一鍵啟動後端、前端注入與 Tailscale 443/8443 代理，供行動裝置進行真機延遲與斷線結算驗證。</p>
           </div>
         </div>
       </section>

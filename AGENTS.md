@@ -149,6 +149,7 @@ For completed gameplay features/fixes/releases, preserve the existing release re
 14. The kernel uses no Node-only APIs; ws, storage, and clock adapters live in `server/`. `server/` never enters the bundle; `bundle.js` is never hand-edited.
 15. Client and server exchange a config version at handshake; a mismatch prompts a refresh.
 16. Daily backups with a tested restore procedure are required before public launch (ops; document in HANDOFF).
+17. The client boots offline unless a server URL is injected via window.__KORAKU_CONFIG__ or window.KORAKU_SERVER_URL; it never derives a WebSocket URL from the page origin. Offline and online saves use disjoint storage keys.
 
 ## Concurrent Agent Rules (online refactor)
 

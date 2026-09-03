@@ -4,7 +4,7 @@
   "use strict";
 
 // --- src/js/config/gameConfig.js ---
-const APP_VERSION = "0.0.22";
+const APP_VERSION = "0.0.23";
 
 const DOJO_CONFIG = Object.freeze({
   defaultHp: 10000,
@@ -508,6 +508,64 @@ const DEFAULT_LOCALE = "en";
 const LOCALE_STORAGE_KEY = "koraku-rps-locale";
 
 const CHANGELOG_DATA = [
+  {
+    version: "0.0.23",
+    date: "2026-09-03",
+    tag: "Offline Default & Fallback Protection, Disjoint Storage, Server Hardening & Tailscale Staging",
+    changes: {
+      "zh-Hant": [
+        "【預設離線沙盒與伺服器注入設定 (Policy 17)】客戶端預設以離線沙盒模式啟動，徹底避免因缺少伺服器端點造成開局無回應問題；僅在偵測到注入伺服器設定時啟動線上模式，並禁止回退同源 /ws。",
+        "【雙模式存檔與快取空間完全隔離】離線沙盒使用 koraku-rps-save-v1；線上 Token 與快取使用專屬前綴鍵（koraku-rps-online-*），切換模式互不污染。",
+        "【斷線與模式切換 UI 升級】斷線提示 Banner 新增「改用離線模式」按鈕，存檔紀錄面板新增「切換回線上模式」按鈕；排隊指令 8 秒未連線自動逾時取消。",
+        "【伺服器安全性強化與 Tailscale 內網環境】出口事件與快照徹底剝除種子與指令紀錄；修復斷線 10 秒寬限自動結算鏈；提供 Tailscale 內網測試站與 Windows 每日自動備份排程。"
+      ],
+      "zh-Hans": [
+        "【默认离线沙盒与服务器注入配置 (Policy 17)】客户端默认以离线沙盒模式启动，彻底避免因缺少服务器端点造成开局无响应问题；仅在检测到注入服务器配置时启动在线模式，并禁止回退同源 /ws。",
+        "【双模式存档与缓存空间完全隔离】离线沙盒使用 koraku-rps-save-v1；在线 Token 与缓存使用专属前缀键（koraku-rps-online-*），切换模式互不污染。",
+        "【断线与模式切换 UI 升级】断线提示 Banner 新增“改用离线模式”按钮，存档记录面板新增“切换回在线模式”按钮；排队指令 8 秒未连线自动超时取消。",
+        "【服务器安全性强化与 Tailscale 内网环境】出口事件与快照彻底剥除种子与指令记录；修复断线 10 秒宽限自动结算链；提供 Tailscale 内网测试站与 Windows 每日自动备份排程。"
+      ],
+      "en": [
+        "【Default Offline Sandbox & Config Injection (Policy 17)】Client boots into offline sandbox mode by default, preventing unresponsiveness when server endpoints are absent; online mode connects only when explicitly injected, without same-origin fallback.",
+        "【Disjoint Storage & Cache Isolation】Offline sandbox utilizes koraku-rps-save-v1; online tokens and state cache use disjoint keys (koraku-rps-online-*), preventing state contamination across modes.",
+        "【Banner & Save Modal Mode Switching UI】Added 'Play offline' button in disconnect banner and 'Switch to online mode' in Save Records modal; queued commands time out after 8s when disconnected.",
+        "【Server Security Hardening & Tailscale Staging】Stripped RNG seed and command logs from outgoing snapshots/events; fixed 10s disconnect settlement pipeline; added Tailscale staging suite and daily backup tasks."
+      ],
+      "ja": [
+        "【デフォルトオフライン＆サーバー設定注入 (Policy 17)】接続先未設定時の操作不能を防ぐため、クライアントはデフォルトでオフライン起動。設定注入時のみオンラインへ接続し、同元/wsへのフォールバックを廃止。",
+        "【完全分離ストレージ＆キャッシュ保護】オフラインセーブには koraku-rps-save-v1、オンラインTokenとキャッシュには専用キー (koraku-rps-online-*) を使用し、モード切り替え時のデータ混入を防止。",
+        "【切断バナー＆モード切り替えUI】切断バナーに「オフラインで遊ぶ」、セーブ記録画面に「オンラインモードに切り替え」ボタンを追加。未接続時の待機コマンドは8秒でタイムアウト。",
+        "【サーバーセキュリティ強化＆Tailscale環境】送信スナップショットからシード値・コマンドログを完全に剥離。10秒切断猶予精算パイプラインの修復、Tailscale検証環境と日次バックアップを整備。"
+      ]
+    }
+  },
+  {
+    version: "0.0.22",
+    date: "2026-09-03",
+    tag: "i18n Residue Cleanup Round 1 & 2 (Keys, Battle HUD, Damage Log, Consumables)",
+    changes: {
+      "zh-Hant": [
+        "【核心回應與在地化鍵化】完成 kernelFactory 全部 8 處回應點 i18n 鍵化（移除伺服器端中文字符串），支援四語系動態翻譯。",
+        "【傷害日誌與手勢按鈕在地化】出拳手勢按鈕與戰鬥 HUD 玩家名依語系渲染；日誌雙小樂歸屬依 targetId 判定；旅人統一為 Traveler。",
+        "【戰績紀錄與單位在地化】戰績面板消耗品、場次、勝敗統計與唯讀提示完整支援四語系對應量詞與參數替換。"
+      ],
+      "zh-Hans": [
+        "【核心响应与本地化键化】完成 kernelFactory 全部 8 处响应点 i18n 键化（移除服务端中文字符串），支持四语系动态翻译。",
+        "【伤害日志与手势按钮本地化】出拳手势按钮与战斗 HUD 玩家名依语系渲染；日志双小乐归属依 targetId 判定；旅人统一为 Traveler。",
+        "【战绩记录与单位本地化】战绩面板消耗品、场次、胜败统计与只读提示完整支持四语系对应量词与参数替换。"
+      ],
+      "en": [
+        "【Kernel Factory i18n Keys】Completed keying across all 8 kernelFactory response points, removing hardcoded Chinese strings and enabling 4-locale translation.",
+        "【Damage Log & Hand Buttons Localization】Hand gesture buttons and battle HUD player name resolve across locales; dual boss damage attribution uses targetId; Traveler unified.",
+        "【Records & Consumables Units Localization】Records modal consumables, match counts, win/loss stats, and read-only notes support 4-locale units and parameter replacement."
+      ],
+      "ja": [
+        "【カーネルレスポンスの完全キー化】kernelFactory の全8箇所の応答をi18nキー化し、サーバー側の中国語ハードコードを排除。",
+        "【ダメージログ＆じゃんけんボタン多言語化】じゃんけんボタンとバトルHUDプレイヤー名をロケール対応；ボス被弾帰属をtargetIdで判定；旅人をTravelerに統一。",
+        "【戦績記録＆消費アイテム単位多言語化】戦績画面の消費アイテム、対戦数、勝敗統計、閲覧専用ノートの各言語単位・パラメータ置換を完備。"
+      ]
+    }
+  },
   {
     version: "0.0.21",
     date: "2026-09-03",
@@ -1209,6 +1267,8 @@ const DICTIONARY = {
       changelogTitle: "更新日誌",
       changelogSubtitle: "遊戲版本迭代與修復紀錄",
       closeChangelog: "關閉",
+      currentVersion: "當前版本",
+      currentVersionStatus: "已上線運行",
       coins: "星砂",
       soundToggle: "切換遊戲音效",
       sfxToggle: "切換遊戲音效",
@@ -1919,7 +1979,11 @@ const DICTIONARY = {
       bannerOnline: "已連線至權威伺服器",
       bannerOffline: "目前處於本機離線沙盒模式",
       bannerReconnecting: "連線中斷，正在嘗試重新連線...",
-      bannerDisconnected: "已與伺服器斷開連線"
+      bannerDisconnected: "已與伺服器斷開連線",
+      noServerConfigured: "未偵測到伺服器設定，已切換為離線模式",
+      switchToOffline: "改用離線模式",
+      switchToOnline: "切換回線上模式",
+      commandFailedOffline: "尚未連線至伺服器，指令已逾時取消"
     },
     battle: {
       lockedDuringBattle: "戰鬥進行中已鎖定換裝與配點。"
@@ -2071,6 +2135,8 @@ const DICTIONARY = {
       changelogTitle: "更新日志",
       changelogSubtitle: "游戏版本迭代与修复纪录",
       closeChangelog: "关闭",
+      currentVersion: "当前版本",
+      currentVersionStatus: "已上线运行",
       coins: "星砂",
       soundToggle: "切换游戏音效",
       sfxToggle: "切换游戏音效",
@@ -2719,7 +2785,11 @@ const DICTIONARY = {
       bannerOnline: "已连接至权威服务器",
       bannerOffline: "当前处于本地离线沙盒模式",
       bannerReconnecting: "连接中断，正在尝试重新连接...",
-      bannerDisconnected: "已与服务器断开连接"
+      bannerDisconnected: "已与服务器断开连接",
+      noServerConfigured: "未检测到服务器配置，已切换为离线模式",
+      switchToOffline: "改用离线模式",
+      switchToOnline: "切换回在线模式",
+      commandFailedOffline: "尚未连接到服务器，指令已超时取消"
     },
     battle: {
       lockedDuringBattle: "战斗进行中已锁定换装与配点。"
@@ -2871,6 +2941,8 @@ const DICTIONARY = {
       changelogTitle: "Changelog",
       changelogSubtitle: "Version history and patch notes",
       closeChangelog: "Close",
+      currentVersion: "Current Version",
+      currentVersionStatus: "Live and active",
       coins: "Star Sand",
       soundToggle: "Toggle SFX",
       sfxToggle: "Toggle SFX",
@@ -3519,7 +3591,11 @@ const DICTIONARY = {
       bannerOnline: "Connected to authoritative server",
       bannerOffline: "Running in local offline sandbox mode",
       bannerReconnecting: "Connection lost. Reconnecting...",
-      bannerDisconnected: "Disconnected from server"
+      bannerDisconnected: "Disconnected from server",
+      noServerConfigured: "No server configuration detected. Switched to offline mode.",
+      switchToOffline: "Play offline",
+      switchToOnline: "Switch to online mode",
+      commandFailedOffline: "Not connected to server; command timed out."
     },
     battle: {
       lockedDuringBattle: "Equipment and stat allocation are locked during active battle."
@@ -3671,6 +3747,8 @@ const DICTIONARY = {
       changelogTitle: "更新履歴",
       changelogSubtitle: "バージョン履歴と更新記録",
       closeChangelog: "閉じる",
+      currentVersion: "現在のバージョン",
+      currentVersionStatus: "稼働中",
       coins: "星砂",
       soundToggle: "効果音切替",
       sfxToggle: "効果音切替",
@@ -4319,7 +4397,11 @@ const DICTIONARY = {
       bannerOnline: "権威サーバーに接続完了",
       bannerOffline: "ローカルオフラインモードで実行中",
       bannerReconnecting: "接続が切断されました。再接続を試みています...",
-      bannerDisconnected: "サーバーから切断されました"
+      bannerDisconnected: "サーバーから切断されました",
+      noServerConfigured: "サーバー設定が見つからないため、オフラインモードに切り替えました",
+      switchToOffline: "オフラインで遊ぶ",
+      switchToOnline: "オンラインモードに切り替え",
+      commandFailedOffline: "サーバーに未接続のため、コマンドがタイムアウトしました"
     },
     battle: {
       lockedDuringBattle: "戦闘中は装備の変更および能力値の配分が固定されています。"
@@ -10404,22 +10486,22 @@ LocalGameClient;
 // version handshake validation, idempotent command ACK tracking, and EventBus forwarding.
 
 
+const ONLINE_STORAGE_PREFIX = "koraku-rps-online-";
+const ONLINE_TOKEN_KEY = "koraku-rps-online-token";
+const ONLINE_STATE_CACHE_KEY = "koraku-rps-online-state";
+
 /**
  * Determine default WebSocket URL based on current runtime environment
  * @param {string} [customUrl]
- * @returns {string}
+ * @returns {string|null}
  */
 function resolveWebSocketUrl(customUrl) {
   if (customUrl) return customUrl;
   if (typeof window !== "undefined") {
     if (window.KORAKU_SERVER_URL) return window.KORAKU_SERVER_URL;
     if (window.__KORAKU_CONFIG__?.serverUrl) return window.__KORAKU_CONFIG__.serverUrl;
-    if (window.location && window.location.host) {
-      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      return `${protocol}//${window.location.host}/ws`;
-    }
   }
-  return "ws://localhost:8080/ws";
+  return null;
 }
 
 /**
@@ -10474,13 +10556,20 @@ class RemoteGameClient extends GameClient {
 
     this._ws = null;
     this._connectionState = ConnectionStates.OFFLINE;
-    this._token = this.options.token;
+    this._storage = options.storage || (typeof window !== "undefined" ? window.localStorage : null);
+    this._token = this.options.token || (this._storage ? this._storage.getItem(ONLINE_TOKEN_KEY) : null) || null;
     this._deviceId = this.options.deviceId;
     this._eventBus = this.options.eventBus || new EventBus();
     this._devEntitlement = Boolean(options.devEntitlement);
 
     // State snapshot cache
     this._state = {};
+    if (this._storage) {
+      try {
+        const raw = this._storage.getItem(ONLINE_STATE_CACHE_KEY);
+        if (raw) this._state = JSON.parse(raw);
+      } catch (_) {}
+    }
     this._storeProxy = null;
     this._battleProxy = null;
     this._postBattleProxy = null;
@@ -10799,6 +10888,14 @@ class RemoteGameClient extends GameClient {
   _connect() {
     if (this._isExplicitlyClosed) return;
 
+    if (!this.options.url) {
+      const err = new Error("No WebSocket URL configured");
+      err.code = ErrorCodes.NOT_CONNECTED;
+      this._setConnectionState(ConnectionStates.DISCONNECTED, { reason: "NO_SERVER_URL" });
+      this._rejectInit(err);
+      return;
+    }
+
     const WebSocketClass = this.options.WebSocketClass;
     if (!WebSocketClass) {
       const err = new Error("WebSocket constructor not available in current environment");
@@ -10965,10 +11062,20 @@ class RemoteGameClient extends GameClient {
     }
 
     // Handshake successful
-    if (msg.token) this._token = msg.token;
+    if (msg.token) {
+      this._token = msg.token;
+      try {
+        if (this._storage) this._storage.setItem(ONLINE_TOKEN_KEY, msg.token);
+      } catch (_) {}
+    }
     if (msg.devEntitlement !== undefined) this._devEntitlement = Boolean(msg.devEntitlement);
     if (msg.serverConfig) this._serverConfig = msg.serverConfig;
-    if (msg.state) this._state = msg.state;
+    if (msg.state) {
+      this._state = msg.state;
+      try {
+        if (this._storage) this._storage.setItem(ONLINE_STATE_CACHE_KEY, JSON.stringify(msg.state));
+      } catch (_) {}
+    }
 
     this._reconnectAttempts = 0;
     this._setConnectionState(ConnectionStates.ONLINE, {
@@ -11075,6 +11182,15 @@ class RemoteGameClient extends GameClient {
     const stateObj = msg.state || (payload && payload.state);
     if (stateObj && typeof stateObj === "object") {
       this._state = { ...this._state, ...stateObj };
+      try {
+        if (this._storage) this._storage.setItem(ONLINE_STATE_CACHE_KEY, JSON.stringify(this._state));
+      } catch (_) {}
+    }
+    if (payload?.token) {
+      this._token = payload.token;
+      try {
+        if (this._storage) this._storage.setItem(ONLINE_TOKEN_KEY, payload.token);
+      } catch (_) {}
     }
 
     const pending = this._pendingCommands.get(cmdId);
@@ -11098,28 +11214,19 @@ class RemoteGameClient extends GameClient {
    */
   _handleCommandReject(msg) {
     const cmdId = msg.cmdId || msg.payload?.cmdId;
+    if (!cmdId) return;
+
+    const code = msg.code || msg.payload?.code || ErrorCodes.INTERNAL_ERROR;
+    const reason = msg.error || msg.reason || msg.payload?.error || msg.payload?.message || "Command rejected";
     const payload = msg.payload !== undefined ? msg.payload : msg;
-    const code = msg.code || payload?.code || ErrorCodes.INTERNAL_ERROR;
-    const key = msg.key || payload?.key;
-    const params = msg.params || payload?.params || {};
-    let reason = msg.reason || msg.error || payload?.reason || payload?.error || "Command rejected by server";
-    if (key && typeof I18n !== "undefined" && typeof I18n.t === "function") {
-      const localized = I18n.t(key, params);
-      if (localized && localized !== key) {
-        reason = localized;
-      }
-    }
 
-    const err = new Error(reason);
-    err.code = code;
-    err.key = key;
-    err.params = params;
-    err.payload = payload;
-
-    const pending = cmdId ? this._pendingCommands.get(cmdId) : null;
+    const pending = this._pendingCommands.get(cmdId);
     if (pending) {
       if (pending.timer) clearTimeout(pending.timer);
       this._pendingCommands.delete(cmdId);
+      const err = new Error(reason);
+      err.code = code;
+      err.payload = payload;
       pending.reject(err);
     }
 
@@ -11145,6 +11252,9 @@ class RemoteGameClient extends GameClient {
     if (eventName === Events.STORE_CHANGED || eventName === "store:changed") {
       if (payload && typeof payload === "object") {
         this._state = { ...this._state, ...payload };
+        try {
+          if (this._storage) this._storage.setItem(ONLINE_STATE_CACHE_KEY, JSON.stringify(this._state));
+        } catch (_) {}
       }
     } else if (eventName === Events.BATTLE_STATE || eventName === "battle:state") {
       if (payload) {
@@ -11213,8 +11323,29 @@ class RemoteGameClient extends GameClient {
         this._dispatchCommand(cmdId);
       } else {
         this._commandQueue.push(cmdId);
+        entry.timer = setTimeout(() => {
+          this._onQueuedCommandTimeout(cmdId);
+        }, this.options.commandTimeout);
       }
     });
+  }
+
+  /**
+   * Handle queued command timeout when disconnected or not online
+   * @private
+   * @param {string} cmdId
+   */
+  _onQueuedCommandTimeout(cmdId) {
+    const entry = this._pendingCommands.get(cmdId);
+    if (!entry) return;
+    this._pendingCommands.delete(cmdId);
+    const idx = this._commandQueue.indexOf(cmdId);
+    if (idx !== -1) {
+      this._commandQueue.splice(idx, 1);
+    }
+    const err = new Error("Command timed out while waiting for server connection.");
+    err.code = ErrorCodes.NOT_CONNECTED;
+    entry.reject(err);
   }
 
   /**
@@ -12143,6 +12274,8 @@ class AppView {
       } catch (err) {
         if (err?.code === ErrorCodes.BATTLE_IN_PROGRESS_LOCKED || err?.code === "BATTLE_IN_PROGRESS_LOCKED" || err?.message === "BATTLE_IN_PROGRESS_LOCKED" || err?.key === "battle.lockedDuringBattle") {
           this.showToast(I18n.t("battle.lockedDuringBattle"), "danger");
+        } else if (err?.code === ErrorCodes.NOT_CONNECTED || err?.code === "NOT_CONNECTED" || err?.errorCode === ErrorCodes.NOT_CONNECTED) {
+          this.showToast(I18n.t("connection.commandFailedOffline"), "warning");
         } else {
           console.error(`[AppView] Command failed (${command}):`, err);
         }
@@ -12239,6 +12372,9 @@ class AppView {
     if (banner && bannerText) {
       if (state === ConnectionStates.RECONNECTING || state === ConnectionStates.DISCONNECTED) {
         banner.hidden = false;
+        if (this.connectionBannerSwitchOffline) {
+          this.connectionBannerSwitchOffline.hidden = false;
+        }
         if (this.battleState?.active) {
           const deadline = meta?.deadline || (Date.now() + 10000);
           this._startDisconnectCountdown(deadline);
@@ -12251,6 +12387,9 @@ class AppView {
       } else {
         this._stopDisconnectCountdown();
         banner.hidden = true;
+        if (this.connectionBannerSwitchOffline) {
+          this.connectionBannerSwitchOffline.hidden = true;
+        }
       }
     }
   }
@@ -12368,6 +12507,18 @@ class AppView {
     this.connectionStatusBanner = $("#connection-status-banner");
     this.connectionBannerText = $("#connection-banner-text");
     this.connectionBannerClose = $("#connection-banner-close");
+    this.connectionBannerSwitchOffline = $("#connection-banner-switch-offline");
+
+    if (this.connectionBannerSwitchOffline) {
+      this.connectionBannerSwitchOffline.addEventListener("click", () => {
+        if (typeof window !== "undefined") {
+          window.localStorage?.setItem("koraku_mode", "offline");
+          const url = new URL(window.location.href);
+          url.searchParams.delete("mode");
+          window.location.href = url.toString();
+        }
+      });
+    }
 
     if (this.connectionBannerClose) {
       this.connectionBannerClose.addEventListener("click", () => {
@@ -13411,6 +13562,14 @@ class AppView {
 
     if (event.target.closest("#btn-import-save-seed")) {
       this.handleImportSaveSeed();
+      return;
+    }
+
+    if (event.target.closest("#btn-switch-to-online")) {
+      if (typeof window !== "undefined") {
+        window.localStorage?.setItem("koraku_mode", "online");
+        window.location.reload();
+      }
       return;
     }
 
@@ -14989,10 +15148,30 @@ class AppView {
   renderChangelog() {
     const listEl = $("#changelog-modal-list");
     if (!listEl) return;
-    const changelogs = I18n.getChangelog();
+    let changelogs = I18n.getChangelog();
+
+    // Guard: Guarantee the running APP_VERSION is present and at the top
+    if (!changelogs.some((e) => e.version === APP_VERSION)) {
+      changelogs = [
+        {
+          version: APP_VERSION,
+          date: new Date().toISOString().slice(0, 10),
+          tag: "Latest Version",
+          changes: [
+            I18n.t("ui.currentVersionStatus")
+              ? `${I18n.t("ui.currentVersion")} (v${APP_VERSION}): ${I18n.t("ui.currentVersionStatus")}`
+              : `v${APP_VERSION}`
+          ]
+        },
+        ...changelogs
+      ];
+    }
+
+    const currentBadgeText = I18n.t("ui.currentVersion") || "當前版本";
+
     listEl.innerHTML = changelogs
-      .map((entry, idx) => {
-        const isCurrent = idx === 0;
+      .map((entry) => {
+        const isCurrent = entry.version === APP_VERSION;
         const changesHtml = entry.changes
           .map((c) => `<li>${c}</li>`)
           .join("");
@@ -15000,6 +15179,7 @@ class AppView {
           <div class="changelog-entry ${isCurrent ? "is-current" : ""}">
             <div class="changelog-entry-header">
               <span class="changelog-ver">v${entry.version}</span>
+              ${isCurrent ? `<span class="changelog-current-badge">${currentBadgeText}</span>` : ""}
               <span class="changelog-date">${entry.date}</span>
               <span class="changelog-tag">${entry.tag}</span>
             </div>
@@ -15040,6 +15220,13 @@ class AppView {
     }
     if (this.saveSeedInput) {
       this.saveSeedInput.value = "";
+    }
+
+    const switchSection = $("#save-mode-switch-section");
+    if (switchSection) {
+      const serverUrl = typeof window !== "undefined" ? (window.__KORAKU_CONFIG__?.serverUrl || window.KORAKU_SERVER_URL) : null;
+      const isOffline = this.client ? (this.client.connectionState === ConnectionStates.OFFLINE || this.client.connectionState === "offline") : true;
+      switchSection.hidden = !(serverUrl && isOffline);
     }
   }
 
@@ -16442,67 +16629,113 @@ class AppView {
 }
 
 // --- src/js/main.js ---
-/**
- * Resolve whether the client should boot in offline sandbox or online authoritative mode
- * @returns {"offline"|"online"}
- */
-function resolveClientMode() {
-  if (typeof window === "undefined") return "offline";
-
-  const urlParams = new URLSearchParams(window.location.search);
-  const modeParam = urlParams.get("mode");
-  if (modeParam === "offline" || modeParam === "online") {
-    return modeParam;
-  }
-
-  const savedMode = window.localStorage?.getItem("koraku_mode");
-  if (savedMode === "offline" || savedMode === "online") {
-    return savedMode;
-  }
-
-  if (window.location.protocol === "file:") {
-    return "offline";
-  }
-
-  const hostname = window.location.hostname;
-  if (!hostname || hostname === "localhost" || hostname === "127.0.0.1") {
-    return "offline";
-  }
-
-  // Production domain (koraku.app) and other web origins default to online
-  return "online";
+function getInjectedServerUrl() {
+  if (typeof window === "undefined") return null;
+  if (window.KORAKU_SERVER_URL) return window.KORAKU_SERVER_URL;
+  if (window.__KORAKU_CONFIG__?.serverUrl) return window.__KORAKU_CONFIG__.serverUrl;
+  return null;
 }
 
-const mode = resolveClientMode();
-const persistence = new Persistence();
-const client = mode === "online"
-  ? new RemoteGameClient({ persistence })
-  : new LocalGameClient({ persistence });
+/**
+ * Resolve client execution mode with detailed status
+ * @param {object} [env={}]
+ * @returns {{ mode: "offline"|"online", warningKey: string|null }}
+ */
+function resolveClientModeDetails(env = {}) {
+  let search = "";
+  let storageValue = null;
+  let protocol = "";
+  let serverUrl = null;
 
-client.init();
+  if (typeof window !== "undefined") {
+    search = window.location?.search || "";
+    storageValue = window.localStorage?.getItem("koraku_mode");
+    protocol = window.location?.protocol || "";
+    serverUrl = getInjectedServerUrl();
+  }
 
-const bus = client.bus;
-const store = client.store;
-const battle = client.battle;
-const postBattle = client.postBattle;
-const sound = new SoundSystem(store);
+  if (env.search !== undefined) search = env.search;
+  if (env.storageValue !== undefined) storageValue = env.storageValue;
+  if (env.protocol !== undefined) protocol = env.protocol;
+  if (env.serverUrl !== undefined) serverUrl = env.serverUrl;
 
-bus.on("battle:ended", (result) => postBattle.open(result));
-bus.on("sound", ({ name }) => sound.play(name));
-bus.on("bgm:scene", ({ scene }) => sound.setBgmScene(scene));
+  if (protocol === "file:") {
+    return { mode: "offline", warningKey: null };
+  }
 
-new DialogueController(bus);
-const view = new AppView({ bus, store, battle, postBattle, sound, client });
-view.init();
+  const params = new URLSearchParams(search.startsWith("?") ? search : (search ? `?${search}` : ""));
+  const modeParam = params.get("mode")?.trim().toLowerCase();
 
-if (
-  typeof window !== "undefined" &&
-  (new URLSearchParams(window.location.search).has("debug") ||
+  let requestedMode = null;
+  if (modeParam === "offline" || modeParam === "online") {
+    requestedMode = modeParam;
+  } else if (storageValue === "offline" || storageValue === "online") {
+    requestedMode = storageValue;
+  }
+
+  if (requestedMode === "offline") {
+    return { mode: "offline", warningKey: null };
+  }
+
+  if (requestedMode === "online") {
+    if (serverUrl) {
+      return { mode: "online", warningKey: null };
+    }
+    // Online requested without injected server URL: cannot derive from origin, downgrade to offline
+    return { mode: "offline", warningKey: "connection.noServerConfigured" };
+  }
+
+  // Default: if injected server URL exists -> online, otherwise offline
+  if (serverUrl) {
+    return { mode: "online", warningKey: null };
+  }
+
+  return { mode: "offline", warningKey: null };
+}
+
+/**
+ * Resolve whether the client should boot in offline sandbox or online authoritative mode
+ * @param {object} [env={}]
+ * @returns {"offline"|"online"}
+ */
+function resolveClientMode(env = {}) {
+  return resolveClientModeDetails(env).mode;
+}
+
+if (typeof window !== "undefined") {
+  const { mode, warningKey } = resolveClientModeDetails();
+  const persistence = new Persistence();
+  const client = mode === "online"
+    ? new RemoteGameClient({ persistence })
+    : new LocalGameClient({ persistence });
+
+  client.init();
+
+  const bus = client.bus;
+  const store = client.store;
+  const battle = client.battle;
+  const postBattle = client.postBattle;
+  const sound = new SoundSystem(store);
+
+  bus.on("battle:ended", (result) => postBattle.open(result));
+  bus.on("sound", ({ name }) => sound.play(name));
+  bus.on("bgm:scene", ({ scene }) => sound.setBgmScene(scene));
+
+  new DialogueController(bus);
+  const view = new AppView({ bus, store, battle, postBattle, sound, client });
+  view.init();
+
+  if (warningKey) {
+    bus.emit("toast", { key: warningKey, tone: "warning" });
+  }
+
+  if (
+    new URLSearchParams(window.location.search).has("debug") ||
     window.location.hash.includes("debug") ||
-    window.localStorage?.getItem("koraku_debug") === "true")
-) {
-  window.__KORAKU_DEBUG__ = { bus, store, battle, postBattle, view, client };
-  const panel = document.createElement("details");
+    window.localStorage?.getItem("koraku_debug") === "true"
+  ) {
+    window.__KORAKU_DEBUG__ = { bus, store, battle, postBattle, view, client };
+    const panel = document.createElement("details");
   panel.className = "debug-panel";
   panel.innerHTML =
     "<summary>DEV</summary>" +
@@ -16526,5 +16759,6 @@ if (
     }
   });
   document.body.append(panel);
+  }
 }
 })();

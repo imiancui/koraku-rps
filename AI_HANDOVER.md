@@ -2,10 +2,10 @@
 
 > **文件用途**：AI 代理人與開發者快速上手、架構交接、開發合約指引與校對基準  
 > **專案根目錄**：`D:\game-dev\New-game-project-4`  
-> **當前版本**：`v0.0.22`（顯示於首頁頁腳最左側 `0.0.22`，自最後一位遞增，每 100 個版本進一位：`0.0.100` -> `0.1.0`）  
+> **當前版本**：`v0.0.23`（顯示於首頁頁腳最左側 `0.0.23`，自最後一位遞增，每 100 個版本進一位：`0.0.100` -> `0.1.0`）  
 > **最新更新日期**：2026-09-03  
 > **基準規範**：`OPENSPEC.md` 與 `AGENTS.md`  
-> **測試狀態**：`npm test` 219/219、`npm run test:server` 17/17、`npm run test:rwd:smoke` 30/30 全部通過 (100% Pass)；雙端合約、反作弊專項、確定性重放、高延遲寬限審查、多開踢出保證、Phase 4 Docker Staging 演練 (Server/Caddy/Client)、20 併發帳號負載煙霧、戰鬥中鎖定策略 (battleLockPolicy)、AppView 換裝配點鎖定灰化 UI (RWD-REG-009 跨 4 視口與雙語系驗證)、i18n 兩輪殘留清理 (kernelFactory key化、雙敵傷害日誌 targetId 歸屬、出拳手勢按鈕、HUD玩家名、戰績消耗品與唯讀說明在地化、Hero/Traveler 一致性) 全數綠燈就位。
+> **測試狀態**：`npm test` 227/227、`npm run test:server` 20/20、`npm run test:rwd:smoke` 30/30 全部通過 (100% Pass)；雙端合約、反作弊專項、確定性重放、高延遲寬限審查、多開踢出保證、Phase 4 Docker Staging 演練 (Server/Caddy/Client)、20 併發帳號負載煙霧、戰鬥中鎖定策略 (battleLockPolicy)、AppView 換裝配點鎖定灰化 UI (RWD-REG-009 跨 4 視口與雙語系驗證)、預設離線與注入設定 (Policy 17)、雙模式存檔隔離、排隊指令逾時、種子防外洩、10s 斷線寬限修復、Tailscale Staging 內網環境、Changelog 頂部最新版保證與當前版本標籤全數綠燈就位。
 
 ---
 
@@ -14,17 +14,33 @@
 本專案為日式 ACGN 猜拳 RPG 對決遊戲，採用純原生（Vanilla ES Modules / HTML5 / CSS3 / Web Audio API）無前端框架架構。
 經過 Online-ready 權威架構重構後，系統已支援 **雙端合約模式（Dual-Client Architecture）**：
 - **線上模式 (`online`)**：連線至權威 WebSocket 伺服器，伺服器執行唯一戰鬥裁決、時序寬限審計、單一寫入者保證與經濟帳本追加。
-- **離線模式 (`offline`)**：本機沙盒環境（`?mode=offline`、`localhost` 或離線狀態），由瀏覽器進程內零 DOM 核心直接驅動，絕不污染線上伺服器存檔。
+- **離線模式 (`offline`)**：本機沙盒環境（`?mode=offline`、`localhost` 或未注入伺服器端點時之預設狀態），由瀏覽器進程內零 DOM 核心直接驅動，絕不污染線上伺服器存檔。
 
 ### 1.1 核心指令
-- **執行全域測試**：`npm test`（Node.js 原生測試執行器，194 項測試全綠，包含合約、反作弊、重放、高延遲與語系檢驗）
-- **執行伺服器測試**：`npm run test:server`（11 項伺服器權威測試）
+- **執行全域測試**：`npm test`（Node.js 原生測試執行器，227 項測試全綠，包含合約、反作弊、重放、高延遲、模式隔離、Changelog 當前版本防護與語系檢驗）
+- **執行伺服器測試**：`npm run test:server`（20 項伺服器權威測試，包含種子防外洩、10s 斷線寬限鏈與拒絕日誌）
 - **執行 RWD 煙霧測試**：`npm run test:rwd:smoke`（30 項 Playwright 跨設備視口煙霧測試）
 - **伺服器資料備份**：`npm run backup:server`（生成 SHA-256 驗證之 JSONL/JSON 備份封裝）
+- **伺服器資料還原**：`node server/scripts/backup.js --restore <backup-dir>`
+- **Tailscale 內網站**：`npm run start:tailscale:full`（一鍵啟動後端、前端注入與 Tailscale 443/8443 代理）
 - **打包發布**：`npm run build` 或 `node scripts/build.mjs`（生成 `src/js/bundle.js`，嚴禁手動編輯 bundle）
 - **產生 Excel 規格**：`npm run specs:excel`
 - **線上發布網址**：`https://koraku.app/`
 - **本地伺服器**：`npm run dev` 或 `npm start`（預設監聽 `http://127.0.0.1:4173/`）
+
+### 1.2 預設離線與伺服器設定注入政策 (Policy 17 & Disjoint Storage)
+- **模式解析順序**：`?mode=offline|online` → `localStorage.koraku_mode` → 若存在 `window.__KORAKU_CONFIG__.serverUrl` 或 `window.KORAKU_SERVER_URL` 則 `online` → 否則一律預設 `offline`。刪除依 hostname 判斷 online 的分支；`file://` 永遠離線。
+- **無注入配置退回保護**：若指定 `online` 但無注入配置，嚴格禁止回退同源 `/ws`，一律直接以 `offline` 沙盒啟動並提示 Toast `connection.noServerConfigured`。
+- **雙模式存檔隔離 (Disjoint Storage Keys)**：離線沙盒存檔使用 `koraku-rps-save-v1`；線上客戶端 Token 使用 `koraku-rps-online-token`，線上狀態快取使用 `koraku-rps-online-state`。兩者鍵空間完全獨立，切換模式互不影響。
+- **斷線 Banner 與存檔面板雙向切換**：斷線 Banner 在 `reconnecting` 與 `disconnected` 狀態顯示「改用離線模式」按鈕；存檔紀錄面板在偵測到注入伺服器時顯示「切換回線上模式」按鈕。
+- **排隊指令 8 秒超時**：未連線（非 ONLINE）狀態下進入 `_commandQueue` 的指令套用 8 秒超時，逾時自佇列移除並以 `NOT_CONNECTED` reject，Toast 提示 `connection.commandFailedOffline`。
+- **伺服器安全性增強**：
+  1. 快照與事件廣播徹底剝除 `seed` 與 `commandLog`，伺服器日誌保留 Replay 檔案（C1）。
+  2. 修復 ConnectionManager -> GameSession -> BattleSystem 10 秒斷線寬限鏈與自動結算（C2）。
+  3. 伺服器端對所有被拒絕指令（限流、Schema、無權作弊、執行失敗）記錄 `console.warn` 審計日誌（C3）。
+- **Tailscale 內網測試站與營運工具**：
+  - `npm run start:tailscale:full`：啟動後端權威伺服器、靜態端並伺服端注入 WSS 設定，掛載 Tailscale HTTPS 443 與 8443 代理。
+  - Windows 工作排程器每日 03:00 自動執行備份（`KorakuBackup`），支援 `node server/scripts/backup.js --restore <dir>` CLI 快速還原。
 
 ---
 
