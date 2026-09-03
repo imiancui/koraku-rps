@@ -1040,7 +1040,7 @@ export class AppView {
     const buyButton = event.target.closest("[data-buy]");
     if (buyButton) {
       const result = await this.sendCommand(Commands.BUY_ITEM, { itemId: buyButton.dataset.buy });
-      if (result?.message) this.showToast(result.message, result.ok ? "success" : "danger");
+      if (result?.message || result?.key) this.showToast({ ...result, tone: result.ok ? "success" : "danger" });
       if (result?.ok) this.bus.emit("sound", { name: "heal" });
       return;
     }
@@ -1061,7 +1061,7 @@ export class AppView {
     const buyEquipBtn = event.target.closest("[data-buy-equip]");
     if (buyEquipBtn) {
       const result = await this.sendCommand(Commands.BUY_EQUIPMENT, { typeId: buyEquipBtn.dataset.buyEquip, itemId: buyEquipBtn.dataset.buyEquip });
-      if (result?.message) this.showToast(result.message, result.ok ? "success" : "danger");
+      if (result?.message || result?.key) this.showToast({ ...result, tone: result.ok ? "success" : "danger" });
       if (result?.ok) this.bus.emit("sound", { name: "heal" });
       return;
     }
@@ -1073,7 +1073,7 @@ export class AppView {
         return;
       }
       const result = await this.sendCommand(Commands.EQUIP_ITEM, { uid: bagItemBtn.dataset.equipBagItem, typeId: bagItemBtn.dataset.equipBagItem });
-      if (result?.message) this.showToast(result.message, result.ok ? "success" : "danger");
+      if (result?.message || result?.key) this.showToast({ ...result, tone: result.ok ? "success" : "danger" });
       if (result?.ok) this.bus.emit("sound", { name: "skill" });
       this.hideTooltip();
       return;
@@ -1087,7 +1087,7 @@ export class AppView {
       }
       const itemId = shopEquipBtn.dataset.shopEquip;
       const result = await this.sendCommand(Commands.EQUIP_ITEM, { uid: itemId, typeId: itemId });
-      if (result?.message) this.showToast(result.message, result.ok ? "success" : "danger");
+      if (result?.message || result?.key) this.showToast({ ...result, tone: result.ok ? "success" : "danger" });
       if (result?.ok) this.bus.emit("sound", { name: "skill" });
       this.hideTooltip();
       return;
@@ -1101,7 +1101,7 @@ export class AppView {
       }
       const slotKey = shopUnequipBtn.dataset.shopUnequip;
       const result = await this.sendCommand(Commands.UNEQUIP_ITEM, { slot: slotKey });
-      if (result?.message) this.showToast(result.message, result.ok ? "success" : "danger");
+      if (result?.message || result?.key) this.showToast({ ...result, tone: result.ok ? "success" : "danger" });
       if (result?.ok) this.bus.emit("sound", { name: "select" });
       this.hideTooltip();
       return;
@@ -1133,7 +1133,7 @@ export class AppView {
       const snapshot = this.getStoreSnapshot();
       if (snapshot.equipment?.[slotKey]) {
         const result = await this.sendCommand(Commands.UNEQUIP_ITEM, { slot: slotKey });
-        if (result?.message) this.showToast(result.message, result.ok ? "success" : "danger");
+        if (result?.message || result?.key) this.showToast({ ...result, tone: result.ok ? "success" : "danger" });
         if (result?.ok) this.bus.emit("sound", { name: "select" });
         this.hideTooltip();
       }
@@ -1238,7 +1238,7 @@ export class AppView {
         return;
       }
       const result = await this.sendCommand(Commands.ALLOCATE_STAT, { stat: allocateButton.dataset.allocate });
-      if (result?.message) this.showToast(result.message, result.ok ? "success" : "danger");
+      if (result?.message || result?.key) this.showToast({ ...result, tone: result.ok ? "success" : "danger" });
       if (result?.ok) this.bus.emit("sound", { name: "skill" });
       return;
     }
@@ -1250,7 +1250,7 @@ export class AppView {
         return;
       }
       const result = await this.sendCommand(Commands.ALLOCATE_SKILL, { skill: allocateSkillButton.dataset.allocateSkill });
-      if (result?.message) this.showToast(result.message, result.ok ? "success" : "danger");
+      if (result?.message || result?.key) this.showToast({ ...result, tone: result.ok ? "success" : "danger" });
       if (result?.ok) this.bus.emit("sound", { name: "skill" });
       return;
     }
@@ -1286,13 +1286,13 @@ export class AppView {
     const itemButton = event.target.closest("[data-item]");
     if (itemButton) {
       const result = await this.sendCommand(Commands.BATTLE_USE_ITEM, { itemId: itemButton.dataset.item });
-      if (result && !result.ok && result.message) this.showToast(result.message, "danger");
+      if (result && !result.ok && (result.message || result.key)) this.showToast({ ...result, tone: "danger" });
       return;
     }
 
     if (event.target.closest("[data-skill='morph']")) {
       const result = await this.sendCommand(Commands.BATTLE_USE_MORPH);
-      if (result && !result.ok && result.message) this.showToast(result.message, "danger");
+      if (result && !result.ok && (result.message || result.key)) this.showToast({ ...result, tone: "danger" });
       return;
     }
 
@@ -1684,18 +1684,18 @@ export class AppView {
 
     if (["4", "h"].includes(key)) {
       const result = await this.sendCommand(Commands.BATTLE_USE_ITEM, { itemId: "hpPotion" });
-      if (result && !result.ok && this.battleState.phase !== "ended" && result.message) {
-        this.showToast(result.message, "danger");
+      if (result && !result.ok && this.battleState.phase !== "ended" && (result.message || result.key)) {
+        this.showToast({ ...result, tone: "danger" });
       }
     } else if (["5", "m"].includes(key)) {
       const result = await this.sendCommand(Commands.BATTLE_USE_ITEM, { itemId: "mpPotion" });
-      if (result && !result.ok && this.battleState.phase !== "ended" && result.message) {
-        this.showToast(result.message, "danger");
+      if (result && !result.ok && this.battleState.phase !== "ended" && (result.message || result.key)) {
+        this.showToast({ ...result, tone: "danger" });
       }
     } else if (key === "f") {
       if (this.battleState.phase === "reaction") {
         const result = await this.sendCommand(Commands.BATTLE_USE_MORPH);
-        if (result && !result.ok && result.message) this.showToast(result.message, "danger");
+        if (result && !result.ok && (result.message || result.key)) this.showToast({ ...result, tone: "danger" });
       }
     }
   }
@@ -1931,26 +1931,26 @@ export class AppView {
     if ($("#records-hp-potions-used")) {
       const hpCount = records.consumablesUsed?.hpPotion || 0;
       const hpRestored = records.restoredTotal?.hp || 0;
-      $("#records-hp-potions-used").textContent = `${hpCount} 瓶 (+${hpRestored.toLocaleString("zh-TW")} HP)`;
+      $("#records-hp-potions-used").textContent = I18n.t("ui.recordsHpRestoredSummary", { count: hpCount, restored: hpRestored.toLocaleString("zh-TW") });
     }
     if ($("#records-mp-potions-used")) {
       const mpCount = records.consumablesUsed?.mpPotion || 0;
       const mpRestored = records.restoredTotal?.mp || 0;
-      $("#records-mp-potions-used").textContent = `${mpCount} 瓶 (+${mpRestored.toLocaleString("zh-TW")} MP)`;
+      $("#records-mp-potions-used").textContent = I18n.t("ui.recordsMpRestoredSummary", { count: mpCount, restored: mpRestored.toLocaleString("zh-TW") });
     }
     if ($("#records-morph-uses")) {
       const morphAtt = records.morphStats?.attempts || records.morphUses || 0;
       const morphSucc = records.morphStats?.successes || records.morphUses || 0;
       const morphDmg = records.morphStats?.damage || 0;
       const morphRate = morphAtt > 0 ? Math.round((morphSucc / morphAtt) * 100) : 0;
-      $("#records-morph-uses").textContent = `${morphSucc}/${morphAtt} 次 (${morphRate}%, ${morphDmg.toLocaleString("zh-TW")} 傷)`;
+      $("#records-morph-uses").textContent = I18n.t("ui.recordsSkillUsesSummary", { success: morphSucc, attempts: morphAtt, rate: morphRate, damage: morphDmg.toLocaleString("zh-TW") });
     }
     if ($("#records-momo-stats")) {
       const momoAtt = records.momoStats?.attempts || 0;
       const momoSucc = records.momoStats?.successes || 0;
       const momoDmg = records.momoStats?.damage || 0;
       const momoRate = momoAtt > 0 ? Math.round((momoSucc / momoAtt) * 100) : 0;
-      $("#records-momo-stats").textContent = `${momoSucc}/${momoAtt} 次 (${momoRate}%, ${momoDmg.toLocaleString("zh-TW")} 傷)`;
+      $("#records-momo-stats").textContent = I18n.t("ui.recordsSkillUsesSummary", { success: momoSucc, attempts: momoAtt, rate: momoRate, damage: momoDmg.toLocaleString("zh-TW") });
     }
 
     // 3. Read-Only Paperdoll
@@ -1990,7 +1990,7 @@ export class AppView {
             <span class="records-paperdoll-item-icon">${EQUIPMENT_SLOTS[slotKey].icon}</span>
             <div class="records-paperdoll-item-info">
               <span class="records-paperdoll-slot-tag">${locSlot?.label || slotKey}</span>
-              <span class="records-paperdoll-item-name" style="color:var(--paper-dim);">未裝備</span>
+              <span class="records-paperdoll-item-name" style="color:var(--paper-dim);">${I18n.t("ui.notEquipped")}</span>
             </div>
           </div>
         `;
@@ -2038,7 +2038,7 @@ export class AppView {
         return `
           <tr>
             <td><b>${stageLabel}</b></td>
-            <td>${st.attempts} 刀 (${st.successes} 中 / ${failures} 空)</td>
+            <td>${I18n.t("ui.strikeAttempts", { attempts: st.attempts, successes: st.successes, failures })}</td>
             <td><span class="rate-badge ${rateClass}">${rate}%</span></td>
           </tr>
         `;
@@ -2051,7 +2051,7 @@ export class AppView {
       watermelonTbody.innerHTML = stageRows + `
         <tr class="total-row">
           <td><b>${I18n.t("ui.strikeTotal")}</b></td>
-          <td>${totalAttempts} 刀 (${totalSuccesses} 中 / ${totalFailures} 空)</td>
+          <td>${I18n.t("ui.strikeAttempts", { attempts: totalAttempts, successes: totalSuccesses, failures: totalFailures })}</td>
           <td><span class="rate-badge ${totalRateClass}">${totalRate}%</span></td>
         </tr>
       `;
@@ -2136,13 +2136,14 @@ export class AppView {
     if (recentBattlesList) {
       const battles = records.recentBattles || [];
       if (battles.length === 0) {
-        recentBattlesList.innerHTML = '<div class="records-recent-battles-empty">尚無對戰紀錄。快去開始一場對局吧！</div>';
+        recentBattlesList.innerHTML = `<div class="records-recent-battles-empty">${I18n.t("ui.noRecentBattles")}</div>`;
       } else {
         recentBattlesList.innerHTML = battles.map((b, idx) => {
-          const locStage = b.stageName ? { name: b.stageName } : I18n.getLocalizedStage(STAGES.find(s => s.id === b.stageId) || { name: `第 ${b.stageId} 章` });
+          const stageDef = STAGES.find(s => s.id === b.stageId);
+          const locStage = stageDef ? I18n.getLocalizedStage(stageDef) : (b.stageName ? { name: b.stageName } : { name: `第 ${b.stageId} 章` });
           const outcomeClass = b.won ? "outcome-win" : "outcome-loss";
           const outcomeText = b.won ? I18n.t("ui.battleWon") : I18n.t("ui.battleLost");
-          const modeBadge = b.isAuto ? '<span class="battle-log-mode is-auto">⚡ 自動</span>' : '<span class="battle-log-mode is-manual">🎮 手動</span>';
+          const modeBadge = b.isAuto ? `<span class="battle-log-mode is-auto">⚡ ${I18n.t("ui.modeAuto")}</span>` : `<span class="battle-log-mode is-manual">🎮 ${I18n.t("ui.modeManual")}</span>`;
           
           const rewardCoins = b.rewardCoins ?? (b.won ? 100 : 0);
           const rewardXp = b.rewardXp ?? (b.won ? 100 : 0);
@@ -2171,15 +2172,15 @@ export class AppView {
           const hpRestored = b.hpRestored || 0;
           const mpRestored = b.mpRestored || 0;
           const potionText = (hpUsed > 0 || mpUsed > 0)
-            ? `HP: ${hpUsed}瓶 (+${hpRestored}) / MP: ${mpUsed}瓶 (+${mpRestored})`
+            ? I18n.t("ui.battleLogPotions", { hpUsed, hpRestored, mpUsed, mpRestored })
             : "-";
 
           const momoText = (b.momoAttempts && b.momoAttempts > 0)
-            ? `${b.momoSuccesses || 0}/${b.momoAttempts} (${Math.round(((b.momoSuccesses || 0) / b.momoAttempts) * 100)}%, ${(b.momoDamage || 0).toLocaleString("zh-TW")}傷)`
+            ? I18n.t("ui.recordsSkillUsesSummary", { success: b.momoSuccesses || 0, attempts: b.momoAttempts, rate: Math.round(((b.momoSuccesses || 0) / b.momoAttempts) * 100), damage: (b.momoDamage || 0).toLocaleString("zh-TW") })
             : "-";
 
           const morphText = (b.morphCount && b.morphCount > 0)
-            ? `${b.morphCount}次 (${(b.morphDamage || 0).toLocaleString("zh-TW")}傷)`
+            ? I18n.t("ui.battleLogMorphSummary", { count: b.morphCount, damage: (b.morphDamage || 0).toLocaleString("zh-TW") })
             : "-";
 
           return `
@@ -3074,13 +3075,11 @@ export class AppView {
 
     const result = await this.sendCommand(Commands.ACCOUNT_CLAIM_TRANSFER_CODE, { code: rawInput });
     if (result && result.ok) {
-      const msg = result.message || I18n.t("ui.toastImportSuccess");
-      this.showToast(msg, "success");
+      this.showToast({ ...result, message: result.message || I18n.t("ui.toastImportSuccess"), tone: "success" });
       this.closeSaveRecordModal();
       this.renderStore(this.getStoreSnapshot());
     } else {
-      const err = result?.message || result?.error || I18n.t("ui.toastImportFailed");
-      this.showToast(err, "danger");
+      this.showToast({ ...result, message: result?.message || result?.error || I18n.t("ui.toastImportFailed"), tone: "danger" });
       if (this.saveSeedInput) this.saveSeedInput.focus();
     }
   }
@@ -4294,49 +4293,49 @@ export class AppView {
     const currentRound = round ?? this.battle?.state?.round ?? 1;
 
     let actorName = "";
-    let actionBadge = "攻";
+    let actionBadge = I18n.t("combat.badgeAttack");
     let isHeal = actionType === "heal";
     let isMana = actionType === "mana";
     let isEnemyHit = false;
 
     if (actionType === "heal") {
-      actorName = "旅人";
-      actionBadge = "療";
+      actorName = I18n.t("dialogue.speakerPlayer");
+      actionBadge = I18n.t("combat.badgeHeal");
     } else if (actionType === "mana") {
-      actorName = "旅人";
-      actionBadge = "魔";
+      actorName = I18n.t("dialogue.speakerPlayer");
+      actionBadge = I18n.t("combat.badgeMana");
     } else if (actionType === "burn") {
-      if (targetId === "left" || (targetName && targetName.includes("左"))) {
-        actorName = "左";
-      } else if (targetId === "right" || (targetName && targetName.includes("右"))) {
-        actorName = "右";
+      if (targetId === "left") {
+        actorName = I18n.t("directions.left");
+      } else if (targetId === "right") {
+        actorName = I18n.t("directions.right");
       } else {
-        actorName = "小樂";
+        actorName = I18n.t("dialogue.speakerKohaku");
       }
-      actionBadge = "灼";
+      actionBadge = I18n.t("combat.badgeBurn");
       isEnemyHit = true;
     } else if (actionType === "reflect") {
-      if (targetId === "left" || (targetName && targetName.includes("左"))) {
-        actorName = "左";
-      } else if (targetId === "right" || (targetName && targetName.includes("右"))) {
-        actorName = "右";
+      if (targetId === "left") {
+        actorName = I18n.t("directions.left");
+      } else if (targetId === "right") {
+        actorName = I18n.t("directions.right");
       } else {
-        actorName = "小樂";
+        actorName = I18n.t("dialogue.speakerKohaku");
       }
       actionBadge = "反";
       isEnemyHit = true;
     } else if (target === "enemy") {
-      if (targetId === "left" || (targetName && targetName.includes("左"))) {
-        actorName = "左";
-      } else if (targetId === "right" || (targetName && targetName.includes("右"))) {
-        actorName = "右";
+      if (targetId === "left") {
+        actorName = I18n.t("directions.left");
+      } else if (targetId === "right") {
+        actorName = I18n.t("directions.right");
       } else {
-        actorName = "小樂";
+        actorName = I18n.t("dialogue.speakerKohaku");
       }
       actionBadge = "受";
       isEnemyHit = true;
     } else {
-      actorName = "旅人";
+      actorName = I18n.t("dialogue.speakerPlayer");
       actionBadge = "受";
     }
 
@@ -4365,7 +4364,7 @@ export class AppView {
     let badge = item.actionBadge;
 
     if (locale === "en") {
-      const enActors = { "旅人": "Hero", "小樂": "Koraku", "左": "L", "右": "R" };
+      const enActors = { "旅人": "Traveler", "小樂": "Koraku", "左": "L", "右": "R" };
       const enBadges = { "攻": "ATK", "受": "HIT", "療": "HEAL", "魔": "MP", "灼": "BURN", "反": "REFL" };
       actor = enActors[actor] || actor;
       badge = enBadges[badge] || badge;

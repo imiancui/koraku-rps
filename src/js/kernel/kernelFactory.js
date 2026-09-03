@@ -42,6 +42,7 @@ export function createKernel(options = {}) {
         cmdId: cmdId || null,
         ack: false,
         errorCode: ErrorCodes.INVALID_SCHEMA,
+        key: "command.missingCommand",
         message: "缺少 command 欄位。"
       };
     }
@@ -67,6 +68,7 @@ export function createKernel(options = {}) {
             cmdId,
             ack: false,
             errorCode: ErrorCodes.BATTLE_IN_PROGRESS_LOCKED,
+            key: "battle.lockedDuringBattle",
             message: "戰鬥進行中，禁止更換裝備。"
           };
         }
@@ -82,6 +84,7 @@ export function createKernel(options = {}) {
             cmdId,
             ack: false,
             errorCode: ErrorCodes.BATTLE_IN_PROGRESS_LOCKED,
+            key: "battle.lockedDuringBattle",
             message: "戰鬥進行中，禁止更換裝備。"
           };
         }
@@ -96,6 +99,7 @@ export function createKernel(options = {}) {
             cmdId,
             ack: false,
             errorCode: ErrorCodes.BATTLE_IN_PROGRESS_LOCKED,
+            key: "battle.lockedDuringBattle",
             message: "戰鬥進行中，禁止分配屬性點數。"
           };
         }
@@ -110,6 +114,7 @@ export function createKernel(options = {}) {
             cmdId,
             ack: false,
             errorCode: ErrorCodes.BATTLE_IN_PROGRESS_LOCKED,
+            key: "battle.lockedDuringBattle",
             message: "戰鬥進行中，禁止分配技能點數。"
           };
         }
@@ -209,7 +214,7 @@ export function createKernel(options = {}) {
 
       case Commands.ACCOUNT_DELETE:
         store.reset();
-        result = { ok: true, message: "帳號資料已重置。" };
+        result = { ok: true, key: "account.resetDone", message: "帳號資料已重置。" };
         break;
 
       case Commands.ACCOUNT_ISSUE_TRANSFER_CODE: {
@@ -226,7 +231,7 @@ export function createKernel(options = {}) {
         if (payload.code && payload.code.startsWith("KORAKU1_")) {
           result = store.importSaveCode(payload.code);
         } else {
-          result = { ok: true, message: "轉移碼兌換完成。" };
+          result = { ok: true, key: "account.transferClaimed", message: "轉移碼兌換完成。" };
         }
         break;
 
@@ -249,6 +254,8 @@ export function createKernel(options = {}) {
           cmdId,
           ack: false,
           errorCode: ErrorCodes.NOT_FOUND,
+          key: "command.unknownCommand",
+          params: { command },
           message: `未定義之指令: ${command}`
         };
     }

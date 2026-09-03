@@ -4,7 +4,7 @@
   "use strict";
 
 // --- src/js/config/gameConfig.js ---
-const APP_VERSION = "0.0.21";
+const APP_VERSION = "0.0.22";
 
 const DOJO_CONFIG = Object.freeze({
   defaultHp: 10000,
@@ -1369,6 +1369,14 @@ const DICTIONARY = {
       resultLoss: "戰敗",
       modeAuto: "自動",
       modeManual: "手動",
+      recordsHpRestoredSummary: "{count} 瓶 (+{restored} HP)",
+      recordsMpRestoredSummary: "{count} 瓶 (+{restored} MP)",
+      recordsSkillUsesSummary: "{success}/{attempts} 次 ({rate}%, {damage} 傷)",
+      paperdollReadOnlyHint: "（唯讀檢視・裝備更換請至「玩家裝備」頁）",
+      notEquipped: "未裝備",
+      noRecentBattles: "尚無對戰紀錄。快去開始一場對局吧！",
+      battleLogPotions: "HP: {hpUsed}瓶 (+{hpRestored}) / MP: {mpUsed}瓶 (+{mpRestored})",
+      battleLogMorphSummary: "{count}次 ({damage}傷)",
       // Screens headings
       stagesTitle: "選擇章節",
       stagesSubtitle: "小樂會隨章節變得更有耐力。提升等級後，新的鏡界便會開啟。",
@@ -1849,7 +1857,11 @@ const DICTIONARY = {
       notInBattle: "目前不在戰鬥中。",
       itemNotFound: "找不到這個道具。",
       resourceFull: "{resource} 已經是滿的。",
-      itemDepleted: "{name}已用完。"
+      itemDepleted: "{name}已用完。",
+      badgeAttack: "攻",
+      badgeHeal: "療",
+      badgeMana: "魔",
+      badgeBurn: "灼"
     },
     shop: {
       itemNotFound: "找不到這件商品。",
@@ -1939,6 +1951,14 @@ const DICTIONARY = {
       roundTimeout: "出拳倒數逾時，判定為棄權輸拳！",
       battleDisconnectedSettled: "戰鬥因逾時未連線自動結算完成。",
       battlePauseCount: "戰鬥已暫停（本場剩餘暫停次數：{remaining} 次）。"
+    },
+    command: {
+      missingCommand: "缺少 command 欄位。",
+      unknownCommand: "未定義之指令: {command}"
+    },
+    account: {
+      resetDone: "帳號資料已重置。",
+      transferClaimed: "轉移碼兌換完成。"
     }
   },
 
@@ -2026,6 +2046,14 @@ const DICTIONARY = {
       resultLoss: "战败",
       modeAuto: "自动",
       modeManual: "手动",
+      recordsHpRestoredSummary: "{count} 瓶 (+{restored} HP)",
+      recordsMpRestoredSummary: "{count} 瓶 (+{restored} MP)",
+      recordsSkillUsesSummary: "{success}/{attempts} 次 ({rate}%, {damage} 伤)",
+      paperdollReadOnlyHint: "（只读检视・装备更换请至“玩家装备”页）",
+      notEquipped: "未装备",
+      noRecentBattles: "尚无对战纪录。快去开始一场对局吧！",
+      battleLogPotions: "HP: {hpUsed}瓶 (+{hpRestored}) / MP: {mpUsed}瓶 (+{mpRestored})",
+      battleLogMorphSummary: "{count}次 ({damage}伤)",
       statTotalCoinsEarned: "累计获得星砂",
       statTotalXpEarned: "累计获得经验",
       statTotalBattles: "总对战场次",
@@ -2629,7 +2657,11 @@ const DICTIONARY = {
       notInBattle: "当前不在战斗中。",
       itemNotFound: "找不到这个道具。",
       resourceFull: "{resource} 已经是满的。",
-      itemDepleted: "{name}已用完。"
+      itemDepleted: "{name}已用完。",
+      badgeAttack: "攻",
+      badgeHeal: "疗",
+      badgeMana: "魔",
+      badgeBurn: "灼"
     },
     shop: {
       itemNotFound: "找不到这件商品。",
@@ -2719,6 +2751,14 @@ const DICTIONARY = {
       roundTimeout: "出拳倒数超时，判定为弃权输拳！",
       battleDisconnectedSettled: "战斗因超时未连接自动结算完成。",
       battlePauseCount: "战斗已暂停（本场剩余暂停次数：{remaining} 次）。"
+    },
+    command: {
+      missingCommand: "缺少 command 字段。",
+      unknownCommand: "未定义之指令: {command}"
+    },
+    account: {
+      resetDone: "账号数据已重置。",
+      transferClaimed: "转移码兑换完成。"
     }
   },
 
@@ -2806,6 +2846,14 @@ const DICTIONARY = {
       resultLoss: "LOSS",
       modeAuto: "Auto",
       modeManual: "Manual",
+      recordsHpRestoredSummary: "{count} Bottles (+{restored} HP)",
+      recordsMpRestoredSummary: "{count} Bottles (+{restored} MP)",
+      recordsSkillUsesSummary: "{success}/{attempts} Hits ({rate}%, {damage} DMG)",
+      paperdollReadOnlyHint: "(Read-only view; change gear on the \"Equipment & Bag\" page)",
+      notEquipped: "Unequipped",
+      noRecentBattles: "No battle records yet. Go start a match!",
+      battleLogPotions: "HP: {hpUsed} Bottles (+{hpRestored}) / MP: {mpUsed} Bottles (+{mpRestored})",
+      battleLogMorphSummary: "{count} Hits ({damage} DMG)",
       statTotalCoinsEarned: "Total Star Sand Earned",
       statTotalXpEarned: "Total EXP Earned",
       statTotalBattles: "Total Battles",
@@ -3409,7 +3457,11 @@ const DICTIONARY = {
       notInBattle: "Not currently in battle.",
       itemNotFound: "Item not found.",
       resourceFull: "{resource} is already full.",
-      itemDepleted: "{name} is depleted."
+      itemDepleted: "{name} is depleted.",
+      badgeAttack: "ATK",
+      badgeHeal: "HEAL",
+      badgeMana: "MP",
+      badgeBurn: "BURN"
     },
     shop: {
       itemNotFound: "Item not found in shop.",
@@ -3499,6 +3551,14 @@ const DICTIONARY = {
       roundTimeout: "Round countdown expired! Forfeited round!",
       battleDisconnectedSettled: "Battle automatically settled due to disconnect timeout.",
       battlePauseCount: "Battle paused (Remaining pauses: {remaining})."
+    },
+    command: {
+      missingCommand: "Missing command field.",
+      unknownCommand: "Unknown command: {command}"
+    },
+    account: {
+      resetDone: "Account data has been reset.",
+      transferClaimed: "Transfer code claimed successfully."
     }
   },
 
@@ -3586,6 +3646,14 @@ const DICTIONARY = {
       resultLoss: "敗北",
       modeAuto: "自動",
       modeManual: "手動",
+      recordsHpRestoredSummary: "{count} 本 (+{restored} HP)",
+      recordsMpRestoredSummary: "{count} 本 (+{restored} MP)",
+      recordsSkillUsesSummary: "{success}/{attempts} 回 ({rate}%, {damage} ダメージ)",
+      paperdollReadOnlyHint: "（閲覧のみ・装備変更は「プレイヤー装備」画面で行ってください）",
+      notEquipped: "未装備",
+      noRecentBattles: "対戦記録はまだありません。早速対局を始めましょう！",
+      battleLogPotions: "HP: {hpUsed}本 (+{hpRestored}) / MP: {mpUsed}本 (+{mpRestored})",
+      battleLogMorphSummary: "{count}回 ({damage}ダメージ)",
       statTotalCoinsEarned: "累計獲得星砂",
       statTotalXpEarned: "累計獲得経験値",
       statTotalBattles: "総対局数",
@@ -4189,7 +4257,11 @@ const DICTIONARY = {
       notInBattle: "現在は戦闘中ではありません。",
       itemNotFound: "アイテムが見つかりません。",
       resourceFull: "{resource}は既に満タンです。",
-      itemDepleted: "{name}は使い切りました。"
+      itemDepleted: "{name}は使い切りました。",
+      badgeAttack: "攻",
+      badgeHeal: "療",
+      badgeMana: "魔",
+      badgeBurn: "灼"
     },
     shop: {
       itemNotFound: "商品が見つかりません。",
@@ -4279,6 +4351,14 @@ const DICTIONARY = {
       roundTimeout: "時間切れ！出し遅れにより敗北判定！",
       battleDisconnectedSettled: "切断タイムアウトにより戦闘が自動清算されました。",
       battlePauseCount: "戦闘を一時停止しました（残り一時停止可能回数: {remaining}回）。"
+    },
+    command: {
+      missingCommand: "command フィールドが不足しています。",
+      unknownCommand: "未定義のコマンド: {command}"
+    },
+    account: {
+      resetDone: "アカウントデータを初期化しました。",
+      transferClaimed: "引き継ぎコードの引き換えが完了しました。"
     }
   }
 };
@@ -9829,6 +9909,7 @@ function createKernel(options = {}) {
         cmdId: cmdId || null,
         ack: false,
         errorCode: ErrorCodes.INVALID_SCHEMA,
+        key: "command.missingCommand",
         message: "缺少 command 欄位。"
       };
     }
@@ -9854,6 +9935,7 @@ function createKernel(options = {}) {
             cmdId,
             ack: false,
             errorCode: ErrorCodes.BATTLE_IN_PROGRESS_LOCKED,
+            key: "battle.lockedDuringBattle",
             message: "戰鬥進行中，禁止更換裝備。"
           };
         }
@@ -9869,6 +9951,7 @@ function createKernel(options = {}) {
             cmdId,
             ack: false,
             errorCode: ErrorCodes.BATTLE_IN_PROGRESS_LOCKED,
+            key: "battle.lockedDuringBattle",
             message: "戰鬥進行中，禁止更換裝備。"
           };
         }
@@ -9883,6 +9966,7 @@ function createKernel(options = {}) {
             cmdId,
             ack: false,
             errorCode: ErrorCodes.BATTLE_IN_PROGRESS_LOCKED,
+            key: "battle.lockedDuringBattle",
             message: "戰鬥進行中，禁止分配屬性點數。"
           };
         }
@@ -9897,6 +9981,7 @@ function createKernel(options = {}) {
             cmdId,
             ack: false,
             errorCode: ErrorCodes.BATTLE_IN_PROGRESS_LOCKED,
+            key: "battle.lockedDuringBattle",
             message: "戰鬥進行中，禁止分配技能點數。"
           };
         }
@@ -9996,7 +10081,7 @@ function createKernel(options = {}) {
 
       case Commands.ACCOUNT_DELETE:
         store.reset();
-        result = { ok: true, message: "帳號資料已重置。" };
+        result = { ok: true, key: "account.resetDone", message: "帳號資料已重置。" };
         break;
 
       case Commands.ACCOUNT_ISSUE_TRANSFER_CODE: {
@@ -10013,7 +10098,7 @@ function createKernel(options = {}) {
         if (payload.code && payload.code.startsWith("KORAKU1_")) {
           result = store.importSaveCode(payload.code);
         } else {
-          result = { ok: true, message: "轉移碼兌換完成。" };
+          result = { ok: true, key: "account.transferClaimed", message: "轉移碼兌換完成。" };
         }
         break;
 
@@ -10036,6 +10121,8 @@ function createKernel(options = {}) {
           cmdId,
           ack: false,
           errorCode: ErrorCodes.NOT_FOUND,
+          key: "command.unknownCommand",
+          params: { command },
           message: `未定義之指令: ${command}`
         };
     }
@@ -12965,7 +13052,7 @@ class AppView {
     const buyButton = event.target.closest("[data-buy]");
     if (buyButton) {
       const result = await this.sendCommand(Commands.BUY_ITEM, { itemId: buyButton.dataset.buy });
-      if (result?.message) this.showToast(result.message, result.ok ? "success" : "danger");
+      if (result?.message || result?.key) this.showToast({ ...result, tone: result.ok ? "success" : "danger" });
       if (result?.ok) this.bus.emit("sound", { name: "heal" });
       return;
     }
@@ -12986,7 +13073,7 @@ class AppView {
     const buyEquipBtn = event.target.closest("[data-buy-equip]");
     if (buyEquipBtn) {
       const result = await this.sendCommand(Commands.BUY_EQUIPMENT, { typeId: buyEquipBtn.dataset.buyEquip, itemId: buyEquipBtn.dataset.buyEquip });
-      if (result?.message) this.showToast(result.message, result.ok ? "success" : "danger");
+      if (result?.message || result?.key) this.showToast({ ...result, tone: result.ok ? "success" : "danger" });
       if (result?.ok) this.bus.emit("sound", { name: "heal" });
       return;
     }
@@ -12998,7 +13085,7 @@ class AppView {
         return;
       }
       const result = await this.sendCommand(Commands.EQUIP_ITEM, { uid: bagItemBtn.dataset.equipBagItem, typeId: bagItemBtn.dataset.equipBagItem });
-      if (result?.message) this.showToast(result.message, result.ok ? "success" : "danger");
+      if (result?.message || result?.key) this.showToast({ ...result, tone: result.ok ? "success" : "danger" });
       if (result?.ok) this.bus.emit("sound", { name: "skill" });
       this.hideTooltip();
       return;
@@ -13012,7 +13099,7 @@ class AppView {
       }
       const itemId = shopEquipBtn.dataset.shopEquip;
       const result = await this.sendCommand(Commands.EQUIP_ITEM, { uid: itemId, typeId: itemId });
-      if (result?.message) this.showToast(result.message, result.ok ? "success" : "danger");
+      if (result?.message || result?.key) this.showToast({ ...result, tone: result.ok ? "success" : "danger" });
       if (result?.ok) this.bus.emit("sound", { name: "skill" });
       this.hideTooltip();
       return;
@@ -13026,7 +13113,7 @@ class AppView {
       }
       const slotKey = shopUnequipBtn.dataset.shopUnequip;
       const result = await this.sendCommand(Commands.UNEQUIP_ITEM, { slot: slotKey });
-      if (result?.message) this.showToast(result.message, result.ok ? "success" : "danger");
+      if (result?.message || result?.key) this.showToast({ ...result, tone: result.ok ? "success" : "danger" });
       if (result?.ok) this.bus.emit("sound", { name: "select" });
       this.hideTooltip();
       return;
@@ -13058,7 +13145,7 @@ class AppView {
       const snapshot = this.getStoreSnapshot();
       if (snapshot.equipment?.[slotKey]) {
         const result = await this.sendCommand(Commands.UNEQUIP_ITEM, { slot: slotKey });
-        if (result?.message) this.showToast(result.message, result.ok ? "success" : "danger");
+        if (result?.message || result?.key) this.showToast({ ...result, tone: result.ok ? "success" : "danger" });
         if (result?.ok) this.bus.emit("sound", { name: "select" });
         this.hideTooltip();
       }
@@ -13163,7 +13250,7 @@ class AppView {
         return;
       }
       const result = await this.sendCommand(Commands.ALLOCATE_STAT, { stat: allocateButton.dataset.allocate });
-      if (result?.message) this.showToast(result.message, result.ok ? "success" : "danger");
+      if (result?.message || result?.key) this.showToast({ ...result, tone: result.ok ? "success" : "danger" });
       if (result?.ok) this.bus.emit("sound", { name: "skill" });
       return;
     }
@@ -13175,7 +13262,7 @@ class AppView {
         return;
       }
       const result = await this.sendCommand(Commands.ALLOCATE_SKILL, { skill: allocateSkillButton.dataset.allocateSkill });
-      if (result?.message) this.showToast(result.message, result.ok ? "success" : "danger");
+      if (result?.message || result?.key) this.showToast({ ...result, tone: result.ok ? "success" : "danger" });
       if (result?.ok) this.bus.emit("sound", { name: "skill" });
       return;
     }
@@ -13211,13 +13298,13 @@ class AppView {
     const itemButton = event.target.closest("[data-item]");
     if (itemButton) {
       const result = await this.sendCommand(Commands.BATTLE_USE_ITEM, { itemId: itemButton.dataset.item });
-      if (result && !result.ok && result.message) this.showToast(result.message, "danger");
+      if (result && !result.ok && (result.message || result.key)) this.showToast({ ...result, tone: "danger" });
       return;
     }
 
     if (event.target.closest("[data-skill='morph']")) {
       const result = await this.sendCommand(Commands.BATTLE_USE_MORPH);
-      if (result && !result.ok && result.message) this.showToast(result.message, "danger");
+      if (result && !result.ok && (result.message || result.key)) this.showToast({ ...result, tone: "danger" });
       return;
     }
 
@@ -13609,18 +13696,18 @@ class AppView {
 
     if (["4", "h"].includes(key)) {
       const result = await this.sendCommand(Commands.BATTLE_USE_ITEM, { itemId: "hpPotion" });
-      if (result && !result.ok && this.battleState.phase !== "ended" && result.message) {
-        this.showToast(result.message, "danger");
+      if (result && !result.ok && this.battleState.phase !== "ended" && (result.message || result.key)) {
+        this.showToast({ ...result, tone: "danger" });
       }
     } else if (["5", "m"].includes(key)) {
       const result = await this.sendCommand(Commands.BATTLE_USE_ITEM, { itemId: "mpPotion" });
-      if (result && !result.ok && this.battleState.phase !== "ended" && result.message) {
-        this.showToast(result.message, "danger");
+      if (result && !result.ok && this.battleState.phase !== "ended" && (result.message || result.key)) {
+        this.showToast({ ...result, tone: "danger" });
       }
     } else if (key === "f") {
       if (this.battleState.phase === "reaction") {
         const result = await this.sendCommand(Commands.BATTLE_USE_MORPH);
-        if (result && !result.ok && result.message) this.showToast(result.message, "danger");
+        if (result && !result.ok && (result.message || result.key)) this.showToast({ ...result, tone: "danger" });
       }
     }
   }
@@ -13856,26 +13943,26 @@ class AppView {
     if ($("#records-hp-potions-used")) {
       const hpCount = records.consumablesUsed?.hpPotion || 0;
       const hpRestored = records.restoredTotal?.hp || 0;
-      $("#records-hp-potions-used").textContent = `${hpCount} 瓶 (+${hpRestored.toLocaleString("zh-TW")} HP)`;
+      $("#records-hp-potions-used").textContent = I18n.t("ui.recordsHpRestoredSummary", { count: hpCount, restored: hpRestored.toLocaleString("zh-TW") });
     }
     if ($("#records-mp-potions-used")) {
       const mpCount = records.consumablesUsed?.mpPotion || 0;
       const mpRestored = records.restoredTotal?.mp || 0;
-      $("#records-mp-potions-used").textContent = `${mpCount} 瓶 (+${mpRestored.toLocaleString("zh-TW")} MP)`;
+      $("#records-mp-potions-used").textContent = I18n.t("ui.recordsMpRestoredSummary", { count: mpCount, restored: mpRestored.toLocaleString("zh-TW") });
     }
     if ($("#records-morph-uses")) {
       const morphAtt = records.morphStats?.attempts || records.morphUses || 0;
       const morphSucc = records.morphStats?.successes || records.morphUses || 0;
       const morphDmg = records.morphStats?.damage || 0;
       const morphRate = morphAtt > 0 ? Math.round((morphSucc / morphAtt) * 100) : 0;
-      $("#records-morph-uses").textContent = `${morphSucc}/${morphAtt} 次 (${morphRate}%, ${morphDmg.toLocaleString("zh-TW")} 傷)`;
+      $("#records-morph-uses").textContent = I18n.t("ui.recordsSkillUsesSummary", { success: morphSucc, attempts: morphAtt, rate: morphRate, damage: morphDmg.toLocaleString("zh-TW") });
     }
     if ($("#records-momo-stats")) {
       const momoAtt = records.momoStats?.attempts || 0;
       const momoSucc = records.momoStats?.successes || 0;
       const momoDmg = records.momoStats?.damage || 0;
       const momoRate = momoAtt > 0 ? Math.round((momoSucc / momoAtt) * 100) : 0;
-      $("#records-momo-stats").textContent = `${momoSucc}/${momoAtt} 次 (${momoRate}%, ${momoDmg.toLocaleString("zh-TW")} 傷)`;
+      $("#records-momo-stats").textContent = I18n.t("ui.recordsSkillUsesSummary", { success: momoSucc, attempts: momoAtt, rate: momoRate, damage: momoDmg.toLocaleString("zh-TW") });
     }
 
     // 3. Read-Only Paperdoll
@@ -13915,7 +14002,7 @@ class AppView {
             <span class="records-paperdoll-item-icon">${EQUIPMENT_SLOTS[slotKey].icon}</span>
             <div class="records-paperdoll-item-info">
               <span class="records-paperdoll-slot-tag">${locSlot?.label || slotKey}</span>
-              <span class="records-paperdoll-item-name" style="color:var(--paper-dim);">未裝備</span>
+              <span class="records-paperdoll-item-name" style="color:var(--paper-dim);">${I18n.t("ui.notEquipped")}</span>
             </div>
           </div>
         `;
@@ -13963,7 +14050,7 @@ class AppView {
         return `
           <tr>
             <td><b>${stageLabel}</b></td>
-            <td>${st.attempts} 刀 (${st.successes} 中 / ${failures} 空)</td>
+            <td>${I18n.t("ui.strikeAttempts", { attempts: st.attempts, successes: st.successes, failures })}</td>
             <td><span class="rate-badge ${rateClass}">${rate}%</span></td>
           </tr>
         `;
@@ -13976,7 +14063,7 @@ class AppView {
       watermelonTbody.innerHTML = stageRows + `
         <tr class="total-row">
           <td><b>${I18n.t("ui.strikeTotal")}</b></td>
-          <td>${totalAttempts} 刀 (${totalSuccesses} 中 / ${totalFailures} 空)</td>
+          <td>${I18n.t("ui.strikeAttempts", { attempts: totalAttempts, successes: totalSuccesses, failures: totalFailures })}</td>
           <td><span class="rate-badge ${totalRateClass}">${totalRate}%</span></td>
         </tr>
       `;
@@ -14061,13 +14148,14 @@ class AppView {
     if (recentBattlesList) {
       const battles = records.recentBattles || [];
       if (battles.length === 0) {
-        recentBattlesList.innerHTML = '<div class="records-recent-battles-empty">尚無對戰紀錄。快去開始一場對局吧！</div>';
+        recentBattlesList.innerHTML = `<div class="records-recent-battles-empty">${I18n.t("ui.noRecentBattles")}</div>`;
       } else {
         recentBattlesList.innerHTML = battles.map((b, idx) => {
-          const locStage = b.stageName ? { name: b.stageName } : I18n.getLocalizedStage(STAGES.find(s => s.id === b.stageId) || { name: `第 ${b.stageId} 章` });
+          const stageDef = STAGES.find(s => s.id === b.stageId);
+          const locStage = stageDef ? I18n.getLocalizedStage(stageDef) : (b.stageName ? { name: b.stageName } : { name: `第 ${b.stageId} 章` });
           const outcomeClass = b.won ? "outcome-win" : "outcome-loss";
           const outcomeText = b.won ? I18n.t("ui.battleWon") : I18n.t("ui.battleLost");
-          const modeBadge = b.isAuto ? '<span class="battle-log-mode is-auto">⚡ 自動</span>' : '<span class="battle-log-mode is-manual">🎮 手動</span>';
+          const modeBadge = b.isAuto ? `<span class="battle-log-mode is-auto">⚡ ${I18n.t("ui.modeAuto")}</span>` : `<span class="battle-log-mode is-manual">🎮 ${I18n.t("ui.modeManual")}</span>`;
           
           const rewardCoins = b.rewardCoins ?? (b.won ? 100 : 0);
           const rewardXp = b.rewardXp ?? (b.won ? 100 : 0);
@@ -14096,15 +14184,15 @@ class AppView {
           const hpRestored = b.hpRestored || 0;
           const mpRestored = b.mpRestored || 0;
           const potionText = (hpUsed > 0 || mpUsed > 0)
-            ? `HP: ${hpUsed}瓶 (+${hpRestored}) / MP: ${mpUsed}瓶 (+${mpRestored})`
+            ? I18n.t("ui.battleLogPotions", { hpUsed, hpRestored, mpUsed, mpRestored })
             : "-";
 
           const momoText = (b.momoAttempts && b.momoAttempts > 0)
-            ? `${b.momoSuccesses || 0}/${b.momoAttempts} (${Math.round(((b.momoSuccesses || 0) / b.momoAttempts) * 100)}%, ${(b.momoDamage || 0).toLocaleString("zh-TW")}傷)`
+            ? I18n.t("ui.recordsSkillUsesSummary", { success: b.momoSuccesses || 0, attempts: b.momoAttempts, rate: Math.round(((b.momoSuccesses || 0) / b.momoAttempts) * 100), damage: (b.momoDamage || 0).toLocaleString("zh-TW") })
             : "-";
 
           const morphText = (b.morphCount && b.morphCount > 0)
-            ? `${b.morphCount}次 (${(b.morphDamage || 0).toLocaleString("zh-TW")}傷)`
+            ? I18n.t("ui.battleLogMorphSummary", { count: b.morphCount, damage: (b.morphDamage || 0).toLocaleString("zh-TW") })
             : "-";
 
           return `
@@ -14999,13 +15087,11 @@ class AppView {
 
     const result = await this.sendCommand(Commands.ACCOUNT_CLAIM_TRANSFER_CODE, { code: rawInput });
     if (result && result.ok) {
-      const msg = result.message || I18n.t("ui.toastImportSuccess");
-      this.showToast(msg, "success");
+      this.showToast({ ...result, message: result.message || I18n.t("ui.toastImportSuccess"), tone: "success" });
       this.closeSaveRecordModal();
       this.renderStore(this.getStoreSnapshot());
     } else {
-      const err = result?.message || result?.error || I18n.t("ui.toastImportFailed");
-      this.showToast(err, "danger");
+      this.showToast({ ...result, message: result?.message || result?.error || I18n.t("ui.toastImportFailed"), tone: "danger" });
       if (this.saveSeedInput) this.saveSeedInput.focus();
     }
   }
@@ -16219,49 +16305,49 @@ class AppView {
     const currentRound = round ?? this.battle?.state?.round ?? 1;
 
     let actorName = "";
-    let actionBadge = "攻";
+    let actionBadge = I18n.t("combat.badgeAttack");
     let isHeal = actionType === "heal";
     let isMana = actionType === "mana";
     let isEnemyHit = false;
 
     if (actionType === "heal") {
-      actorName = "旅人";
-      actionBadge = "療";
+      actorName = I18n.t("dialogue.speakerPlayer");
+      actionBadge = I18n.t("combat.badgeHeal");
     } else if (actionType === "mana") {
-      actorName = "旅人";
-      actionBadge = "魔";
+      actorName = I18n.t("dialogue.speakerPlayer");
+      actionBadge = I18n.t("combat.badgeMana");
     } else if (actionType === "burn") {
-      if (targetId === "left" || (targetName && targetName.includes("左"))) {
-        actorName = "左";
-      } else if (targetId === "right" || (targetName && targetName.includes("右"))) {
-        actorName = "右";
+      if (targetId === "left") {
+        actorName = I18n.t("directions.left");
+      } else if (targetId === "right") {
+        actorName = I18n.t("directions.right");
       } else {
-        actorName = "小樂";
+        actorName = I18n.t("dialogue.speakerKohaku");
       }
-      actionBadge = "灼";
+      actionBadge = I18n.t("combat.badgeBurn");
       isEnemyHit = true;
     } else if (actionType === "reflect") {
-      if (targetId === "left" || (targetName && targetName.includes("左"))) {
-        actorName = "左";
-      } else if (targetId === "right" || (targetName && targetName.includes("右"))) {
-        actorName = "右";
+      if (targetId === "left") {
+        actorName = I18n.t("directions.left");
+      } else if (targetId === "right") {
+        actorName = I18n.t("directions.right");
       } else {
-        actorName = "小樂";
+        actorName = I18n.t("dialogue.speakerKohaku");
       }
       actionBadge = "反";
       isEnemyHit = true;
     } else if (target === "enemy") {
-      if (targetId === "left" || (targetName && targetName.includes("左"))) {
-        actorName = "左";
-      } else if (targetId === "right" || (targetName && targetName.includes("右"))) {
-        actorName = "右";
+      if (targetId === "left") {
+        actorName = I18n.t("directions.left");
+      } else if (targetId === "right") {
+        actorName = I18n.t("directions.right");
       } else {
-        actorName = "小樂";
+        actorName = I18n.t("dialogue.speakerKohaku");
       }
       actionBadge = "受";
       isEnemyHit = true;
     } else {
-      actorName = "旅人";
+      actorName = I18n.t("dialogue.speakerPlayer");
       actionBadge = "受";
     }
 
@@ -16290,7 +16376,7 @@ class AppView {
     let badge = item.actionBadge;
 
     if (locale === "en") {
-      const enActors = { "旅人": "Hero", "小樂": "Koraku", "左": "L", "右": "R" };
+      const enActors = { "旅人": "Traveler", "小樂": "Koraku", "左": "L", "右": "R" };
       const enBadges = { "攻": "ATK", "受": "HIT", "療": "HEAL", "魔": "MP", "灼": "BURN", "反": "REFL" };
       actor = enActors[actor] || actor;
       badge = enBadges[badge] || badge;

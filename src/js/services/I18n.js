@@ -882,6 +882,14 @@ const DICTIONARY = {
       resultLoss: "戰敗",
       modeAuto: "自動",
       modeManual: "手動",
+      recordsHpRestoredSummary: "{count} 瓶 (+{restored} HP)",
+      recordsMpRestoredSummary: "{count} 瓶 (+{restored} MP)",
+      recordsSkillUsesSummary: "{success}/{attempts} 次 ({rate}%, {damage} 傷)",
+      paperdollReadOnlyHint: "（唯讀檢視・裝備更換請至「玩家裝備」頁）",
+      notEquipped: "未裝備",
+      noRecentBattles: "尚無對戰紀錄。快去開始一場對局吧！",
+      battleLogPotions: "HP: {hpUsed}瓶 (+{hpRestored}) / MP: {mpUsed}瓶 (+{mpRestored})",
+      battleLogMorphSummary: "{count}次 ({damage}傷)",
       // Screens headings
       stagesTitle: "選擇章節",
       stagesSubtitle: "小樂會隨章節變得更有耐力。提升等級後，新的鏡界便會開啟。",
@@ -1362,7 +1370,11 @@ const DICTIONARY = {
       notInBattle: "目前不在戰鬥中。",
       itemNotFound: "找不到這個道具。",
       resourceFull: "{resource} 已經是滿的。",
-      itemDepleted: "{name}已用完。"
+      itemDepleted: "{name}已用完。",
+      badgeAttack: "攻",
+      badgeHeal: "療",
+      badgeMana: "魔",
+      badgeBurn: "灼"
     },
     shop: {
       itemNotFound: "找不到這件商品。",
@@ -1452,6 +1464,14 @@ const DICTIONARY = {
       roundTimeout: "出拳倒數逾時，判定為棄權輸拳！",
       battleDisconnectedSettled: "戰鬥因逾時未連線自動結算完成。",
       battlePauseCount: "戰鬥已暫停（本場剩餘暫停次數：{remaining} 次）。"
+    },
+    command: {
+      missingCommand: "缺少 command 欄位。",
+      unknownCommand: "未定義之指令: {command}"
+    },
+    account: {
+      resetDone: "帳號資料已重置。",
+      transferClaimed: "轉移碼兌換完成。"
     }
   },
 
@@ -1539,6 +1559,14 @@ const DICTIONARY = {
       resultLoss: "战败",
       modeAuto: "自动",
       modeManual: "手动",
+      recordsHpRestoredSummary: "{count} 瓶 (+{restored} HP)",
+      recordsMpRestoredSummary: "{count} 瓶 (+{restored} MP)",
+      recordsSkillUsesSummary: "{success}/{attempts} 次 ({rate}%, {damage} 伤)",
+      paperdollReadOnlyHint: "（只读检视・装备更换请至“玩家装备”页）",
+      notEquipped: "未装备",
+      noRecentBattles: "尚无对战纪录。快去开始一场对局吧！",
+      battleLogPotions: "HP: {hpUsed}瓶 (+{hpRestored}) / MP: {mpUsed}瓶 (+{mpRestored})",
+      battleLogMorphSummary: "{count}次 ({damage}伤)",
       statTotalCoinsEarned: "累计获得星砂",
       statTotalXpEarned: "累计获得经验",
       statTotalBattles: "总对战场次",
@@ -2142,7 +2170,11 @@ const DICTIONARY = {
       notInBattle: "当前不在战斗中。",
       itemNotFound: "找不到这个道具。",
       resourceFull: "{resource} 已经是满的。",
-      itemDepleted: "{name}已用完。"
+      itemDepleted: "{name}已用完。",
+      badgeAttack: "攻",
+      badgeHeal: "疗",
+      badgeMana: "魔",
+      badgeBurn: "灼"
     },
     shop: {
       itemNotFound: "找不到这件商品。",
@@ -2232,6 +2264,14 @@ const DICTIONARY = {
       roundTimeout: "出拳倒数超时，判定为弃权输拳！",
       battleDisconnectedSettled: "战斗因超时未连接自动结算完成。",
       battlePauseCount: "战斗已暂停（本场剩余暂停次数：{remaining} 次）。"
+    },
+    command: {
+      missingCommand: "缺少 command 字段。",
+      unknownCommand: "未定义之指令: {command}"
+    },
+    account: {
+      resetDone: "账号数据已重置。",
+      transferClaimed: "转移码兑换完成。"
     }
   },
 
@@ -2319,6 +2359,14 @@ const DICTIONARY = {
       resultLoss: "LOSS",
       modeAuto: "Auto",
       modeManual: "Manual",
+      recordsHpRestoredSummary: "{count} Bottles (+{restored} HP)",
+      recordsMpRestoredSummary: "{count} Bottles (+{restored} MP)",
+      recordsSkillUsesSummary: "{success}/{attempts} Hits ({rate}%, {damage} DMG)",
+      paperdollReadOnlyHint: "(Read-only view; change gear on the \"Equipment & Bag\" page)",
+      notEquipped: "Unequipped",
+      noRecentBattles: "No battle records yet. Go start a match!",
+      battleLogPotions: "HP: {hpUsed} Bottles (+{hpRestored}) / MP: {mpUsed} Bottles (+{mpRestored})",
+      battleLogMorphSummary: "{count} Hits ({damage} DMG)",
       statTotalCoinsEarned: "Total Star Sand Earned",
       statTotalXpEarned: "Total EXP Earned",
       statTotalBattles: "Total Battles",
@@ -2922,7 +2970,11 @@ const DICTIONARY = {
       notInBattle: "Not currently in battle.",
       itemNotFound: "Item not found.",
       resourceFull: "{resource} is already full.",
-      itemDepleted: "{name} is depleted."
+      itemDepleted: "{name} is depleted.",
+      badgeAttack: "ATK",
+      badgeHeal: "HEAL",
+      badgeMana: "MP",
+      badgeBurn: "BURN"
     },
     shop: {
       itemNotFound: "Item not found in shop.",
@@ -3012,6 +3064,14 @@ const DICTIONARY = {
       roundTimeout: "Round countdown expired! Forfeited round!",
       battleDisconnectedSettled: "Battle automatically settled due to disconnect timeout.",
       battlePauseCount: "Battle paused (Remaining pauses: {remaining})."
+    },
+    command: {
+      missingCommand: "Missing command field.",
+      unknownCommand: "Unknown command: {command}"
+    },
+    account: {
+      resetDone: "Account data has been reset.",
+      transferClaimed: "Transfer code claimed successfully."
     }
   },
 
@@ -3099,6 +3159,14 @@ const DICTIONARY = {
       resultLoss: "敗北",
       modeAuto: "自動",
       modeManual: "手動",
+      recordsHpRestoredSummary: "{count} 本 (+{restored} HP)",
+      recordsMpRestoredSummary: "{count} 本 (+{restored} MP)",
+      recordsSkillUsesSummary: "{success}/{attempts} 回 ({rate}%, {damage} ダメージ)",
+      paperdollReadOnlyHint: "（閲覧のみ・装備変更は「プレイヤー装備」画面で行ってください）",
+      notEquipped: "未装備",
+      noRecentBattles: "対戦記録はまだありません。早速対局を始めましょう！",
+      battleLogPotions: "HP: {hpUsed}本 (+{hpRestored}) / MP: {mpUsed}本 (+{mpRestored})",
+      battleLogMorphSummary: "{count}回 ({damage}ダメージ)",
       statTotalCoinsEarned: "累計獲得星砂",
       statTotalXpEarned: "累計獲得経験値",
       statTotalBattles: "総対局数",
@@ -3702,7 +3770,11 @@ const DICTIONARY = {
       notInBattle: "現在は戦闘中ではありません。",
       itemNotFound: "アイテムが見つかりません。",
       resourceFull: "{resource}は既に満タンです。",
-      itemDepleted: "{name}は使い切りました。"
+      itemDepleted: "{name}は使い切りました。",
+      badgeAttack: "攻",
+      badgeHeal: "療",
+      badgeMana: "魔",
+      badgeBurn: "灼"
     },
     shop: {
       itemNotFound: "商品が見つかりません。",
@@ -3792,6 +3864,14 @@ const DICTIONARY = {
       roundTimeout: "時間切れ！出し遅れにより敗北判定！",
       battleDisconnectedSettled: "切断タイムアウトにより戦闘が自動清算されました。",
       battlePauseCount: "戦闘を一時停止しました（残り一時停止可能回数: {remaining}回）。"
+    },
+    command: {
+      missingCommand: "command フィールドが不足しています。",
+      unknownCommand: "未定義のコマンド: {command}"
+    },
+    account: {
+      resetDone: "アカウントデータを初期化しました。",
+      transferClaimed: "引き継ぎコードの引き換えが完了しました。"
     }
   }
 };

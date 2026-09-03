@@ -25,12 +25,12 @@
         } catch (_) {}
       })();
     </script>
-    <link rel="stylesheet" href="./src/styles/tokens.css?v=202609030645">
-    <link rel="stylesheet" href="./src/styles/base.css?v=202609030645">
-    <link rel="stylesheet" href="./src/styles/components.css?v=202609030645">
-    <link rel="stylesheet" href="./src/styles/screens.css?v=202609030645">
-    <link rel="stylesheet" href="./src/styles/animations.css?v=202609030645">
-    <link rel="stylesheet" href="./src/styles/responsive.css?v=202609030645">
+    <link rel="stylesheet" href="./src/styles/tokens.css?v=202609030810">
+    <link rel="stylesheet" href="./src/styles/base.css?v=202609030810">
+    <link rel="stylesheet" href="./src/styles/components.css?v=202609030810">
+    <link rel="stylesheet" href="./src/styles/screens.css?v=202609030810">
+    <link rel="stylesheet" href="./src/styles/animations.css?v=202609030810">
+    <link rel="stylesheet" href="./src/styles/responsive.css?v=202609030810">
   </head>
   <body>
     <div id="app" class="app-shell" data-screen="home">
@@ -166,7 +166,7 @@
               </button>
               <footer class="home-footer" aria-label="頁腳資訊" data-i18n-attr="aria-label:ui.footerInfo">
                 <button type="button" class="footer-version-btn" id="footer-app-version-btn" title="查看更新日誌 (Changelog)" aria-label="查看更新日誌" data-i18n-attr="aria-label:ui.changelog,title:ui.changelog">
-                  <span class="footer-version" id="footer-app-version">0.0.21</span>
+                  <span class="footer-version" id="footer-app-version">0.0.22</span>
                 </button>
                 <span class="footer-plain-sep">/</span>
                 <a href="https://store.steampowered.com/app/1425000" target="_blank" rel="noopener noreferrer" class="footer-plain-link">Endless Alice</a>
@@ -576,11 +576,11 @@
                 <h4 data-i18n="ui.consumablesUsed">消耗品與技能施展累計</h4>
                 <div class="records-consumables-items">
                   <div class="records-consumable-pill">
-                    <span>🔴 緋露藥</span>
+                    <span>🔴 <span data-i18n="items.hpPotion.name">緋露藥</span></span>
                     <strong id="records-hp-potions-used">0 瓶 (+0 HP)</strong>
                   </div>
                   <div class="records-consumable-pill">
-                    <span>🔵 蒼月露</span>
+                    <span>🔵 <span data-i18n="items.mpPotion.name">蒼月露</span></span>
                     <strong id="records-mp-potions-used">0 瓶 (+0 MP)</strong>
                   </div>
                   <div class="records-consumable-pill wide">
@@ -599,7 +599,7 @@
             <div class="records-section-card">
               <div class="records-section-header">
                 <h4 data-i18n="ui.currentEquipment">當前穿戴裝備</h4>
-                <small style="color:var(--paper-dim);">（唯讀檢視・裝備更換請至「玩家裝備」頁）</small>
+                <small style="color:var(--paper-dim);" data-i18n="ui.paperdollReadOnlyHint">（唯讀檢視・裝備更換請至「玩家裝備」頁）</small>
               </div>
               <div id="records-paperdoll" class="records-paperdoll-grid"></div>
             </div>
@@ -804,18 +804,18 @@
                 <div id="player-hand-wrap-single">
                   <small>YOU</small>
                   <strong id="player-hand-display">✊</strong>
-                  <b id="player-hand-label">石頭</b>
+                  <b id="player-hand-label" data-i18n="hands.rock.label">石頭</b>
                 </div>
                 <div id="player-hand-wrap-dual" class="dual-hand-wrap" hidden>
                   <div class="dual-hand-side">
-                    <small>左手</small>
+                    <small data-i18n="ui.playerLeftHand">左手</small>
                     <strong id="player-left-hand-display">✊</strong>
-                    <b id="player-left-hand-label">石頭</b>
+                    <b id="player-left-hand-label" data-i18n="hands.rock.label">石頭</b>
                   </div>
                   <div class="dual-hand-side">
-                    <small>右手</small>
+                    <small data-i18n="ui.playerRightHand">右手</small>
                     <strong id="player-right-hand-display">✊</strong>
-                    <b id="player-right-hand-label">石頭</b>
+                    <b id="player-right-hand-label" data-i18n="hands.rock.label">石頭</b>
                   </div>
                 </div>
                 <span>対</span>
@@ -849,7 +849,7 @@
               <section class="combatant-hud player-hud" aria-label="玩家生命與魔力" data-i18n-attr="aria-label:ui.playerHpMp">
                 <div class="hud-name player-name">
                   <span class="player-mark">主</span>
-                  <div><small id="battle-player-level">LEVEL 01</small><b>旅人</b></div>
+                  <div><small id="battle-player-level">LEVEL 01</small><b data-i18n="dialogue.speakerPlayer">旅人</b></div>
                   <span class="hud-atk-badge"><small>ATK</small> <b id="player-atk-text">50</b></span>
                   <em id="player-hp-text">100 / 100</em>
                 </div>
@@ -865,24 +865,24 @@
                 <!-- Single Hand Mode -->
                 <div id="hand-selector-single" class="hand-selector-group">
                   <span class="panel-kicker">選擇手勢 <small>[1/2/3]</small></span>
-                  <button type="button" data-hand="rock" class="hand-button is-selected" title="選擇石頭 (熱鍵: 1)" data-i18n-attr="title:ui.selectRockKey"><i>✊</i><span>石頭</span><kbd>1</kbd></button>
-                  <button type="button" data-hand="paper" class="hand-button" title="選擇布 (熱鍵: 2)" data-i18n-attr="title:ui.selectPaperKey"><i>✋</i><span>布</span><kbd>2</kbd></button>
-                  <button type="button" data-hand="scissors" class="hand-button" title="選擇剪刀 (熱鍵: 3)" data-i18n-attr="title:ui.selectScissorsKey"><i>✌</i><span>剪刀</span><kbd>3</kbd></button>
+                  <button type="button" data-hand="rock" class="hand-button is-selected" title="選擇石頭 (熱鍵: 1)" data-i18n-attr="title:ui.selectRockKey"><i>✊</i><span data-i18n="hands.rock.label">石頭</span><kbd>1</kbd></button>
+                  <button type="button" data-hand="paper" class="hand-button" title="選擇布 (熱鍵: 2)" data-i18n-attr="title:ui.selectPaperKey"><i>✋</i><span data-i18n="hands.paper.label">布</span><kbd>2</kbd></button>
+                  <button type="button" data-hand="scissors" class="hand-button" title="選擇剪刀 (熱鍵: 3)" data-i18n-attr="title:ui.selectScissorsKey"><i>✌</i><span data-i18n="hands.scissors.label">剪刀</span><kbd>3</kbd></button>
                 </div>
 
                 <!-- Two-handed Liberation Mode (Skill dualHand) -->
                 <div id="hand-selector-dual" class="hand-selector-dual" hidden>
                   <div class="dual-hand-sub-column">
                     <span class="panel-kicker">左手・對左 <small>[1/2/3]</small></span>
-                    <button type="button" data-hand-slot="left" data-hand="rock" class="hand-button is-selected" title="左手石頭 (熱鍵: 1 或 Q)" data-i18n-attr="title:ui.selectLeftRockKey"><i>✊</i><span>石頭</span><kbd>1</kbd></button>
-                    <button type="button" data-hand-slot="left" data-hand="paper" class="hand-button" title="左手布 (熱鍵: 2 或 W)" data-i18n-attr="title:ui.selectLeftPaperKey"><i>✋</i><span>布</span><kbd>2</kbd></button>
-                    <button type="button" data-hand-slot="left" data-hand="scissors" class="hand-button" title="左手剪刀 (熱鍵: 3 或 E)" data-i18n-attr="title:ui.selectLeftScissorsKey"><i>✌</i><span>剪刀</span><kbd>3</kbd></button>
+                    <button type="button" data-hand-slot="left" data-hand="rock" class="hand-button is-selected" title="左手石頭 (熱鍵: 1 或 Q)" data-i18n-attr="title:ui.selectLeftRockKey"><i>✊</i><span data-i18n="hands.rock.label">石頭</span><kbd>1</kbd></button>
+                    <button type="button" data-hand-slot="left" data-hand="paper" class="hand-button" title="左手布 (熱鍵: 2 或 W)" data-i18n-attr="title:ui.selectLeftPaperKey"><i>✋</i><span data-i18n="hands.paper.label">布</span><kbd>2</kbd></button>
+                    <button type="button" data-hand-slot="left" data-hand="scissors" class="hand-button" title="左手剪刀 (熱鍵: 3 或 E)" data-i18n-attr="title:ui.selectLeftScissorsKey"><i>✌</i><span data-i18n="hands.scissors.label">剪刀</span><kbd>3</kbd></button>
                   </div>
                   <div class="dual-hand-sub-column">
                     <span class="panel-kicker">右手・對右 <small>[7/8/9 或 J/K/L]</small></span>
-                    <button type="button" data-hand-slot="right" data-hand="rock" class="hand-button is-selected" title="右手石頭 (熱鍵: 7 或 J 或 Num1)" data-i18n-attr="title:ui.selectRightRockKey"><i>✊</i><span>石頭</span><kbd>7</kbd></button>
-                    <button type="button" data-hand-slot="right" data-hand="paper" class="hand-button" title="右手布 (熱鍵: 8 或 K 或 Num2)" data-i18n-attr="title:ui.selectRightPaperKey"><i>✋</i><span>布</span><kbd>8</kbd></button>
-                    <button type="button" data-hand-slot="right" data-hand="scissors" class="hand-button" title="右手剪刀 (熱鍵: 9 或 L 或 Num3)" data-i18n-attr="title:ui.selectRightScissorsKey"><i>✌</i><span>剪刀</span><kbd>9</kbd></button>
+                    <button type="button" data-hand-slot="right" data-hand="rock" class="hand-button is-selected" title="右手石頭 (熱鍵: 7 或 J 或 Num1)" data-i18n-attr="title:ui.selectRightRockKey"><i>✊</i><span data-i18n="hands.rock.label">石頭</span><kbd>7</kbd></button>
+                    <button type="button" data-hand-slot="right" data-hand="paper" class="hand-button" title="右手布 (熱鍵: 8 或 K 或 Num2)" data-i18n-attr="title:ui.selectRightPaperKey"><i>✋</i><span data-i18n="hands.paper.label">布</span><kbd>8</kbd></button>
+                    <button type="button" data-hand-slot="right" data-hand="scissors" class="hand-button" title="右手剪刀 (熱鍵: 9 或 L 或 Num3)" data-i18n-attr="title:ui.selectRightScissorsKey"><i>✌</i><span data-i18n="hands.scissors.label">剪刀</span><kbd>9</kbd></button>
                   </div>
                 </div>
               </section>
@@ -1618,6 +1618,6 @@
       <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
     </div>
-    <script src="./src/js/bundle.js?v=202609030645"></script>
+    <script src="./src/js/bundle.js?v=202609030810"></script>
   </body>
 </html>

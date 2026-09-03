@@ -2,10 +2,10 @@
 
 > **文件用途**：AI 代理人與開發者快速上手、架構交接、開發合約指引與校對基準  
 > **專案根目錄**：`D:\game-dev\New-game-project-4`  
-> **當前版本**：`v0.0.21`（顯示於首頁頁腳最左側 `0.0.21`，自最後一位遞增，每 100 個版本進一位：`0.0.100` -> `0.1.0`）  
+> **當前版本**：`v0.0.22`（顯示於首頁頁腳最左側 `0.0.22`，自最後一位遞增，每 100 個版本進一位：`0.0.100` -> `0.1.0`）  
 > **最新更新日期**：2026-09-03  
 > **基準規範**：`OPENSPEC.md` 與 `AGENTS.md`  
-> **測試狀態**：`npm test` 213/213、`npm run test:server` 17/17、`npm run test:rwd:smoke` 30/30 全部通過 (100% Pass)；雙端合約、反作弊專項、確定性重放、高延遲寬限審查、多開踢出保證、Phase 4 Docker Staging 演練 (Server/Caddy/Client)、20 併發帳號負載煙霧、戰鬥中鎖定策略 (battleLockPolicy) 與 AppView 換裝配點鎖定灰化 UI (RWD-REG-009 跨 4 視口與雙語系驗證) 全數綠燈就位。
+> **測試狀態**：`npm test` 219/219、`npm run test:server` 17/17、`npm run test:rwd:smoke` 30/30 全部通過 (100% Pass)；雙端合約、反作弊專項、確定性重放、高延遲寬限審查、多開踢出保證、Phase 4 Docker Staging 演練 (Server/Caddy/Client)、20 併發帳號負載煙霧、戰鬥中鎖定策略 (battleLockPolicy)、AppView 換裝配點鎖定灰化 UI (RWD-REG-009 跨 4 視口與雙語系驗證)、i18n 兩輪殘留清理 (kernelFactory key化、雙敵傷害日誌 targetId 歸屬、出拳手勢按鈕、HUD玩家名、戰績消耗品與唯讀說明在地化、Hero/Traveler 一致性) 全數綠燈就位。
 
 ---
 
@@ -232,4 +232,4 @@ New-game-project-4/
   - 玩家間即時 PVP 猜拳匹配擂台賽系統。
 
 ### 已知待辦 (Known Technical Debt & Follow-ups)
-- `kernelFactory.js` 離線 kernel 四處 `BATTLE_IN_PROGRESS_LOCKED` 訊息為硬編碼中文，應改 `{ key }` 走 I18n。
+- i18n 第三批次級靜態殘留待辦（戰鬥日誌 header 旁小字、出拳區 panel-kicker 上方小標、快捷欄子標籤、背包靈露說明、戰績挑戰統計總計行）：量小且非核心流程，留待後續 UI 優化統一清理。
