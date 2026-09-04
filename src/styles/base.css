@@ -135,6 +135,28 @@ p {
   background: transparent;
   text-align: left;
   cursor: pointer;
+  border-radius: 6px;
+  transition: filter 160ms ease;
+}
+
+.brand-button:hover {
+  filter: brightness(1.1);
+}
+
+.brand-button:hover .brand-mon {
+  box-shadow: inset 0 0 0 3px rgba(10, 10, 16, 0.45), 0 0 10px rgba(216, 182, 106, 0.35);
+}
+
+.brand-button:active,
+.brand-button.is-btn-pressed {
+  transform: none !important;
+  filter: brightness(1.15) !important;
+  box-shadow: none !important;
+}
+
+.brand-button:active .brand-mon,
+.brand-button.is-btn-pressed .brand-mon {
+  box-shadow: inset 0 0 0 3px rgba(10, 10, 16, 0.45), 0 0 14px rgba(216, 182, 106, 0.55);
 }
 
 .brand-mon {
@@ -331,7 +353,7 @@ select.profile-chip.lang-select option {
   color: var(--paper-dim);
   border-color: rgba(255, 255, 255, 0.08);
   background: rgba(0, 0, 0, 0.25);
-  opacity: 0.75;
+  opacity: 0.85;
 }
 
 .audio-toggle-btn.is-muted:hover {

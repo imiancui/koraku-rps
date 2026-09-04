@@ -895,40 +895,49 @@ export class GameStore {
   }
 
   cheatSetValues(updates = {}) {
-    if (typeof updates.level === "number" && updates.level >= 1) {
-      this.state.profile.level = Math.floor(updates.level);
+    const statsObj = (updates && typeof updates.stats === "object" && updates.stats !== null && !Array.isArray(updates.stats)) ? updates.stats : {};
+    const flat = (updates && typeof updates === "object" && !Array.isArray(updates)) ? updates : {};
+    const merged = { ...statsObj, ...flat };
+    merged.allocations = { ...(statsObj.allocations || {}), ...(flat.allocations || {}) };
+    merged.skills = { ...(statsObj.skills || {}), ...(flat.skills || {}) };
+
+    if (typeof merged.level === "number" && merged.level >= 1) {
+      this.state.profile.level = Math.floor(merged.level);
     }
-    if (typeof updates.xp === "number" && updates.xp >= 0) {
-      this.state.profile.xp = Math.floor(updates.xp);
+    if (typeof merged.xp === "number" && merged.xp >= 0) {
+      this.state.profile.xp = Math.floor(merged.xp);
     }
-    if (typeof updates.skillPoints === "number" && updates.skillPoints >= 0) {
-      this.state.profile.skillPoints = Math.floor(updates.skillPoints);
+    if (typeof merged.skillPoints === "number" && merged.skillPoints >= 0) {
+      this.state.profile.skillPoints = Math.floor(merged.skillPoints);
     }
-    if (typeof updates.coins === "number" && updates.coins >= 0) {
-      this.state.coins = Math.floor(updates.coins);
+    if (typeof merged.coins === "number" && merged.coins >= 0) {
+      this.state.coins = Math.floor(merged.coins);
     }
-    if (typeof updates.hpPotion === "number" && updates.hpPotion >= 0) {
-      this.state.inventory.hpPotion = Math.floor(updates.hpPotion);
+    if (typeof merged.hpPotion === "number" && merged.hpPotion >= 0) {
+      this.state.inventory.hpPotion = Math.floor(merged.hpPotion);
     }
-    if (typeof updates.mpPotion === "number" && updates.mpPotion >= 0) {
-      this.state.inventory.mpPotion = Math.floor(updates.mpPotion);
+    if (typeof merged.mpPotion === "number" && merged.mpPotion >= 0) {
+      this.state.inventory.mpPotion = Math.floor(merged.mpPotion);
     }
-    if (typeof updates.watermelonStock === "number" && updates.watermelonStock >= 0) {
+    if (typeof merged.watermelonStock === "number" && merged.watermelonStock >= 0) {
       if (!this.state.records) this.state.records = {};
-      this.state.records.watermelonStock = Math.max(0, Math.min(999, Math.floor(updates.watermelonStock)));
+      this.state.records.watermelonStock = Math.max(0, Math.min(999, Math.floor(merged.watermelonStock)));
     }
-    if (updates.allocations) {
-      if (typeof updates.allocations.hp === "number") this.state.profile.allocations.hp = Math.max(0, updates.allocations.hp);
-      if (typeof updates.allocations.mp === "number") this.state.profile.allocations.mp = Math.max(0, updates.allocations.mp);
-      if (typeof updates.allocations.damage === "number") this.state.profile.allocations.damage = Math.max(0, updates.allocations.damage);
+    if (merged.allocations) {
+      const allocHp = merged.hp ?? merged.allocations.hp;
+      const allocMp = merged.mp ?? merged.allocations.mp;
+      const allocDamage = merged.damage ?? merged.allocations.damage;
+      if (typeof allocHp === "number" && allocHp >= 0) this.state.profile.allocations.hp = Math.max(0, allocHp);
+      if (typeof allocMp === "number" && allocMp >= 0) this.state.profile.allocations.mp = Math.max(0, allocMp);
+      if (typeof allocDamage === "number" && allocDamage >= 0) this.state.profile.allocations.damage = Math.max(0, allocDamage);
     }
-    if (updates.skills) {
-      if (typeof updates.skills.momo === "number") this.state.profile.skills.momo = Math.max(0, Math.min(10, updates.skills.momo));
-      if (typeof updates.skills.dualHand === "number") this.state.profile.skills.dualHand = Math.max(0, Math.min(1, updates.skills.dualHand));
+    if (merged.skills) {
+      if (typeof merged.skills.momo === "number") this.state.profile.skills.momo = Math.max(0, Math.min(10, merged.skills.momo));
+      if (typeof merged.skills.dualHand === "number") this.state.profile.skills.dualHand = Math.max(0, Math.min(1, merged.skills.dualHand));
     }
     this._recordLedger({
       action: "cheat_set_values",
-      updates,
+      updates: merged,
       source: "dev"
     });
     this.commit("cheat-update");

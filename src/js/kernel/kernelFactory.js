@@ -248,7 +248,7 @@ export function createKernel(options = {}) {
         break;
 
       case Commands.CHEAT_UNLOCK_ALL:
-        result = store.cheatUnlockAll();
+        result = payload?.gallery ? store.cheatUnlockGallery() : store.cheatUnlockAll();
         break;
 
       case Commands.CHEAT_ADD_COINS: {

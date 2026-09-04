@@ -16,13 +16,13 @@ class MemoryPersistence {
 test("圖鑑設定：包含小樂預設、2P色、泳裝預設與切西瓜差分共4種立繪", () => {
   assert.equal(GALLERY_ITEMS.length, 4);
   assert.equal(GALLERY_ITEMS[0].id, "koraku_default");
-  assert.equal(GALLERY_ITEMS[0].src, "./koraku/小樂-預設.png");
+  assert.equal(GALLERY_ITEMS[0].src, "./koraku/小樂-預設.webp");
   assert.equal(GALLERY_ITEMS[1].id, "koraku_2p");
-  assert.equal(GALLERY_ITEMS[1].src, "./koraku/小樂-2P色.png");
+  assert.equal(GALLERY_ITEMS[1].src, "./koraku/小樂-2P色.webp");
   assert.equal(GALLERY_ITEMS[2].id, "swimsuit_default");
-  assert.equal(GALLERY_ITEMS[2].src, "./koraku/泳裝小樂.png");
+  assert.equal(GALLERY_ITEMS[2].src, "./koraku/泳裝小樂.webp");
   assert.equal(GALLERY_ITEMS[3].id, "swimsuit_watermelon");
-  assert.equal(GALLERY_ITEMS[3].src, "./koraku/泳裝小樂_西瓜.png");
+  assert.equal(GALLERY_ITEMS[3].src, "./koraku/泳裝小樂_西瓜.webp");
 });
 
 test("圖鑑解鎖條件：預設小樂直接解鎖、2P色需通關第4關、泳裝需通關或觸發事件", () => {

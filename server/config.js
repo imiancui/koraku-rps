@@ -48,6 +48,16 @@ export function resolveBattleLockPolicy(policyValue = process.env.BATTLE_LOCK_PO
   return policy;
 }
 
+export function resolveDevAdminKey() {
+  if (process.env.DEV_ADMIN_KEY) {
+    return process.env.DEV_ADMIN_KEY;
+  }
+  if (isDevOrTestEnvironment()) {
+    return "8989";
+  }
+  return null;
+}
+
 export const SERVER_CONFIG = Object.freeze({
   port: parseInt(process.env.PORT || "8080", 10),
   host: process.env.HOST || "0.0.0.0",
@@ -69,7 +79,7 @@ export const SERVER_CONFIG = Object.freeze({
     burstWindowMs: parseInt(process.env.RATE_LIMIT_BURST_WINDOW_MS || "200", 10),
     burstLimit: parseInt(process.env.RATE_LIMIT_BURST_LIMIT || "10", 10)
   },
-  devAdminKey: process.env.DEV_ADMIN_KEY || null,
+  devAdminKey: resolveDevAdminKey(),
   devDeviceWhitelist: process.env.DEV_DEVICE_WHITELIST ? process.env.DEV_DEVICE_WHITELIST.split(",") : [],
   allowedOrigins: process.env.ALLOWED_ORIGINS
     ? process.env.ALLOWED_ORIGINS.split(",").map((s) => s.trim()).filter(Boolean)

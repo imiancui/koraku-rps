@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.0.27";
+export const APP_VERSION = "0.0.28";
 
 export const DOJO_CONFIG = Object.freeze({
   defaultHp: 10000,
@@ -8,11 +8,11 @@ export const DOJO_CONFIG = Object.freeze({
 });
 
 export const ASSETS = Object.freeze({
-  default: "./koraku/小樂-預設.png",
-  final: "./koraku/小樂-2P色.png",
-  swimsuit: "./koraku/泳裝小樂.png",
-  watermelon: "./koraku/泳裝小樂_西瓜.png",
-  defeat: "./koraku/凝視小樂.png"
+  default: "./koraku/小樂-預設.webp",
+  final: "./koraku/小樂-2P色.webp",
+  swimsuit: "./koraku/泳裝小樂.webp",
+  watermelon: "./koraku/泳裝小樂_西瓜.webp",
+  defeat: "./koraku/凝視小樂.webp"
 });
 
 export const HANDS = Object.freeze({

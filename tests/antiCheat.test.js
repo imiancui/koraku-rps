@@ -4,6 +4,9 @@
 
 import test from "node:test";
 import assert from "node:assert/strict";
+import fs from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
 import {
   Commands,
   Events,
@@ -15,6 +18,9 @@ import {
   MemoryPersistence,
   TestRemoteGameClient
 } from "./helpers/testHarness.js";
+import { createKorakuServer } from "../server/server.js";
+import { RemoteGameClient } from "../src/js/net/RemoteGameClient.js";
+import { AppView } from "../src/js/ui/AppView.js";
 
 test("反作弊 1：偽造未授權指令與竄改 payload 結構防護", async () => {
   const server = new AuthoritativeKernelServer({ devTokens: ["admin_token"] });
@@ -288,4 +294,209 @@ test("反作弊 8：戰鬥進行中鎖定換裝與配點指令（Battle in-progr
   assert.equal(server.store.state.profile.allocations.hp, 1);
 
   client.destroy();
+});
+
+test("反作弊 9：RemoteGameClient 在線動態提權與降級全流程驗證", async () => {
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "koraku-test-anticheat-elevate-"));
+  const server = createKorakuServer({
+    port: 0,
+    host: "127.0.0.1",
+    dataDir: tmpDir,
+    devAdminKey: "koraku_test_admin_key",
+    allowedOrigins: ["*"],
+    allowEmptyOrigin: true
+  });
+
+  await server.start(0, "127.0.0.1");
+  const port = server.actualPort;
+
+  // 1. 取得普通 Token
+  const authRes = await fetch(`http://127.0.0.1:${port}/auth/anonymous`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ deviceId: "device_remote_client_test" })
+  });
+  const authData = await authRes.json();
+
+  const fakeStorage = new Map();
+  const storageMock = {
+    getItem: (k) => fakeStorage.get(k) || null,
+    setItem: (k, v) => fakeStorage.set(k, v),
+    removeItem: (k) => fakeStorage.delete(k)
+  };
+
+  const client = new RemoteGameClient({
+    url: `ws://127.0.0.1:${port}`,
+    token: authData.token,
+    storage: storageMock,
+    autoReconnect: false
+  });
+
+  assert.equal(client.hasDevEntitlement(), false, "初始狀態應無 devEntitlement");
+
+  // 2. 錯誤密碼提權失敗
+  const failRes = await client.verifyDevEntitlement("wrong_pass_888");
+  assert.equal(failRes, false, "錯誤密碼應提權失敗");
+  assert.equal(client.hasDevEntitlement(), false);
+
+  // 3. 正確密碼提權成功
+  const okRes = await client.verifyDevEntitlement("koraku_test_admin_key");
+  assert.equal(okRes, true, "正確密碼應提權成功");
+  assert.equal(client.hasDevEntitlement(), true, "提權後 hasDevEntitlement 應為 true");
+  assert.ok(fakeStorage.has("koraku-rps-online-token"), "LocalStorage 應寫入超級 Token");
+
+  // 4. 降級登出管理員
+  const demoteRes = await client.revokeDevEntitlement();
+  assert.equal(demoteRes, true, "降級應成功");
+  assert.equal(client.hasDevEntitlement(), false, "降級後 hasDevEntitlement 應為 false");
+
+  client.destroy();
+  await server.close();
+  await fs.rm(tmpDir, { recursive: true, force: true });
+});
+
+test("反作弊 10 / E2E：在線管理員提權後設定等級 50，一鍵解鎖全關卡後等級依然保持 50 不變及深層合併驗證", async () => {
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "koraku-test-anticheat-e2e-"));
+  const server = createKorakuServer({
+    port: 0,
+    host: "127.0.0.1",
+    dataDir: tmpDir,
+    devAdminKey: "koraku_test_admin_key",
+    allowedOrigins: ["*"],
+    allowEmptyOrigin: true
+  });
+
+  await server.start(0, "127.0.0.1");
+  const port = server.actualPort;
+
+  // 1. 匿名進入遊戲
+  const authRes = await fetch(`http://127.0.0.1:${port}/auth/anonymous`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ deviceId: "device_e2e_cheat_test" })
+  });
+  const authData = await authRes.json();
+
+  const fakeStorage = new Map();
+  const storageMock = {
+    getItem: (k) => fakeStorage.get(k) || null,
+    setItem: (k, v) => fakeStorage.set(k, v),
+    removeItem: (k) => fakeStorage.delete(k)
+  };
+
+  const client = new RemoteGameClient({
+    url: `ws://127.0.0.1:${port}`,
+    token: authData.token,
+    storage: storageMock
+  });
+
+  await client.init();
+
+  // 2. 驗證管理員身分
+  const elevateRes = await client.verifyDevEntitlement("koraku_test_admin_key");
+  assert.equal(elevateRes, true, "驗證管理員密碼應成功");
+  assert.equal(client.hasDevEntitlement(), true, "客戶端應具備 Dev 權限");
+
+  // 3. 模擬 AppView DOM 與視圖綁定
+  const elements = new Map();
+  const getOrCreateEl = (id) => {
+    if (!elements.has(id)) {
+      elements.set(id, {
+        textContent: "",
+        value: "",
+        style: {},
+        classList: { toggle: () => {} },
+        setAttribute: () => {},
+        removeAttribute: () => {}
+      });
+    }
+    return elements.get(id);
+  };
+
+  const originalDocument = globalThis.document;
+  globalThis.document = {
+    querySelector: (sel) => getOrCreateEl(sel),
+    querySelectorAll: () => []
+  };
+
+  const appView = Object.create(AppView.prototype);
+  appView.getStoreSnapshot = () => client.getState();
+  appView.sound = null;
+  appView.renderHomeRecords = () => {};
+  appView.renderStages = () => {};
+  appView.renderShop = () => {};
+  appView.renderGrowth = () => {};
+  appView.renderGallery = () => {};
+  appView.renderGuideBoss = () => {};
+  appView.renderEquipment = () => {};
+  appView.renderInventory = () => {};
+
+  // 4. 呼叫 CHEAT_SET_STATS 設定等級為 50，星砂 88888，並分配屬性與技能
+  const setStatsRes = await client.send(Commands.CHEAT_SET_STATS, {
+    level: 50,
+    xp: 200,
+    skillPoints: 20,
+    coins: 88888,
+    hpPotion: 10,
+    mpPotion: 10,
+    watermelonStock: 5,
+    allocations: { hp: 10, mp: 5, damage: 15 },
+    skills: { momo: 3, dualHand: 1 }
+  });
+
+  assert.equal(setStatsRes.ack, true, "設定作弊屬性指令應成功返回 ACK");
+  const stateAfterSet = client.getState();
+  assert.equal(stateAfterSet.profile.level, 50, "客戶端 State 等級應變為 50");
+  assert.equal(stateAfterSet.coins, 88888, "星砂應變為 88888");
+  assert.equal(stateAfterSet.profile.allocations.hp, 10, "生命配點應為 10");
+  assert.equal(stateAfterSet.profile.skills.momo, 3, "摸摸技能等級應為 3");
+
+  // 視圖重繪斷言
+  appView.renderStore(stateAfterSet);
+  assert.equal(elements.get("#header-level").textContent, "50", "視圖頭部等級應立即變為 50");
+  assert.equal(elements.get("#header-coins").textContent, (88888).toLocaleString("zh-TW"), "視圖星砂應立即顯示 88,888");
+
+  // 5. 呼叫 CHEAT_UNLOCK_ALL 解鎖關卡
+  const unlockRes = await client.send(Commands.CHEAT_UNLOCK_ALL, { stages: true });
+  assert.equal(unlockRes.ack, true, "解鎖關卡應成功返回 ACK");
+  const stateAfterUnlock = client.getState();
+
+  // 關鍵斷言：關卡全開，但等級依然保持 50，絕對不可退回或變為 10！
+  assert.equal(stateAfterUnlock.records.bestStage, 4, "最深關卡應為第 4 關");
+  assert.deepEqual(stateAfterUnlock.records.clearedStages, [1, 2, 3, 4], "通關關卡應包含 1, 2, 3, 4");
+  assert.equal(stateAfterUnlock.profile.level, 50, "【核心斷言】解鎖關卡後等級依然必須保持 50，絕對不可被覆寫為 10！");
+  assert.equal(stateAfterUnlock.profile.skillPoints, 20, "技能點必須保持 20，不可被覆寫！");
+  assert.equal(stateAfterUnlock.profile.allocations.hp, 10, "深層合併應保留 allocations.hp = 10");
+  assert.equal(stateAfterUnlock.profile.skills.momo, 3, "深層合併應保留 skills.momo = 3");
+  assert.equal(stateAfterUnlock.coins, 88888, "深層合併應保留 coins = 88888");
+
+  appView.renderStore(stateAfterUnlock);
+  assert.equal(elements.get("#header-level").textContent, "50", "視圖等級在解鎖關卡後依然保持 50");
+
+  // 6. 呼叫 CHEAT_UNLOCK_ALL 解鎖圖鑑
+  const unlockGalleryRes = await client.send(Commands.CHEAT_UNLOCK_ALL, { gallery: true });
+  assert.equal(unlockGalleryRes.ack, true, "解鎖圖鑑應成功返回 ACK");
+  const stateAfterGallery = client.getState();
+  assert.equal(stateAfterGallery.records.unlockedSwimsuit, true, "泳裝應已解鎖");
+  assert.equal(stateAfterGallery.records.unlockedGalleryAll, true, "全圖鑑應已解鎖");
+  assert.equal(stateAfterGallery.profile.level, 50, "解鎖圖鑑後等級依然保持 50");
+
+  // 7. 支援巢狀 stats 物件更新
+  const nestedStatsRes = await client.send(Commands.CHEAT_SET_STATS, {
+    stats: {
+      level: 65,
+      coins: 99999
+    }
+  });
+  assert.equal(nestedStatsRes.ack, true, "巢狀 stats 物件更新應成功");
+  const stateAfterNested = client.getState();
+  assert.equal(stateAfterNested.profile.level, 65, "等級應更新為 65");
+  assert.equal(stateAfterNested.coins, 99999, "星砂應更新為 99999");
+  assert.equal(stateAfterNested.profile.allocations.hp, 10, "巢狀更新後舊 allocations 依然保留");
+  assert.equal(stateAfterNested.profile.skills.momo, 3, "巢狀更新後舊 skills 依然保留");
+
+  globalThis.document = originalDocument;
+  client.destroy();
+  await server.close();
+  await fs.rm(tmpDir, { recursive: true, force: true });
 });

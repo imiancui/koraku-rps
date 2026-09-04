@@ -458,6 +458,8 @@ export class AppView {
     this.cheatAuthModal = $("#cheat-auth-modal");
     this.cheatAuthPassword = $("#cheat-auth-password");
     this.cheatAuthForm = $("#cheat-auth-form");
+    this.cheatDevBadge = $("#cheat-dev-badge");
+    this.cheatDemoteBtn = $("#btn-cheat-demote");
     this.changelogModal = $("#changelog-modal");
     this.equipTooltip = $("#equip-tooltip");
     this.activeShopFilter = "all";
@@ -877,6 +879,13 @@ export class AppView {
       });
     }
 
+    const btnCheatDemote = $("#btn-cheat-demote");
+    if (btnCheatDemote) {
+      btnCheatDemote.addEventListener("click", () => {
+        this.handleCheatDemote();
+      });
+    }
+
     document.addEventListener("mousemove", (event) => {
       const tooltipTarget = event.target.closest("[data-equip-tooltip-id]");
       if (tooltipTarget) {
@@ -1025,7 +1034,7 @@ export class AppView {
 
   async handleClick(event) {
     const pressedButton = event.target.closest("button, [role='button'], [data-nav], [data-allocate], [data-allocate-skill], [data-buy], [data-buy-equip], [data-slot], [data-equip-bag-item], .pill-btn, .tab-pill, .button-primary, .button-secondary, .button-ghost, .menu-command");
-    if (pressedButton) {
+    if (pressedButton && !pressedButton.classList?.contains?.("brand-button")) {
       pressedButton.classList.remove("is-btn-pressed");
       void pressedButton.offsetWidth;
       pressedButton.classList.add("is-btn-pressed");
@@ -1314,14 +1323,24 @@ export class AppView {
 
     if (event.target.closest("#cheat-unlock-stages-btn")) {
       const res = await this.sendCommand(Commands.CHEAT_UNLOCK_ALL, { stages: true });
-      this.showToast(res?.message || "已解鎖全部關卡！", res?.ok !== false ? "success" : "danger");
+      if (res?.ok === false || res?.ack === false) {
+        this.showToast(res?.message || res?.error || "解鎖關卡失敗", "danger");
+        return;
+      }
+      this.showToast(res?.message || "已解鎖全部關卡！", "success");
+      this.renderStore();
       this.populateCheatModal();
       return;
     }
 
     if (event.target.closest("#cheat-unlock-gallery-btn")) {
       const res = await this.sendCommand(Commands.CHEAT_UNLOCK_ALL, { gallery: true });
-      this.showToast(res?.message || "已解鎖全圖鑑！", res?.ok !== false ? "success" : "danger");
+      if (res?.ok === false || res?.ack === false) {
+        this.showToast(res?.message || res?.error || "解鎖圖鑑失敗", "danger");
+        return;
+      }
+      this.showToast(res?.message || "已解鎖全圖鑑！", "success");
+      this.renderStore();
       this.populateCheatModal();
       return;
     }
@@ -1336,7 +1355,12 @@ export class AppView {
         mpPotion: 99,
         skills: { momo: 10 }
       });
-      this.showToast(res?.message || "已一鍵設置滿級、99999 星砂與 100 SP！", res?.ok !== false ? "success" : "danger");
+      if (res?.ok === false || res?.ack === false) {
+        this.showToast(res?.message || res?.error || "設置數值失敗", "danger");
+        return;
+      }
+      this.showToast(res?.message || "已一鍵設置滿級、99999 星砂與 100 SP！", "success");
+      this.renderStore();
       this.populateCheatModal();
       return;
     }
@@ -3035,10 +3059,11 @@ export class AppView {
       this.closeCheatAuthModal();
       if (this.cheatModal) {
         this.populateCheatModal();
+        this.updateCheatDevUi();
         this.cheatModal.hidden = false;
         this.cheatModal.setAttribute("aria-hidden", "false");
       }
-      this.showToast(I18n.t("ui.cheatAuthSuccess") !== "ui.cheatAuthSuccess" ? I18n.t("ui.cheatAuthSuccess") : "⚙️ 密碼正確，作弊選單已解鎖！", "success");
+      this.showToast(I18n.t("ui.cheatAuthSuccess") !== "ui.cheatAuthSuccess" ? I18n.t("ui.cheatAuthSuccess") : "密碼正確，管理員作弊選單已解鎖！", "success");
     } else {
       this.showToast(I18n.t("ui.cheatAuthError") !== "ui.cheatAuthError" ? I18n.t("ui.cheatAuthError") : "密碼錯誤！無法開啟作弊選單。", "danger");
       if (this.cheatAuthPassword) {
@@ -3048,6 +3073,40 @@ export class AppView {
     }
   }
 
+  updateCheatDevUi() {
+    const isOnline = this.connectionState === ConnectionStates.ONLINE || Boolean(this.client && this.connectionState !== ConnectionStates.OFFLINE);
+    const hasEntitlement = this.client?.hasDevEntitlement ? this.client.hasDevEntitlement() : false;
+
+    if (this.cheatDevBadge) {
+      if (isOnline && hasEntitlement) {
+        this.cheatDevBadge.hidden = false;
+        this.cheatDevBadge.removeAttribute("aria-hidden");
+      } else {
+        this.cheatDevBadge.hidden = true;
+        this.cheatDevBadge.setAttribute("aria-hidden", "true");
+      }
+    }
+
+    if (this.cheatDemoteBtn) {
+      if (isOnline && hasEntitlement) {
+        this.cheatDemoteBtn.hidden = false;
+        this.cheatDemoteBtn.removeAttribute("aria-hidden");
+      } else {
+        this.cheatDemoteBtn.hidden = true;
+        this.cheatDemoteBtn.setAttribute("aria-hidden", "true");
+      }
+    }
+  }
+
+  async handleCheatDemote() {
+    if (this.client && typeof this.client.revokeDevEntitlement === "function") {
+      await this.client.revokeDevEntitlement();
+    }
+    this.closeCheatModal();
+    this.updateCheatDevUi();
+    this.showToast(I18n.t("ui.cheatDemoteSuccess") !== "ui.cheatDemoteSuccess" ? I18n.t("ui.cheatDemoteSuccess") : "已登出管理員身分，恢復為普通玩家權限。", "info");
+  }
+
   openCheatModal() {
     const hasEntitlement = this.client?.hasDevEntitlement ? this.client.hasDevEntitlement() : (this.connectionState === ConnectionStates.OFFLINE || !this.client);
     if (!hasEntitlement) {
@@ -3055,6 +3114,7 @@ export class AppView {
       return;
     }
     this.populateCheatModal();
+    this.updateCheatDevUi();
     if (this.cheatModal) {
       this.cheatModal.hidden = false;
       this.cheatModal.setAttribute("aria-hidden", "false");
@@ -3102,9 +3162,16 @@ export class AppView {
         dualHand: Number($("#cheat-skill-dualHand")?.value) || 0
       }
     };
-    await this.sendCommand(Commands.CHEAT_SET_STATS, updates);
+    const res = await this.sendCommand(Commands.CHEAT_SET_STATS, updates);
+    if (res?.ok === false || res?.ack === false) {
+      this.showToast(res?.message || res?.error || "作弊數值套用失敗！", "danger");
+      return;
+    }
     this.showToast("作弊數值已成功套用！", "success");
     this.closeCheatModal();
+    const snapshot = this.getStoreSnapshot();
+    this.renderStore(snapshot);
+    this.renderGrowth(snapshot);
   }
 
   openSaveRecordModal() {

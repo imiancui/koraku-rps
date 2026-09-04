@@ -428,7 +428,7 @@ export class GameSession {
         break;
 
       case Commands.CHEAT_UNLOCK_ALL:
-        result = await this._handleCheatUnlockAll();
+        result = await this._handleCheatUnlockAll(payload);
         break;
 
       case Commands.CHEAT_ADD_COINS:
@@ -1020,31 +1020,103 @@ export class GameSession {
 
   // --- Dev Entitlement / Cheat Handlers ---
 
-  async _handleCheatSetStats({ stats = {} }) {
-    if (stats.hp !== undefined) this.state.profile.allocations.hp = stats.hp;
-    if (stats.mp !== undefined) this.state.profile.allocations.mp = stats.mp;
-    if (stats.damage !== undefined) this.state.profile.allocations.damage = stats.damage;
-    if (stats.level !== undefined) this.state.profile.level = stats.level;
-    if (stats.skillPoints !== undefined) this.state.profile.skillPoints = stats.skillPoints;
+  async _handleCheatSetStats(payload = {}) {
+    const statsObj = (payload && typeof payload.stats === "object" && payload.stats !== null && !Array.isArray(payload.stats)) ? payload.stats : {};
+    const flat = (payload && typeof payload === "object" && !Array.isArray(payload)) ? payload : {};
 
-    this.emit(Events.STORE_CHANGED, { profile: this.state.profile });
-    return { ack: true, profile: this.state.profile };
+    if (!this.state.profile) this.state.profile = {};
+    if (!this.state.inventory) this.state.inventory = {};
+    if (!this.state.records) this.state.records = {};
+
+    const level = flat.level ?? statsObj.level;
+    if (typeof level === "number" && Number.isFinite(level) && level >= 1) {
+      this.state.profile.level = Math.floor(level);
+    }
+    const xp = flat.xp ?? statsObj.xp;
+    if (typeof xp === "number" && Number.isFinite(xp) && xp >= 0) {
+      this.state.profile.xp = Math.floor(xp);
+    }
+    const skillPoints = flat.skillPoints ?? statsObj.skillPoints;
+    if (typeof skillPoints === "number" && Number.isFinite(skillPoints) && skillPoints >= 0) {
+      this.state.profile.skillPoints = Math.floor(skillPoints);
+    }
+    const coins = flat.coins ?? statsObj.coins;
+    if (typeof coins === "number" && Number.isFinite(coins) && coins >= 0) {
+      const prevCoins = this.state.coins || 0;
+      const newCoins = Math.floor(coins);
+      this.state.coins = newCoins;
+      await this.storage.appendLedger(this.accountId, {
+        source: "cheatSetStats",
+        delta: { coins: newCoins - prevCoins },
+        serverTime: Date.now()
+      });
+    }
+    const hpPotion = flat.hpPotion ?? statsObj.hpPotion;
+    if (typeof hpPotion === "number" && Number.isFinite(hpPotion) && hpPotion >= 0) {
+      this.state.inventory.hpPotion = Math.floor(hpPotion);
+    }
+    const mpPotion = flat.mpPotion ?? statsObj.mpPotion;
+    if (typeof mpPotion === "number" && Number.isFinite(mpPotion) && mpPotion >= 0) {
+      this.state.inventory.mpPotion = Math.floor(mpPotion);
+    }
+    const watermelonStock = flat.watermelonStock ?? statsObj.watermelonStock;
+    if (typeof watermelonStock === "number" && Number.isFinite(watermelonStock) && watermelonStock >= 0) {
+      this.state.records.watermelonStock = Math.max(0, Math.min(999, Math.floor(watermelonStock)));
+    }
+
+    if (!this.state.profile.allocations) this.state.profile.allocations = { hp: 0, mp: 0, damage: 0 };
+    const mergedAlloc = { ...(statsObj.allocations || {}), ...(flat.allocations || {}) };
+    const allocHp = flat.hp ?? statsObj.hp ?? mergedAlloc.hp;
+    const allocMp = flat.mp ?? statsObj.mp ?? mergedAlloc.mp;
+    const allocDamage = flat.damage ?? statsObj.damage ?? mergedAlloc.damage;
+    if (typeof allocHp === "number" && Number.isFinite(allocHp) && allocHp >= 0) {
+      this.state.profile.allocations.hp = Math.max(0, Math.floor(allocHp));
+    }
+    if (typeof allocMp === "number" && Number.isFinite(allocMp) && allocMp >= 0) {
+      this.state.profile.allocations.mp = Math.max(0, Math.floor(allocMp));
+    }
+    if (typeof allocDamage === "number" && Number.isFinite(allocDamage) && allocDamage >= 0) {
+      this.state.profile.allocations.damage = Math.max(0, Math.floor(allocDamage));
+    }
+
+    if (!this.state.profile.skills) this.state.profile.skills = { momo: 0, dualHand: 0 };
+    const mergedSkills = { ...(statsObj.skills || {}), ...(flat.skills || {}) };
+    if (typeof mergedSkills.momo === "number" && Number.isFinite(mergedSkills.momo) && mergedSkills.momo >= 0) {
+      this.state.profile.skills.momo = Math.max(0, Math.min(10, Math.floor(mergedSkills.momo)));
+    }
+    if (typeof mergedSkills.dualHand === "number" && Number.isFinite(mergedSkills.dualHand) && mergedSkills.dualHand >= 0) {
+      this.state.profile.skills.dualHand = Math.max(0, Math.min(1, Math.floor(mergedSkills.dualHand)));
+    }
+
+    this.emit(Events.STORE_CHANGED, this.state);
+    return { ack: true, state: this.state, profile: this.state.profile };
   }
 
-  async _handleCheatUnlockAll() {
-    this.state.profile.level = 10;
-    this.state.profile.skillPoints = 999;
-    this.state.profile.skills.momo = 10;
-    this.state.profile.skills.dualHand = 1;
-    this.state.records.unlockedSwimsuit = true;
-    this.state.records.clearedStages = [1, 2, 3, 4];
-    this.state.records.bestStage = 4;
+  async _handleCheatUnlockAll(payload = {}) {
+    if (payload?.gallery) {
+      if (!this.state.records) this.state.records = {};
+      this.state.records.unlockedSwimsuit = true;
+      this.state.records.unlockedGalleryAll = true;
+    } else {
+      if (!this.state.records) this.state.records = {};
+      this.state.records.bestStage = 4;
+      this.state.records.clearedStages = [1, 2, 3, 4];
+      if (!this.state.records.stageStats) this.state.records.stageStats = {};
+      for (let s = 1; s <= 4; s++) {
+        if (!this.state.records.stageStats[s]) {
+          this.state.records.stageStats[s] = { totalAttempts: 1, manualWins: 1, manualLosses: 0, autoWins: 0, autoLosses: 0 };
+        } else {
+          this.state.records.stageStats[s].manualWins = Math.max(1, this.state.records.stageStats[s].manualWins || 1);
+          this.state.records.stageStats[s].totalAttempts = Math.max(1, this.state.records.stageStats[s].totalAttempts || 1);
+        }
+      }
+    }
 
-    this.emit(Events.STORE_CHANGED, { profile: this.state.profile, records: this.state.records });
-    return { ack: true, unlocked: true };
+    this.emit(Events.STORE_CHANGED, this.state);
+    return { ack: true, unlocked: true, state: this.state };
   }
 
-  async _handleCheatAddCoins({ amount = 1000 }) {
+  async _handleCheatAddCoins({ amount = 1000 } = {}) {
     this.state.coins += amount;
     await this.storage.appendLedger(this.accountId, {
       source: "cheatAddCoins",
@@ -1052,8 +1124,8 @@ export class GameSession {
       serverTime: Date.now()
     });
 
-    this.emit(Events.STORE_CHANGED, { coins: this.state.coins });
-    return { ack: true, coins: this.state.coins };
+    this.emit(Events.STORE_CHANGED, this.state);
+    return { ack: true, coins: this.state.coins, state: this.state };
   }
 
   // --- Account & Transfer Code Handlers ---

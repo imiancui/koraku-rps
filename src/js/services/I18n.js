@@ -22,6 +22,29 @@ export const LOCALE_STORAGE_KEY = "koraku-rps-locale";
 
 export const CHANGELOG_DATA = [
   {
+    version: "0.0.28",
+    date: "2026-09-04",
+    tag: "Authoritative Cheat Module Overhaul, WebP Asset Migration & Instant View Re-rendering",
+    changes: {
+      "zh-Hant": [
+        "【作弊與測試調試模組重構】後端驗證層相容扁平與巢狀 stats 欄位並強化數值邊界校驗；伺服器一鍵解鎖關卡徹底拔除玩家等級污染，金幣變更記錄精確審計帳本差額；客戶端實作狀態深層合併，保全技能與配點結構；作弊指令提交後即時觸發主畫面與頂部 HUD 數值重繪。",
+        "【高解析度立繪全面 WebP 化】全角色與泳裝立繪全面轉碼為現代 WebP 格式，大幅縮減傳輸體積並提昇加載效能。"
+      ],
+      "zh-Hans": [
+        "【作弊与测试调试模块重构】后端验证层兼容扁平与嵌套 stats 字段并强化数值边界校验；服务器一键解锁关卡彻底拔除玩家等级污染，金币变更记录精确审计账本差额；客户端实现状态深层合并，保全技能与配点结构；作弊指令提交后即时触发主画面与顶部 HUD 数值重绘。",
+        "【高分辨率立绘全面 WebP 化】全角色与泳装立绘全面转码为现代 WebP 格式，大幅缩减传输体积并提升加载效能。"
+      ],
+      "en": [
+        "【Authoritative Cheat Module Overhaul】Backend validator now accepts both flat and nested stats schemas with non-negative bounds; stage unlock no longer pollutes player level, with accurate ledger delta logging; client implements deep state merging to protect nested allocations and skills; UI immediately re-renders HUD and store upon ACK.",
+        "【High-Res WebP Sprite Migration】Converted character and swimsuit sprites to modern WebP format, significantly reducing payload size and improving render performance."
+      ],
+      "ja": [
+        "【デバッグ・チート機能の全面刷新】サーバー検証層がフラット・ネスト形式の両方に対応し数値境界を厳密化。ステージ全開放時のレベル汚染を完全撤廃し、星砂変動の監査台帳差分を正確に記録。クライアント状態のディープマージと即時UI再描画を実装。",
+        "【高解像度立ち絵のWebP化】キャラクターおよび水着立ち絵をWebPフォーマットに完全移行し、通信容量の削減と読み込み速度の向上を実現。"
+      ]
+    }
+  },
+  {
     version: "0.0.27",
     date: "2026-09-04",
     tag: "Online Battle Countdown Client Ticker & Save Modal Mode Switching Normalization",
@@ -1141,6 +1164,15 @@ const DICTIONARY = {
       guideDualDesc: "在第四章解鎖雙手技能後，可同時以左手與右手獨立出拳，分別對決兩位小樂！",
       // Cheat Modal
       cheatModalTitle: "測試調試 / 作弊選單",
+      cheatAuthTitle: "作弊與開發權限驗證",
+      cheatAuthPrompt: "請輸入開發者密鑰或轉移碼以解鎖測試選單：",
+      cheatAuthConfirm: "驗證權限",
+      cheatAuthCancel: "取消",
+      cheatAuthSuccess: "密碼正確，管理員作弊選單已解鎖！",
+      cheatAuthError: "密碼錯誤！無法開啟作弊選單。",
+      cheatDevBadge: "DEV 管理員已驗證",
+      cheatDemote: "登出管理員身分",
+      cheatDemoteSuccess: "已登出管理員身分，恢復為普通玩家權限。",
       cheatSetLevel: "設定等級",
       cheatAddCoins: "增加星砂 (+1000)",
       cheatAddSp: "增加技能點 (+50)",
@@ -1962,6 +1994,15 @@ const DICTIONARY = {
       guideDualTitle: "双手解放奥义",
       guideDualDesc: "在第四章解锁双手技能后，可同时以左手与右手独立出拳，分别对决两位小乐！",
       cheatModalTitle: "测试调试 / 作弊菜单",
+      cheatAuthTitle: "作弊与开发权限验证",
+      cheatAuthPrompt: "请输入开发者密钥或转移码以解锁测试菜单：",
+      cheatAuthConfirm: "验证权限",
+      cheatAuthCancel: "取消",
+      cheatAuthSuccess: "密码正确，管理员作弊菜单已解锁！",
+      cheatAuthError: "密码错误！无法开启作弊菜单。",
+      cheatDevBadge: "DEV 管理员已验证",
+      cheatDemote: "退出管理员身份",
+      cheatDemoteSuccess: "已退出管理员身份，恢复为普通玩家权限。",
       cheatSetLevel: "设定等级",
       cheatAddCoins: "增加星砂 (+1000)",
       cheatAddSp: "增加技能点 (+50)",
@@ -2769,6 +2810,15 @@ const DICTIONARY = {
       guideDualTitle: "Dual Hands Mastery",
       guideDualDesc: "Unlock Dual Hands in Chapter 4 to throw left and right hands independently against Twin Kohakus!",
       cheatModalTitle: "Debug & Cheat Menu",
+      cheatAuthTitle: "Developer Entitlement Auth",
+      cheatAuthPrompt: "Enter developer secret key to unlock cheat menu:",
+      cheatAuthConfirm: "Verify",
+      cheatAuthCancel: "Cancel",
+      cheatAuthSuccess: "Authentication successful. Cheat menu unlocked!",
+      cheatAuthError: "Incorrect password! Failed to unlock cheat menu.",
+      cheatDevBadge: "DEV Admin Verified",
+      cheatDemote: "Revoke Admin Mode",
+      cheatDemoteSuccess: "Admin mode revoked. Restored to regular player.",
       cheatSetLevel: "Set Level",
       cheatAddCoins: "+1000 Star Sand",
       cheatAddSp: "+50 SP Points",
@@ -3576,6 +3626,15 @@ const DICTIONARY = {
       guideDualTitle: "両手解放の極意",
       guideDualDesc: "第4章で両手スキルを解放すると、左手と右手で独立してじゃんけんが可能に！",
       cheatModalTitle: "デバッグ・チート設定",
+      cheatAuthTitle: "開発者権限認証",
+      cheatAuthPrompt: "チートメニューを開放する開発者キーを入力してください：",
+      cheatAuthConfirm: "認証する",
+      cheatAuthCancel: "キャンセル",
+      cheatAuthSuccess: "認証成功。チートメニューを開放しました！",
+      cheatAuthError: "パスワードが違います！チートメニューを開けません。",
+      cheatDevBadge: "DEV 管理者認証済み",
+      cheatDemote: "管理者権限を解除",
+      cheatDemoteSuccess: "管理者権限を解除しました。通常プレイヤーに戻ります。",
       cheatSetLevel: "レベル変更",
       cheatAddCoins: "星砂追加 (+1000)",
       cheatAddSp: "SP追加 (+50)",

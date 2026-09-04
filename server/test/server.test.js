@@ -950,3 +950,89 @@ test("Part C - C3: 伺服器端拒絕非法指令日誌審計記錄", async () =
     console.warn = originalWarn;
   }
 });
+
+test("Phase 3.6: 在線動態提權 (POST /auth/elevate) 與降級 (POST /auth/demote) 驗證", async () => {
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "koraku-test-elevate-"));
+  const server = createKorakuServer({
+    port: 0,
+    dataDir: tmpDir,
+    devAdminKey: "super_secret_dev_key_8989"
+  });
+
+  await server.start();
+  const port = server.actualPort;
+
+  // 1. 取得一般匿名 Token (devEntitlement: false)
+  const authResponse = await fetch(`http://127.0.0.1:${port}/auth/anonymous`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ deviceId: "device_elevate_test" })
+  });
+  assert.equal(authResponse.status, 200);
+  const anonData = await authResponse.json();
+  assert.ok(anonData.token);
+  assert.equal(anonData.devEntitlement, false);
+
+  // 2. 缺少 Token 發起提權 -> 400
+  const missingTokenRes = await fetch(`http://127.0.0.1:${port}/auth/elevate`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ devAdminKey: "super_secret_dev_key_8989" })
+  });
+  assert.equal(missingTokenRes.status, 400);
+
+  // 3. 錯誤之 devAdminKey 發起提權 -> 401
+  const wrongKeyRes = await fetch(`http://127.0.0.1:${port}/auth/elevate`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      token: anonData.token,
+      devAdminKey: "wrong_password_123"
+    })
+  });
+  assert.equal(wrongKeyRes.status, 401);
+  const wrongKeyData = await wrongKeyRes.json();
+  assert.equal(wrongKeyData.code, ErrorCodes.UNAUTHORIZED_CHEAT);
+
+  // 4. 正確之 devAdminKey 發起提權 -> 200
+  const elevateRes = await fetch(`http://127.0.0.1:${port}/auth/elevate`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      token: anonData.token,
+      devAdminKey: "super_secret_dev_key_8989"
+    })
+  });
+  assert.equal(elevateRes.status, 200);
+  const elevateData = await elevateRes.json();
+  assert.equal(elevateData.success, true);
+  assert.equal(elevateData.devEntitlement, true);
+  assert.equal(elevateData.accountId, anonData.accountId);
+  assert.ok(elevateData.token);
+
+  // 驗證新 Token 的解密 payload 包含 devEntitlement: true
+  const verifiedElevated = server.auth.verifyToken(elevateData.token);
+  assert.equal(verifiedElevated.valid, true);
+  assert.equal(verifiedElevated.payload.devEntitlement, true);
+
+  // 5. 使用提權 Token 發起降級 (POST /auth/demote) -> 200
+  const demoteRes = await fetch(`http://127.0.0.1:${port}/auth/demote`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token: elevateData.token })
+  });
+  assert.equal(demoteRes.status, 200);
+  const demoteData = await demoteRes.json();
+  assert.equal(demoteData.success, true);
+  assert.equal(demoteData.devEntitlement, false);
+  assert.equal(demoteData.accountId, anonData.accountId);
+  assert.ok(demoteData.token);
+
+  // 驗證降級後 Token 的解密 payload 包含 devEntitlement: false
+  const verifiedDemoted = server.auth.verifyToken(demoteData.token);
+  assert.equal(verifiedDemoted.valid, true);
+  assert.equal(verifiedDemoted.payload.devEntitlement, false);
+
+  await server.close();
+  await fs.rm(tmpDir, { recursive: true, force: true });
+});

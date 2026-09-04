@@ -361,23 +361,60 @@ export class Validator {
         break;
 
       case Commands.CHEAT_SET_STATS: {
-        if (!payload.stats || typeof payload.stats !== "object" || Array.isArray(payload.stats)) {
-          return { valid: false, code: ErrorCodes.INVALID_SCHEMA, error: "cheat.setStats requires object payload.stats." };
+        if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+          return { valid: false, code: ErrorCodes.INVALID_SCHEMA, error: "cheat.setStats requires object payload." };
         }
-        const allowedStatsFields = new Set(["hp", "mp", "damage", "level", "skillPoints"]);
-        for (const k of Object.keys(payload.stats)) {
-          if (!allowedStatsFields.has(k)) {
-            return { valid: false, code: ErrorCodes.INVALID_SCHEMA, error: `cheat.setStats unexpected stat field: ${k}` };
+        const allowedNumericFields = new Set([
+          "level", "xp", "skillPoints", "coins", "hpPotion", "mpPotion", "watermelonStock", "hp", "mp", "damage"
+        ]);
+        const allowedAllocations = new Set(["hp", "mp", "damage"]);
+        const allowedSkills = new Set(["momo", "dualHand"]);
+
+        const validateFields = (obj, isNestedStats = false) => {
+          for (const [k, v] of Object.entries(obj)) {
+            if (!isNestedStats && k === "stats") {
+              if (!v || typeof v !== "object" || Array.isArray(v)) {
+                return { valid: false, code: ErrorCodes.INVALID_SCHEMA, error: "cheat.setStats stats must be an object." };
+              }
+              const nestedRes = validateFields(v, true);
+              if (!nestedRes.valid) return nestedRes;
+            } else if (k === "allocations") {
+              if (!v || typeof v !== "object" || Array.isArray(v)) {
+                return { valid: false, code: ErrorCodes.INVALID_SCHEMA, error: "cheat.setStats allocations must be an object." };
+              }
+              for (const [ak, av] of Object.entries(v)) {
+                if (!allowedAllocations.has(ak)) {
+                  return { valid: false, code: ErrorCodes.INVALID_SCHEMA, error: `cheat.setStats allocations unexpected field: ${ak}` };
+                }
+                if (typeof av !== "number" || !Number.isFinite(av) || av < 0) {
+                  return { valid: false, code: ErrorCodes.INVALID_SCHEMA, error: `cheat.setStats allocations.${ak} must be non-negative finite number.` };
+                }
+              }
+            } else if (k === "skills") {
+              if (!v || typeof v !== "object" || Array.isArray(v)) {
+                return { valid: false, code: ErrorCodes.INVALID_SCHEMA, error: "cheat.setStats skills must be an object." };
+              }
+              for (const [sk, sv] of Object.entries(v)) {
+                if (!allowedSkills.has(sk)) {
+                  return { valid: false, code: ErrorCodes.INVALID_SCHEMA, error: `cheat.setStats skills unexpected field: ${sk}` };
+                }
+                if (typeof sv !== "number" || !Number.isFinite(sv) || sv < 0) {
+                  return { valid: false, code: ErrorCodes.INVALID_SCHEMA, error: `cheat.setStats skills.${sk} must be non-negative finite number.` };
+                }
+              }
+            } else if (allowedNumericFields.has(k)) {
+              if (typeof v !== "number" || !Number.isFinite(v) || v < 0) {
+                return { valid: false, code: ErrorCodes.INVALID_SCHEMA, error: `cheat.setStats field ${k} must be non-negative finite number.` };
+              }
+            } else {
+              return { valid: false, code: ErrorCodes.INVALID_SCHEMA, error: `cheat.setStats unexpected field: ${k}` };
+            }
           }
-          if (typeof payload.stats[k] !== "number" || !Number.isFinite(payload.stats[k])) {
-            return { valid: false, code: ErrorCodes.INVALID_SCHEMA, error: `cheat.setStats stat ${k} must be finite number.` };
-          }
-        }
-        for (const k of Object.keys(payload)) {
-          if (k !== "stats") {
-            return { valid: false, code: ErrorCodes.INVALID_SCHEMA, error: `cheat.setStats unexpected field: ${k}` };
-          }
-        }
+          return { valid: true };
+        };
+
+        const checkRes = validateFields(payload, false);
+        if (!checkRes.valid) return checkRes;
         break;
       }
 

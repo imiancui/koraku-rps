@@ -131,6 +131,60 @@ export class AuthManager {
       return { valid: false, error: "PAYLOAD_DECODE_FAILED" };
     }
   }
+
+  /**
+   * Elevate an existing valid token to have devEntitlement: true
+   * @param {string} token
+   * @returns {{ success: boolean, token?: string, payload?: object, error?: string }}
+   */
+  elevateToken(token) {
+    const verification = this.verifyToken(token);
+    if (!verification.valid) {
+      return { success: false, error: verification.error };
+    }
+    const { accountId, deviceId } = verification.payload;
+    const newToken = this.issueToken({
+      accountId,
+      deviceId,
+      devEntitlement: true
+    });
+    return {
+      success: true,
+      token: newToken,
+      payload: {
+        accountId,
+        deviceId,
+        devEntitlement: true
+      }
+    };
+  }
+
+  /**
+   * Demote an existing valid token to have devEntitlement: false
+   * @param {string} token
+   * @returns {{ success: boolean, token?: string, payload?: object, error?: string }}
+   */
+  demoteToken(token) {
+    const verification = this.verifyToken(token);
+    if (!verification.valid) {
+      return { success: false, error: verification.error };
+    }
+    const { accountId, deviceId } = verification.payload;
+    const newToken = this.issueToken({
+      accountId,
+      deviceId,
+      devEntitlement: false
+    });
+    return {
+      success: true,
+      token: newToken,
+      payload: {
+        accountId,
+        deviceId,
+        devEntitlement: false
+      }
+    };
+  }
 }
 
 export default AuthManager;

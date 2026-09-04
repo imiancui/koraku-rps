@@ -4,7 +4,7 @@
   "use strict";
 
 // --- src/js/config/gameConfig.js ---
-const APP_VERSION = "0.0.27";
+const APP_VERSION = "0.0.28";
 
 const DOJO_CONFIG = Object.freeze({
   defaultHp: 10000,
@@ -14,11 +14,11 @@ const DOJO_CONFIG = Object.freeze({
 });
 
 const ASSETS = Object.freeze({
-  default: "./koraku/小樂-預設.png",
-  final: "./koraku/小樂-2P色.png",
-  swimsuit: "./koraku/泳裝小樂.png",
-  watermelon: "./koraku/泳裝小樂_西瓜.png",
-  defeat: "./koraku/凝視小樂.png"
+  default: "./koraku/小樂-預設.webp",
+  final: "./koraku/小樂-2P色.webp",
+  swimsuit: "./koraku/泳裝小樂.webp",
+  watermelon: "./koraku/泳裝小樂_西瓜.webp",
+  defeat: "./koraku/凝視小樂.webp"
 });
 
 const HANDS = Object.freeze({
@@ -508,6 +508,29 @@ const DEFAULT_LOCALE = "en";
 const LOCALE_STORAGE_KEY = "koraku-rps-locale";
 
 const CHANGELOG_DATA = [
+  {
+    version: "0.0.28",
+    date: "2026-09-04",
+    tag: "Authoritative Cheat Module Overhaul, WebP Asset Migration & Instant View Re-rendering",
+    changes: {
+      "zh-Hant": [
+        "【作弊與測試調試模組重構】後端驗證層相容扁平與巢狀 stats 欄位並強化數值邊界校驗；伺服器一鍵解鎖關卡徹底拔除玩家等級污染，金幣變更記錄精確審計帳本差額；客戶端實作狀態深層合併，保全技能與配點結構；作弊指令提交後即時觸發主畫面與頂部 HUD 數值重繪。",
+        "【高解析度立繪全面 WebP 化】全角色與泳裝立繪全面轉碼為現代 WebP 格式，大幅縮減傳輸體積並提昇加載效能。"
+      ],
+      "zh-Hans": [
+        "【作弊与测试调试模块重构】后端验证层兼容扁平与嵌套 stats 字段并强化数值边界校验；服务器一键解锁关卡彻底拔除玩家等级污染，金币变更记录精确审计账本差额；客户端实现状态深层合并，保全技能与配点结构；作弊指令提交后即时触发主画面与顶部 HUD 数值重绘。",
+        "【高分辨率立绘全面 WebP 化】全角色与泳装立绘全面转码为现代 WebP 格式，大幅缩减传输体积并提升加载效能。"
+      ],
+      "en": [
+        "【Authoritative Cheat Module Overhaul】Backend validator now accepts both flat and nested stats schemas with non-negative bounds; stage unlock no longer pollutes player level, with accurate ledger delta logging; client implements deep state merging to protect nested allocations and skills; UI immediately re-renders HUD and store upon ACK.",
+        "【High-Res WebP Sprite Migration】Converted character and swimsuit sprites to modern WebP format, significantly reducing payload size and improving render performance."
+      ],
+      "ja": [
+        "【デバッグ・チート機能の全面刷新】サーバー検証層がフラット・ネスト形式の両方に対応し数値境界を厳密化。ステージ全開放時のレベル汚染を完全撤廃し、星砂変動の監査台帳差分を正確に記録。クライアント状態のディープマージと即時UI再描画を実装。",
+        "【高解像度立ち絵のWebP化】キャラクターおよび水着立ち絵をWebPフォーマットに完全移行し、通信容量の削減と読み込み速度の向上を実現。"
+      ]
+    }
+  },
   {
     version: "0.0.27",
     date: "2026-09-04",
@@ -1628,6 +1651,15 @@ const DICTIONARY = {
       guideDualDesc: "在第四章解鎖雙手技能後，可同時以左手與右手獨立出拳，分別對決兩位小樂！",
       // Cheat Modal
       cheatModalTitle: "測試調試 / 作弊選單",
+      cheatAuthTitle: "作弊與開發權限驗證",
+      cheatAuthPrompt: "請輸入開發者密鑰或轉移碼以解鎖測試選單：",
+      cheatAuthConfirm: "驗證權限",
+      cheatAuthCancel: "取消",
+      cheatAuthSuccess: "密碼正確，管理員作弊選單已解鎖！",
+      cheatAuthError: "密碼錯誤！無法開啟作弊選單。",
+      cheatDevBadge: "DEV 管理員已驗證",
+      cheatDemote: "登出管理員身分",
+      cheatDemoteSuccess: "已登出管理員身分，恢復為普通玩家權限。",
       cheatSetLevel: "設定等級",
       cheatAddCoins: "增加星砂 (+1000)",
       cheatAddSp: "增加技能點 (+50)",
@@ -2449,6 +2481,15 @@ const DICTIONARY = {
       guideDualTitle: "双手解放奥义",
       guideDualDesc: "在第四章解锁双手技能后，可同时以左手与右手独立出拳，分别对决两位小乐！",
       cheatModalTitle: "测试调试 / 作弊菜单",
+      cheatAuthTitle: "作弊与开发权限验证",
+      cheatAuthPrompt: "请输入开发者密钥或转移码以解锁测试菜单：",
+      cheatAuthConfirm: "验证权限",
+      cheatAuthCancel: "取消",
+      cheatAuthSuccess: "密码正确，管理员作弊菜单已解锁！",
+      cheatAuthError: "密码错误！无法开启作弊菜单。",
+      cheatDevBadge: "DEV 管理员已验证",
+      cheatDemote: "退出管理员身份",
+      cheatDemoteSuccess: "已退出管理员身份，恢复为普通玩家权限。",
       cheatSetLevel: "设定等级",
       cheatAddCoins: "增加星砂 (+1000)",
       cheatAddSp: "增加技能点 (+50)",
@@ -3256,6 +3297,15 @@ const DICTIONARY = {
       guideDualTitle: "Dual Hands Mastery",
       guideDualDesc: "Unlock Dual Hands in Chapter 4 to throw left and right hands independently against Twin Kohakus!",
       cheatModalTitle: "Debug & Cheat Menu",
+      cheatAuthTitle: "Developer Entitlement Auth",
+      cheatAuthPrompt: "Enter developer secret key to unlock cheat menu:",
+      cheatAuthConfirm: "Verify",
+      cheatAuthCancel: "Cancel",
+      cheatAuthSuccess: "Authentication successful. Cheat menu unlocked!",
+      cheatAuthError: "Incorrect password! Failed to unlock cheat menu.",
+      cheatDevBadge: "DEV Admin Verified",
+      cheatDemote: "Revoke Admin Mode",
+      cheatDemoteSuccess: "Admin mode revoked. Restored to regular player.",
       cheatSetLevel: "Set Level",
       cheatAddCoins: "+1000 Star Sand",
       cheatAddSp: "+50 SP Points",
@@ -4063,6 +4113,15 @@ const DICTIONARY = {
       guideDualTitle: "両手解放の極意",
       guideDualDesc: "第4章で両手スキルを解放すると、左手と右手で独立してじゃんけんが可能に！",
       cheatModalTitle: "デバッグ・チート設定",
+      cheatAuthTitle: "開発者権限認証",
+      cheatAuthPrompt: "チートメニューを開放する開発者キーを入力してください：",
+      cheatAuthConfirm: "認証する",
+      cheatAuthCancel: "キャンセル",
+      cheatAuthSuccess: "認証成功。チートメニューを開放しました！",
+      cheatAuthError: "パスワードが違います！チートメニューを開けません。",
+      cheatDevBadge: "DEV 管理者認証済み",
+      cheatDemote: "管理者権限を解除",
+      cheatDemoteSuccess: "管理者権限を解除しました。通常プレイヤーに戻ります。",
       cheatSetLevel: "レベル変更",
       cheatAddCoins: "星砂追加 (+1000)",
       cheatAddSp: "SP追加 (+50)",
@@ -6680,40 +6739,49 @@ class GameStore {
   }
 
   cheatSetValues(updates = {}) {
-    if (typeof updates.level === "number" && updates.level >= 1) {
-      this.state.profile.level = Math.floor(updates.level);
+    const statsObj = (updates && typeof updates.stats === "object" && updates.stats !== null && !Array.isArray(updates.stats)) ? updates.stats : {};
+    const flat = (updates && typeof updates === "object" && !Array.isArray(updates)) ? updates : {};
+    const merged = { ...statsObj, ...flat };
+    merged.allocations = { ...(statsObj.allocations || {}), ...(flat.allocations || {}) };
+    merged.skills = { ...(statsObj.skills || {}), ...(flat.skills || {}) };
+
+    if (typeof merged.level === "number" && merged.level >= 1) {
+      this.state.profile.level = Math.floor(merged.level);
     }
-    if (typeof updates.xp === "number" && updates.xp >= 0) {
-      this.state.profile.xp = Math.floor(updates.xp);
+    if (typeof merged.xp === "number" && merged.xp >= 0) {
+      this.state.profile.xp = Math.floor(merged.xp);
     }
-    if (typeof updates.skillPoints === "number" && updates.skillPoints >= 0) {
-      this.state.profile.skillPoints = Math.floor(updates.skillPoints);
+    if (typeof merged.skillPoints === "number" && merged.skillPoints >= 0) {
+      this.state.profile.skillPoints = Math.floor(merged.skillPoints);
     }
-    if (typeof updates.coins === "number" && updates.coins >= 0) {
-      this.state.coins = Math.floor(updates.coins);
+    if (typeof merged.coins === "number" && merged.coins >= 0) {
+      this.state.coins = Math.floor(merged.coins);
     }
-    if (typeof updates.hpPotion === "number" && updates.hpPotion >= 0) {
-      this.state.inventory.hpPotion = Math.floor(updates.hpPotion);
+    if (typeof merged.hpPotion === "number" && merged.hpPotion >= 0) {
+      this.state.inventory.hpPotion = Math.floor(merged.hpPotion);
     }
-    if (typeof updates.mpPotion === "number" && updates.mpPotion >= 0) {
-      this.state.inventory.mpPotion = Math.floor(updates.mpPotion);
+    if (typeof merged.mpPotion === "number" && merged.mpPotion >= 0) {
+      this.state.inventory.mpPotion = Math.floor(merged.mpPotion);
     }
-    if (typeof updates.watermelonStock === "number" && updates.watermelonStock >= 0) {
+    if (typeof merged.watermelonStock === "number" && merged.watermelonStock >= 0) {
       if (!this.state.records) this.state.records = {};
-      this.state.records.watermelonStock = Math.max(0, Math.min(999, Math.floor(updates.watermelonStock)));
+      this.state.records.watermelonStock = Math.max(0, Math.min(999, Math.floor(merged.watermelonStock)));
     }
-    if (updates.allocations) {
-      if (typeof updates.allocations.hp === "number") this.state.profile.allocations.hp = Math.max(0, updates.allocations.hp);
-      if (typeof updates.allocations.mp === "number") this.state.profile.allocations.mp = Math.max(0, updates.allocations.mp);
-      if (typeof updates.allocations.damage === "number") this.state.profile.allocations.damage = Math.max(0, updates.allocations.damage);
+    if (merged.allocations) {
+      const allocHp = merged.hp ?? merged.allocations.hp;
+      const allocMp = merged.mp ?? merged.allocations.mp;
+      const allocDamage = merged.damage ?? merged.allocations.damage;
+      if (typeof allocHp === "number" && allocHp >= 0) this.state.profile.allocations.hp = Math.max(0, allocHp);
+      if (typeof allocMp === "number" && allocMp >= 0) this.state.profile.allocations.mp = Math.max(0, allocMp);
+      if (typeof allocDamage === "number" && allocDamage >= 0) this.state.profile.allocations.damage = Math.max(0, allocDamage);
     }
-    if (updates.skills) {
-      if (typeof updates.skills.momo === "number") this.state.profile.skills.momo = Math.max(0, Math.min(10, updates.skills.momo));
-      if (typeof updates.skills.dualHand === "number") this.state.profile.skills.dualHand = Math.max(0, Math.min(1, updates.skills.dualHand));
+    if (merged.skills) {
+      if (typeof merged.skills.momo === "number") this.state.profile.skills.momo = Math.max(0, Math.min(10, merged.skills.momo));
+      if (typeof merged.skills.dualHand === "number") this.state.profile.skills.dualHand = Math.max(0, Math.min(1, merged.skills.dualHand));
     }
     this._recordLedger({
       action: "cheat_set_values",
-      updates,
+      updates: merged,
       source: "dev"
     });
     this.commit("cheat-update");
@@ -10355,7 +10423,7 @@ function createKernel(options = {}) {
         break;
 
       case Commands.CHEAT_UNLOCK_ALL:
-        result = store.cheatUnlockAll();
+        result = payload?.gallery ? store.cheatUnlockGallery() : store.cheatUnlockAll();
         break;
 
       case Commands.CHEAT_ADD_COINS: {
@@ -10989,6 +11057,145 @@ class RemoteGameClient extends GameClient {
   }
 
   /**
+   * Resolve HTTP base URL corresponding to server endpoint
+   * @private
+   * @returns {string}
+   */
+  _resolveHttpBaseUrl() {
+    if (typeof window !== "undefined" && window.__KORAKU_CONFIG__?.httpUrl) {
+      return window.__KORAKU_CONFIG__.httpUrl;
+    }
+    const wsUrl = this.options.url;
+    if (!wsUrl) {
+      if (typeof location !== "undefined" && location.origin && location.origin !== "null") {
+        return location.origin;
+      }
+      return "http://127.0.0.1:8080";
+    }
+    try {
+      const parsed = new URL(wsUrl);
+      if (parsed.protocol === "ws:") {
+        parsed.protocol = "http:";
+      } else if (parsed.protocol === "wss:") {
+        parsed.protocol = "https:";
+      }
+      return `${parsed.protocol}//${parsed.host}`;
+    } catch {
+      return wsUrl.replace(/^ws:\/\//i, "http://").replace(/^wss:\/\//i, "https://");
+    }
+  }
+
+  /**
+   * Request server elevation to Dev Entitlement using admin key
+   * @param {string} pass - Admin / Dev secret key
+   * @returns {Promise<boolean>}
+   */
+  async verifyDevEntitlement(pass) {
+    const httpBase = this._resolveHttpBaseUrl();
+    const token = this._token;
+    if (!token) {
+      console.warn("[RemoteGameClient] Cannot elevate without a valid session token");
+      return false;
+    }
+
+    try {
+      const fetchFn = typeof fetch !== "undefined" ? fetch : (globalThis.fetch || null);
+      if (!fetchFn) {
+        console.warn("[RemoteGameClient] Fetch API not available for dev entitlement elevation");
+        return false;
+      }
+
+      const res = await fetchFn(`${httpBase}/auth/elevate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          token,
+          devAdminKey: pass
+        })
+      });
+
+      if (!res.ok) {
+        return false;
+      }
+
+      const data = await res.json();
+      if (data && data.success && data.token) {
+        this._token = data.token;
+        this._devEntitlement = true;
+        if (this._storage) {
+          try {
+            this._storage.setItem(ONLINE_TOKEN_KEY, data.token);
+          } catch (_) {}
+        }
+        this._emit(Events.CONNECTION_STATE, {
+          state: this._connectionState,
+          token: this._token,
+          devEntitlement: true
+        });
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error("[RemoteGameClient] Error during dev entitlement verification:", err);
+      return false;
+    }
+  }
+
+  /**
+   * Revoke dev entitlement and demote back to regular anonymous account
+   * @returns {Promise<boolean>}
+   */
+  async revokeDevEntitlement() {
+    const httpBase = this._resolveHttpBaseUrl();
+    const token = this._token;
+    if (!token) {
+      this._devEntitlement = false;
+      return true;
+    }
+
+    try {
+      const fetchFn = typeof fetch !== "undefined" ? fetch : (globalThis.fetch || null);
+      if (fetchFn) {
+        const res = await fetchFn(`${httpBase}/auth/demote`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ token })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.token) {
+            this._token = data.token;
+          }
+        }
+      }
+    } catch (err) {
+      console.warn("[RemoteGameClient] Remote demote failed, falling back to local revocation:", err);
+    }
+
+    this._devEntitlement = false;
+    if (this._storage) {
+      try {
+        if (this._token) {
+          this._storage.setItem(ONLINE_TOKEN_KEY, this._token);
+        } else {
+          this._storage.removeItem(ONLINE_TOKEN_KEY);
+        }
+      } catch (_) {}
+    }
+
+    this._emit(Events.CONNECTION_STATE, {
+      state: this._connectionState,
+      token: this._token,
+      devEntitlement: false
+    });
+    return true;
+  }
+
+  /**
    * Get current auth token
    * @returns {string|null}
    */
@@ -11056,6 +11263,30 @@ class RemoteGameClient extends GameClient {
   }
 
   /**
+   * Resolve WebSocket URL with auth token attached as query param if present
+   * @private
+   * @returns {string|null}
+   */
+  _resolveConnectionUrl() {
+    const rawUrl = this.options.url;
+    if (!rawUrl) return null;
+    if (!this._token) return rawUrl;
+    try {
+      const parsed = new URL(rawUrl);
+      if (!parsed.searchParams.has("token")) {
+        parsed.searchParams.set("token", this._token);
+      }
+      return parsed.toString();
+    } catch {
+      const separator = rawUrl.includes("?") ? "&" : "?";
+      if (!rawUrl.includes("token=")) {
+        return `${rawUrl}${separator}token=${encodeURIComponent(this._token)}`;
+      }
+      return rawUrl;
+    }
+  }
+
+  /**
    * Establish WebSocket connection
    * @private
    */
@@ -11083,7 +11314,8 @@ class RemoteGameClient extends GameClient {
     this._setConnectionState(targetState, { attempt: this._reconnectAttempts });
 
     try {
-      this._ws = new WebSocketClass(this.options.url);
+      const connectUrl = this._resolveConnectionUrl();
+      this._ws = new WebSocketClass(connectUrl);
 
       this._ws.onopen = () => this._onOpen();
       this._ws.onmessage = (event) => this._onMessage(event);
@@ -11352,13 +11584,12 @@ class RemoteGameClient extends GameClient {
 
     const payload = msg.payload !== undefined ? msg.payload : msg;
 
-    // Update state cache if state is embedded in ACK or root message
-    const stateObj = msg.state || (payload && payload.state);
-    if (stateObj && typeof stateObj === "object") {
-      this._state = { ...this._state, ...stateObj };
-      try {
-        if (this._storage) this._storage.setItem(ONLINE_STATE_CACHE_KEY, JSON.stringify(this._state));
-      } catch (_) {}
+    // Update state cache if state is embedded in successful ACK or root message
+    if (msg.ack !== false && msg.ok !== false && payload?.ack !== false && payload?.ok !== false) {
+      const stateObj = msg.state || (payload && payload.state) || (payload && typeof payload === "object" ? payload : null);
+      if (stateObj && typeof stateObj === "object") {
+        this._mergeState(stateObj);
+      }
     }
     if (payload?.token) {
       this._token = payload.token;
@@ -11412,6 +11643,55 @@ class RemoteGameClient extends GameClient {
   }
 
   /**
+   * Safely merge incoming state delta into internal cache
+   * @private
+   * @param {object} incoming
+   */
+  _mergeState(incoming) {
+    if (!incoming || typeof incoming !== "object") return;
+
+    const source = (incoming.state && typeof incoming.state === "object" && !Array.isArray(incoming.state))
+      ? incoming.state
+      : incoming;
+
+    const ENVELOPE_METADATA_KEYS = new Set([
+      "cmdId", "command", "ack", "ok", "code", "error", "message",
+      "serverTime", "clientTime", "token", "type", "event", "status"
+    ]);
+
+    const deepMerge = (target, src) => {
+      if (!src || typeof src !== "object" || Array.isArray(src)) {
+        return src;
+      }
+      const result = (target && typeof target === "object" && !Array.isArray(target))
+        ? { ...target }
+        : {};
+
+      for (const [key, val] of Object.entries(src)) {
+        if (ENVELOPE_METADATA_KEYS.has(key)) {
+          continue;
+        }
+        if (val === null || val === undefined) {
+          result[key] = val;
+        } else if (Array.isArray(val)) {
+          result[key] = [...val];
+        } else if (typeof val === "object") {
+          result[key] = deepMerge(result[key], val);
+        } else {
+          result[key] = val;
+        }
+      }
+      return result;
+    };
+
+    this._state = deepMerge(this._state || {}, source);
+
+    try {
+      if (this._storage) this._storage.setItem(ONLINE_STATE_CACHE_KEY, JSON.stringify(this._state));
+    } catch (_) {}
+  }
+
+  /**
    * Handle read model server push events
    * @private
    * @param {object} msg
@@ -11425,10 +11705,7 @@ class RemoteGameClient extends GameClient {
     // Cache state changes
     if (eventName === Events.STORE_CHANGED || eventName === "store:changed") {
       if (payload && typeof payload === "object") {
-        this._state = { ...this._state, ...payload };
-        try {
-          if (this._storage) this._storage.setItem(ONLINE_STATE_CACHE_KEY, JSON.stringify(this._state));
-        } catch (_) {}
+        this._mergeState(payload);
       }
     } else if (eventName === Events.BATTLE_STATE || eventName === "battle:state") {
       if (payload) {
@@ -12779,6 +13056,8 @@ class AppView {
     this.cheatAuthModal = $("#cheat-auth-modal");
     this.cheatAuthPassword = $("#cheat-auth-password");
     this.cheatAuthForm = $("#cheat-auth-form");
+    this.cheatDevBadge = $("#cheat-dev-badge");
+    this.cheatDemoteBtn = $("#btn-cheat-demote");
     this.changelogModal = $("#changelog-modal");
     this.equipTooltip = $("#equip-tooltip");
     this.activeShopFilter = "all";
@@ -13198,6 +13477,13 @@ class AppView {
       });
     }
 
+    const btnCheatDemote = $("#btn-cheat-demote");
+    if (btnCheatDemote) {
+      btnCheatDemote.addEventListener("click", () => {
+        this.handleCheatDemote();
+      });
+    }
+
     document.addEventListener("mousemove", (event) => {
       const tooltipTarget = event.target.closest("[data-equip-tooltip-id]");
       if (tooltipTarget) {
@@ -13346,7 +13632,7 @@ class AppView {
 
   async handleClick(event) {
     const pressedButton = event.target.closest("button, [role='button'], [data-nav], [data-allocate], [data-allocate-skill], [data-buy], [data-buy-equip], [data-slot], [data-equip-bag-item], .pill-btn, .tab-pill, .button-primary, .button-secondary, .button-ghost, .menu-command");
-    if (pressedButton) {
+    if (pressedButton && !pressedButton.classList?.contains?.("brand-button")) {
       pressedButton.classList.remove("is-btn-pressed");
       void pressedButton.offsetWidth;
       pressedButton.classList.add("is-btn-pressed");
@@ -13635,14 +13921,24 @@ class AppView {
 
     if (event.target.closest("#cheat-unlock-stages-btn")) {
       const res = await this.sendCommand(Commands.CHEAT_UNLOCK_ALL, { stages: true });
-      this.showToast(res?.message || "已解鎖全部關卡！", res?.ok !== false ? "success" : "danger");
+      if (res?.ok === false || res?.ack === false) {
+        this.showToast(res?.message || res?.error || "解鎖關卡失敗", "danger");
+        return;
+      }
+      this.showToast(res?.message || "已解鎖全部關卡！", "success");
+      this.renderStore();
       this.populateCheatModal();
       return;
     }
 
     if (event.target.closest("#cheat-unlock-gallery-btn")) {
       const res = await this.sendCommand(Commands.CHEAT_UNLOCK_ALL, { gallery: true });
-      this.showToast(res?.message || "已解鎖全圖鑑！", res?.ok !== false ? "success" : "danger");
+      if (res?.ok === false || res?.ack === false) {
+        this.showToast(res?.message || res?.error || "解鎖圖鑑失敗", "danger");
+        return;
+      }
+      this.showToast(res?.message || "已解鎖全圖鑑！", "success");
+      this.renderStore();
       this.populateCheatModal();
       return;
     }
@@ -13657,7 +13953,12 @@ class AppView {
         mpPotion: 99,
         skills: { momo: 10 }
       });
-      this.showToast(res?.message || "已一鍵設置滿級、99999 星砂與 100 SP！", res?.ok !== false ? "success" : "danger");
+      if (res?.ok === false || res?.ack === false) {
+        this.showToast(res?.message || res?.error || "設置數值失敗", "danger");
+        return;
+      }
+      this.showToast(res?.message || "已一鍵設置滿級、99999 星砂與 100 SP！", "success");
+      this.renderStore();
       this.populateCheatModal();
       return;
     }
@@ -15356,10 +15657,11 @@ class AppView {
       this.closeCheatAuthModal();
       if (this.cheatModal) {
         this.populateCheatModal();
+        this.updateCheatDevUi();
         this.cheatModal.hidden = false;
         this.cheatModal.setAttribute("aria-hidden", "false");
       }
-      this.showToast(I18n.t("ui.cheatAuthSuccess") !== "ui.cheatAuthSuccess" ? I18n.t("ui.cheatAuthSuccess") : "⚙️ 密碼正確，作弊選單已解鎖！", "success");
+      this.showToast(I18n.t("ui.cheatAuthSuccess") !== "ui.cheatAuthSuccess" ? I18n.t("ui.cheatAuthSuccess") : "密碼正確，管理員作弊選單已解鎖！", "success");
     } else {
       this.showToast(I18n.t("ui.cheatAuthError") !== "ui.cheatAuthError" ? I18n.t("ui.cheatAuthError") : "密碼錯誤！無法開啟作弊選單。", "danger");
       if (this.cheatAuthPassword) {
@@ -15369,6 +15671,40 @@ class AppView {
     }
   }
 
+  updateCheatDevUi() {
+    const isOnline = this.connectionState === ConnectionStates.ONLINE || Boolean(this.client && this.connectionState !== ConnectionStates.OFFLINE);
+    const hasEntitlement = this.client?.hasDevEntitlement ? this.client.hasDevEntitlement() : false;
+
+    if (this.cheatDevBadge) {
+      if (isOnline && hasEntitlement) {
+        this.cheatDevBadge.hidden = false;
+        this.cheatDevBadge.removeAttribute("aria-hidden");
+      } else {
+        this.cheatDevBadge.hidden = true;
+        this.cheatDevBadge.setAttribute("aria-hidden", "true");
+      }
+    }
+
+    if (this.cheatDemoteBtn) {
+      if (isOnline && hasEntitlement) {
+        this.cheatDemoteBtn.hidden = false;
+        this.cheatDemoteBtn.removeAttribute("aria-hidden");
+      } else {
+        this.cheatDemoteBtn.hidden = true;
+        this.cheatDemoteBtn.setAttribute("aria-hidden", "true");
+      }
+    }
+  }
+
+  async handleCheatDemote() {
+    if (this.client && typeof this.client.revokeDevEntitlement === "function") {
+      await this.client.revokeDevEntitlement();
+    }
+    this.closeCheatModal();
+    this.updateCheatDevUi();
+    this.showToast(I18n.t("ui.cheatDemoteSuccess") !== "ui.cheatDemoteSuccess" ? I18n.t("ui.cheatDemoteSuccess") : "已登出管理員身分，恢復為普通玩家權限。", "info");
+  }
+
   openCheatModal() {
     const hasEntitlement = this.client?.hasDevEntitlement ? this.client.hasDevEntitlement() : (this.connectionState === ConnectionStates.OFFLINE || !this.client);
     if (!hasEntitlement) {
@@ -15376,6 +15712,7 @@ class AppView {
       return;
     }
     this.populateCheatModal();
+    this.updateCheatDevUi();
     if (this.cheatModal) {
       this.cheatModal.hidden = false;
       this.cheatModal.setAttribute("aria-hidden", "false");
@@ -15423,9 +15760,16 @@ class AppView {
         dualHand: Number($("#cheat-skill-dualHand")?.value) || 0
       }
     };
-    await this.sendCommand(Commands.CHEAT_SET_STATS, updates);
+    const res = await this.sendCommand(Commands.CHEAT_SET_STATS, updates);
+    if (res?.ok === false || res?.ack === false) {
+      this.showToast(res?.message || res?.error || "作弊數值套用失敗！", "danger");
+      return;
+    }
     this.showToast("作弊數值已成功套用！", "success");
     this.closeCheatModal();
+    const snapshot = this.getStoreSnapshot();
+    this.renderStore(snapshot);
+    this.renderGrowth(snapshot);
   }
 
   openSaveRecordModal() {

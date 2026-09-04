@@ -355,6 +355,145 @@ export class RemoteGameClient extends GameClient {
   }
 
   /**
+   * Resolve HTTP base URL corresponding to server endpoint
+   * @private
+   * @returns {string}
+   */
+  _resolveHttpBaseUrl() {
+    if (typeof window !== "undefined" && window.__KORAKU_CONFIG__?.httpUrl) {
+      return window.__KORAKU_CONFIG__.httpUrl;
+    }
+    const wsUrl = this.options.url;
+    if (!wsUrl) {
+      if (typeof location !== "undefined" && location.origin && location.origin !== "null") {
+        return location.origin;
+      }
+      return "http://127.0.0.1:8080";
+    }
+    try {
+      const parsed = new URL(wsUrl);
+      if (parsed.protocol === "ws:") {
+        parsed.protocol = "http:";
+      } else if (parsed.protocol === "wss:") {
+        parsed.protocol = "https:";
+      }
+      return `${parsed.protocol}//${parsed.host}`;
+    } catch {
+      return wsUrl.replace(/^ws:\/\//i, "http://").replace(/^wss:\/\//i, "https://");
+    }
+  }
+
+  /**
+   * Request server elevation to Dev Entitlement using admin key
+   * @param {string} pass - Admin / Dev secret key
+   * @returns {Promise<boolean>}
+   */
+  async verifyDevEntitlement(pass) {
+    const httpBase = this._resolveHttpBaseUrl();
+    const token = this._token;
+    if (!token) {
+      console.warn("[RemoteGameClient] Cannot elevate without a valid session token");
+      return false;
+    }
+
+    try {
+      const fetchFn = typeof fetch !== "undefined" ? fetch : (globalThis.fetch || null);
+      if (!fetchFn) {
+        console.warn("[RemoteGameClient] Fetch API not available for dev entitlement elevation");
+        return false;
+      }
+
+      const res = await fetchFn(`${httpBase}/auth/elevate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          token,
+          devAdminKey: pass
+        })
+      });
+
+      if (!res.ok) {
+        return false;
+      }
+
+      const data = await res.json();
+      if (data && data.success && data.token) {
+        this._token = data.token;
+        this._devEntitlement = true;
+        if (this._storage) {
+          try {
+            this._storage.setItem(ONLINE_TOKEN_KEY, data.token);
+          } catch (_) {}
+        }
+        this._emit(Events.CONNECTION_STATE, {
+          state: this._connectionState,
+          token: this._token,
+          devEntitlement: true
+        });
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error("[RemoteGameClient] Error during dev entitlement verification:", err);
+      return false;
+    }
+  }
+
+  /**
+   * Revoke dev entitlement and demote back to regular anonymous account
+   * @returns {Promise<boolean>}
+   */
+  async revokeDevEntitlement() {
+    const httpBase = this._resolveHttpBaseUrl();
+    const token = this._token;
+    if (!token) {
+      this._devEntitlement = false;
+      return true;
+    }
+
+    try {
+      const fetchFn = typeof fetch !== "undefined" ? fetch : (globalThis.fetch || null);
+      if (fetchFn) {
+        const res = await fetchFn(`${httpBase}/auth/demote`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ token })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.token) {
+            this._token = data.token;
+          }
+        }
+      }
+    } catch (err) {
+      console.warn("[RemoteGameClient] Remote demote failed, falling back to local revocation:", err);
+    }
+
+    this._devEntitlement = false;
+    if (this._storage) {
+      try {
+        if (this._token) {
+          this._storage.setItem(ONLINE_TOKEN_KEY, this._token);
+        } else {
+          this._storage.removeItem(ONLINE_TOKEN_KEY);
+        }
+      } catch (_) {}
+    }
+
+    this._emit(Events.CONNECTION_STATE, {
+      state: this._connectionState,
+      token: this._token,
+      devEntitlement: false
+    });
+    return true;
+  }
+
+  /**
    * Get current auth token
    * @returns {string|null}
    */
@@ -422,6 +561,30 @@ export class RemoteGameClient extends GameClient {
   }
 
   /**
+   * Resolve WebSocket URL with auth token attached as query param if present
+   * @private
+   * @returns {string|null}
+   */
+  _resolveConnectionUrl() {
+    const rawUrl = this.options.url;
+    if (!rawUrl) return null;
+    if (!this._token) return rawUrl;
+    try {
+      const parsed = new URL(rawUrl);
+      if (!parsed.searchParams.has("token")) {
+        parsed.searchParams.set("token", this._token);
+      }
+      return parsed.toString();
+    } catch {
+      const separator = rawUrl.includes("?") ? "&" : "?";
+      if (!rawUrl.includes("token=")) {
+        return `${rawUrl}${separator}token=${encodeURIComponent(this._token)}`;
+      }
+      return rawUrl;
+    }
+  }
+
+  /**
    * Establish WebSocket connection
    * @private
    */
@@ -449,7 +612,8 @@ export class RemoteGameClient extends GameClient {
     this._setConnectionState(targetState, { attempt: this._reconnectAttempts });
 
     try {
-      this._ws = new WebSocketClass(this.options.url);
+      const connectUrl = this._resolveConnectionUrl();
+      this._ws = new WebSocketClass(connectUrl);
 
       this._ws.onopen = () => this._onOpen();
       this._ws.onmessage = (event) => this._onMessage(event);
@@ -718,13 +882,12 @@ export class RemoteGameClient extends GameClient {
 
     const payload = msg.payload !== undefined ? msg.payload : msg;
 
-    // Update state cache if state is embedded in ACK or root message
-    const stateObj = msg.state || (payload && payload.state);
-    if (stateObj && typeof stateObj === "object") {
-      this._state = { ...this._state, ...stateObj };
-      try {
-        if (this._storage) this._storage.setItem(ONLINE_STATE_CACHE_KEY, JSON.stringify(this._state));
-      } catch (_) {}
+    // Update state cache if state is embedded in successful ACK or root message
+    if (msg.ack !== false && msg.ok !== false && payload?.ack !== false && payload?.ok !== false) {
+      const stateObj = msg.state || (payload && payload.state) || (payload && typeof payload === "object" ? payload : null);
+      if (stateObj && typeof stateObj === "object") {
+        this._mergeState(stateObj);
+      }
     }
     if (payload?.token) {
       this._token = payload.token;
@@ -778,6 +941,55 @@ export class RemoteGameClient extends GameClient {
   }
 
   /**
+   * Safely merge incoming state delta into internal cache
+   * @private
+   * @param {object} incoming
+   */
+  _mergeState(incoming) {
+    if (!incoming || typeof incoming !== "object") return;
+
+    const source = (incoming.state && typeof incoming.state === "object" && !Array.isArray(incoming.state))
+      ? incoming.state
+      : incoming;
+
+    const ENVELOPE_METADATA_KEYS = new Set([
+      "cmdId", "command", "ack", "ok", "code", "error", "message",
+      "serverTime", "clientTime", "token", "type", "event", "status"
+    ]);
+
+    const deepMerge = (target, src) => {
+      if (!src || typeof src !== "object" || Array.isArray(src)) {
+        return src;
+      }
+      const result = (target && typeof target === "object" && !Array.isArray(target))
+        ? { ...target }
+        : {};
+
+      for (const [key, val] of Object.entries(src)) {
+        if (ENVELOPE_METADATA_KEYS.has(key)) {
+          continue;
+        }
+        if (val === null || val === undefined) {
+          result[key] = val;
+        } else if (Array.isArray(val)) {
+          result[key] = [...val];
+        } else if (typeof val === "object") {
+          result[key] = deepMerge(result[key], val);
+        } else {
+          result[key] = val;
+        }
+      }
+      return result;
+    };
+
+    this._state = deepMerge(this._state || {}, source);
+
+    try {
+      if (this._storage) this._storage.setItem(ONLINE_STATE_CACHE_KEY, JSON.stringify(this._state));
+    } catch (_) {}
+  }
+
+  /**
    * Handle read model server push events
    * @private
    * @param {object} msg
@@ -791,10 +1003,7 @@ export class RemoteGameClient extends GameClient {
     // Cache state changes
     if (eventName === Events.STORE_CHANGED || eventName === "store:changed") {
       if (payload && typeof payload === "object") {
-        this._state = { ...this._state, ...payload };
-        try {
-          if (this._storage) this._storage.setItem(ONLINE_STATE_CACHE_KEY, JSON.stringify(this._state));
-        } catch (_) {}
+        this._mergeState(payload);
       }
     } else if (eventName === Events.BATTLE_STATE || eventName === "battle:state") {
       if (payload) {

@@ -1,5 +1,6 @@
 // server/server.js
 import http from "node:http";
+import crypto from "node:crypto";
 import {
   SERVER_CONFIG,
   Events,
@@ -158,6 +159,107 @@ export class KorakuServer {
       return;
     }
 
+    if (req.method === "POST" && pathname === "/auth/elevate") {
+      const clientIp = this._resolveClientIp(req);
+      const ipCheck = this.rateLimiter.check(`ip_${clientIp}`);
+      if (!ipCheck.allowed) {
+        res.writeHead(429, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Rate limit exceeded" }));
+        return;
+      }
+
+      let body = "";
+      req.on("data", (chunk) => (body += chunk));
+      req.on("end", () => {
+        try {
+          const payload = body ? JSON.parse(body) : {};
+          const { devAdminKey, token } = payload;
+
+          if (!token) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Token is required" }));
+            return;
+          }
+
+          if (!this.config.devAdminKey) {
+            res.writeHead(403, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Dev entitlement elevation is not enabled" }));
+            return;
+          }
+
+          const provBuf = Buffer.from(String(devAdminKey || ""), "utf8");
+          const expBuf = Buffer.from(String(this.config.devAdminKey), "utf8");
+          const isMatch = provBuf.length === expBuf.length && crypto.timingSafeEqual(provBuf, expBuf);
+
+          if (!isMatch) {
+            console.warn(`[SECURITY AUDIT] Dev elevation failed from IP: ${clientIp}`);
+            res.writeHead(401, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Invalid devAdminKey", code: ErrorCodes.UNAUTHORIZED_CHEAT }));
+            return;
+          }
+
+          const elevation = this.auth.elevateToken(token);
+          if (!elevation.success) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: elevation.error }));
+            return;
+          }
+
+          this.connectionManager.setDevEntitlement(elevation.payload.accountId, true);
+          console.log(`[SECURITY AUDIT] Dev elevation successful for account: ${elevation.payload.accountId}, IP: ${clientIp}`);
+
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({
+            success: true,
+            token: elevation.token,
+            devEntitlement: true,
+            accountId: elevation.payload.accountId
+          }));
+        } catch {
+          res.writeHead(400, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ error: "Invalid JSON body" }));
+        }
+      });
+      return;
+    }
+
+    if (req.method === "POST" && pathname === "/auth/demote") {
+      let body = "";
+      req.on("data", (chunk) => (body += chunk));
+      req.on("end", () => {
+        try {
+          const payload = body ? JSON.parse(body) : {};
+          const { token } = payload;
+
+          if (!token) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Token is required" }));
+            return;
+          }
+
+          const demotion = this.auth.demoteToken(token);
+          if (!demotion.success) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: demotion.error }));
+            return;
+          }
+
+          this.connectionManager.setDevEntitlement(demotion.payload.accountId, false);
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({
+            success: true,
+            token: demotion.token,
+            devEntitlement: false,
+            accountId: demotion.payload.accountId
+          }));
+        } catch {
+          res.writeHead(400, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ error: "Invalid JSON body" }));
+        }
+      });
+      return;
+    }
+
     res.writeHead(404, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ error: "Not Found" }));
   }
@@ -216,7 +318,7 @@ export class KorakuServer {
     }
 
     // Register with ConnectionManager (automatically kicks any older duplicate connection)
-    const session = this.connectionManager.registerConnection(accountId, socket, undefined, deviceId);
+    const session = this.connectionManager.registerConnection(accountId, socket, undefined, deviceId, devEntitlement);
     await session.load();
 
     // Send connection state handshake ACK
@@ -307,11 +409,14 @@ export class KorakuServer {
 
     const envelope = validation.envelope;
 
+    const conn = this.connectionManager.getConnection(accountId);
+    const effectiveDevEntitlement = conn ? Boolean(conn.devEntitlement) : Boolean(devEntitlement);
+
     // 3. Dev Entitlement verification for cheat commands
     const entitlementCheck = this.entitlements.checkEntitlement({
       command: envelope.command,
       accountId,
-      devEntitlement,
+      devEntitlement: effectiveDevEntitlement,
       ip: clientIp
     });
 

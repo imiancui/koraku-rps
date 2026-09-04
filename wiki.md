@@ -569,6 +569,19 @@ $$\text{Theoretical DPS} = \frac{(\text{Base DMG} \times \text{Greatsword Mult} 
 - **存檔紀錄線上模式切換修復**：修復首頁「存檔紀錄」彈窗內「切換回線上模式」按鈕，主動清理殘留 URL 參數並注入模式標記，確保本機與正式環境皆能順暢重啟切換回線上伺服器。
 - **全量測試與構建**：`npm test` 250/250 全部通過，同步編譯最新版 `src/js/bundle.js`。
 
+---
+
+## 27. v0.0.28 版本更新：作弊調試模組重構、立繪 WebP 遷移與視圖即時重繪 (v0.0.28)
+
+### 27.1 核心修復與權威調試模組
+- **後端驗證層相容性強化**：`Validator.js` 在 `CHEAT_SET_STATS` 中相容「扁平欄位」與「巢狀 `stats` 物件」，放行並校驗 `level`, `xp`, `skillPoints`, `coins`, `hpPotion`, `mpPotion`, `watermelonStock`, `allocations`, `skills` 等所有欄位，嚴格限制非負有限數值。
+- **後端會話解耦防污染**：`GameSession._handleCheatUnlockAll` 徹底拔除覆寫玩家等級的硬編碼，解鎖關卡僅開放關卡進度與戰績統計，等級與技能點維持不變；星砂變更精確記錄審計帳本差額；支援全圖鑑與泳裝解鎖。
+- **客戶端快取深層合併**：`RemoteGameClient._mergeState` 實作遞迴深層合併，避免部分更新覆寫既有配點與技能結構，並在指令失敗時阻絕快取污染。
+- **前端視圖即時響應**：`AppView.handleCheatSubmit` 於指令 ACK 成功後立即調用 `renderStore` 與 `renderGrowth`，強制主畫面與頂部 HUD（等級、星砂、經驗條）立即重繪；快速操作按鈕點擊後即時更新對話框輸入值。
+- **現代立繪 WebP 化**：立繪資源全面轉換為 WebP 格式，大幅縮減網絡載荷並提升加載速度。
+- **測試與建置驗收**：`npm test` 253/253 全綠通過，反作弊全鏈路真實 WebSocket E2E 測試通過。
+
+
 
 
 

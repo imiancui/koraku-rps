@@ -34,7 +34,7 @@ export class ConnectionManager {
    * @param {string} [connectionId]
    * @returns {GameSession}
    */
-  registerConnection(accountId, socket, connectionId = `conn_${Date.now()}`, deviceId = null) {
+  registerConnection(accountId, socket, connectionId = `conn_${Date.now()}`, deviceId = null, devEntitlement = false) {
     if (!accountId || !socket) {
       throw new Error("accountId and socket are required.");
     }
@@ -64,8 +64,10 @@ export class ConnectionManager {
       socket,
       connectionId,
       deviceId,
+      devEntitlement: Boolean(devEntitlement),
       connectedAt: Date.now()
     });
+    this.socketToAccount.delete(existing?.socket);
     this.socketToAccount.set(socket, accountId);
 
     // Get or create GameSession
@@ -92,6 +94,31 @@ export class ConnectionManager {
 
     session.touch();
     return session;
+  }
+
+  /**
+   * Get connection info for an account
+   * @param {string} accountId
+   * @returns {object|null}
+   */
+  getConnection(accountId) {
+    return this.connections.get(accountId) || null;
+  }
+
+  /**
+   * Dynamically set devEntitlement on all active connections and sessions for an account
+   * @param {string} accountId
+   * @param {boolean} devEntitlement
+   */
+  setDevEntitlement(accountId, devEntitlement) {
+    const conn = this.connections.get(accountId);
+    if (conn) {
+      conn.devEntitlement = Boolean(devEntitlement);
+    }
+    const session = this.sessions.get(accountId);
+    if (session) {
+      session.devEntitlement = Boolean(devEntitlement);
+    }
   }
 
   /**

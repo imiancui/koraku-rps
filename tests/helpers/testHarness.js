@@ -372,7 +372,7 @@ export class AuthoritativeKernelServer {
           result = { ok: false, error: "Unauthorized cheat attempt", code: ErrorCodes.UNAUTHORIZED_CHEAT };
           break;
         }
-        result = this.store.cheatUnlockAll();
+        result = payload?.gallery ? this.store.cheatUnlockGallery() : this.store.cheatUnlockAll();
         break;
       }
       case Commands.CHEAT_ADD_COINS: {
