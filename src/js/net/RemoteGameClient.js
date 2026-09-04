@@ -820,8 +820,14 @@ export class RemoteGameClient extends GameClient {
       this._mergeState(msg.state);
     }
 
-    if (typeof msg.onlineCount === "number") {
-      this._onlineCount = msg.onlineCount;
+    const resolvedOnlineCount = (typeof msg.onlineCount === "number" ? msg.onlineCount : null) ??
+      (typeof msg.onlineConnections === "number" ? msg.onlineConnections : null) ??
+      (typeof msg.payload?.onlineCount === "number" ? msg.payload.onlineCount : null) ??
+      (typeof msg.payload?.onlineConnections === "number" ? msg.payload.onlineConnections : null);
+    if (typeof resolvedOnlineCount === "number") {
+      this._onlineCount = resolvedOnlineCount;
+    } else if (this._onlineCount < 1) {
+      this._onlineCount = 1;
     }
 
     this._reconnectAttempts = 0;
@@ -853,9 +859,14 @@ export class RemoteGameClient extends GameClient {
       this._pongTimeoutTimer = null;
     }
 
-    if (typeof msg.onlineCount === "number") {
-      this._onlineCount = msg.onlineCount;
-      const countPayload = { onlineCount: msg.onlineCount, state: this._connectionState };
+    const resolvedPongCount = (typeof msg.onlineCount === "number" ? msg.onlineCount : null) ??
+      (typeof msg.onlineConnections === "number" ? msg.onlineConnections : null) ??
+      (typeof msg.payload?.onlineCount === "number" ? msg.payload.onlineCount : null) ??
+      (typeof msg.payload?.onlineConnections === "number" ? msg.payload.onlineConnections : null);
+
+    if (typeof resolvedPongCount === "number") {
+      this._onlineCount = resolvedPongCount;
+      const countPayload = { onlineCount: resolvedPongCount, state: this._connectionState };
       this._emit("online:count", countPayload);
       if (this._eventBus && typeof this._eventBus.emit === "function") {
         this._eventBus.emit("online:count", countPayload);
@@ -913,7 +924,8 @@ export class RemoteGameClient extends GameClient {
    * @returns {number}
    */
   getOnlineCount() {
-    return this._connectionState === ConnectionStates.ONLINE ? (this._onlineCount || 0) : 0;
+    if (this._connectionState !== ConnectionStates.ONLINE) return 0;
+    return (typeof this._onlineCount === "number" && this._onlineCount > 0) ? this._onlineCount : 1;
   }
 
   /**
@@ -1091,6 +1103,9 @@ export class RemoteGameClient extends GameClient {
       if (payload && typeof payload === "object") {
         this._mergeState(payload);
       }
+      const mergedSnap = this.store ? this.store.snapshot() : this._state;
+      this._emit(eventName, mergedSnap);
+      return;
     } else if (eventName === Events.BATTLE_STATE || eventName === "battle:state") {
       if (payload) {
         this._state.battle = payload;
@@ -1114,6 +1129,13 @@ export class RemoteGameClient extends GameClient {
           reason: "KICKED_BY_NEW_CONNECTION",
           message: payload.message || "Another connection for this account was established."
         });
+      }
+    } else if (eventName === "online:count" || eventName === "onlineConnections") {
+      const cnt = (typeof payload?.onlineCount === "number" ? payload.onlineCount : null) ??
+        (typeof payload?.onlineConnections === "number" ? payload.onlineConnections : null) ??
+        (typeof payload === "number" ? payload : null);
+      if (typeof cnt === "number") {
+        this._onlineCount = cnt;
       }
     }
 

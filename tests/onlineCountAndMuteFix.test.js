@@ -111,10 +111,19 @@ test("UI 視圖：AppView 連線狀態徽章在線上時整合顯示括號人數
     appView.connectionStatusText = getOrCreateEl("#connection-status-text");
     appView.client = { getOnlineCount: () => 3 };
 
-    // 1. 線上狀態且有 3 人在線
+    // 1. 線上狀態且有 3 人在線 (onlineCount)
     appView.renderConnectionState(ConnectionStates.ONLINE, { onlineCount: 3 });
-    assert.equal(appView.connectionStatusText.textContent, "連線中 (3人)", "線上且 3 人在線時應呈現「連線中 (3人)」");
+    assert.equal(appView.connectionStatusText.textContent, "線上 (3人)", "線上且 3 人在線時應呈現「線上 (3人)」");
     assert.equal(appView.connectionStatusBadge.classList.contains("is-online"), true);
+
+    // 1b. 線上狀態且遠端伺服器回傳 onlineConnections
+    appView.renderConnectionState(ConnectionStates.ONLINE, { onlineConnections: 5 });
+    assert.equal(appView.connectionStatusText.textContent, "線上 (5人)", "收到 onlineConnections 時應呈現「線上 (5人)」");
+
+    // 1c. 線上狀態無 meta 或 meta 為空，保底至少顯示 1 人 (自己)
+    appView.client = { getOnlineCount: () => 0 };
+    appView.renderConnectionState(ConnectionStates.ONLINE, {});
+    assert.equal(appView.connectionStatusText.textContent, "線上 (1人)", "無其他計數時應保底顯示「線上 (1人)」");
 
     // 2. 離線狀態
     appView.renderConnectionState(ConnectionStates.OFFLINE);
@@ -176,8 +185,30 @@ test("靜音持久化：模擬 F5 刷新，localStorage 記憶之 BGM 與 SFX �
       profile: { level: 1 },
       settings: { musicMuted: false, sfxMuted: false }
     });
-    assert.equal(client._state.settings.musicMuted, true, "伺服器推送狀態後，本地 musicMuted 依然保持 true");
-    assert.equal(client._state.settings.sfxMuted, true, "伺服器推送狀態後，本地 sfxMuted 依然保持 true");
+    // 5. RemoteGameClient _handleServerEvent 收到伺服器 STORE_CHANGED 時，阻斷未過濾的 raw payload 轉發
+    let lastBusPayload = null;
+    let storeChangedCount = 0;
+    client.bus.on("store:changed", (data) => {
+      storeChangedCount++;
+      lastBusPayload = data;
+    });
+
+    client._handleServerEvent({
+      event: "store:changed",
+      payload: {
+        profile: { level: 2 },
+        settings: { musicMuted: false, sfxMuted: false }
+      }
+    });
+
+    assert.equal(storeChangedCount, 1, "STORE_CHANGED 事件應僅發布 1 次已合併之快照，不轉發原始 server payload");
+    assert.equal(lastBusPayload?.state?.settings?.musicMuted, true, "EventBus 上收到的快照應保留本地 musicMuted = true");
+    assert.equal(lastBusPayload?.state?.settings?.sfxMuted, true, "EventBus 上收到的快照應保留本地 sfxMuted = true");
+
+    // 6. SoundSystem 獨立 updateSfxState 與 updateMusicState 解耦
+    assert.equal(typeof sound.updateSfxState, "function", "SoundSystem 應具備 updateSfxState 方法");
+    assert.equal(typeof sound.updateAudioState, "function", "SoundSystem 應具備 updateAudioState 方法");
+    assert.equal(sound.isMusicRunning, false, "初始靜音狀態下音樂調度器不得運作");
   } finally {
     globalThis.window = origWindow;
   }

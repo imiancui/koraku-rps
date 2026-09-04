@@ -44,7 +44,7 @@ export class SoundSystem {
       if (this.context) {
         if (this.context.state === "suspended" || this.context.state === "interrupted") {
           this.context.resume().then(() => {
-            this.updateMusicState();
+            this.updateAudioState();
           }).catch(() => {});
         }
         try {
@@ -55,7 +55,7 @@ export class SoundSystem {
           source.start(0);
         } catch (_) {}
       }
-      this.updateMusicState();
+      this.updateAudioState();
     };
 
     const events = ["pointerdown", "touchstart", "touchend", "click", "keydown"];
@@ -67,9 +67,9 @@ export class SoundSystem {
           this.ensureContext();
           if (this.context) {
             if (this.context.state === "suspended" || this.context.state === "interrupted") {
-              this.context.resume().then(() => this.updateMusicState()).catch(() => {});
+              this.context.resume().then(() => this.updateAudioState()).catch(() => {});
             } else {
-              this.updateMusicState();
+              this.updateAudioState();
             }
           }
         }
@@ -79,7 +79,7 @@ export class SoundSystem {
     window.addEventListener("pageshow", () => {
       this.ensureContext();
       if (this.context) {
-        this.context.resume().then(() => this.updateMusicState()).catch(() => {});
+        this.context.resume().then(() => this.updateAudioState()).catch(() => {});
       }
     });
 
@@ -87,7 +87,7 @@ export class SoundSystem {
       this.ensureContext();
       if (this.context) {
         if (this.context.state === "suspended" || this.context.state === "interrupted") {
-          this.context.resume().then(() => this.updateMusicState()).catch(() => {});
+          this.context.resume().then(() => this.updateAudioState()).catch(() => {});
         }
       }
     });
@@ -110,7 +110,7 @@ export class SoundSystem {
         if (this.context?.state === "interrupted" || this.context?.state === "suspended") {
           this.context.resume().catch(() => {});
         }
-        this.updateMusicState();
+        this.updateAudioState();
       };
 
       this.masterMusicGain = this.context.createGain();
@@ -161,18 +161,13 @@ export class SoundSystem {
     this.ensureContext();
     if (!this.context) return;
 
-    const { isMusicMuted, isSfxMuted } = this.getEffectiveMuteState();
+    const { isMusicMuted } = this.getEffectiveMuteState();
     const now = Math.max(this.context.currentTime, 0);
 
     if (this.masterMusicGain) {
       this.masterMusicGain.gain.cancelScheduledValues(now);
       this.masterMusicGain.gain.setValueAtTime(this.masterMusicGain.gain.value, now);
       this.masterMusicGain.gain.linearRampToValueAtTime(isMusicMuted ? 0.0001 : 0.22, now + 0.15);
-    }
-    if (this.masterSfxGain) {
-      this.masterSfxGain.gain.cancelScheduledValues(now);
-      this.masterSfxGain.gain.setValueAtTime(this.masterSfxGain.gain.value, now);
-      this.masterSfxGain.gain.linearRampToValueAtTime(isSfxMuted ? 0.0001 : 0.35, now + 0.08);
     }
 
     if (!isMusicMuted) {
@@ -185,7 +180,28 @@ export class SoundSystem {
           }
         }).catch(() => {});
       }
+    } else {
+      this.stopMusicScheduler();
     }
+  }
+
+  updateSfxState() {
+    this.ensureContext();
+    if (!this.context) return;
+
+    const { isSfxMuted } = this.getEffectiveMuteState();
+    const now = Math.max(this.context.currentTime, 0);
+
+    if (this.masterSfxGain) {
+      this.masterSfxGain.gain.cancelScheduledValues(now);
+      this.masterSfxGain.gain.setValueAtTime(this.masterSfxGain.gain.value, now);
+      this.masterSfxGain.gain.linearRampToValueAtTime(isSfxMuted ? 0.0001 : 0.35, now + 0.08);
+    }
+  }
+
+  updateAudioState() {
+    this.updateMusicState();
+    this.updateSfxState();
   }
 
   startMusicScheduler() {

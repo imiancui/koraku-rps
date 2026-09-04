@@ -645,6 +645,23 @@ $$\text{Theoretical DPS} = \frac{(\text{Base DMG} \times \text{Greatsword Mult} 
 - **交握狀態覆蓋根治**：修復 `RemoteGameClient` 於交握完成時錯誤將連線狀態字串指派為內部遊戲狀態之缺陷，杜絕伺服器預設音訊設定覆寫本機儲存之問題。
 - **雙向深度保底**：在 `GameStore` 初始化與 `RemoteGameClient._mergeState` 時主動讀取本機 `localStorage` 靜音偏好，確保 BGM 與 SFX 靜音設定於網頁刷新後 100% 保持。
 
+---
+
+## 32. v0.0.33 版本更新：音效音樂開關徹底解耦、F5 重整靜音持久化與線上人數顯示修復 (v0.0.33)
+
+### 32.1 音效與音樂開關徹底解耦
+- **獨立狀態切換**：`SoundSystem` 拆分 `updateSfxState()` 與 `updateMusicState()`，點擊音效按鈕不再誤調用通用 `toggleAudioState()` 影響背景音樂。
+- **排程器即時暫停**：靜音背景音樂時即時觸發 `stopMusicScheduler()` 停止排程；取消靜音時動態依當前畫面恢復播放。
+
+### 32.2 F5 重整靜音持久化與 EventBus 隔離
+- **伺服器事件隔離**：`RemoteGameClient._handleServerEvent` 接收 `STORE_CHANGED` 時先執行狀態合併，杜絕伺服器未包含之音訊欄位污染本機 EventBus。
+- **音訊開關真實狀態判定**：`AppView.updateAudioToggles` 與 `renderStore` 全面採用 `SoundSystem.getEffectiveMuteState()` 與本機 `localStorage` 作為最高權威，保證頁面重載後靜音狀態絕不丟失。
+
+### 32.3 即時線上人數顯示修復
+- **欄位全面相容**：`RemoteGameClient` 同步支援雲端生產環境 `onlineConnections` 與 `onlineCount` 鍵名。
+- **保底人數顯示**：線上連線成功時保底至少呈現當前玩家（1人），並將繁體中文文案校準為「線上 (X人)」。
+
+
 
 
 

@@ -22,6 +22,33 @@ export const LOCALE_STORAGE_KEY = "koraku-rps-locale";
 
 export const CHANGELOG_DATA = [
   {
+    version: "0.0.33",
+    date: "2026-09-05",
+    tag: "Audio Toggles Decoupling, F5 Mute Persistence & Real-time Online Player Counter Fix",
+    changes: {
+      "zh-Hant": [
+        "【音效與音樂獨立開關】徹底解耦音樂 (BGM) 與音效 (SFX) 開關，修正點擊單一按鈕會同時影響兩個開關之連動問題。",
+        "【F5 重整靜音持久化修復】修復頁面重新整理 (F5) 後靜音狀態被重設為有聲音之缺陷，確保 localStorage 本地設定與音訊排程器狀態完整保留。",
+        "【即時在線人數顯示修復】相容伺服器 onlineConnections 與 onlineCount 欄位，保底顯示在線玩家計數，繁體中文狀態正名為「線上 (X人)」。"
+      ],
+      "zh-Hans": [
+        "【音效与音乐独立开关】彻底解耦音乐 (BGM) 与音效 (SFX) 开关，修正点击单一按钮会同时影响两个开关之联动问题。",
+        "【F5 刷新静音持久化修复】修复页面刷新 (F5) 后静音状态被重设为有声音之缺陷，确保 localStorage 本地设置与音频调度器状态完整保留。",
+        "【实时在线人数显示修复】兼容服务器 onlineConnections 与 onlineCount 字段，保底显示在线玩家计数，优化在线状态文案。"
+      ],
+      "en": [
+        "【Audio Toggles Decoupling】Completely decoupled Music (BGM) and Sound Effects (SFX) controls, resolving the issue where toggling one switch unintentionally affected both.",
+        "【F5 Refresh Mute State Persistence】Fixed an issue where reloading the page (F5) would reset mute back to unmuted, ensuring localStorage and audio scheduler retain muted states seamlessly.",
+        "【Online Player Counter Fix】Added full compatibility for onlineConnections and onlineCount fields, guaranteed active player count visibility, and refined connection labels."
+      ],
+      "ja": [
+        "【BGM/SEスイッチの独立分離】音楽（BGM）と効果音（SE）の切り替えを完全に分離し、片方のボタンを押すともう片方まで連動してしまう不具合を解消。",
+        "【F5リロード時のミュート永続化修復】ページ再読み込み（F5）時に消音設定が解除されて音が出てしまう問題を修正し、localStorageとスケジューラーの状態を確実に保持。",
+        "【リアルタイムオンライン人数表示修復】サーバーの onlineConnections と onlineCount の両方に対応し、オンライン人数の表示と接続ラベルの整合性を確保。"
+      ]
+    }
+  },
+  {
     version: "0.0.32",
     date: "2026-09-04",
     tag: "Real-time Online Players Counter, Gold Mute Slash & F5 Mute State Persistence Fix",
@@ -1730,7 +1757,7 @@ const DICTIONARY = {
 
       connecting: "連線中",
       online: "線上連線",
-      onlineWithCount: "連線中 ({count}人)",
+      onlineWithCount: "線上 ({count}人)",
       offline: "離線模式",
       reconnecting: "重新連線中",
       disconnected: "連線中斷",

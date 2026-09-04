@@ -417,13 +417,15 @@ export class AppView {
 
   getConnectionLabel(state, meta = {}) {
     if (state === ConnectionStates.ONLINE) {
-      const count = (typeof meta?.onlineCount === "number" && meta.onlineCount > 0)
+      const countFromMeta = (typeof meta?.onlineCount === "number" && meta.onlineCount > 0)
         ? meta.onlineCount
-        : (typeof this.client?.getOnlineCount === "function" ? this.client.getOnlineCount() : null);
+        : (typeof meta?.onlineConnections === "number" && meta.onlineConnections > 0)
+          ? meta.onlineConnections
+          : null;
 
-      if (typeof count === "number" && count > 0) {
-        return I18n.t("connection.onlineWithCount", { count });
-      }
+      const count = countFromMeta ?? (typeof this.client?.getOnlineCount === "function" ? this.client.getOnlineCount() : 1);
+      const safeCount = (typeof count === "number" && count > 0) ? count : 1;
+      return I18n.t("connection.onlineWithCount", { count: safeCount });
     }
     const key = `connection.${state}`;
     const translated = I18n.t(key);
@@ -1630,7 +1632,11 @@ export class AppView {
       const muted = this.store?.toggleSfxMuted ? this.store.toggleSfxMuted() : false;
       this.updateAudioToggles();
       if (this.sound) {
-        this.sound.updateMusicState();
+        if (typeof this.sound.updateSfxState === "function") {
+          this.sound.updateSfxState();
+        } else {
+          this.sound.updateMusicState();
+        }
       }
       this.showToast(muted ? I18n.t("ui.sfxOffToast") : I18n.t("ui.sfxOnToast"));
       return;
@@ -2159,9 +2165,26 @@ export class AppView {
   }
 
   updateAudioToggles(rawState) {
-    const state = rawState || this.getStoreSnapshot() || {};
-    const isMusicMuted = Boolean(state.settings?.musicMuted);
-    const isSfxMuted = Boolean(state.settings?.sfxMuted ?? state.settings?.muted);
+    let isMusicMuted = false;
+    let isSfxMuted = false;
+
+    if (this.sound && typeof this.sound.getEffectiveMuteState === "function") {
+      const eff = this.sound.getEffectiveMuteState();
+      isMusicMuted = eff.isMusicMuted;
+      isSfxMuted = eff.isSfxMuted;
+    } else {
+      const state = rawState || this.getStoreSnapshot() || {};
+      isMusicMuted = Boolean(state.settings?.musicMuted);
+      isSfxMuted = Boolean(state.settings?.sfxMuted ?? state.settings?.muted);
+      try {
+        if (typeof window !== "undefined" && window.localStorage) {
+          const sm = window.localStorage.getItem("koraku_music_muted");
+          if (sm !== null) isMusicMuted = sm === "true";
+          const ss = window.localStorage.getItem("koraku_sfx_muted");
+          if (ss !== null) isSfxMuted = ss === "true";
+        }
+      } catch (_) {}
+    }
 
     const musicToggle = $("#music-toggle");
     if (musicToggle) {
@@ -2206,7 +2229,11 @@ export class AppView {
     }
 
     if (this.sound) {
-      this.sound.updateMusicState();
+      if (typeof this.sound.updateAudioState === "function") {
+        this.sound.updateAudioState();
+      } else {
+        this.sound.updateMusicState();
+      }
     }
     this.renderHomeRecords(state);
     this.renderStages(state);
