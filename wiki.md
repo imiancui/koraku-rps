@@ -661,6 +661,22 @@ $$\text{Theoretical DPS} = \frac{(\text{Base DMG} \times \text{Greatsword Mult} 
 - **欄位全面相容**：`RemoteGameClient` 同步支援雲端生產環境 `onlineConnections` 與 `onlineCount` 鍵名。
 - **保底人數顯示**：線上連線成功時保底至少呈現當前玩家（1人），並將繁體中文文案校準為「線上 (X人)」。
 
+---
+
+## 33. v0.0.34 版本更新：作弊密碼 8989 介面解鎖、會話認證狀態維護與多語系輸入提示補齊 (v0.0.34)
+
+### 33.1 作弊密碼 8989 介面解鎖與雙重保障
+- **在線提權與客戶端解鎖兜底**：`handleCheatAuthSubmit()` 在線上模式優先呼叫伺服器端 Session 提權；若伺服器連線中斷、未設置密鑰或尚未握手完成，只要輸入為官方規範之 `8989`（或合法 DEV 密鑰），客戶端均放行解鎖並順利顯現 `#cheat-modal`。
+- **伺服器端密鑰預設修復**：`server/config.js` 之 `resolveDevAdminKey()` 於未配置環境變數時預設回退為 `"8989"`，使線上模式 `/auth/elevate` 端點可正常完成動態提權。
+
+### 33.2 會話驗證狀態維護
+- **防誤觸密碼彈窗**：在 `AppView` 引入 `this.cheatAuthenticated` UI 會話標記，首次點擊管理按鈕必定彈出密碼輸入彈窗，符合防止誤觸之規格要求。
+- **會話內解鎖保持與降級重新上鎖**：驗證通過後在同次會話中保持開啟狀態，不需重複輸入密碼；點擊「登出管理員身分」或重整時安全重設為未認證狀態。
+
+### 33.3 多語系輸入提示補齊
+- **輸入框 placeholder 綁定**：在 `index.html` 密碼輸入框補齊 `data-i18n-attr="placeholder:ui.cheatAuthPlaceholder"`，四國語言下均正確顯示「輸入密碼 (8989)」提示。
+
+
 
 
 

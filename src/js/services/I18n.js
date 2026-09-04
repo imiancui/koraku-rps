@@ -22,6 +22,33 @@ export const LOCALE_STORAGE_KEY = "koraku-rps-locale";
 
 export const CHANGELOG_DATA = [
   {
+    version: "0.0.34",
+    date: "2026-09-05",
+    tag: "Cheat Passcode 8989 Interface Unlock & Authentication Fallback Fix",
+    changes: {
+      "zh-Hant": [
+        "【作弊密碼 8989 解鎖修復】修復輸入官方密碼 8989 後無法開啟作弊面板之問題，補齊在線模式驗證失敗之客戶端解鎖兜底保障。",
+        "【會話驗證狀態維護】引入 UI 會話認證生命週期，首頁點擊按鈕彈出密碼彈窗防誤觸，解鎖後於會話內保持開啟，登出管理員時安全重新上鎖。",
+        "【多語系輸入提示補齊】密碼輸入框完整綁定各語系提示「輸入密碼 (8989)」，提升操作可用性與規格一致性。"
+      ],
+      "zh-Hans": [
+        "【作弊密码 8989 解锁修复】修复输入官方密码 8989 后无法开启作弊面板之问题，补齐在线模式验证失败之客户端解锁兜底保障。",
+        "【会话验证状态维护】引入 UI 会话认证生命周期，首页点击按钮弹出密码弹窗防误触，解锁后于会话内保持开启，登出管理员时安全重新上锁。",
+        "【多语系输入提示补齐】密码输入框完整绑定各语系提示「输入密码 (8989)」，提升操作可用性与规格一致性。"
+      ],
+      "en": [
+        "【Cheat Passcode 8989 Unlock Fix】Fixed the issue where entering master passcode 8989 failed to open the cheat modal, adding client-side unlock fallback when server elevation is unavailable.",
+        "【Session Authentication Lifecycle】Introduced session authentication tracking to prompt for passcode on first click, retain unlocked status during the session, and re-lock upon demote.",
+        "【Localized Input Placeholders】Properly bound data-i18n-attr placeholder across all 4 locales displaying 'Passcode (8989)' for clarity."
+      ],
+      "ja": [
+        "【チートパスワード 8989 解放修復】公式パスワード 8989 入力後にチート画面が開かない問題を修正し、オンライン認証失敗時のクライアント側フォールバックを実装。",
+        "【セッション認証ライフサイクル】誤タップ防止のため初回クリック時にパスワード入力を要求し、認証後はセッション中開放を維持、降格時に安全に再施錠する状態管理を導入。",
+        "【多言語入力プレースホルダー追加】パスワード入力欄に全4言語対応の「パスワード (8989)」ヒントを設定し、操作性を向上。"
+      ]
+    }
+  },
+  {
     version: "0.0.33",
     date: "2026-09-05",
     tag: "Audio Toggles Decoupling, F5 Mute Persistence & Real-time Online Player Counter Fix",

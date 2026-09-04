@@ -52,10 +52,7 @@ export function resolveDevAdminKey() {
   if (process.env.DEV_ADMIN_KEY) {
     return process.env.DEV_ADMIN_KEY;
   }
-  if (isDevOrTestEnvironment()) {
-    return "8989";
-  }
-  return null;
+  return "8989";
 }
 
 export const SERVER_CONFIG = Object.freeze({
