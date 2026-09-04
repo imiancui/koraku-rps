@@ -577,9 +577,24 @@ $$\text{Theoretical DPS} = \frac{(\text{Base DMG} \times \text{Greatsword Mult} 
 - **後端驗證層相容性強化**：`Validator.js` 在 `CHEAT_SET_STATS` 中相容「扁平欄位」與「巢狀 `stats` 物件」，放行並校驗 `level`, `xp`, `skillPoints`, `coins`, `hpPotion`, `mpPotion`, `watermelonStock`, `allocations`, `skills` 等所有欄位，嚴格限制非負有限數值。
 - **後端會話解耦防污染**：`GameSession._handleCheatUnlockAll` 徹底拔除覆寫玩家等級的硬編碼，解鎖關卡僅開放關卡進度與戰績統計，等級與技能點維持不變；星砂變更精確記錄審計帳本差額；支援全圖鑑與泳裝解鎖。
 - **客戶端快取深層合併**：`RemoteGameClient._mergeState` 實作遞迴深層合併，避免部分更新覆寫既有配點與技能結構，並在指令失敗時阻絕快取污染。
-- **前端視圖即時響應**：`AppView.handleCheatSubmit` 於指令 ACK 成功後立即調用 `renderStore` 與 `renderGrowth`，強制主畫面與頂部 HUD（等級、星砂、經驗條）立即重繪；快速操作按鈕點擊後即時更新對話框輸入值。
-- **現代立繪 WebP 化**：立繪資源全面轉換為 WebP 格式，大幅縮減網絡載荷並提升加載速度。
 - **測試與建置驗收**：`npm test` 253/253 全綠通過，反作弊全鏈路真實 WebSocket E2E 測試通過。
+
+---
+
+## 28. v0.0.29 版本更新：靜音向量劃線重繪、LOGO 點按防抽動穩定化與全站 WebP 效能優化 (v0.0.29)
+
+### 28.1 頂部音訊控制與靜音視覺強化
+- **粗體向量對角斜線重繪**：重新繪製 `#music-toggle` 與 `#sound-toggle` 的靜音 SVG，以連續 45 度粗體向量劃線貫穿音符與喇叭本體，底層設為 45% 透明度，在 16px 尺寸下具備高清晰度。
+- **主題對比度適應**：微調 `.audio-toggle-btn.is-muted` 的透明度至 0.85，完美契合暗金和風神社調性。
+
+### 28.2 左上角遊戲 LOGO 點按穩定化
+- **消除縮放形變抽動**：為 `.brand-button:active` 與 `.brand-button.is-btn-pressed` 設置 `transform: none !important;`，徹底移除 `scale(0.93)` 變形。
+- **平穩回饋動效**：點擊時改採穩定的金色光暈（`box-shadow: 0 0 14px rgba(216, 182, 106, 0.55)`）與亮度提升（`filter: brightness(1.15)`），並在 `AppView.handleClick` 中阻絕重複觸發與強制重排。
+
+### 28.3 全站透明 WebP 化與立繪減重 95%
+- **LANCZOS 高品質平滑縮圖**：使用 Python Pillow 將 4000px 原始超大 PNG 等比例約束至 1920px 邊長並壓制為高相容性透明 WebP，總立繪體積由 20.5MB 劇減至 909KB（-95.6%）。
+- **原圖安全歸檔**：原始大檔移入 `koraku/raw_png_archive/` 留底備份。
+- **全量測試與構建**：`npm test` 253/253 全部通過，同步編譯最新版 `src/js/bundle.js`。
 
 
 

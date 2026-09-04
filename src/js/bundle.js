@@ -4,7 +4,7 @@
   "use strict";
 
 // --- src/js/config/gameConfig.js ---
-const APP_VERSION = "0.0.28";
+const APP_VERSION = "0.0.29";
 
 const DOJO_CONFIG = Object.freeze({
   defaultHp: 10000,
@@ -508,6 +508,33 @@ const DEFAULT_LOCALE = "en";
 const LOCALE_STORAGE_KEY = "koraku-rps-locale";
 
 const CHANGELOG_DATA = [
+  {
+    version: "0.0.29",
+    date: "2026-09-04",
+    tag: "Audio Mute Vector Strikethrough, Logo Click Stabilization & Transparent WebP Payload Optimization",
+    changes: {
+      "zh-Hant": [
+        "【音效音樂靜音向量劃線】重新繪製頂部音樂與音效按鈕的靜音向量圖示，採用連續 45 度同色粗對角劃線貫穿本體，顯著提升 16px 尺寸下的靜音視覺辨識度。",
+        "【左上角 LOGO 點按穩定化】排除 LOGO（.brand-button）全域按鈕縮放變形（transform: none）與重複點擊觸發機制，改為平穩的金色外光暈與亮度微調反饋，徹底消除連續抽動抖動。",
+        "【全站立繪透明 WebP 化與載入優化】將原始逾 20MB 超大 PNG 經 LANCZOS 限制最大邊長 1920px 轉為高品質透明 WebP，立繪總體積銳減 95.6%（僅 909KB），顯著提升行動網路首次載入效能。"
+      ],
+      "zh-Hans": [
+        "【音效音乐静音矢量划线】重新绘制顶部音乐与音效按钮的静音矢量图标，采用连续 45 度同色粗对角划线贯穿本体，显著提升 16px 尺寸下的静音视觉辨识度。",
+        "【左上角 LOGO 点按稳定化】排除 LOGO（.brand-button）全局按钮缩放变形（transform: none）与重复点击触发机制，改为平稳的金色外光晕与亮度微调反馈，彻底消除连续抽动抖动。",
+        "【全站立绘透明 WebP 化与加载优化】将原始逾 20MB 超大 PNG 经 LANCZOS 限制最大边长 1920px 转为高质量透明 WebP，立绘总体积锐减 95.6%（仅 909KB），显著提升移动网络首次加载效能。"
+      ],
+      "en": [
+        "【Vector Audio Mute Strikethrough】Redesigned mute SVG icons with a continuous, bold 45-degree diagonal strikethrough cutting through note and speaker, greatly improving visibility at 16px.",
+        "【Logo Click Non-Jitter Stabilization】Eliminated transform: scale distortion and repeated click triggers on .brand-button, replacing them with steady gold glow and brightness feedback to remove twitching.",
+        "【Transparent WebP Asset Optimization】Converted over 20MB of raw PNGs into high-fidelity transparent WebPs capped at 1920px max dimension, slashing sprite payload by 95.6% (down to 909KB) for fast first-load times."
+      ],
+      "ja": [
+        "【ミュートボタン斜線ベクター再描画】音楽・効果音ミュートアイコンに連続した45度太斜線ベクターを採用し、16pxサイズでも一目で消音状態がわかる視認性を実現。",
+        "【左上ロゴクリック時のブレ防止】ロゴボタン（.brand-button）のscale縮小変形を排除し、穏やかな金色の光彩と輝度調整フィードバックに変更。連続した揺れ・痙攣挙動を解消。",
+        "【立ち絵画像のWebP化・通信量95%削減】20MB超のPNG原図を最大辺1920pxにリサイズし高品質透過WebPへ完全移行。総容量を909KBに削減し、初回読み込み速度を飛躍的に向上。"
+      ]
+    }
+  },
   {
     version: "0.0.28",
     date: "2026-09-04",
