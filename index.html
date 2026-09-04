@@ -44,12 +44,12 @@
         }
       })();
     </script>
-    <link rel="stylesheet" href="./src/styles/tokens.css?v=202609042030">
-    <link rel="stylesheet" href="./src/styles/base.css?v=202609042030">
-    <link rel="stylesheet" href="./src/styles/components.css?v=202609042030">
-    <link rel="stylesheet" href="./src/styles/screens.css?v=202609042030">
-    <link rel="stylesheet" href="./src/styles/animations.css?v=202609042030">
-    <link rel="stylesheet" href="./src/styles/responsive.css?v=202609042030">
+    <link rel="stylesheet" href="./src/styles/tokens.css?v=202609042110">
+    <link rel="stylesheet" href="./src/styles/base.css?v=202609042110">
+    <link rel="stylesheet" href="./src/styles/components.css?v=202609042110">
+    <link rel="stylesheet" href="./src/styles/screens.css?v=202609042110">
+    <link rel="stylesheet" href="./src/styles/animations.css?v=202609042110">
+    <link rel="stylesheet" href="./src/styles/responsive.css?v=202609042110">
   </head>
   <body>
     <div id="app" class="app-shell" data-screen="home">
@@ -89,15 +89,15 @@
           <button id="music-toggle" class="icon-button audio-toggle-btn" type="button" aria-label="切換背景音樂" title="切換背景音樂" data-i18n-attr="aria-label:ui.toggleBgm,title:ui.toggleBgm">
             <svg class="audio-icon icon-music-on" viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
             <svg class="audio-icon icon-music-off" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-              <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" opacity="0.45"/>
-              <path d="M3.27 4.69L19.31 20.73l1.42-1.42L4.69 3.27 3.27 4.69z"/>
+              <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" opacity="0.38"/>
+              <line class="mute-slash" x1="3" y1="3" x2="21" y2="21" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
             </svg>
           </button>
           <button id="sound-toggle" class="icon-button audio-toggle-btn" type="button" aria-label="切換遊戲音效" title="切換遊戲音效" data-i18n-attr="aria-label:ui.toggleSfx,title:ui.toggleSfx">
             <svg class="audio-icon icon-sound-on" viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
             <svg class="audio-icon icon-sound-off" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-              <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z" opacity="0.45"/>
-              <path d="M3.27 4.69L19.31 20.73l1.42-1.42L4.69 3.27 3.27 4.69z"/>
+              <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z" opacity="0.38"/>
+              <line class="mute-slash" x1="3" y1="3" x2="21" y2="21" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
             </svg>
           </button>
         </div>
@@ -192,7 +192,7 @@
               </button>
               <footer class="home-footer" aria-label="頁腳資訊" data-i18n-attr="aria-label:ui.footerInfo">
                 <button type="button" class="footer-version-btn" id="footer-app-version-btn" title="查看更新日誌 (Changelog)" aria-label="查看更新日誌" data-i18n-attr="aria-label:ui.changelog,title:ui.changelog">
-                  <span class="footer-version" id="footer-app-version">0.0.29</span>
+                  <span class="footer-version" id="footer-app-version">0.0.30</span>
                 </button>
                 <span class="footer-plain-sep">/</span>
                 <a href="https://store.steampowered.com/app/1425000" target="_blank" rel="noopener noreferrer" class="footer-plain-link">Endless Alice</a>
@@ -1667,6 +1667,6 @@
       <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
     </div>
-    <script src="./src/js/bundle.js?v=202609042030"></script>
+    <script src="./src/js/bundle.js?v=202609042110"></script>
   </body>
 </html>

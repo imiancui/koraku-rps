@@ -351,16 +351,16 @@ select.profile-chip.lang-select option {
 
 .audio-toggle-btn.is-muted {
   color: var(--paper-dim);
-  border-color: rgba(255, 255, 255, 0.08);
-  background: rgba(0, 0, 0, 0.25);
-  opacity: 0.85;
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.35);
+  opacity: 0.9;
 }
 
 .audio-toggle-btn.is-muted:hover {
   color: var(--paper);
   border-color: var(--line);
   opacity: 1;
-  box-shadow: none;
+  box-shadow: 0 0 8px rgba(239, 83, 101, 0.3);
 }
 
 .audio-toggle-btn.is-muted .icon-music-on,
@@ -371,6 +371,15 @@ select.profile-chip.lang-select option {
 .audio-toggle-btn.is-muted .icon-music-off,
 .audio-toggle-btn.is-muted .icon-sound-off {
   display: inline-block;
+}
+
+.audio-toggle-btn.is-muted .mute-slash {
+  stroke: var(--crimson-bright);
+}
+
+.audio-toggle-btn.is-muted:hover .mute-slash {
+  stroke: var(--crimson-bright);
+  filter: drop-shadow(0 0 4px rgba(239, 83, 101, 0.6));
 }
 
 .screen-stack {

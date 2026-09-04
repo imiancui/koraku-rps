@@ -4,7 +4,7 @@
   "use strict";
 
 // --- src/js/config/gameConfig.js ---
-const APP_VERSION = "0.0.29";
+const APP_VERSION = "0.0.30";
 
 const DOJO_CONFIG = Object.freeze({
   defaultHp: 10000,
@@ -508,6 +508,33 @@ const DEFAULT_LOCALE = "en";
 const LOCALE_STORAGE_KEY = "koraku-rps-locale";
 
 const CHANGELOG_DATA = [
+  {
+    version: "0.0.30",
+    date: "2026-09-04",
+    tag: "Audio Mute Toggle Event Synchronization, Cross-Mode Persistence & Crimson Slash Visual Fix",
+    changes: {
+      "zh-Hant": [
+        "【線上模式音訊切換即時同步】修復線上模式（RemoteGameClient）點擊靜音按鈕時未觸發 store:changed 事件、未即時更新 DOM 樣式類別（.is-muted）之核心缺陷，點擊後同步更新 Web Audio API 增益與圖示狀態。",
+        "【靜音禁用劃線硃砂紅視覺強化】音效與音樂靜音圖示斜線採用神宮硃砂紅（--crimson-bright）與清晰向量線段，懸浮時微光映照，徹底解決暗色背景下靜音狀態難以辨識之問題。",
+        "【跨模式音訊設定持久化保持】將玩家音訊靜音偏好（音樂/音效）同步寫入裝置 localStorage，在線上與離線模式切換或網頁重新整理時皆能完美保持偏好，防止伺服器狀態合併時覆寫本機靜音設定。"
+      ],
+      "zh-Hans": [
+        "【线上模式音频切换即时同步】修复线上模式（RemoteGameClient）点击静音按钮时未触发 store:changed 事件、未即时更新 DOM 样式类（.is-muted）之核心缺陷，点击后同步更新 Web Audio API 增益与图标状态。",
+        "【静音禁用划线朱砂红视觉强化】音效与音乐静音图标斜线采用神宫朱砂红（--crimson-bright）与清晰矢量线段，悬浮时微光映照，彻底解决暗色背景下静音状态难以辨识之问题。",
+        "【跨模式音频设置持久化保持】将玩家音频静音偏好（音乐/音效）同步写入设备 localStorage，在在线与离线模式切换或网页刷新时均能完美保持偏好，防止服务器状态合并时覆盖本机静音设置。"
+      ],
+      "en": [
+        "【Online Audio Toggle Immediate Synchronization】Fixed a core flaw in online mode (RemoteGameClient) where audio toggle clicks did not emit store:changed or toggle the .is-muted DOM class, synchronizing Web Audio API gain and icon visuals immediately.",
+        "【Crimson Slash Strikethrough Visual Enhancement】Restyled the mute strikethrough with vibrant shrine crimson (--crimson-bright) and clean vector lines, eliminating visibility issues on dark backgrounds.",
+        "【Cross-Mode Audio Preference Persistence】Persisted player mute preferences across page reloads and online/offline mode switches via dedicated localStorage keys, safeguarding local audio preferences from being wiped by server snapshots."
+      ],
+      "ja": [
+        "【オンライン音量トグル即時同期修復】オンラインモード（RemoteGameClient）において消音ボタン押下時に store:changed が発火せず、DOMの .is-muted クラスが更新されなかった問題を完全改修。Web Audio API ゲインとアイコン表示を即座に連動。",
+        "【ミュート禁止斜線の朱赤ベクター強調】消音アイコンの斜線に神社調の朱赤（--crimson-bright）と鮮明なベクターラインを採用し、ホバー時の微光効果も追加。暗色背景下での視認性を劇的に改善。",
+        "【モード間音声設定の永続化保持】プレイヤーの消音設定をデバイスの localStorage に二重永続化し、オンライン／オフライン切り替えやページ再読み込み時にも確実に維持。サーバー同期による上書きを防止。"
+      ]
+    }
+  },
   {
     version: "0.0.29",
     date: "2026-09-04",
@@ -6125,7 +6152,21 @@ function sanitizeSave(candidate) {
       recentBattles: Array.isArray(migrated.records?.recentBattles) ? migrated.records.recentBattles.slice(0, 100) : [],
       stageStats
     },
-    settings: { ...base.settings, ...migrated.settings }
+    settings: (() => {
+      const s = { ...base.settings, ...migrated.settings };
+      try {
+        if (typeof window !== "undefined" && window.localStorage) {
+          const sm = window.localStorage.getItem("koraku_music_muted");
+          if (sm !== null) s.musicMuted = sm === "true";
+          const ss = window.localStorage.getItem("koraku_sfx_muted");
+          if (ss !== null) {
+            s.sfxMuted = ss === "true";
+            s.muted = ss === "true";
+          }
+        }
+      } catch (_) {}
+      return s;
+    })()
   };
 }
 
@@ -6848,6 +6889,11 @@ class GameStore {
 
   toggleMusicMuted() {
     this.state.settings.musicMuted = !this.state.settings.musicMuted;
+    try {
+      if (typeof window !== "undefined" && window.localStorage) {
+        window.localStorage.setItem("koraku_music_muted", String(this.state.settings.musicMuted));
+      }
+    } catch (_) {}
     this.commit("toggle-music-muted");
     return this.state.settings.musicMuted;
   }
@@ -6855,6 +6901,11 @@ class GameStore {
   toggleSfxMuted() {
     this.state.settings.sfxMuted = !this.state.settings.sfxMuted;
     this.state.settings.muted = this.state.settings.sfxMuted;
+    try {
+      if (typeof window !== "undefined" && window.localStorage) {
+        window.localStorage.setItem("koraku_sfx_muted", String(this.state.settings.sfxMuted));
+      }
+    } catch (_) {}
     this.commit("toggle-sfx-muted");
     return this.state.settings.sfxMuted;
   }
@@ -10831,6 +10882,20 @@ class RemoteGameClient extends GameClient {
         if (raw) this._state = JSON.parse(raw);
       } catch (_) {}
     }
+    if (!this._state.settings) {
+      this._state.settings = {};
+    }
+    if (this._storage) {
+      const savedMusic = this._storage.getItem("koraku_music_muted");
+      if (savedMusic !== null) {
+        this._state.settings.musicMuted = savedMusic === "true";
+      }
+      const savedSfx = this._storage.getItem("koraku_sfx_muted");
+      if (savedSfx !== null) {
+        this._state.settings.sfxMuted = savedSfx === "true";
+        this._state.settings.muted = savedSfx === "true";
+      }
+    }
     this._storeProxy = null;
     this._battleProxy = null;
     this._postBattleProxy = null;
@@ -10888,16 +10953,41 @@ class RemoteGameClient extends GameClient {
           return Math.round(damage * 1.5);
         },
         toggleMusicMuted: () => {
-          const curr = Boolean(client._state?.settings?.musicMuted);
+          if (!client._state) client._state = {};
           if (!client._state.settings) client._state.settings = {};
-          client._state.settings.musicMuted = !curr;
-          return client._state.settings.musicMuted;
+          const curr = Boolean(client._state.settings.musicMuted);
+          const next = !curr;
+          client._state.settings.musicMuted = next;
+          try {
+            if (client._storage) {
+              client._storage.setItem("koraku_music_muted", String(next));
+              client._storage.setItem(ONLINE_STATE_CACHE_KEY, JSON.stringify(client._state));
+            }
+          } catch (_) {}
+          const snap = client.store.snapshot();
+          if (client._eventBus && typeof client._eventBus.emit === "function") {
+            client._eventBus.emit("store:changed", { reason: "toggle-music-muted", state: snap });
+          }
+          return next;
         },
         toggleSfxMuted: () => {
-          const curr = Boolean(client._state?.settings?.sfxMuted);
+          if (!client._state) client._state = {};
           if (!client._state.settings) client._state.settings = {};
-          client._state.settings.sfxMuted = !curr;
-          return client._state.settings.sfxMuted;
+          const curr = Boolean(client._state.settings.sfxMuted);
+          const next = !curr;
+          client._state.settings.sfxMuted = next;
+          client._state.settings.muted = next;
+          try {
+            if (client._storage) {
+              client._storage.setItem("koraku_sfx_muted", String(next));
+              client._storage.setItem(ONLINE_STATE_CACHE_KEY, JSON.stringify(client._state));
+            }
+          } catch (_) {}
+          const snap = client.store.snapshot();
+          if (client._eventBus && typeof client._eventBus.emit === "function") {
+            client._eventBus.emit("store:changed", { reason: "toggle-sfx-muted", state: snap });
+          }
+          return next;
         }
       };
     }
@@ -11711,7 +11801,20 @@ class RemoteGameClient extends GameClient {
       return result;
     };
 
+    const localMusicMuted = this._state?.settings?.musicMuted;
+    const localSfxMuted = this._state?.settings?.sfxMuted;
+
     this._state = deepMerge(this._state || {}, source);
+
+    if (this._state.settings) {
+      if (localMusicMuted !== undefined) {
+        this._state.settings.musicMuted = localMusicMuted;
+      }
+      if (localSfxMuted !== undefined) {
+        this._state.settings.sfxMuted = localSfxMuted;
+        this._state.settings.muted = localSfxMuted;
+      }
+    }
 
     try {
       if (this._storage) this._storage.setItem(ONLINE_STATE_CACHE_KEY, JSON.stringify(this._state));
@@ -13162,6 +13265,7 @@ class AppView {
 
   init() {
     this.renderI18n();
+    this.updateAudioToggles();
     const snapshot = this.getStoreSnapshot();
     this.renderStore(snapshot);
     this.renderConnectionState(this.connectionState);
@@ -14177,12 +14281,20 @@ class AppView {
 
     if (event.target.closest("#music-toggle")) {
       const muted = this.store?.toggleMusicMuted ? this.store.toggleMusicMuted() : false;
+      this.updateAudioToggles();
+      if (this.sound) {
+        this.sound.updateMusicState();
+      }
       this.showToast(muted ? I18n.t("ui.musicOffToast") : I18n.t("ui.musicOnToast"));
       return;
     }
 
     if (event.target.closest("#sound-toggle")) {
       const muted = this.store?.toggleSfxMuted ? this.store.toggleSfxMuted() : false;
+      this.updateAudioToggles();
+      if (this.sound) {
+        this.sound.updateMusicState();
+      }
       this.showToast(muted ? I18n.t("ui.sfxOffToast") : I18n.t("ui.sfxOnToast"));
       return;
     }
@@ -14699,28 +14811,8 @@ class AppView {
     await this.sendCommand(Commands.AUTO_BATTLE_START, { stageId, rounds });
   }
 
-  renderStore(rawState) {
-    const fallback = this.getStoreSnapshot() || {};
-    const incoming = rawState?.profile ? rawState : (rawState?.state?.profile ? rawState.state : rawState);
-    const state = { ...fallback, ...(incoming || {}) };
-    if (incoming?.profile) state.profile = { ...(fallback.profile || {}), ...incoming.profile };
-    if (!state?.profile) return;
-    $("#header-level").textContent = String(state.profile.level || 1).padStart(2, "0");
-    $("#header-coins").textContent = (state.coins || 0).toLocaleString("zh-TW");
-    $("#header-xp").textContent = (state.profile.xp || 0) + " / " + (state.xpToNext || 0);
-    $("#header-xp-fill").style.width = clampPercent(state.profile.xp || 0, state.xpToNext || 1) + "%";
-    if (state.records) {
-      $("#record-wins").textContent = state.records.wins || 0;
-      $("#record-losses").textContent = state.records.losses || 0;
-      $("#record-stage").textContent = state.records.bestStage ? I18n.getLocalizedStage(STAGES.find(s => s.id === state.records.bestStage) || { chapter: "第 " + state.records.bestStage + " 章" }).chapter : "—";
-    }
-    
-    const growthNavBtn = document.querySelector('.menu-command[data-nav="growth"]');
-    if (growthNavBtn) {
-      const hasPendingPoints = Boolean((state.profile?.skillPoints > 0) || (state.profile?.statPoints > 0));
-      growthNavBtn.classList.toggle("has-pending-points", hasPendingPoints);
-    }
-
+  updateAudioToggles(rawState) {
+    const state = rawState || this.getStoreSnapshot() || {};
     const isMusicMuted = Boolean(state.settings?.musicMuted);
     const isSfxMuted = Boolean(state.settings?.sfxMuted ?? state.settings?.muted);
 
@@ -14738,6 +14830,32 @@ class AppView {
       soundToggle.setAttribute("aria-label", label);
       soundToggle.setAttribute("title", label);
       soundToggle.classList.toggle("is-muted", isSfxMuted);
+    }
+  }
+
+  renderStore(rawState) {
+    const fallback = this.getStoreSnapshot() || {};
+    const incoming = rawState?.profile ? rawState : (rawState?.state?.profile ? rawState.state : rawState);
+    const state = { ...fallback, ...(incoming || {}) };
+    if (incoming?.profile) state.profile = { ...(fallback.profile || {}), ...incoming.profile };
+
+    this.updateAudioToggles(state);
+
+    if (!state?.profile) return;
+    $("#header-level").textContent = String(state.profile.level || 1).padStart(2, "0");
+    $("#header-coins").textContent = (state.coins || 0).toLocaleString("zh-TW");
+    $("#header-xp").textContent = (state.profile.xp || 0) + " / " + (state.xpToNext || 0);
+    $("#header-xp-fill").style.width = clampPercent(state.profile.xp || 0, state.xpToNext || 1) + "%";
+    if (state.records) {
+      $("#record-wins").textContent = state.records.wins || 0;
+      $("#record-losses").textContent = state.records.losses || 0;
+      $("#record-stage").textContent = state.records.bestStage ? I18n.getLocalizedStage(STAGES.find(s => s.id === state.records.bestStage) || { chapter: "第 " + state.records.bestStage + " 章" }).chapter : "—";
+    }
+    
+    const growthNavBtn = document.querySelector('.menu-command[data-nav="growth"]');
+    if (growthNavBtn) {
+      const hasPendingPoints = Boolean((state.profile?.skillPoints > 0) || (state.profile?.statPoints > 0));
+      growthNavBtn.classList.toggle("has-pending-points", hasPendingPoints);
     }
 
     if (this.sound) {

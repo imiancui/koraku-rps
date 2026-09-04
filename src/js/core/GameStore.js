@@ -254,7 +254,21 @@ export function sanitizeSave(candidate) {
       recentBattles: Array.isArray(migrated.records?.recentBattles) ? migrated.records.recentBattles.slice(0, 100) : [],
       stageStats
     },
-    settings: { ...base.settings, ...migrated.settings }
+    settings: (() => {
+      const s = { ...base.settings, ...migrated.settings };
+      try {
+        if (typeof window !== "undefined" && window.localStorage) {
+          const sm = window.localStorage.getItem("koraku_music_muted");
+          if (sm !== null) s.musicMuted = sm === "true";
+          const ss = window.localStorage.getItem("koraku_sfx_muted");
+          if (ss !== null) {
+            s.sfxMuted = ss === "true";
+            s.muted = ss === "true";
+          }
+        }
+      } catch (_) {}
+      return s;
+    })()
   };
 }
 
@@ -977,6 +991,11 @@ export class GameStore {
 
   toggleMusicMuted() {
     this.state.settings.musicMuted = !this.state.settings.musicMuted;
+    try {
+      if (typeof window !== "undefined" && window.localStorage) {
+        window.localStorage.setItem("koraku_music_muted", String(this.state.settings.musicMuted));
+      }
+    } catch (_) {}
     this.commit("toggle-music-muted");
     return this.state.settings.musicMuted;
   }
@@ -984,6 +1003,11 @@ export class GameStore {
   toggleSfxMuted() {
     this.state.settings.sfxMuted = !this.state.settings.sfxMuted;
     this.state.settings.muted = this.state.settings.sfxMuted;
+    try {
+      if (typeof window !== "undefined" && window.localStorage) {
+        window.localStorage.setItem("koraku_sfx_muted", String(this.state.settings.sfxMuted));
+      }
+    } catch (_) {}
     this.commit("toggle-sfx-muted");
     return this.state.settings.sfxMuted;
   }

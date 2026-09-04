@@ -102,6 +102,20 @@ export class RemoteGameClient extends GameClient {
         if (raw) this._state = JSON.parse(raw);
       } catch (_) {}
     }
+    if (!this._state.settings) {
+      this._state.settings = {};
+    }
+    if (this._storage) {
+      const savedMusic = this._storage.getItem("koraku_music_muted");
+      if (savedMusic !== null) {
+        this._state.settings.musicMuted = savedMusic === "true";
+      }
+      const savedSfx = this._storage.getItem("koraku_sfx_muted");
+      if (savedSfx !== null) {
+        this._state.settings.sfxMuted = savedSfx === "true";
+        this._state.settings.muted = savedSfx === "true";
+      }
+    }
     this._storeProxy = null;
     this._battleProxy = null;
     this._postBattleProxy = null;
@@ -159,16 +173,41 @@ export class RemoteGameClient extends GameClient {
           return Math.round(damage * 1.5);
         },
         toggleMusicMuted: () => {
-          const curr = Boolean(client._state?.settings?.musicMuted);
+          if (!client._state) client._state = {};
           if (!client._state.settings) client._state.settings = {};
-          client._state.settings.musicMuted = !curr;
-          return client._state.settings.musicMuted;
+          const curr = Boolean(client._state.settings.musicMuted);
+          const next = !curr;
+          client._state.settings.musicMuted = next;
+          try {
+            if (client._storage) {
+              client._storage.setItem("koraku_music_muted", String(next));
+              client._storage.setItem(ONLINE_STATE_CACHE_KEY, JSON.stringify(client._state));
+            }
+          } catch (_) {}
+          const snap = client.store.snapshot();
+          if (client._eventBus && typeof client._eventBus.emit === "function") {
+            client._eventBus.emit("store:changed", { reason: "toggle-music-muted", state: snap });
+          }
+          return next;
         },
         toggleSfxMuted: () => {
-          const curr = Boolean(client._state?.settings?.sfxMuted);
+          if (!client._state) client._state = {};
           if (!client._state.settings) client._state.settings = {};
-          client._state.settings.sfxMuted = !curr;
-          return client._state.settings.sfxMuted;
+          const curr = Boolean(client._state.settings.sfxMuted);
+          const next = !curr;
+          client._state.settings.sfxMuted = next;
+          client._state.settings.muted = next;
+          try {
+            if (client._storage) {
+              client._storage.setItem("koraku_sfx_muted", String(next));
+              client._storage.setItem(ONLINE_STATE_CACHE_KEY, JSON.stringify(client._state));
+            }
+          } catch (_) {}
+          const snap = client.store.snapshot();
+          if (client._eventBus && typeof client._eventBus.emit === "function") {
+            client._eventBus.emit("store:changed", { reason: "toggle-sfx-muted", state: snap });
+          }
+          return next;
         }
       };
     }
@@ -982,7 +1021,20 @@ export class RemoteGameClient extends GameClient {
       return result;
     };
 
+    const localMusicMuted = this._state?.settings?.musicMuted;
+    const localSfxMuted = this._state?.settings?.sfxMuted;
+
     this._state = deepMerge(this._state || {}, source);
+
+    if (this._state.settings) {
+      if (localMusicMuted !== undefined) {
+        this._state.settings.musicMuted = localMusicMuted;
+      }
+      if (localSfxMuted !== undefined) {
+        this._state.settings.sfxMuted = localSfxMuted;
+        this._state.settings.muted = localSfxMuted;
+      }
+    }
 
     try {
       if (this._storage) this._storage.setItem(ONLINE_STATE_CACHE_KEY, JSON.stringify(this._state));

@@ -596,6 +596,24 @@ $$\text{Theoretical DPS} = \frac{(\text{Base DMG} \times \text{Greatsword Mult} 
 - **原圖安全歸檔**：原始大檔移入 `koraku/raw_png_archive/` 留底備份。
 - **全量測試與構建**：`npm test` 253/253 全部通過，同步編譯最新版 `src/js/bundle.js`。
 
+---
+
+## 29. v0.0.30 版本更新：線上音訊切換即時事件同步、跨模式本機持久化與神宮硃砂紅靜音劃線修復 (v0.0.30)
+
+### 29.1 線上客戶端與視圖事件即時同步
+- **核心事件總線綁定**：徹底修復線上模式（`RemoteGameClient`）點擊音訊切換按鈕時未觸發 `store:changed` 事件的斷層問題，確保切換後發送 `{ reason, state }`。
+- **視圖點擊即時響應**：`AppView.handleClick` 於點按 `#music-toggle` 與 `#sound-toggle` 時，立即調用 `updateAudioToggles` 與 `sound.updateMusicState`，使按鈕立即掛載/卸載 `.is-muted` 樣式並實時淡入淡出 Web Audio API 增益。
+- **視圖重繪生命週期解耦**：抽離獨立 `updateAudioToggles(state)` 方法，於 `AppView.init()` 及 `renderStore` 最頂端優先執行，徹底避免因個人資料尚未就緒而略過按鈕初始化。
+
+### 29.2 靜音禁用劃線硃砂紅高對比強化
+- **神宮硃砂紅高辨識向量線**：音訊按鈕靜音狀態下，對角斜線採用神宮硃砂紅（`--crimson-bright`, `#ef5365`）繪製，在深墨色（`--ink-950`）與半透明背景上呈現極佳對比度。
+- **懸浮微光動效**：`.audio-toggle-btn.is-muted:hover` 增加細緻柔和的紅光擴散（`drop-shadow(0 0 4px rgba(239, 83, 101, 0.6))`），操作意圖更加明確。
+
+### 29.3 跨模式音訊設定持久化與伺服器防覆寫保護
+- **本機雙重持久化**：玩家音樂與音效靜音偏好同步寫入 `localStorage`（`koraku_music_muted` 與 `koraku_sfx_muted`），在線上與離線模式切換、重新整理網頁時完美保留。
+- **伺服器狀態合併保護**：`RemoteGameClient._mergeState` 在合併伺服器狀態時主動保護本機已設定之音訊偏好，防止空伺服器預設值覆寫使用者設定。
+
+
 
 
 

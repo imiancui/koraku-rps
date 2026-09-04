@@ -537,6 +537,7 @@ export class AppView {
 
   init() {
     this.renderI18n();
+    this.updateAudioToggles();
     const snapshot = this.getStoreSnapshot();
     this.renderStore(snapshot);
     this.renderConnectionState(this.connectionState);
@@ -1552,12 +1553,20 @@ export class AppView {
 
     if (event.target.closest("#music-toggle")) {
       const muted = this.store?.toggleMusicMuted ? this.store.toggleMusicMuted() : false;
+      this.updateAudioToggles();
+      if (this.sound) {
+        this.sound.updateMusicState();
+      }
       this.showToast(muted ? I18n.t("ui.musicOffToast") : I18n.t("ui.musicOnToast"));
       return;
     }
 
     if (event.target.closest("#sound-toggle")) {
       const muted = this.store?.toggleSfxMuted ? this.store.toggleSfxMuted() : false;
+      this.updateAudioToggles();
+      if (this.sound) {
+        this.sound.updateMusicState();
+      }
       this.showToast(muted ? I18n.t("ui.sfxOffToast") : I18n.t("ui.sfxOnToast"));
       return;
     }
@@ -2074,28 +2083,8 @@ export class AppView {
     await this.sendCommand(Commands.AUTO_BATTLE_START, { stageId, rounds });
   }
 
-  renderStore(rawState) {
-    const fallback = this.getStoreSnapshot() || {};
-    const incoming = rawState?.profile ? rawState : (rawState?.state?.profile ? rawState.state : rawState);
-    const state = { ...fallback, ...(incoming || {}) };
-    if (incoming?.profile) state.profile = { ...(fallback.profile || {}), ...incoming.profile };
-    if (!state?.profile) return;
-    $("#header-level").textContent = String(state.profile.level || 1).padStart(2, "0");
-    $("#header-coins").textContent = (state.coins || 0).toLocaleString("zh-TW");
-    $("#header-xp").textContent = (state.profile.xp || 0) + " / " + (state.xpToNext || 0);
-    $("#header-xp-fill").style.width = clampPercent(state.profile.xp || 0, state.xpToNext || 1) + "%";
-    if (state.records) {
-      $("#record-wins").textContent = state.records.wins || 0;
-      $("#record-losses").textContent = state.records.losses || 0;
-      $("#record-stage").textContent = state.records.bestStage ? I18n.getLocalizedStage(STAGES.find(s => s.id === state.records.bestStage) || { chapter: "第 " + state.records.bestStage + " 章" }).chapter : "—";
-    }
-    
-    const growthNavBtn = document.querySelector('.menu-command[data-nav="growth"]');
-    if (growthNavBtn) {
-      const hasPendingPoints = Boolean((state.profile?.skillPoints > 0) || (state.profile?.statPoints > 0));
-      growthNavBtn.classList.toggle("has-pending-points", hasPendingPoints);
-    }
-
+  updateAudioToggles(rawState) {
+    const state = rawState || this.getStoreSnapshot() || {};
     const isMusicMuted = Boolean(state.settings?.musicMuted);
     const isSfxMuted = Boolean(state.settings?.sfxMuted ?? state.settings?.muted);
 
@@ -2113,6 +2102,32 @@ export class AppView {
       soundToggle.setAttribute("aria-label", label);
       soundToggle.setAttribute("title", label);
       soundToggle.classList.toggle("is-muted", isSfxMuted);
+    }
+  }
+
+  renderStore(rawState) {
+    const fallback = this.getStoreSnapshot() || {};
+    const incoming = rawState?.profile ? rawState : (rawState?.state?.profile ? rawState.state : rawState);
+    const state = { ...fallback, ...(incoming || {}) };
+    if (incoming?.profile) state.profile = { ...(fallback.profile || {}), ...incoming.profile };
+
+    this.updateAudioToggles(state);
+
+    if (!state?.profile) return;
+    $("#header-level").textContent = String(state.profile.level || 1).padStart(2, "0");
+    $("#header-coins").textContent = (state.coins || 0).toLocaleString("zh-TW");
+    $("#header-xp").textContent = (state.profile.xp || 0) + " / " + (state.xpToNext || 0);
+    $("#header-xp-fill").style.width = clampPercent(state.profile.xp || 0, state.xpToNext || 1) + "%";
+    if (state.records) {
+      $("#record-wins").textContent = state.records.wins || 0;
+      $("#record-losses").textContent = state.records.losses || 0;
+      $("#record-stage").textContent = state.records.bestStage ? I18n.getLocalizedStage(STAGES.find(s => s.id === state.records.bestStage) || { chapter: "第 " + state.records.bestStage + " 章" }).chapter : "—";
+    }
+    
+    const growthNavBtn = document.querySelector('.menu-command[data-nav="growth"]');
+    if (growthNavBtn) {
+      const hasPendingPoints = Boolean((state.profile?.skillPoints > 0) || (state.profile?.statPoints > 0));
+      growthNavBtn.classList.toggle("has-pending-points", hasPendingPoints);
     }
 
     if (this.sound) {
