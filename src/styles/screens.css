@@ -812,6 +812,7 @@
 /* Swimsuit watermelon (4007x5425) vs Swimsuit default (4993px):
    86% * (5425 / 4993) = 93.44% perfectly matches character model pixel size & vertical alignment!
    Horizontal alignment: +1.6px compensation for 4007w vs 3970w canvas centering */
+.gallery-art-frame[data-variant="swimsuit_default"][data-diff="watermelon"] img,
 .gallery-art-frame[data-variant="swimsuit_watermelon"] img,
 .gallery-art-frame img.gallery-img-swimsuit_watermelon {
   height: 93.44%;
@@ -838,35 +839,60 @@
   opacity: 0.94;
 }
 
-.gallery-zoom-badge {
+.gallery-badge-group {
   position: absolute;
   right: 12px;
   bottom: 12px;
   z-index: 10;
   display: inline-flex;
   align-items: center;
+  gap: 8px;
+}
+
+.gallery-zoom-badge,
+.gallery-diff-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   gap: 6px;
-  padding: 6px 12px;
+  padding: 8px 12px;
+  min-height: 40px;
   background: rgba(10, 14, 22, 0.85);
   backdrop-filter: blur(6px);
   border: 1px solid rgba(216, 182, 106, 0.4);
   color: var(--gold-bright);
-  font: 500 11px/1 var(--serif);
+  font: 500 12px/1 var(--serif);
   letter-spacing: 0.12em;
   border-radius: 4px;
   cursor: pointer;
   transition: all 160ms ease;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  box-sizing: border-box;
+  touch-action: manipulation;
 }
 
-.gallery-zoom-badge:hover {
+.gallery-zoom-badge:hover,
+.gallery-diff-badge:hover {
   border-color: var(--gold);
   background: rgba(181, 37, 55, 0.8);
   color: #fff;
   transform: scale(1.04);
 }
 
-.gallery-art-frame.is-locked .gallery-zoom-badge {
+.gallery-diff-badge.is-watermelon {
+  border-color: rgba(76, 175, 80, 0.5);
+  color: #a5d6a7;
+}
+
+.gallery-diff-badge.is-watermelon:hover {
+  border-color: #81c784;
+  background: rgba(46, 125, 50, 0.8);
+  color: #fff;
+}
+
+.gallery-art-frame.is-locked .gallery-badge-group,
+.gallery-art-frame.is-locked .gallery-zoom-badge,
+.gallery-art-frame.is-locked .gallery-diff-badge {
   display: none;
 }
 

@@ -22,6 +22,37 @@ export const LOCALE_STORAGE_KEY = "koraku-rps-locale";
 
 export const CHANGELOG_DATA = [
   {
+    version: "0.0.31",
+    date: "2026-09-04",
+    tag: "Gallery Swimsuit Diff Toggle, Records XP Math Fix & Dojo History Navigation Polish",
+    changes: {
+      "zh-Hant": [
+        "【圖鑑泳裝西瓜差分動態切換】移除圖鑑主列表重複之「切西瓜」選項與舊黑剪影，主選單精簡為 3 項；選中清涼泳裝時新增「差分」切換按鈕，可平滑切換無西瓜與切西瓜立繪且放大鑑賞同步支援。",
+        "【戰績經驗值與進度條精準呈現】修復離線或線上初始化時經驗值為 0 卻顯示 0 / undefined EXP (100%) 與滿格之缺陷，補足經驗值保底與百分比空條運算。",
+        "【修練道場歷史整合與上下頁關閉】開啟修練道場彈窗時寫入 #dojo 歷史紀錄，支援瀏覽器上一頁/下一頁與滑鼠側鍵（button 3/4）自然關閉彈窗。",
+        "【修練道場 QTE 練習離開即刻銷毀】修正 QTE 練習中按上一頁或切換畫面時背景仍持續運行之問題，離開道場時強制終止 QTE 系統、音效與定時器。"
+      ],
+      "zh-Hans": [
+        "【图鉴泳装西瓜差分动态切换】移除图鉴主列表重复之“切西瓜”选项与旧黑剪影，主菜单精简为 3 项；选中清凉泳装时新增“差分”切换按钮，可平滑切换无西瓜与切西瓜立绘且放大鉴赏同步支持。",
+        "【战绩经验值与进度条精准呈现】修复离线或在线初始化时经验值为 0 却显示 0 / undefined EXP (100%) 与满格之缺陷，补足经验值保底与百分比空格运算。",
+        "【修练道场历史整合与上下页关闭】开启修练道场弹窗时写入 #dojo 历史记录，支持浏览器上一页/下一页与鼠标侧键（button 3/4）自然关闭弹窗。",
+        "【修练道场 QTE 练习离开即刻销毁】修正 QTE 练习中按上一页或切换画面时背景仍持续运行之问题，离开道场时强制终止 QTE 系统、音效与定时器。"
+      ],
+      "en": [
+        "【Gallery Swimsuit Variant Diff Toggle】Removed duplicate watermelon slot and redundant silhouette from gallery main tabs (now 3 primary entries); added a Variant toggle button to smoothly switch between default swimsuit and watermelon split CG with full lightbox support.",
+        "【Journey Records EXP & Gauge Calculation Fix】Fixed an issue where 0 EXP at Level 1 resulted in 0 / undefined EXP (100%) and a fully filled bar, ensuring robust fallback formula and accurate empty bar display.",
+        "【Training Dojo History & Back Navigation Integration】Pushed #dojo history entry on opening dojo modal, allowing browser Back/Forward and mouse navigation buttons to close the modal seamlessly.",
+        "【Dojo QTE Background Execution Teardown】Ensured full teardown of QTE loops, timers, and SFX whenever navigating away from the continuous QTE training screen via browser history or UI buttons."
+      ],
+      "ja": [
+        "【図鑑水着スイカ割り差分動態切り替え】図鑑メインタブから重複していた「スイカ割り」独立項目と黒シルエットを削除し3項目に統合。水着鑑賞時に「差分」トグルボタンを追加し、通常水着とスイカ割り姿を滑らかに切り替え可能に。",
+        "【戦績経験値計算とゲージ表示の修正】Lv.1・経験値0の際に 0 / undefined EXP (100%) および満タン表示になっていた不具合を解消。確実なEXP上限保証と正確な0%表示を実装。",
+        "【修練道場モーダルの履歴統合と戻る対応】道場モーダル展開時に #dojo 履歴を記録し、ブラウザの「戻る／進む」およびマウス進む／戻るボタンで自然に閉じられるよう改善。",
+        "【道場QTE練習の画面遷移時即時終了】QTE練習中にブラウザ履歴等で離脱した際にバックグラウンドで処理やSEが継続していた問題を解消し、完全停止処理を適用。"
+      ]
+    }
+  },
+  {
     version: "0.0.30",
     date: "2026-09-04",
     tag: "Audio Mute Toggle Event Synchronization, Cross-Mode Persistence & Crimson Slash Visual Fix",
@@ -973,6 +1004,9 @@ const DICTIONARY = {
       sfxOffToast: "遊戲音效已關閉。",
       rewardEarned: "獲得獎勵",
       zoomHighRes: "放大鑑賞",
+      galleryDiffToggle: "差分",
+      galleryDiffDefault: "預設泳裝",
+      galleryDiffWatermelon: "切西瓜差分",
       clickToZoom: "點擊全螢幕放大查看",
       closeLightbox: "關閉視圖",
       langToggle: "語系",
@@ -1543,7 +1577,7 @@ const DICTIONARY = {
       },
       swimsuit_default: {
         name: "夏日祭・清涼泳裝",
-        variantName: "預設泳裝",
+        variantName: "清涼泳裝",
         description: "小樂難得換上的清涼泳裝。在對局勝出後方能一窺風采。"
       },
       swimsuit_watermelon: {
@@ -1851,6 +1885,9 @@ const DICTIONARY = {
       sfxOffToast: "游戏音效已关闭。",
       rewardEarned: "获得奖励",
       zoomHighRes: "放大鉴赏",
+      galleryDiffToggle: "差分",
+      galleryDiffDefault: "默认泳装",
+      galleryDiffWatermelon: "切西瓜差分",
       clickToZoom: "点击全屏放大查看",
       closeLightbox: "关闭视图",
       langToggle: "语言",
@@ -2359,7 +2396,7 @@ const DICTIONARY = {
       },
       swimsuit_default: {
         name: "夏日祭・清凉泳装",
-        variantName: "默认泳装",
+        variantName: "清凉泳装",
         description: "小乐难得换上的清凉泳装。在对局胜出后方能一窥风采。"
       },
       swimsuit_watermelon: {
@@ -2667,6 +2704,9 @@ const DICTIONARY = {
       sfxOffToast: "Sound effects disabled.",
       rewardEarned: "Rewards Earned",
       zoomHighRes: "Zoom HD",
+      galleryDiffToggle: "Variant",
+      galleryDiffDefault: "Default Swimsuit",
+      galleryDiffWatermelon: "Watermelon Split",
       clickToZoom: "Click to view full resolution",
       closeLightbox: "Close",
       langToggle: "Language",
@@ -3175,7 +3215,7 @@ const DICTIONARY = {
       },
       swimsuit_default: {
         name: "Summer Festival: Breezy Swimsuit",
-        variantName: "Default Swimsuit",
+        variantName: "Summer Swimsuit",
         description: "A rare sight of Kohaku in her refreshing summer swimsuit, revealed only after claiming victory."
       },
       swimsuit_watermelon: {
@@ -3483,6 +3523,9 @@ const DICTIONARY = {
       sfxOffToast: "効果音を無効にしました。",
       rewardEarned: "獲得報酬",
       zoomHighRes: "拡大鑑賞",
+      galleryDiffToggle: "差分",
+      galleryDiffDefault: "通常水着",
+      galleryDiffWatermelon: "スイカ割り差分",
       clickToZoom: "クリックで高画質全画面拡大",
       closeLightbox: "閉じる",
       langToggle: "言語",
@@ -3991,7 +4034,7 @@ const DICTIONARY = {
       },
       swimsuit_default: {
         name: "夏祭り・清涼水着",
-        variantName: "通常水着",
+        variantName: "清涼水着",
         description: "コハクが珍しく着替えた水着姿。勝負に勝った者だけが拝めるご褒美。"
       },
       swimsuit_watermelon: {

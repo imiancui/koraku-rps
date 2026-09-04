@@ -13,16 +13,19 @@ class MemoryPersistence {
   clear() { this.data = null; }
 }
 
-test("圖鑑設定：包含小樂預設、2P色、泳裝預設與切西瓜差分共4種立繪", () => {
-  assert.equal(GALLERY_ITEMS.length, 4);
+test("圖鑑設定：包含小樂預設、2P色、清涼泳裝（含切西瓜差分）共3種主造型", () => {
+  assert.equal(GALLERY_ITEMS.length, 3);
   assert.equal(GALLERY_ITEMS[0].id, "koraku_default");
   assert.equal(GALLERY_ITEMS[0].src, "./koraku/小樂-預設.webp");
   assert.equal(GALLERY_ITEMS[1].id, "koraku_2p");
   assert.equal(GALLERY_ITEMS[1].src, "./koraku/小樂-2P色.webp");
   assert.equal(GALLERY_ITEMS[2].id, "swimsuit_default");
   assert.equal(GALLERY_ITEMS[2].src, "./koraku/泳裝小樂.webp");
-  assert.equal(GALLERY_ITEMS[3].id, "swimsuit_watermelon");
-  assert.equal(GALLERY_ITEMS[3].src, "./koraku/泳裝小樂_西瓜.webp");
+  assert.ok(Array.isArray(GALLERY_ITEMS[2].diffVariants));
+  assert.equal(GALLERY_ITEMS[2].diffVariants.length, 2);
+  assert.equal(GALLERY_ITEMS[2].diffVariants[0].id, "default");
+  assert.equal(GALLERY_ITEMS[2].diffVariants[1].id, "watermelon");
+  assert.equal(GALLERY_ITEMS[2].diffVariants[1].src, "./koraku/泳裝小樂_西瓜.webp");
 });
 
 test("圖鑑解鎖條件：預設小樂直接解鎖、2P色需通關第4關、泳裝需通關或觸發事件", () => {
@@ -35,7 +38,6 @@ test("圖鑑解鎖條件：預設小樂直接解鎖、2P色需通關第4關、�
   assert.equal(isUnlocked(GALLERY_ITEMS[0], store.snapshot()), true, "預設小樂應直接解鎖");
   assert.equal(isUnlocked(GALLERY_ITEMS[1], store.snapshot()), false, "2P色小樂初始應鎖定");
   assert.equal(isUnlocked(GALLERY_ITEMS[2], store.snapshot()), false, "泳裝小樂初始應鎖定");
-  assert.equal(isUnlocked(GALLERY_ITEMS[3], store.snapshot()), false, "切西瓜小樂初始應鎖定");
 
   // 2. 通關第一關：解鎖泳裝
   store.recordBattle(true, { id: 1, name: "初逢・朱鳥居", winCoins: 100, xpWin: 150 });

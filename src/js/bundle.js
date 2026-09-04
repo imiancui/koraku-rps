@@ -4,7 +4,7 @@
   "use strict";
 
 // --- src/js/config/gameConfig.js ---
-const APP_VERSION = "0.0.30";
+const APP_VERSION = "0.0.31";
 
 const DOJO_CONFIG = Object.freeze({
   defaultHp: 10000,
@@ -202,16 +202,25 @@ const GALLERY_ITEMS = Object.freeze([
   {
     id: "swimsuit_default",
     name: "夏日祭・清涼泳裝",
-    variantName: "預設泳裝",
+    variantName: "清涼泳裝",
     src: ASSETS.swimsuit,
-    description: "小樂難得換上的清涼泳裝。在對局勝出後方能一窺風采。"
-  },
-  {
-    id: "swimsuit_watermelon",
-    name: "海風・切西瓜",
-    variantName: "切西瓜",
-    src: ASSETS.watermelon,
-    description: "蒙眼切西瓜大獲全勝後，小樂得意洋洋展示成果的模樣。"
+    description: "小樂難得換上的清涼泳裝。在對局勝出後方能一窺風采。",
+    diffVariants: [
+      {
+        id: "default",
+        name: "夏日祭・清涼泳裝",
+        variantName: "清涼泳裝",
+        src: ASSETS.swimsuit,
+        description: "小樂難得換上的清涼泳裝。在對局勝出後方能一窺風采。"
+      },
+      {
+        id: "watermelon",
+        name: "海風・切西瓜",
+        variantName: "切西瓜",
+        src: ASSETS.watermelon,
+        description: "蒙眼切西瓜大獲全勝後，小樂得意洋洋展示成果的模樣。"
+      }
+    ]
   }
 ]);
 
@@ -508,6 +517,37 @@ const DEFAULT_LOCALE = "en";
 const LOCALE_STORAGE_KEY = "koraku-rps-locale";
 
 const CHANGELOG_DATA = [
+  {
+    version: "0.0.31",
+    date: "2026-09-04",
+    tag: "Gallery Swimsuit Diff Toggle, Records XP Math Fix & Dojo History Navigation Polish",
+    changes: {
+      "zh-Hant": [
+        "【圖鑑泳裝西瓜差分動態切換】移除圖鑑主列表重複之「切西瓜」選項與舊黑剪影，主選單精簡為 3 項；選中清涼泳裝時新增「差分」切換按鈕，可平滑切換無西瓜與切西瓜立繪且放大鑑賞同步支援。",
+        "【戰績經驗值與進度條精準呈現】修復離線或線上初始化時經驗值為 0 卻顯示 0 / undefined EXP (100%) 與滿格之缺陷，補足經驗值保底與百分比空條運算。",
+        "【修練道場歷史整合與上下頁關閉】開啟修練道場彈窗時寫入 #dojo 歷史紀錄，支援瀏覽器上一頁/下一頁與滑鼠側鍵（button 3/4）自然關閉彈窗。",
+        "【修練道場 QTE 練習離開即刻銷毀】修正 QTE 練習中按上一頁或切換畫面時背景仍持續運行之問題，離開道場時強制終止 QTE 系統、音效與定時器。"
+      ],
+      "zh-Hans": [
+        "【图鉴泳装西瓜差分动态切换】移除图鉴主列表重复之“切西瓜”选项与旧黑剪影，主菜单精简为 3 项；选中清凉泳装时新增“差分”切换按钮，可平滑切换无西瓜与切西瓜立绘且放大鉴赏同步支持。",
+        "【战绩经验值与进度条精准呈现】修复离线或在线初始化时经验值为 0 却显示 0 / undefined EXP (100%) 与满格之缺陷，补足经验值保底与百分比空格运算。",
+        "【修练道场历史整合与上下页关闭】开启修练道场弹窗时写入 #dojo 历史记录，支持浏览器上一页/下一页与鼠标侧键（button 3/4）自然关闭弹窗。",
+        "【修练道场 QTE 练习离开即刻销毁】修正 QTE 练习中按上一页或切换画面时背景仍持续运行之问题，离开道场时强制终止 QTE 系统、音效与定时器。"
+      ],
+      "en": [
+        "【Gallery Swimsuit Variant Diff Toggle】Removed duplicate watermelon slot and redundant silhouette from gallery main tabs (now 3 primary entries); added a Variant toggle button to smoothly switch between default swimsuit and watermelon split CG with full lightbox support.",
+        "【Journey Records EXP & Gauge Calculation Fix】Fixed an issue where 0 EXP at Level 1 resulted in 0 / undefined EXP (100%) and a fully filled bar, ensuring robust fallback formula and accurate empty bar display.",
+        "【Training Dojo History & Back Navigation Integration】Pushed #dojo history entry on opening dojo modal, allowing browser Back/Forward and mouse navigation buttons to close the modal seamlessly.",
+        "【Dojo QTE Background Execution Teardown】Ensured full teardown of QTE loops, timers, and SFX whenever navigating away from the continuous QTE training screen via browser history or UI buttons."
+      ],
+      "ja": [
+        "【図鑑水着スイカ割り差分動態切り替え】図鑑メインタブから重複していた「スイカ割り」独立項目と黒シルエットを削除し3項目に統合。水着鑑賞時に「差分」トグルボタンを追加し、通常水着とスイカ割り姿を滑らかに切り替え可能に。",
+        "【戦績経験値計算とゲージ表示の修正】Lv.1・経験値0の際に 0 / undefined EXP (100%) および満タン表示になっていた不具合を解消。確実なEXP上限保証と正確な0%表示を実装。",
+        "【修練道場モーダルの履歴統合と戻る対応】道場モーダル展開時に #dojo 履歴を記録し、ブラウザの「戻る／進む」およびマウス進む／戻るボタンで自然に閉じられるよう改善。",
+        "【道場QTE練習の画面遷移時即時終了】QTE練習中にブラウザ履歴等で離脱した際にバックグラウンドで処理やSEが継続していた問題を解消し、完全停止処理を適用。"
+      ]
+    }
+  },
   {
     version: "0.0.30",
     date: "2026-09-04",
@@ -1460,6 +1500,9 @@ const DICTIONARY = {
       sfxOffToast: "遊戲音效已關閉。",
       rewardEarned: "獲得獎勵",
       zoomHighRes: "放大鑑賞",
+      galleryDiffToggle: "差分",
+      galleryDiffDefault: "預設泳裝",
+      galleryDiffWatermelon: "切西瓜差分",
       clickToZoom: "點擊全螢幕放大查看",
       closeLightbox: "關閉視圖",
       langToggle: "語系",
@@ -2030,7 +2073,7 @@ const DICTIONARY = {
       },
       swimsuit_default: {
         name: "夏日祭・清涼泳裝",
-        variantName: "預設泳裝",
+        variantName: "清涼泳裝",
         description: "小樂難得換上的清涼泳裝。在對局勝出後方能一窺風采。"
       },
       swimsuit_watermelon: {
@@ -2338,6 +2381,9 @@ const DICTIONARY = {
       sfxOffToast: "游戏音效已关闭。",
       rewardEarned: "获得奖励",
       zoomHighRes: "放大鉴赏",
+      galleryDiffToggle: "差分",
+      galleryDiffDefault: "默认泳装",
+      galleryDiffWatermelon: "切西瓜差分",
       clickToZoom: "点击全屏放大查看",
       closeLightbox: "关闭视图",
       langToggle: "语言",
@@ -2846,7 +2892,7 @@ const DICTIONARY = {
       },
       swimsuit_default: {
         name: "夏日祭・清凉泳装",
-        variantName: "默认泳装",
+        variantName: "清凉泳装",
         description: "小乐难得换上的清凉泳装。在对局胜出后方能一窥风采。"
       },
       swimsuit_watermelon: {
@@ -3154,6 +3200,9 @@ const DICTIONARY = {
       sfxOffToast: "Sound effects disabled.",
       rewardEarned: "Rewards Earned",
       zoomHighRes: "Zoom HD",
+      galleryDiffToggle: "Variant",
+      galleryDiffDefault: "Default Swimsuit",
+      galleryDiffWatermelon: "Watermelon Split",
       clickToZoom: "Click to view full resolution",
       closeLightbox: "Close",
       langToggle: "Language",
@@ -3662,7 +3711,7 @@ const DICTIONARY = {
       },
       swimsuit_default: {
         name: "Summer Festival: Breezy Swimsuit",
-        variantName: "Default Swimsuit",
+        variantName: "Summer Swimsuit",
         description: "A rare sight of Kohaku in her refreshing summer swimsuit, revealed only after claiming victory."
       },
       swimsuit_watermelon: {
@@ -3970,6 +4019,9 @@ const DICTIONARY = {
       sfxOffToast: "効果音を無効にしました。",
       rewardEarned: "獲得報酬",
       zoomHighRes: "拡大鑑賞",
+      galleryDiffToggle: "差分",
+      galleryDiffDefault: "通常水着",
+      galleryDiffWatermelon: "スイカ割り差分",
       clickToZoom: "クリックで高画質全画面拡大",
       closeLightbox: "閉じる",
       langToggle: "言語",
@@ -4478,7 +4530,7 @@ const DICTIONARY = {
       },
       swimsuit_default: {
         name: "夏祭り・清涼水着",
-        variantName: "通常水着",
+        variantName: "清涼水着",
         description: "コハクが珍しく着替えた水着姿。勝負に勝った者だけが拝めるご褒美。"
       },
       swimsuit_watermelon: {
@@ -12760,6 +12812,7 @@ class AppView {
     this.activeShopTab = "potions";
     this.activeShopFilter = "all";
     this.selectedGalleryItem = GALLERY_ITEMS[0].id;
+    this.gallerySwimsuitDiff = "default";
     this.battleState = null;
     this.postState = null;
     this.qteState = null;
@@ -12795,6 +12848,10 @@ class AppView {
         this.activeGuideTab = window.localStorage.getItem("koraku_guide_tab") || "basics";
         this.activeShopTab = window.localStorage.getItem("koraku_shop_tab") || "potions";
         this.selectedGalleryItem = window.localStorage.getItem("koraku_gallery_item") || GALLERY_ITEMS[0].id;
+        if (this.selectedGalleryItem === "swimsuit_watermelon") {
+          this.selectedGalleryItem = "swimsuit_default";
+          this.gallerySwimsuitDiff = "watermelon";
+        }
         this.dojoQteStyle = window.localStorage.getItem("koraku_dojo_style") || "single";
         this.dojoMode = window.localStorage.getItem("koraku_dojo_mode") || "1";
         this.isWatermelonZoomed = window.localStorage.getItem("koraku_watermelon_zoomed") === "true";
@@ -12879,10 +12936,16 @@ class AppView {
     }
     if (this.client && typeof this.client.getState === "function") {
       const st = this.client.getState();
-      if (st && Object.keys(st).length > 0) return st;
+      if (st && Object.keys(st).length > 0) {
+        if (!st.xpToNext && st.profile?.level) {
+          st.xpToNext = xpNeededForLevel(st.profile.level);
+        }
+        return st;
+      }
     }
     return {
       profile: { level: 1, xp: 0, skillPoints: 0, allocations: { hp: 0, mp: 0, damage: 0 }, skills: { momo: 0, dualHand: 0 } },
+      xpToNext: xpNeededForLevel(1),
       playerStats: { maxHp: 100, maxMp: 50, damage: 15 },
       coins: 0,
       inventory: { hpPotion: 1, mpPotion: 0 },
@@ -13296,15 +13359,24 @@ class AppView {
     }
 
     let targetScreen = "home";
+    let openDojoOnInit = false;
     try {
       const hashScreen = window.location.hash ? window.location.hash.replace(/^#/, "") : null;
-      targetScreen = hashScreen || sessionStorage.getItem("koraku_active_screen") || "home";
+      if (hashScreen === "dojo") {
+        targetScreen = "home";
+        openDojoOnInit = true;
+      } else {
+        targetScreen = hashScreen || sessionStorage.getItem("koraku_active_screen") || "home";
+      }
     } catch (_) {}
 
     if (typeof window !== "undefined" && window.history) {
-      window.history.replaceState({ screen: targetScreen }, "", "#" + targetScreen);
+      window.history.replaceState({ screen: targetScreen }, "", "#" + (openDojoOnInit ? "dojo" : targetScreen));
     }
     this.navigate(targetScreen, { pushHistory: false });
+    if (openDojoOnInit) {
+      this.openDojoModal({ pushHistory: false });
+    }
   }
 
   renderI18n() {
@@ -13536,7 +13608,25 @@ class AppView {
 
     // Browser Popstate (History Back / Forward & Mobile Back Gesture)
     window.addEventListener("popstate", (event) => {
-      const targetScreen = event.state?.screen || (window.location.hash ? window.location.hash.replace(/^#/, "") : "home");
+      const rawHash = window.location.hash ? window.location.hash.replace(/^#/, "") : "home";
+      const targetScreen = event.state?.screen || rawHash;
+
+      // If leaving #dojo, close dojo modal
+      if (rawHash !== "dojo" && this.dojoModal && !this.dojoModal.hidden) {
+        this.closeDojoModal({ popHistory: false });
+      }
+
+      // If navigating to #dojo, open dojo modal
+      if (rawHash === "dojo") {
+        this.openDojoModal({ pushHistory: false });
+        return;
+      }
+
+      // If leaving dojo-qte or QTE is active, immediately tear it down
+      if (this.currentScreen === "dojo-qte" || this.dojoQteActive) {
+        this.stopDojoQte();
+      }
+
       if (this.currentScreen === targetScreen) return;
 
       if (this.currentScreen === "battle" && (this.battleState?.active || this.battle?.autoBattle?.active)) {
@@ -13562,6 +13652,17 @@ class AppView {
         if (this.currentScreen === "battle" && (this.battleState?.active || this.battle?.autoBattle?.active)) {
           event.preventDefault();
           this.promptAbandonBattle("home");
+          return;
+        }
+        if (this.dojoModal && !this.dojoModal.hidden && event.button === 3) {
+          event.preventDefault();
+          this.closeDojoModal();
+          return;
+        }
+        if (this.currentScreen === "dojo-qte" && event.button === 3) {
+          event.preventDefault();
+          this.stopDojoQte();
+          this.navigate("home");
           return;
         }
         event.preventDefault();
@@ -13859,13 +13960,13 @@ class AppView {
     if (event.target.closest("#btn-start-dojo-practice")) {
       if (this.dojoMode === "1") {
         const style = document.querySelector('input[name="dojo-mode1-style"]:checked')?.value || "single";
-        this.closeDojoModal();
+        this.closeDojoModal({ popHistory: false });
         this.startDojoQte(style);
       } else {
         const style = document.querySelector('input[name="dojo-mode2-style"]:checked')?.value || "single";
         const customHp = Number($("#dojo-custom-hp")?.value) || 10000;
         const customDamage = Number($("#dojo-custom-dmg")?.value) || 0;
-        this.closeDojoModal();
+        this.closeDojoModal({ popHistory: false });
         this.startDojoSandbox({ isDual: style === "dual", customHp, customDamage });
       }
       return;
@@ -14299,6 +14400,13 @@ class AppView {
       return;
     }
 
+    if (event.target.closest("#btn-gallery-diff")) {
+      this.gallerySwimsuitDiff = (this.gallerySwimsuitDiff === "watermelon") ? "default" : "watermelon";
+      this.renderGallery(this.getStoreSnapshot());
+      this.bus.emit("sound", { name: "select" });
+      return;
+    }
+
     if (event.target.closest("#btn-gallery-zoom") || (event.target.closest("#gallery-image") && !this.galleryArtFrame?.classList.contains("is-locked"))) {
       this.openGalleryLightbox();
       return;
@@ -14694,6 +14802,9 @@ class AppView {
   }
 
   navigate(screenName, options = {}) {
+    if ((this.currentScreen === "dojo-qte" || this.dojoQteActive) && screenName !== "dojo-qte") {
+      this.stopDojoQte();
+    }
     this.currentScreen = screenName;
     this.bus.emit("bgm:scene", { scene: screenName === "battle" ? "battle" : "lobby" });
     if (this.sound) {
@@ -14876,9 +14987,12 @@ class AppView {
     const records = state.records || {};
 
     // 1. Profile Level, XP and Theoretical DPS
-    if ($("#records-level")) $("#records-level").textContent = state.profile.level;
-    const xpPercent = state.xpToNext > 0 ? Math.min(100, Math.round((state.profile.xp / state.xpToNext) * 100)) : 100;
-    if ($("#records-xp-text")) $("#records-xp-text").textContent = `${state.profile.xp} / ${state.xpToNext} EXP (${xpPercent}%)`;
+    const profile = state.profile || { level: 1, xp: 0 };
+    if ($("#records-level")) $("#records-level").textContent = profile.level || 1;
+    const xpToNext = state.xpToNext || xpNeededForLevel(profile.level || 1);
+    const currentXp = profile.xp || 0;
+    const xpPercent = xpToNext > 0 ? Math.min(100, Math.max(0, Math.round((currentXp / xpToNext) * 100))) : 0;
+    if ($("#records-xp-text")) $("#records-xp-text").textContent = `${currentXp} / ${xpToNext} EXP (${xpPercent}%)`;
     if ($("#records-xp-fill")) $("#records-xp-fill").style.width = `${xpPercent}%`;
     const theoDps = this.store?.getTheoreticalDPS ? this.store.getTheoreticalDPS() : "0.0";
     if ($("#records-theoretical-dps")) $("#records-theoretical-dps").textContent = theoDps;
@@ -15541,21 +15655,47 @@ class AppView {
     const locCurrentItem = I18n.getLocalizedGalleryItem(currentItem);
     const unlocked = this.isGalleryItemUnlocked(currentItem, state);
 
+    const isSwimsuit = currentItem.id === "swimsuit_default";
+    const diffBtn = $("#btn-gallery-diff");
+    if (diffBtn) {
+      diffBtn.hidden = !isSwimsuit || !unlocked;
+      const isWatermelon = this.gallerySwimsuitDiff === "watermelon";
+      diffBtn.classList.toggle("is-watermelon", isWatermelon);
+      const diffBtnText = $("#gallery-diff-btn-text");
+      if (diffBtnText) {
+        diffBtnText.textContent = isWatermelon ? I18n.t("ui.galleryDiffWatermelon") : I18n.t("ui.galleryDiffDefault");
+      }
+    }
+
+    let displaySrc = currentItem.src;
+    let displayName = locCurrentItem.name;
+    let displayDesc = locCurrentItem.description;
+
+    if (isSwimsuit && this.gallerySwimsuitDiff === "watermelon") {
+      displaySrc = ASSETS.watermelon;
+      const watermelonLoc = DICTIONARY[I18n.getLocale()]?.gallery?.swimsuit_watermelon || DICTIONARY["zh-Hant"]?.gallery?.swimsuit_watermelon;
+      if (watermelonLoc) {
+        displayName = watermelonLoc.name;
+        displayDesc = watermelonLoc.description;
+      }
+    }
+
     if (this.galleryArtFrame) {
       this.galleryArtFrame.classList.toggle("is-locked", !unlocked);
       this.galleryArtFrame.dataset.variant = currentItem.id;
+      this.galleryArtFrame.dataset.diff = isSwimsuit ? this.gallerySwimsuitDiff : "none";
     }
     if (this.galleryImage) {
-      this.galleryImage.src = currentItem.src;
-      this.galleryImage.alt = locCurrentItem.name;
-      this.galleryImage.className = "gallery-img-" + currentItem.id;
+      this.galleryImage.src = displaySrc;
+      this.galleryImage.alt = displayName;
+      this.galleryImage.className = "gallery-img-" + currentItem.id + (isSwimsuit && this.gallerySwimsuitDiff === "watermelon" ? " gallery-img-swimsuit_watermelon" : "");
     }
     if (this.galleryItemTitle) {
-      this.galleryItemTitle.textContent = unlocked ? locCurrentItem.name : "？？？ (" + I18n.t("ui.galleryLockedTag") + ")";
+      this.galleryItemTitle.textContent = unlocked ? displayName : "？？？ (" + I18n.t("ui.galleryLockedTag") + ")";
     }
     if (this.galleryItemDesc) {
       if (unlocked) {
-        this.galleryItemDesc.textContent = locCurrentItem.description;
+        this.galleryItemDesc.textContent = displayDesc;
       } else {
         if (currentItem.id === "koraku_2p") {
           this.galleryItemDesc.textContent = I18n.t("ui.unlock2PHint") || "需戰勝終ノ章（第四關）1 次以解鎖";
@@ -15582,14 +15722,12 @@ class AppView {
     const unlocked = this.isGalleryItemUnlocked(currentItem, this.store.snapshot());
     if (!unlocked) return;
 
-    // 手機/觸控螢幕：直接開啟新分頁瀏覽原圖，以便使用者進行雙指放大 (Pinch to Zoom) 與長按下載
-    const isMobile = window.innerWidth <= 780 || ("ontouchstart" in window) || (navigator.maxTouchPoints > 0);
-    if (isMobile) {
-      window.open(currentItem.src, "_blank");
-      return;
-    }
-
+    const isWatermelonDiff = currentItem.id === "swimsuit_default" && this.gallerySwimsuitDiff === "watermelon";
+    const targetSrc = isWatermelonDiff ? ASSETS.watermelon : currentItem.src;
     const locItem = I18n.getLocalizedGalleryItem(currentItem);
+    let titleText = locItem.name;
+    let dimsText = "Ultra HD";
+
     const dimsMap = {
       "koraku_default": "4000 × 4000 px (Original)",
       "koraku_2p": "4000 × 4000 px (Original)",
@@ -15597,19 +15735,34 @@ class AppView {
       "swimsuit_watermelon": "4007 × 5425 px (Ultra HD)"
     };
 
+    if (isWatermelonDiff) {
+      const watermelonLoc = DICTIONARY[I18n.getLocale()]?.gallery?.swimsuit_watermelon || DICTIONARY["zh-Hant"]?.gallery?.swimsuit_watermelon;
+      if (watermelonLoc) titleText = watermelonLoc.name;
+      dimsText = dimsMap.swimsuit_watermelon;
+    } else {
+      dimsText = dimsMap[currentItem.id] || "Ultra HD";
+    }
+
+    // 手機/觸控螢幕：直接開啟新分頁瀏覽原圖，以便使用者進行雙指放大 (Pinch to Zoom) 與長按下載
+    const isMobile = window.innerWidth <= 780 || ("ontouchstart" in window) || (navigator.maxTouchPoints > 0);
+    if (isMobile) {
+      window.open(targetSrc, "_blank");
+      return;
+    }
+
     const titleEl = $("#gallery-lightbox-title");
     const dimsEl = $("#gallery-lightbox-dims");
     const imgEl = $("#gallery-lightbox-image");
     const tabLinkEl = $("#btn-open-image-tab");
 
-    if (titleEl) titleEl.textContent = locItem.name;
-    if (dimsEl) dimsEl.textContent = dimsMap[currentItem.id] || "Ultra HD";
+    if (titleEl) titleEl.textContent = titleText;
+    if (dimsEl) dimsEl.textContent = dimsText;
     if (imgEl) {
-      imgEl.src = currentItem.src;
-      imgEl.alt = locItem.name;
+      imgEl.src = targetSrc;
+      imgEl.alt = titleText;
     }
     if (tabLinkEl) {
-      tabLinkEl.href = currentItem.src;
+      tabLinkEl.href = targetSrc;
     }
 
     if (this.galleryLightboxModal) {
@@ -17116,17 +17269,25 @@ class AppView {
     }
   }
 
-  openDojoModal() {
+  openDojoModal({ pushHistory = true } = {}) {
     if (this.dojoModal) {
       this.dojoModal.hidden = false;
       this.dojoModal.setAttribute("aria-hidden", "false");
+      if (pushHistory && typeof window !== "undefined" && window.history) {
+        if (window.location.hash !== "#dojo") {
+          window.history.pushState({ modal: "dojo", screen: this.currentScreen }, "", "#dojo");
+        }
+      }
     }
   }
 
-  closeDojoModal() {
+  closeDojoModal({ popHistory = true } = {}) {
     if (this.dojoModal) {
       this.dojoModal.hidden = true;
       this.dojoModal.setAttribute("aria-hidden", "true");
+      if (popHistory && typeof window !== "undefined" && window.location.hash === "#dojo" && window.history) {
+        window.history.back();
+      }
     }
   }
 

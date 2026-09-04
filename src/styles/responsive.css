@@ -960,6 +960,18 @@
     padding-top: 10px;
   }
 
+  .gallery-badge-group {
+    right: 8px;
+    bottom: 8px;
+    gap: 6px;
+  }
+
+  .gallery-zoom-badge,
+  .gallery-diff-badge {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
   .gallery-lightbox-modal {
     padding: 8px;
   }

@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.0.30";
+export const APP_VERSION = "0.0.31";
 
 export const DOJO_CONFIG = Object.freeze({
   defaultHp: 10000,
@@ -196,16 +196,25 @@ export const GALLERY_ITEMS = Object.freeze([
   {
     id: "swimsuit_default",
     name: "夏日祭・清涼泳裝",
-    variantName: "預設泳裝",
+    variantName: "清涼泳裝",
     src: ASSETS.swimsuit,
-    description: "小樂難得換上的清涼泳裝。在對局勝出後方能一窺風采。"
-  },
-  {
-    id: "swimsuit_watermelon",
-    name: "海風・切西瓜",
-    variantName: "切西瓜",
-    src: ASSETS.watermelon,
-    description: "蒙眼切西瓜大獲全勝後，小樂得意洋洋展示成果的模樣。"
+    description: "小樂難得換上的清涼泳裝。在對局勝出後方能一窺風采。",
+    diffVariants: [
+      {
+        id: "default",
+        name: "夏日祭・清涼泳裝",
+        variantName: "清涼泳裝",
+        src: ASSETS.swimsuit,
+        description: "小樂難得換上的清涼泳裝。在對局勝出後方能一窺風采。"
+      },
+      {
+        id: "watermelon",
+        name: "海風・切西瓜",
+        variantName: "切西瓜",
+        src: ASSETS.watermelon,
+        description: "蒙眼切西瓜大獲全勝後，小樂得意洋洋展示成果的模樣。"
+      }
+    ]
   }
 ]);
 

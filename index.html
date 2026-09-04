@@ -44,12 +44,12 @@
         }
       })();
     </script>
-    <link rel="stylesheet" href="./src/styles/tokens.css?v=202609042110">
-    <link rel="stylesheet" href="./src/styles/base.css?v=202609042110">
-    <link rel="stylesheet" href="./src/styles/components.css?v=202609042110">
-    <link rel="stylesheet" href="./src/styles/screens.css?v=202609042110">
-    <link rel="stylesheet" href="./src/styles/animations.css?v=202609042110">
-    <link rel="stylesheet" href="./src/styles/responsive.css?v=202609042110">
+    <link rel="stylesheet" href="./src/styles/tokens.css?v=202609042245">
+    <link rel="stylesheet" href="./src/styles/base.css?v=202609042245">
+    <link rel="stylesheet" href="./src/styles/components.css?v=202609042245">
+    <link rel="stylesheet" href="./src/styles/screens.css?v=202609042245">
+    <link rel="stylesheet" href="./src/styles/animations.css?v=202609042245">
+    <link rel="stylesheet" href="./src/styles/responsive.css?v=202609042245">
   </head>
   <body>
     <div id="app" class="app-shell" data-screen="home">
@@ -192,7 +192,7 @@
               </button>
               <footer class="home-footer" aria-label="頁腳資訊" data-i18n-attr="aria-label:ui.footerInfo">
                 <button type="button" class="footer-version-btn" id="footer-app-version-btn" title="查看更新日誌 (Changelog)" aria-label="查看更新日誌" data-i18n-attr="aria-label:ui.changelog,title:ui.changelog">
-                  <span class="footer-version" id="footer-app-version">0.0.30</span>
+                  <span class="footer-version" id="footer-app-version">0.0.31</span>
                 </button>
                 <span class="footer-plain-sep">/</span>
                 <a href="https://store.steampowered.com/app/1425000" target="_blank" rel="noopener noreferrer" class="footer-plain-link">Endless Alice</a>
@@ -365,10 +365,16 @@
             <div class="gallery-stage">
               <div id="gallery-art-frame" class="gallery-art-frame">
                 <img id="gallery-image" src="./koraku/泳裝小樂.webp" alt="小樂立繪">
-                <button type="button" id="btn-gallery-zoom" class="gallery-zoom-badge" aria-label="放大查看全圖" title="放大鑑賞 (High-Res)" data-i18n-attr="aria-label:ui.galleryZoom,title:ui.galleryZoomTitle">
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14zm.5-7H9v2H7v1h2v2h1v-2h2V9h-2z"/></svg>
-                  <span data-i18n="ui.zoomHighRes">放大鑑賞</span>
-                </button>
+                <div class="gallery-badge-group">
+                  <button type="button" id="btn-gallery-diff" class="gallery-diff-badge" aria-label="切換差分" title="切換差分" data-i18n-attr="aria-label:ui.galleryDiffToggle,title:ui.galleryDiffToggle" hidden>
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3L21 9z"/></svg>
+                    <span id="gallery-diff-btn-text" data-i18n="ui.galleryDiffToggle">差分</span>
+                  </button>
+                  <button type="button" id="btn-gallery-zoom" class="gallery-zoom-badge" aria-label="放大查看全圖" title="放大鑑賞 (High-Res)" data-i18n-attr="aria-label:ui.galleryZoom,title:ui.galleryZoomTitle">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14zm.5-7H9v2H7v1h2v2h1v-2h2V9h-2z"/></svg>
+                    <span data-i18n="ui.zoomHighRes">放大鑑賞</span>
+                  </button>
+                </div>
                 <div id="gallery-lock-overlay" class="gallery-lock-overlay">
                   <span class="gallery-lock-icon">🔒</span>
                   <b data-i18n="ui.notYetUnlocked">尚未解鎖</b>
@@ -1667,6 +1673,6 @@
       <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
     </div>
-    <script src="./src/js/bundle.js?v=202609042110"></script>
+    <script src="./src/js/bundle.js?v=202609042245"></script>
   </body>
 </html>

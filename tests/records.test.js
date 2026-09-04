@@ -76,3 +76,23 @@ test("戰績與統計紀錄系統：累計獲得星砂、EXP、總場次、手�
   store.recordWatermelonSlice();
   assert.equal(store.state.records.watermelonSlices, 2);
 });
+
+test("戰績與資源統計：Lv.1 且經驗為 0 時進度條為 0% 且無 undefined", () => {
+  const bus = new EventBus();
+  const persistence = new MemoryPersistence();
+  const store = new GameStore(bus, persistence);
+  const snap = store.snapshot();
+
+  assert.equal(snap.profile.level, 1);
+  assert.equal(snap.profile.xp, 0);
+  assert.equal(snap.xpToNext, 100);
+
+  // 模擬 AppView.renderHomeRecords 計算邏輯
+  const xpToNext = snap.xpToNext || 100;
+  const currentXp = snap.profile.xp || 0;
+  const xpPercent = xpToNext > 0 ? Math.min(100, Math.max(0, Math.round((currentXp / xpToNext) * 100))) : 0;
+  const text = `${currentXp} / ${xpToNext} EXP (${xpPercent}%)`;
+
+  assert.equal(xpPercent, 0, "經驗值為 0 時進度條應為 0%");
+  assert.equal(text, "0 / 100 EXP (0%)", "不得包含 undefined");
+});
