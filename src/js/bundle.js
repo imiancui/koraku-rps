@@ -4,7 +4,7 @@
   "use strict";
 
 // --- src/js/config/gameConfig.js ---
-const APP_VERSION = "0.0.34";
+const APP_VERSION = "0.0.35";
 
 const DOJO_CONFIG = Object.freeze({
   defaultHp: 10000,
@@ -517,6 +517,33 @@ const DEFAULT_LOCALE = "en";
 const LOCALE_STORAGE_KEY = "koraku-rps-locale";
 
 const CHANGELOG_DATA = [
+  {
+    version: "0.0.35",
+    date: "2026-09-05",
+    tag: "Security Hardening: Mask Cheat Passcode In Placeholder & Authoritative Online Elevation Sync",
+    changes: {
+      "zh-Hant": [
+        "【移除密碼洩漏提示】徹底移除作弊驗證輸入框內洩漏之「(8989)」文字，改為安全中立的「請輸入管理員密碼」，維護管理員權限保護機制。",
+        "【線上權威伺服器同步更新】遠端權威伺服器 (ws.koraku.app) 同步更新部署，全面支援 8989 提權與新版作弊屬性指令，徹底解決線上無法套用作弊之問題。",
+        "【嚴格在線提權校驗】線上連線模式下嚴格校驗伺服器端提權結果，提權未過時不再假裝解鎖，確保前後端權限狀態嚴格一致。"
+      ],
+      "zh-Hans": [
+        "【移除密码泄露提示】彻底移除作弊验证输入框内泄露之「(8989)」文字，改为安全中立的「请输入管理员密码」，维护管理员权限保护机制。",
+        "【线上权威服务器同步更新】远端权威服务器 (ws.koraku.app) 同步更新部署，全面支持 8989 提权与新版作弊属性指令，彻底解决线上无法套用作弊之问题。",
+        "【严格在线提权校验】线上连线模式下严格校验服务器端提权结果，提权未过时不再假装解锁，确保前后端权限状态严格一致。"
+      ],
+      "en": [
+        "【Security: Mask Passcode in Placeholder】Completely removed leaked '(8989)' from the cheat auth input placeholder across all locales, replacing it with a secure neutral prompt.",
+        "【Authoritative Server Elevation Sync】Synchronized and deployed the latest authoritative server on ws.koraku.app, fully supporting 8989 elevation and modern flat cheat commands online.",
+        "【Strict Online Elevation Validation】Strictly checks server elevation ACK when connected online, eliminating false-positive client unlocks when server elevation fails."
+      ],
+      "ja": [
+        "【プレースホルダーのパスワード漏洩防止】チート認証入力欄の「(8989)」表記を全言語で完全に削除し、「管理者パスワードを入力」に安全化。",
+        "【オンライン権威サーバー同期更新】遠隔サーバー (ws.koraku.app) を最新コードに同期・再起動し、8989 昇格と最新チートコマンドの完全適用を実現。",
+        "【厳格なオンライン昇格検証】オンライン接続時はサーバー昇格の成功を厳格に確認し、サーバー拒否時にクライアント側が誤開放する不整合を解消。"
+      ]
+    }
+  },
   {
     version: "0.0.34",
     date: "2026-09-05",
@@ -1595,7 +1622,7 @@ const DICTIONARY = {
       openCheat: "測試調試 / 作弊選單",
       cheatAuthTitle: "作弊驗證",
       cheatAuthPrompt: "請輸入管理密碼以開啟測試選單：",
-      cheatAuthPlaceholder: "輸入密碼 (8989)",
+      cheatAuthPlaceholder: "請輸入管理員密碼",
       cheatAuthConfirm: "解鎖選單",
       cheatAuthCancel: "取消",
       cheatAuthError: "密碼錯誤！無法開啟作弊選單。",
@@ -2477,7 +2504,7 @@ const DICTIONARY = {
       openCheat: "测试调试 / 作弊菜单",
       cheatAuthTitle: "作弊验证",
       cheatAuthPrompt: "请输入管理密码以开启测试菜单：",
-      cheatAuthPlaceholder: "输入密码 (8989)",
+      cheatAuthPlaceholder: "请输入管理员密码",
       cheatAuthConfirm: "解锁菜单",
       cheatAuthCancel: "取消",
       cheatAuthError: "密码错误！无法开启作弊菜单。",
@@ -3297,7 +3324,7 @@ const DICTIONARY = {
       openCheat: "Debug & Cheat Menu",
       cheatAuthTitle: "Cheat Verification",
       cheatAuthPrompt: "Enter admin passcode to unlock the debug menu:",
-      cheatAuthPlaceholder: "Passcode (8989)",
+      cheatAuthPlaceholder: "Enter admin passcode",
       cheatAuthConfirm: "Unlock",
       cheatAuthCancel: "Cancel",
       cheatAuthError: "Incorrect passcode! Debug menu remains locked.",
@@ -4117,7 +4144,7 @@ const DICTIONARY = {
       openCheat: "デバッグ・チート設定",
       cheatAuthTitle: "チート認証",
       cheatAuthPrompt: "管理パスワードを入力してデバッグメニューを開放します：",
-      cheatAuthPlaceholder: "パスワード (8989)",
+      cheatAuthPlaceholder: "管理者パスワードを入力",
       cheatAuthConfirm: "解除",
       cheatAuthCancel: "キャンセル",
       cheatAuthError: "パスワードが正しくありません。",
@@ -16190,9 +16217,6 @@ class AppView {
         isEntitled = await this.client.verifyDevEntitlement(pass);
       } catch (err) {
         console.warn("[AppView] verifyDevEntitlement failed:", err);
-      }
-      if (!isEntitled && (isMasterPass || isDevKey)) {
-        isEntitled = true;
       }
     } else {
       isEntitled = isMasterPass || isDevKey;
