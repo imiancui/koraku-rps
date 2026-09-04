@@ -4,7 +4,7 @@
   "use strict";
 
 // --- src/js/config/gameConfig.js ---
-const APP_VERSION = "0.0.31";
+const APP_VERSION = "0.0.32";
 
 const DOJO_CONFIG = Object.freeze({
   defaultHp: 10000,
@@ -517,6 +517,33 @@ const DEFAULT_LOCALE = "en";
 const LOCALE_STORAGE_KEY = "koraku-rps-locale";
 
 const CHANGELOG_DATA = [
+  {
+    version: "0.0.32",
+    date: "2026-09-04",
+    tag: "Real-time Online Players Counter, Gold Mute Slash & F5 Mute State Persistence Fix",
+    changes: {
+      "zh-Hant": [
+        "【即時線上人數連線顯示】連線狀態徽章整合即時在線人數（每 5 秒心跳更新），連線成功時顯示「連線中 (X人)」，離線時優雅維持「離線」。",
+        "【神社金靜音禁用劃線統整】調整靜音圖示斜線為純粹神社金（--gold: #d8b66a）與深黑立體描邊，移除紅色光暈，使整體 UI 視覺統一且簡潔高雅。",
+        "【F5 網頁重整靜音持久化修復】徹底根除線上連線交握時狀態覆蓋導致 F5 後音訊靜音失效問題，確保 BGM 與 SFX 靜音狀態於頁面重載後 100% 保持。"
+      ],
+      "zh-Hans": [
+        "【实时在线人数连接显示】连接状态徽章整合实时在线人数（每 5 秒心跳更新），连接成功时显示“连接中 (X人)”，离线时优雅保持“离线”。",
+        "【神社金静音禁用划线统整】调整静音图标斜线为纯粹神社金（--gold: #d8b66a）与深黑立体描边，移除红色光晕，使整体 UI 视觉统一且简洁高雅。",
+        "【F5 网页刷新静音持久化修复】彻底根除在线连接握手时状态覆盖导致 F5 后音频静音失效问题，确保 BGM 与 SFX 静音状态于页面重载后 100% 保持。"
+      ],
+      "en": [
+        "【Real-time Online Players Counter】Integrated live player counts into the connection status badge (heartbeat updated every 5s), displaying 'Connected (X players)' when online and cleanly showing 'Offline' when disconnected.",
+        "【Shrine Gold Mute Slash Alignment】Unified mute strikethrough lines with elegant shrine gold (--gold: #d8b66a) and crisp dark stroke drop-shadow, eliminating red hover glow for clean visual cohesion.",
+        "【F5 Page Refresh Mute Persistence Fix】Resolved an issue where server handshake snapshot overwrite wiped client mute state on F5 refresh, guaranteeing 100% sound and music mute state retention."
+      ],
+      "ja": [
+        "【リアルタイムオンライン人数表示】接続ステータスバッジにリアルタイム接続人数（5秒ごとのハートビート更新）を統合し、接続時は「接続中 (X人)」、オフライン時は「オフライン」と正確に表示。",
+        "【神社金ミュート禁止斜線の統一】消音斜線を神社金（--gold: #d8b66a）と引き締まった黒シャドウに統一し、赤色のホバー光彩を除去して洗練された統一感を確立。",
+        "【F5リロード時のミュート永続化修復】オンライン接続ハンドシェイク時の状態上書きによりF5リロードで消音状態が解除されていた問題を根絶し、BGM/SEの消音状態を100%保持。"
+      ]
+    }
+  },
   {
     version: "0.0.31",
     date: "2026-09-04",
@@ -2199,6 +2226,7 @@ const DICTIONARY = {
 
       connecting: "連線中",
       online: "線上連線",
+      onlineWithCount: "連線中 ({count}人)",
       offline: "離線模式",
       reconnecting: "重新連線中",
       disconnected: "連線中斷",
@@ -3018,6 +3046,7 @@ const DICTIONARY = {
 
       connecting: "连接中",
       online: "在线连接",
+      onlineWithCount: "在线 ({count}人)",
       offline: "离线模式",
       reconnecting: "重新连接中",
       disconnected: "连接中断",
@@ -3837,6 +3866,7 @@ const DICTIONARY = {
 
       connecting: "Connecting",
       online: "Online",
+      onlineWithCount: "Online ({count})",
       offline: "Offline",
       reconnecting: "Reconnecting",
       disconnected: "Disconnected",
@@ -4656,6 +4686,7 @@ const DICTIONARY = {
 
       connecting: "接続中",
       online: "オンライン",
+      onlineWithCount: "オンライン ({count}人)",
       offline: "オフライン",
       reconnecting: "再接続中",
       disconnected: "切断",
@@ -6067,7 +6098,19 @@ function getEquipmentTypeId(itemOrId) {
 }
 
 function freshSave() {
-  return structuredClone(DEFAULT_SAVE);
+  const save = structuredClone(DEFAULT_SAVE);
+  try {
+    if (typeof window !== "undefined" && window.localStorage) {
+      const sm = window.localStorage.getItem("koraku_music_muted");
+      if (sm !== null) save.settings.musicMuted = sm === "true";
+      const ss = window.localStorage.getItem("koraku_sfx_muted");
+      if (ss !== null) {
+        save.settings.sfxMuted = ss === "true";
+        save.settings.muted = ss === "true";
+      }
+    }
+  } catch (_) {}
+  return save;
 }
 
 function migrateSave(candidate, fromVersion = 1, toVersion = 2) {
@@ -9430,9 +9473,7 @@ class SoundSystem {
       this.masterMusicGain = this.context.createGain();
       this.masterSfxGain = this.context.createGain();
 
-      const snap = this.store.snapshot();
-      const isMusicMuted = Boolean(snap.settings?.musicMuted);
-      const isSfxMuted = Boolean(snap.settings?.sfxMuted ?? snap.settings?.muted);
+      const { isMusicMuted, isSfxMuted } = this.getEffectiveMuteState();
 
       const now = Math.max(this.context.currentTime, 0);
       this.masterMusicGain.gain.setValueAtTime(isMusicMuted ? 0.0001 : 0.22, now);
@@ -9445,6 +9486,21 @@ class SoundSystem {
     } catch {
       return null;
     }
+  }
+
+  getEffectiveMuteState() {
+    const snap = this.store?.snapshot ? this.store.snapshot() : {};
+    let isMusicMuted = Boolean(snap.settings?.musicMuted);
+    let isSfxMuted = Boolean(snap.settings?.sfxMuted ?? snap.settings?.muted);
+    try {
+      if (typeof window !== "undefined" && window.localStorage) {
+        const sm = window.localStorage.getItem("koraku_music_muted");
+        if (sm !== null) isMusicMuted = sm === "true";
+        const ss = window.localStorage.getItem("koraku_sfx_muted");
+        if (ss !== null) isSfxMuted = ss === "true";
+      }
+    } catch (_) {}
+    return { isMusicMuted, isSfxMuted };
   }
 
   setBgmScene(scene) {
@@ -9462,9 +9518,7 @@ class SoundSystem {
     this.ensureContext();
     if (!this.context) return;
 
-    const snap = this.store.snapshot();
-    const isMusicMuted = Boolean(snap.settings?.musicMuted);
-    const isSfxMuted = Boolean(snap.settings?.sfxMuted ?? snap.settings?.muted);
+    const { isMusicMuted, isSfxMuted } = this.getEffectiveMuteState();
     const now = Math.max(this.context.currentTime, 0);
 
     if (this.masterMusicGain) {
@@ -9930,8 +9984,8 @@ class SoundSystem {
 
   // --- SOUND EFFECTS (SFX) ---
   play(name) {
-    const snap = this.store.snapshot();
-    if (snap.settings?.sfxMuted ?? snap.settings?.muted) return;
+    const { isSfxMuted } = this.getEffectiveMuteState();
+    if (isSfxMuted) return;
     this.ensureContext();
     if (!this.context) return;
 
@@ -10808,6 +10862,14 @@ class LocalGameClient extends GameClient {
     return true;
   }
 
+  /**
+   * Local sandbox has no remote online players
+   * @returns {number}
+   */
+  getOnlineCount() {
+    return 0;
+  }
+
   // Accessors for UI/subsystem backward compatibility
   get store() {
     return this.kernel?.store;
@@ -10908,7 +10970,7 @@ class RemoteGameClient extends GameClient {
       reconnectBackoffFactor: options.reconnectBackoffFactor || 1.5,
       reconnectJitter: options.reconnectJitter !== false,
       maxReconnectAttempts: options.maxReconnectAttempts ?? Infinity,
-      pingInterval: options.pingInterval || 10000,
+      pingInterval: options.pingInterval || 5000,
       pingTimeout: options.pingTimeout || 5000,
       commandTimeout: options.commandTimeout || 8000,
       commandMaxRetries: options.commandMaxRetries ?? 2,
@@ -10920,6 +10982,7 @@ class RemoteGameClient extends GameClient {
 
     this._ws = null;
     this._connectionState = ConnectionStates.OFFLINE;
+    this._onlineCount = 0;
     this._storage = options.storage || (typeof window !== "undefined" ? window.localStorage : null);
     this._token = this.options.token || (this._storage ? this._storage.getItem(ONLINE_TOKEN_KEY) : null) || null;
     this._deviceId = this.options.deviceId;
@@ -11645,18 +11708,22 @@ class RemoteGameClient extends GameClient {
     }
     if (msg.devEntitlement !== undefined) this._devEntitlement = Boolean(msg.devEntitlement);
     if (msg.serverConfig) this._serverConfig = msg.serverConfig;
-    if (msg.state) {
-      this._state = msg.state;
-      try {
-        if (this._storage) this._storage.setItem(ONLINE_STATE_CACHE_KEY, JSON.stringify(msg.state));
-      } catch (_) {}
+    if (msg.gameState && typeof msg.gameState === "object") {
+      this._mergeState(msg.gameState);
+    } else if (msg.state && typeof msg.state === "object") {
+      this._mergeState(msg.state);
+    }
+
+    if (typeof msg.onlineCount === "number") {
+      this._onlineCount = msg.onlineCount;
     }
 
     this._reconnectAttempts = 0;
     this._setConnectionState(ConnectionStates.ONLINE, {
       token: this._token,
       devEntitlement: this._devEntitlement,
-      serverConfig: this._serverConfig
+      serverConfig: this._serverConfig,
+      onlineCount: this._onlineCount
     });
 
     // Start heartbeat
@@ -11678,6 +11745,15 @@ class RemoteGameClient extends GameClient {
     if (this._pongTimeoutTimer) {
       clearTimeout(this._pongTimeoutTimer);
       this._pongTimeoutTimer = null;
+    }
+
+    if (typeof msg.onlineCount === "number") {
+      this._onlineCount = msg.onlineCount;
+      const countPayload = { onlineCount: msg.onlineCount, state: this._connectionState };
+      this._emit("online:count", countPayload);
+      if (this._eventBus && typeof this._eventBus.emit === "function") {
+        this._eventBus.emit("online:count", countPayload);
+      }
     }
 
     const t1 = msg.t1 || msg.clientTime || this._lastPingTimestamp;
@@ -11724,6 +11800,14 @@ class RemoteGameClient extends GameClient {
     if (this._eventBus && typeof this._eventBus.emit === "function") {
       this._eventBus.emit("connection:ping", rttPayload);
     }
+  }
+
+  /**
+   * Get real-time online player count
+   * @returns {number}
+   */
+  getOnlineCount() {
+    return this._connectionState === ConnectionStates.ONLINE ? (this._onlineCount || 0) : 0;
   }
 
   /**
@@ -11853,12 +11937,21 @@ class RemoteGameClient extends GameClient {
       return result;
     };
 
-    const localMusicMuted = this._state?.settings?.musicMuted;
-    const localSfxMuted = this._state?.settings?.sfxMuted;
+    let localMusicMuted = this._state?.settings?.musicMuted;
+    let localSfxMuted = this._state?.settings?.sfxMuted;
+    if (this._storage) {
+      const sm = this._storage.getItem("koraku_music_muted");
+      if (sm !== null) localMusicMuted = sm === "true";
+      const ss = this._storage.getItem("koraku_sfx_muted");
+      if (ss !== null) localSfxMuted = ss === "true";
+    }
 
     this._state = deepMerge(this._state || {}, source);
 
-    if (this._state.settings) {
+    if (this._state && typeof this._state === "object") {
+      if (!this._state.settings) {
+        this._state.settings = {};
+      }
       if (localMusicMuted !== undefined) {
         this._state.settings.musicMuted = localMusicMuted;
       }
@@ -11871,6 +11964,9 @@ class RemoteGameClient extends GameClient {
     try {
       if (this._storage) this._storage.setItem(ONLINE_STATE_CACHE_KEY, JSON.stringify(this._state));
     } catch (_) {}
+    if (this._eventBus && typeof this._eventBus.emit === "function") {
+      this._eventBus.emit("store:changed", { reason: "state-merged", state: this.store.snapshot() });
+    }
   }
 
   /**
@@ -12231,8 +12327,12 @@ class RemoteGameClient extends GameClient {
     if (this._connectionState === newState && Object.keys(meta).length === 0) return;
 
     this._connectionState = newState;
+    if (newState !== ConnectionStates.ONLINE && meta.onlineCount === undefined) {
+      this._onlineCount = 0;
+    }
     const eventPayload = {
       state: newState,
+      onlineCount: this._onlineCount,
       timestamp: this._now(),
       ...meta
     };
@@ -13008,7 +13108,7 @@ class AppView {
       }
     }
 
-    const label = this.getConnectionLabel(state);
+    const label = this.getConnectionLabel(state, meta);
     if (textEl) {
       textEl.textContent = label;
     }
@@ -13194,7 +13294,16 @@ class AppView {
     this._stopReactionTicker();
   }
 
-  getConnectionLabel(state) {
+  getConnectionLabel(state, meta = {}) {
+    if (state === ConnectionStates.ONLINE) {
+      const count = (typeof meta?.onlineCount === "number" && meta.onlineCount > 0)
+        ? meta.onlineCount
+        : (typeof this.client?.getOnlineCount === "function" ? this.client.getOnlineCount() : null);
+
+      if (typeof count === "number" && count > 0) {
+        return I18n.t("connection.onlineWithCount", { count });
+      }
+    }
     const key = `connection.${state}`;
     const translated = I18n.t(key);
     return (translated && translated !== key) ? translated : state;
@@ -13410,6 +13519,8 @@ class AppView {
         }
       });
     });
+
+    this.renderConnectionState(this.connectionState);
   }
 
   bindEvents() {
@@ -13732,6 +13843,10 @@ class AppView {
     this.bus.on("connection:ping", (ping) => this.handlePingUpdate(ping));
     if (this.client && typeof this.client.on === "function") {
       this.client.on("connection:ping", (ping) => this.handlePingUpdate(ping));
+    }
+    this.bus.on("online:count", (data) => this.renderConnectionState(this.connectionState, data));
+    if (this.client && typeof this.client.on === "function") {
+      this.client.on("online:count", (data) => this.renderConnectionState(this.connectionState, data));
     }
 
     this.bus.on("store:changed", (data) => this.renderStore(data?.state || data));

@@ -76,7 +76,7 @@ export class RemoteGameClient extends GameClient {
       reconnectBackoffFactor: options.reconnectBackoffFactor || 1.5,
       reconnectJitter: options.reconnectJitter !== false,
       maxReconnectAttempts: options.maxReconnectAttempts ?? Infinity,
-      pingInterval: options.pingInterval || 10000,
+      pingInterval: options.pingInterval || 5000,
       pingTimeout: options.pingTimeout || 5000,
       commandTimeout: options.commandTimeout || 8000,
       commandMaxRetries: options.commandMaxRetries ?? 2,
@@ -88,6 +88,7 @@ export class RemoteGameClient extends GameClient {
 
     this._ws = null;
     this._connectionState = ConnectionStates.OFFLINE;
+    this._onlineCount = 0;
     this._storage = options.storage || (typeof window !== "undefined" ? window.localStorage : null);
     this._token = this.options.token || (this._storage ? this._storage.getItem(ONLINE_TOKEN_KEY) : null) || null;
     this._deviceId = this.options.deviceId;
@@ -813,18 +814,22 @@ export class RemoteGameClient extends GameClient {
     }
     if (msg.devEntitlement !== undefined) this._devEntitlement = Boolean(msg.devEntitlement);
     if (msg.serverConfig) this._serverConfig = msg.serverConfig;
-    if (msg.state) {
-      this._state = msg.state;
-      try {
-        if (this._storage) this._storage.setItem(ONLINE_STATE_CACHE_KEY, JSON.stringify(msg.state));
-      } catch (_) {}
+    if (msg.gameState && typeof msg.gameState === "object") {
+      this._mergeState(msg.gameState);
+    } else if (msg.state && typeof msg.state === "object") {
+      this._mergeState(msg.state);
+    }
+
+    if (typeof msg.onlineCount === "number") {
+      this._onlineCount = msg.onlineCount;
     }
 
     this._reconnectAttempts = 0;
     this._setConnectionState(ConnectionStates.ONLINE, {
       token: this._token,
       devEntitlement: this._devEntitlement,
-      serverConfig: this._serverConfig
+      serverConfig: this._serverConfig,
+      onlineCount: this._onlineCount
     });
 
     // Start heartbeat
@@ -846,6 +851,15 @@ export class RemoteGameClient extends GameClient {
     if (this._pongTimeoutTimer) {
       clearTimeout(this._pongTimeoutTimer);
       this._pongTimeoutTimer = null;
+    }
+
+    if (typeof msg.onlineCount === "number") {
+      this._onlineCount = msg.onlineCount;
+      const countPayload = { onlineCount: msg.onlineCount, state: this._connectionState };
+      this._emit("online:count", countPayload);
+      if (this._eventBus && typeof this._eventBus.emit === "function") {
+        this._eventBus.emit("online:count", countPayload);
+      }
     }
 
     const t1 = msg.t1 || msg.clientTime || this._lastPingTimestamp;
@@ -892,6 +906,14 @@ export class RemoteGameClient extends GameClient {
     if (this._eventBus && typeof this._eventBus.emit === "function") {
       this._eventBus.emit("connection:ping", rttPayload);
     }
+  }
+
+  /**
+   * Get real-time online player count
+   * @returns {number}
+   */
+  getOnlineCount() {
+    return this._connectionState === ConnectionStates.ONLINE ? (this._onlineCount || 0) : 0;
   }
 
   /**
@@ -1021,12 +1043,21 @@ export class RemoteGameClient extends GameClient {
       return result;
     };
 
-    const localMusicMuted = this._state?.settings?.musicMuted;
-    const localSfxMuted = this._state?.settings?.sfxMuted;
+    let localMusicMuted = this._state?.settings?.musicMuted;
+    let localSfxMuted = this._state?.settings?.sfxMuted;
+    if (this._storage) {
+      const sm = this._storage.getItem("koraku_music_muted");
+      if (sm !== null) localMusicMuted = sm === "true";
+      const ss = this._storage.getItem("koraku_sfx_muted");
+      if (ss !== null) localSfxMuted = ss === "true";
+    }
 
     this._state = deepMerge(this._state || {}, source);
 
-    if (this._state.settings) {
+    if (this._state && typeof this._state === "object") {
+      if (!this._state.settings) {
+        this._state.settings = {};
+      }
       if (localMusicMuted !== undefined) {
         this._state.settings.musicMuted = localMusicMuted;
       }
@@ -1039,6 +1070,9 @@ export class RemoteGameClient extends GameClient {
     try {
       if (this._storage) this._storage.setItem(ONLINE_STATE_CACHE_KEY, JSON.stringify(this._state));
     } catch (_) {}
+    if (this._eventBus && typeof this._eventBus.emit === "function") {
+      this._eventBus.emit("store:changed", { reason: "state-merged", state: this.store.snapshot() });
+    }
   }
 
   /**
@@ -1399,8 +1433,12 @@ export class RemoteGameClient extends GameClient {
     if (this._connectionState === newState && Object.keys(meta).length === 0) return;
 
     this._connectionState = newState;
+    if (newState !== ConnectionStates.ONLINE && meta.onlineCount === undefined) {
+      this._onlineCount = 0;
+    }
     const eventPayload = {
       state: newState,
+      onlineCount: this._onlineCount,
       timestamp: this._now(),
       ...meta
     };

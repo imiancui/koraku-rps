@@ -360,7 +360,7 @@ select.profile-chip.lang-select option {
   color: var(--paper);
   border-color: var(--line);
   opacity: 1;
-  box-shadow: 0 0 8px rgba(239, 83, 101, 0.3);
+  box-shadow: 0 0 8px rgba(216, 182, 106, 0.25);
 }
 
 .audio-toggle-btn.is-muted .icon-music-on,
@@ -374,12 +374,12 @@ select.profile-chip.lang-select option {
 }
 
 .audio-toggle-btn.is-muted .mute-slash {
-  stroke: var(--crimson-bright);
+  stroke: var(--gold);
 }
 
 .audio-toggle-btn.is-muted:hover .mute-slash {
-  stroke: var(--crimson-bright);
-  filter: drop-shadow(0 0 4px rgba(239, 83, 101, 0.6));
+  stroke: var(--gold);
+  filter: none;
 }
 
 .screen-stack {

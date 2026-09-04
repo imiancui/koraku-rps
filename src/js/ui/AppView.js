@@ -229,7 +229,7 @@ export class AppView {
       }
     }
 
-    const label = this.getConnectionLabel(state);
+    const label = this.getConnectionLabel(state, meta);
     if (textEl) {
       textEl.textContent = label;
     }
@@ -415,7 +415,16 @@ export class AppView {
     this._stopReactionTicker();
   }
 
-  getConnectionLabel(state) {
+  getConnectionLabel(state, meta = {}) {
+    if (state === ConnectionStates.ONLINE) {
+      const count = (typeof meta?.onlineCount === "number" && meta.onlineCount > 0)
+        ? meta.onlineCount
+        : (typeof this.client?.getOnlineCount === "function" ? this.client.getOnlineCount() : null);
+
+      if (typeof count === "number" && count > 0) {
+        return I18n.t("connection.onlineWithCount", { count });
+      }
+    }
     const key = `connection.${state}`;
     const translated = I18n.t(key);
     return (translated && translated !== key) ? translated : state;
@@ -631,6 +640,8 @@ export class AppView {
         }
       });
     });
+
+    this.renderConnectionState(this.connectionState);
   }
 
   bindEvents() {
@@ -953,6 +964,10 @@ export class AppView {
     this.bus.on("connection:ping", (ping) => this.handlePingUpdate(ping));
     if (this.client && typeof this.client.on === "function") {
       this.client.on("connection:ping", (ping) => this.handlePingUpdate(ping));
+    }
+    this.bus.on("online:count", (data) => this.renderConnectionState(this.connectionState, data));
+    if (this.client && typeof this.client.on === "function") {
+      this.client.on("online:count", (data) => this.renderConnectionState(this.connectionState, data));
     }
 
     this.bus.on("store:changed", (data) => this.renderStore(data?.state || data));

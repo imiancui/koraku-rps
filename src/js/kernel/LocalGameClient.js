@@ -70,6 +70,14 @@ export class LocalGameClient extends GameClient {
     return true;
   }
 
+  /**
+   * Local sandbox has no remote online players
+   * @returns {number}
+   */
+  getOnlineCount() {
+    return 0;
+  }
+
   // Accessors for UI/subsystem backward compatibility
   get store() {
     return this.kernel?.store;

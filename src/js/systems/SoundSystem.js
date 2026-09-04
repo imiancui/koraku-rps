@@ -116,9 +116,7 @@ export class SoundSystem {
       this.masterMusicGain = this.context.createGain();
       this.masterSfxGain = this.context.createGain();
 
-      const snap = this.store.snapshot();
-      const isMusicMuted = Boolean(snap.settings?.musicMuted);
-      const isSfxMuted = Boolean(snap.settings?.sfxMuted ?? snap.settings?.muted);
+      const { isMusicMuted, isSfxMuted } = this.getEffectiveMuteState();
 
       const now = Math.max(this.context.currentTime, 0);
       this.masterMusicGain.gain.setValueAtTime(isMusicMuted ? 0.0001 : 0.22, now);
@@ -131,6 +129,21 @@ export class SoundSystem {
     } catch {
       return null;
     }
+  }
+
+  getEffectiveMuteState() {
+    const snap = this.store?.snapshot ? this.store.snapshot() : {};
+    let isMusicMuted = Boolean(snap.settings?.musicMuted);
+    let isSfxMuted = Boolean(snap.settings?.sfxMuted ?? snap.settings?.muted);
+    try {
+      if (typeof window !== "undefined" && window.localStorage) {
+        const sm = window.localStorage.getItem("koraku_music_muted");
+        if (sm !== null) isMusicMuted = sm === "true";
+        const ss = window.localStorage.getItem("koraku_sfx_muted");
+        if (ss !== null) isSfxMuted = ss === "true";
+      }
+    } catch (_) {}
+    return { isMusicMuted, isSfxMuted };
   }
 
   setBgmScene(scene) {
@@ -148,9 +161,7 @@ export class SoundSystem {
     this.ensureContext();
     if (!this.context) return;
 
-    const snap = this.store.snapshot();
-    const isMusicMuted = Boolean(snap.settings?.musicMuted);
-    const isSfxMuted = Boolean(snap.settings?.sfxMuted ?? snap.settings?.muted);
+    const { isMusicMuted, isSfxMuted } = this.getEffectiveMuteState();
     const now = Math.max(this.context.currentTime, 0);
 
     if (this.masterMusicGain) {
@@ -616,8 +627,8 @@ export class SoundSystem {
 
   // --- SOUND EFFECTS (SFX) ---
   play(name) {
-    const snap = this.store.snapshot();
-    if (snap.settings?.sfxMuted ?? snap.settings?.muted) return;
+    const { isSfxMuted } = this.getEffectiveMuteState();
+    if (isSfxMuted) return;
     this.ensureContext();
     if (!this.context) return;
 

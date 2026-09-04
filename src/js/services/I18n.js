@@ -22,6 +22,33 @@ export const LOCALE_STORAGE_KEY = "koraku-rps-locale";
 
 export const CHANGELOG_DATA = [
   {
+    version: "0.0.32",
+    date: "2026-09-04",
+    tag: "Real-time Online Players Counter, Gold Mute Slash & F5 Mute State Persistence Fix",
+    changes: {
+      "zh-Hant": [
+        "【即時線上人數連線顯示】連線狀態徽章整合即時在線人數（每 5 秒心跳更新），連線成功時顯示「連線中 (X人)」，離線時優雅維持「離線」。",
+        "【神社金靜音禁用劃線統整】調整靜音圖示斜線為純粹神社金（--gold: #d8b66a）與深黑立體描邊，移除紅色光暈，使整體 UI 視覺統一且簡潔高雅。",
+        "【F5 網頁重整靜音持久化修復】徹底根除線上連線交握時狀態覆蓋導致 F5 後音訊靜音失效問題，確保 BGM 與 SFX 靜音狀態於頁面重載後 100% 保持。"
+      ],
+      "zh-Hans": [
+        "【实时在线人数连接显示】连接状态徽章整合实时在线人数（每 5 秒心跳更新），连接成功时显示“连接中 (X人)”，离线时优雅保持“离线”。",
+        "【神社金静音禁用划线统整】调整静音图标斜线为纯粹神社金（--gold: #d8b66a）与深黑立体描边，移除红色光晕，使整体 UI 视觉统一且简洁高雅。",
+        "【F5 网页刷新静音持久化修复】彻底根除在线连接握手时状态覆盖导致 F5 后音频静音失效问题，确保 BGM 与 SFX 静音状态于页面重载后 100% 保持。"
+      ],
+      "en": [
+        "【Real-time Online Players Counter】Integrated live player counts into the connection status badge (heartbeat updated every 5s), displaying 'Connected (X players)' when online and cleanly showing 'Offline' when disconnected.",
+        "【Shrine Gold Mute Slash Alignment】Unified mute strikethrough lines with elegant shrine gold (--gold: #d8b66a) and crisp dark stroke drop-shadow, eliminating red hover glow for clean visual cohesion.",
+        "【F5 Page Refresh Mute Persistence Fix】Resolved an issue where server handshake snapshot overwrite wiped client mute state on F5 refresh, guaranteeing 100% sound and music mute state retention."
+      ],
+      "ja": [
+        "【リアルタイムオンライン人数表示】接続ステータスバッジにリアルタイム接続人数（5秒ごとのハートビート更新）を統合し、接続時は「接続中 (X人)」、オフライン時は「オフライン」と正確に表示。",
+        "【神社金ミュート禁止斜線の統一】消音斜線を神社金（--gold: #d8b66a）と引き締まった黒シャドウに統一し、赤色のホバー光彩を除去して洗練された統一感を確立。",
+        "【F5リロード時のミュート永続化修復】オンライン接続ハンドシェイク時の状態上書きによりF5リロードで消音状態が解除されていた問題を根絶し、BGM/SEの消音状態を100%保持。"
+      ]
+    }
+  },
+  {
     version: "0.0.31",
     date: "2026-09-04",
     tag: "Gallery Swimsuit Diff Toggle, Records XP Math Fix & Dojo History Navigation Polish",
@@ -1703,6 +1730,7 @@ const DICTIONARY = {
 
       connecting: "連線中",
       online: "線上連線",
+      onlineWithCount: "連線中 ({count}人)",
       offline: "離線模式",
       reconnecting: "重新連線中",
       disconnected: "連線中斷",
@@ -2522,6 +2550,7 @@ const DICTIONARY = {
 
       connecting: "连接中",
       online: "在线连接",
+      onlineWithCount: "在线 ({count}人)",
       offline: "离线模式",
       reconnecting: "重新连接中",
       disconnected: "连接中断",
@@ -3341,6 +3370,7 @@ const DICTIONARY = {
 
       connecting: "Connecting",
       online: "Online",
+      onlineWithCount: "Online ({count})",
       offline: "Offline",
       reconnecting: "Reconnecting",
       disconnected: "Disconnected",
@@ -4160,6 +4190,7 @@ const DICTIONARY = {
 
       connecting: "接続中",
       online: "オンライン",
+      onlineWithCount: "オンライン ({count}人)",
       offline: "オフライン",
       reconnecting: "再接続中",
       disconnected: "切断",

@@ -117,7 +117,19 @@ export function getEquipmentTypeId(itemOrId) {
 }
 
 export function freshSave() {
-  return structuredClone(DEFAULT_SAVE);
+  const save = structuredClone(DEFAULT_SAVE);
+  try {
+    if (typeof window !== "undefined" && window.localStorage) {
+      const sm = window.localStorage.getItem("koraku_music_muted");
+      if (sm !== null) save.settings.musicMuted = sm === "true";
+      const ss = window.localStorage.getItem("koraku_sfx_muted");
+      if (ss !== null) {
+        save.settings.sfxMuted = ss === "true";
+        save.settings.muted = ss === "true";
+      }
+    }
+  } catch (_) {}
+  return save;
 }
 
 export function migrateSave(candidate, fromVersion = 1, toVersion = 2) {

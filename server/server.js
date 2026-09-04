@@ -120,13 +120,15 @@ export class KorakuServer {
     }
 
     if (req.method === "GET" && pathname === "/health") {
+      const count = this.connectionManager.getConnectionCount();
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(
         JSON.stringify({
           status: "ok",
           protocolVersion: this.config.protocolVersion,
           configVersion: this.config.configVersion,
-          onlineConnections: this.connectionManager.getConnectionCount(),
+          onlineConnections: count,
+          onlineCount: count,
           serverTime: Date.now()
         })
       );
@@ -333,6 +335,7 @@ export class KorakuServer {
       serverConfig: {
         battleLockPolicy: this.config.battleLockPolicy
       },
+      onlineCount: this.connectionManager.getConnectionCount(),
       serverTime: Date.now()
     });
 
@@ -372,6 +375,7 @@ export class KorakuServer {
         type: "pong",
         clientTime: parsedObj.clientTime,
         t1: parsedObj.clientTime,
+        onlineCount: this.connectionManager.getConnectionCount(),
         serverTime: Date.now()
       });
       return;
