@@ -268,6 +268,11 @@ New-game-project-4/
   - **網頁背景音訊生命週期管理**：`SoundSystem.js` 補齊 `visibilitychange`（`hidden` 自動停止排程並暫停 AudioContext、`visible` 自動恢復）與 `pagehide` / `beforeunload` 安全釋放，徹底移除在隱藏狀態下無條件強行 resume 的缺陷。
   - **背景孤兒行程根除與防護**：全面清除背景殘留之 Headless 孤兒程序與常駐音訊服務；測試探測工具加入 `--mute-audio` 與 Windows 行程樹銷毀。
   - **全量測試與資源快取更新**：單元測試 270 項全數通過（新增生命週期測試），更新 `bundle.js` 與靜態資源快取戳記 `?v=202609051010`。
+- **Phase 4.22：v0.0.40 升版與發布（已 100% 達成）**：
+  - **線上人數卡頓修復與殭屍連線清理**：修復反向代理中斷時 TCP half-open 未觸發 close 之缺陷，`WsAdapter.js` 完整監聽 socket `end` 與 `error` 事件，即時關閉並清理連線，杜絕人數虛高卡在 5 人的問題。
+  - **30 秒心跳超時巡檢與全域即時廣播**：`ConnectionManager.js` 每 10 秒巡檢連線池，自動清理超過 30 秒無活動之殭屍 Socket；連線建立、中斷或清理時即時向全體線上玩家推播 `online:count` 最新在線人數。
+  - **前端生命週期韌性加固**：`RemoteGameClient.js` 整合 Page Visibility API，分頁由背景喚醒為可見時立即主動補發 Ping；分頁關閉或離開時發送乾淨 RFC 6455 關閉幀。
+  - **全量測試與資源快取更新**：單元測試 274 項與伺服器測試 21 項全數通過（新增殭屍連線清理測試），更新 `bundle.js` 與靜態資源快取戳記 `?v=202609051130`。
 - **Phase 5（後續演進待辦）**：
   - 第三方帳號登入整合（Discord / Google OAuth2 與匿名裝置 Token 綁定遷移）。
   - 全球伺服器多節點部署與 Redis 分散式 Session 支援。

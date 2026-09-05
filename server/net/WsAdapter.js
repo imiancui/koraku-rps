@@ -16,12 +16,24 @@ class NativeWebSocketClient extends EventEmitter {
     this._buffer = Buffer.alloc(0);
 
     socket.on("data", (chunk) => this._onData(chunk));
+    socket.on("end", () => {
+      this.close(1000, "TCP_FIN");
+    });
     socket.on("close", () => {
-      this.readyState = 3; // CLOSED
-      this.emit("close");
+      if (this.readyState !== 3) {
+        this.readyState = 3; // CLOSED
+        this.emit("close");
+      }
     });
     socket.on("error", (err) => {
       this.emit("error", err);
+      try {
+        this.socket.destroy();
+      } catch (_) {}
+      if (this.readyState !== 3) {
+        this.readyState = 3;
+        this.emit("close");
+      }
     });
   }
 

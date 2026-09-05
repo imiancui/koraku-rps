@@ -145,6 +145,31 @@ export class RemoteGameClient extends GameClient {
     // Commands & ACK tracking
     this._pendingCommands = new Map(); // cmdId -> { envelope, resolve, reject, timer, retries, sentAt }
     this._commandQueue = []; // Array of cmdIds waiting to be dispatched when connection is ONLINE
+
+    // Lifecycle event handlers
+    this._handleVisibilityChange = () => {
+      if (typeof document !== "undefined" && document.visibilityState === "visible") {
+        if (this._connectionState === ConnectionStates.ONLINE) {
+          this._sendPing();
+        }
+      }
+    };
+
+    this._handlePageUnload = () => {
+      if (this._ws && (this._ws.readyState === 1 || this._ws.readyState === 0)) {
+        try {
+          this._ws.close(1000, "PAGE_UNLOAD");
+        } catch (_) {}
+      }
+    };
+
+    if (typeof document !== "undefined" && typeof document.addEventListener === "function") {
+      document.addEventListener("visibilitychange", this._handleVisibilityChange);
+    }
+    if (typeof window !== "undefined" && typeof window.addEventListener === "function") {
+      window.addEventListener("pagehide", this._handlePageUnload);
+      window.addEventListener("beforeunload", this._handlePageUnload);
+    }
   }
 
   get bus() {
@@ -1546,6 +1571,14 @@ export class RemoteGameClient extends GameClient {
 
     this._cleanupSocket();
     this._setConnectionState(ConnectionStates.DISCONNECTED, { reason: "destroy" });
+
+    if (typeof document !== "undefined" && typeof document.removeEventListener === "function" && this._handleVisibilityChange) {
+      document.removeEventListener("visibilitychange", this._handleVisibilityChange);
+    }
+    if (typeof window !== "undefined" && typeof window.removeEventListener === "function" && this._handlePageUnload) {
+      window.removeEventListener("pagehide", this._handlePageUnload);
+      window.removeEventListener("beforeunload", this._handlePageUnload);
+    }
 
     super.destroy();
   }

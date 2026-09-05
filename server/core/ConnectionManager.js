@@ -9,13 +9,14 @@ export class ConnectionManager {
    * @param {import('./TransferManager.js').TransferManager} params.transferManager
    * @param {number} [params.idleTimeoutMs]
    */
-  constructor({ storage, transferManager, idleTimeoutMs, battleLockPolicy = "always" }) {
+  constructor({ storage, transferManager, idleTimeoutMs, battleLockPolicy = "always", connectionTimeoutMs = 30000 }) {
     this.storage = storage;
     this.transferManager = transferManager;
     this.idleTimeoutMs = idleTimeoutMs || SERVER_CONFIG.idleSessionTimeoutMs;
     this.battleLockPolicy = battleLockPolicy;
+    this.connectionTimeoutMs = connectionTimeoutMs;
 
-    this.connections = new Map(); // accountId -> { socket, connectionId, connectedAt }
+    this.connections = new Map(); // accountId -> { socket, connectionId, connectedAt, lastActiveAt }
     this.sessions = new Map(); // accountId -> GameSession
     this.socketToAccount = new Map(); // socket -> accountId
 
@@ -23,6 +24,12 @@ export class ConnectionManager {
     this._idleTimer = setInterval(() => this._sweepIdleSessions(), 60000);
     if (this._idleTimer.unref) {
       this._idleTimer.unref();
+    }
+
+    // Periodic sweep for dead or inactive connections (heartbeat timeout)
+    this._staleTimer = setInterval(() => this._sweepStaleConnections(), 10000);
+    if (this._staleTimer.unref) {
+      this._staleTimer.unref();
     }
   }
 
@@ -60,12 +67,14 @@ export class ConnectionManager {
       this.socketToAccount.delete(existing.socket);
     }
 
+    const now = Date.now();
     this.connections.set(accountId, {
       socket,
       connectionId,
       deviceId,
       devEntitlement: Boolean(devEntitlement),
-      connectedAt: Date.now()
+      connectedAt: now,
+      lastActiveAt: now
     });
     this.socketToAccount.delete(existing?.socket);
     this.socketToAccount.set(socket, accountId);
@@ -93,7 +102,20 @@ export class ConnectionManager {
     }
 
     session.touch();
+    this.broadcastOnlineCount();
     return session;
+  }
+
+  /**
+   * Record client activity / heartbeat for connection
+   * @param {string} accountId
+   */
+  touchConnection(accountId) {
+    if (!accountId) return;
+    const conn = this.connections.get(accountId);
+    if (conn) {
+      conn.lastActiveAt = Date.now();
+    }
   }
 
   /**
@@ -163,6 +185,89 @@ export class ConnectionManager {
           session.handleDisconnect();
         }
       }
+      this.broadcastOnlineCount();
+    }
+  }
+
+  /**
+   * Broadcast an event payload to all active connected sockets
+   * @param {string} event
+   * @param {object} payload
+   */
+  broadcast(event, payload = {}) {
+    const message = JSON.stringify({
+      event,
+      payload,
+      serverTime: Date.now()
+    });
+
+    for (const [accountId, conn] of this.connections.entries()) {
+      try {
+        const socket = conn?.socket;
+        const isOpen = socket && (socket.readyState === undefined || socket.readyState === 1 || socket.writable === true) && !socket.destroyed;
+        if (isOpen) {
+          if (typeof socket.send === "function") {
+            socket.send(message);
+          } else if (typeof socket.write === "function") {
+            socket.write(message);
+          }
+        }
+      } catch (err) {
+        console.error(`[ConnectionManager] Error broadcasting to ${accountId}:`, err);
+      }
+    }
+  }
+
+  /**
+   * Broadcast current online count to all active connected sockets
+   */
+  broadcastOnlineCount() {
+    const count = this.getConnectionCount();
+    this.broadcast("online:count", {
+      onlineCount: count,
+      onlineConnections: count
+    });
+  }
+
+  /**
+   * Periodically sweep dead or timed-out connections from the connection pool (30s timeout)
+   */
+  _sweepStaleConnections() {
+    const now = Date.now();
+    let sweptAny = false;
+
+    for (const [accountId, conn] of this.connections.entries()) {
+      const socket = conn.socket;
+      const isDeadSocket = !socket || socket.destroyed || (socket.readyState !== undefined && socket.readyState !== 1);
+      const isTimedOut = (now - (conn.lastActiveAt || conn.connectedAt || 0)) >= this.connectionTimeoutMs;
+
+      if (isDeadSocket || isTimedOut) {
+        sweptAny = true;
+        try {
+          if (socket) {
+            if (typeof socket.close === "function") {
+              socket.close(1000, "HEARTBEAT_TIMEOUT");
+            } else if (typeof socket.destroy === "function") {
+              socket.destroy();
+            }
+          }
+        } catch (_) {}
+
+        this.connections.delete(accountId);
+        if (socket) this.socketToAccount.delete(socket);
+
+        const session = this.sessions.get(accountId);
+        if (session) {
+          session.touch();
+          if (typeof session.handleDisconnect === "function") {
+            session.handleDisconnect();
+          }
+        }
+      }
+    }
+
+    if (sweptAny) {
+      this.broadcastOnlineCount();
     }
   }
 
@@ -253,6 +358,9 @@ export class ConnectionManager {
   destroy() {
     if (this._idleTimer) {
       clearInterval(this._idleTimer);
+    }
+    if (this._staleTimer) {
+      clearInterval(this._staleTimer);
     }
     for (const conn of this.connections.values()) {
       try {

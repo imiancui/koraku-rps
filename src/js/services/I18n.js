@@ -22,6 +22,33 @@ export const LOCALE_STORAGE_KEY = "koraku-rps-locale";
 
 export const CHANGELOG_DATA = [
   {
+    version: "0.0.40",
+    date: "2026-09-05 11:30 (GMT+8)",
+    tag: "Online Player Counter Zombie Socket Cleanup, 30s Heartbeat Audit & Real-time Broadcast",
+    changes: {
+      "zh-Hant": [
+        "【線上人數卡頓修復與殭屍連線清理】修復反向代理中斷時 TCP half-open 未觸發 close 之缺陷，WsAdapter 完整監聽 socket end/error 事件，杜絕人數虛高卡在 5 人的問題。",
+        "【30 秒心跳超時巡檢與全域即時廣播】伺服器每 10 秒巡檢連線池，自動清理超過 30 秒無活動之殭屍 Socket；連線建立、中斷或清理時即時向全體線上玩家推播最新在線人數。",
+        "【前端生命週期韌性加固】RemoteGameClient 整合 Page Visibility API，分頁由背景喚醒為可見時立即主動補發 Ping；分頁關閉或離開時發送乾淨 RFC 6455 關閉幀。"
+      ],
+      "zh-Hans": [
+        "【在线人数卡顿修复与僵尸连接清理】修复反向代理中断时 TCP half-open 未触发 close 之缺陷，WsAdapter 完整监听 socket end/error 事件，杜绝人数虚高卡在 5 人的问题。",
+        "【30 秒心跳超时巡检与全局实时广播】服务器每 10 秒巡检连接池，自动清理超过 30 秒无活动之僵尸 Socket；连接建立、中断或清理时即时向全体在线玩家推送最新在线人数。",
+        "【前端生命周期韧性加固】RemoteGameClient 整合 Page Visibility API，标签页由背景唤醒为可见时立即主动补发 Ping；标签页关闭或离开时发送干净 RFC 6455 关闭帧。"
+      ],
+      "en": [
+        "【Online Player Counter Zombie Cleanup】Fixed TCP half-open socket leaks behind reverse proxies by properly handling socket 'end' and 'error' events in WsAdapter, resolving the issue where player counts remained stuck at 5.",
+        "【30s Heartbeat Audit & Real-time Broadcast】Implemented a 10s periodic sweep on the server to terminate connections idle for >30s; broadcasted real-time 'online:count' updates upon connection, disconnection, or timeout sweep.",
+        "【Client Lifecycle Resilience】Integrated Page Visibility API in RemoteGameClient to immediately send a Ping when waking from background; cleanly dispatched RFC 6455 close frames on tab unload."
+      ],
+      "ja": [
+        "【オンライン人数スタック解消＆ゾンビ接続掃除】リバースプロキシ切断時のTCP half-openでcloseが発火しない不具合を修正。WsAdapterでsocketのend/errorイベントを監視し、人数が5人に固定される問題を解消。",
+        "【30秒ハートビート監査＆リアルタイムブロードキャスト】サーバーで10秒周期のクリーンアップを実施し、30秒無通信のゾンビ接続を自動切断。接続・切断・掃除時に全クライアントへ最新人数を即座に配信。",
+        "【クライアントのライフサイクル堅牢化】RemoteGameClientにPage Visibility APIを統合し、バックグラウンド復帰時に即時Pingを送信。タブ離脱時には正常なRFC 6455クローズフレームを送信。"
+      ]
+    }
+  },
+  {
     version: "0.0.39",
     date: "2026-09-05 10:10 (GMT+8)",
     tag: "Audio Lifecycle Background Pause & Headless Browser Orphan Guard",

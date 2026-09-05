@@ -756,5 +756,25 @@ $$\text{Theoretical DPS} = \frac{(\text{Base DMG} \times \text{Greatsword Mult} 
 - **探測靜音旗標**：啟動無頭瀏覽器（`--headless=new`）之開發探測腳本一律追加 `--mute-audio`，防止向系統請求音訊裝置。
 - **行程樹徹底銷毀**：在腳本退出清理區塊中引入 Windows 平台之 `taskkill /F /T /PID` 遞迴終止機制，杜絕子行程未隨主行程關閉而殘留之後台孤兒問題。
 
+---
+
+## 39. v0.0.40 版本更新：線上人數卡頓修復、殭屍連線清理、30秒心跳超時巡檢與即時廣播 (v0.0.40)
+
+### 39.1 伺服器端 TCP Half-Open 根除 (TCP Lifecycle Termination)
+- **補齊 `end` 事件監聽**：`WsAdapter.js` 之 `NativeWebSocketClient` 完整監聽 Node `net.Socket` 的 `end` 事件與強化 `error` 事件。當反向代理或用戶端關閉發送 TCP FIN 時，伺服器立即調用 `this.close(1000, "TCP_FIN")`，阻斷 Socket 滯留於 half-open 狀態，確保 `close` 事件即時發布並觸發連線清理。
+
+### 39.2 伺服器 30 秒心跳超時巡檢 (Heartbeat Audit Sweep)
+- **連線活躍時戳追蹤**：`ConnectionManager.js` 記錄每條連線的 `lastActiveAt`，伺服器於收到任何客戶端資料或每 5 秒 Ping 時調用 `touchConnection()` 即時刷新。
+- **定時自動清理**：建立每 10 秒執行一次之 `_sweepStaleConnections()` 巡檢，對超過 30 秒未有任何心跳（容許連續 6 次心跳遺失）或 Socket 已損毀之死連線，主動銷毀 Socket、自連線池中移除並釋放相關記憶體。
+
+### 39.3 線上人數異動全域即時廣播 (Real-time Online Count Broadcast)
+- **即時廣播通知**：`ConnectionManager` 新增全域 `broadcast(event, payload)` 方法。每當新連線加入、玩家正常離線或殭屍連線被 30 秒巡檢清理時，伺服器主動向全體在線客戶端推播 `online:count`，客戶端連線狀態徽章即時更新最新在線人數。
+- **雙重保底機制**：保留原本每 5 秒 Ping/Pong 回傳之 `onlineCount`，兼具即時性與輪詢保底。
+
+### 39.4 前端分頁前景喚醒與卸載清理 (Client Lifecycle Resilience)
+- **切回前景主動補發心跳**：`RemoteGameClient.js` 整合 Page Visibility API，當玩家將分頁切回前景（`document.visibilityState === "visible"`）且處於線上模式時，立即主動發送一次 Ping 刷新時鐘、延遲與在線人數。
+- **分頁卸載發送標準關閉幀**：監聽 `pagehide` 與 `beforeunload`，於頁面關閉時主動向伺服器發送 RFC 6455 正常關閉幀（代碼 1000），並於銷毀時安全解綁事件監聽器。
+
+
 
 

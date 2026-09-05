@@ -364,6 +364,10 @@ export class KorakuServer {
    * Handle incoming envelope message from a socket
    */
   async _handleSocketMessage(socket, accountId, devEntitlement, clientIp, rawMessage) {
+    if (accountId) {
+      this.connectionManager.touchConnection(accountId);
+    }
+
     // 1. Control frames (handshake / ping) - bypass command rate limits
     let parsedObj = null;
     try {
@@ -374,6 +378,7 @@ export class KorakuServer {
       return;
     }
     if (parsedObj?.type === "ping") {
+      this.connectionManager.touchConnection(accountId);
       this.connectionManager.sendToSocket(socket, "pong", {
         type: "pong",
         clientTime: parsedObj.clientTime,
