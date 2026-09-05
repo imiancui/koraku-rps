@@ -12,6 +12,7 @@ import {
   wasdDirectionFromKey
 } from "../systems/QTEInputSystem.js";
 import { HUDDragController } from "./HUDDragController.js";
+import { Pillow3DViewer } from "./Pillow3DViewer.js";
 import { Commands, Events, ConnectionStates, ErrorCodes } from "../kernel/protocol.js";
 
 const $ = (selector) => document.querySelector(selector);
@@ -38,6 +39,7 @@ export class AppView {
     this.postState = null;
     this.qteState = null;
     this.recentDamageLog = [];
+    this.pillowViewer = null;
     this.dojoQteActive = false;
     this.dojoQteStyle = "single";
     this.dojoCombo = 0;
@@ -1655,6 +1657,11 @@ export class AppView {
       return;
     }
 
+    if (event.target.closest("#exchange-art-frame") || event.target.closest("#exchange-product-img")) {
+      this.openExchangeLightbox();
+      return;
+    }
+
     if (event.target.closest("#open-save-record-modal")) {
       this.openSaveRecordModal();
       return;
@@ -2072,6 +2079,10 @@ export class AppView {
       }
     }
 
+    if (this.currentScreen === "exchange" && screenName !== "exchange") {
+      this.pillowViewer?.pause?.();
+    }
+
     const next = $("#screen-" + screenName);
     if (!next) return;
     document.querySelectorAll(".screen").forEach((screen) => {
@@ -2087,6 +2098,9 @@ export class AppView {
       this.renderGallery(this.getStoreSnapshot());
     } else if (screenName === "records") {
       this.renderHomeRecords(this.getStoreSnapshot());
+    } else if (screenName === "exchange") {
+      this.renderExchange(this.getStoreSnapshot());
+      this.initOrResumePillowViewer();
     }
   }
 
@@ -2216,6 +2230,10 @@ export class AppView {
     if (!state?.profile) return;
     $("#header-level").textContent = String(state.profile.level || 1).padStart(2, "0");
     $("#header-coins").textContent = (state.coins || 0).toLocaleString("zh-TW");
+    const exCoins = $("#exchange-coins");
+    if (exCoins) exCoins.textContent = (state.coins || 0).toLocaleString("zh-TW");
+    const exPlayerCoins = $("#exchange-player-coins");
+    if (exPlayerCoins) exPlayerCoins.textContent = (state.coins || 0).toLocaleString("zh-TW");
     $("#header-xp").textContent = (state.profile.xp || 0) + " / " + (state.xpToNext || 0);
     $("#header-xp-fill").style.width = clampPercent(state.profile.xp || 0, state.xpToNext || 1) + "%";
     if (state.records) {
@@ -3042,6 +3060,163 @@ export class AppView {
       this.galleryLightboxModal.classList.remove("is-open");
       this.galleryLightboxModal.setAttribute("aria-hidden", "true");
       this.galleryLightboxModal.setAttribute("hidden", "");
+    }
+  }
+
+  openExchangeLightbox() {
+    const targetSrc = "./koraku/小樂抱枕產品圖.png";
+    const titleText = I18n.t("ui.exchangePrizeTitle") || "小樂等身抱枕（雙面）";
+    const dimsText = "1122 × 1402 px (HD)";
+
+    const isMobile = window.innerWidth <= 780 || ("ontouchstart" in window) || (navigator.maxTouchPoints > 0);
+    if (isMobile) {
+      window.open(targetSrc, "_blank");
+      return;
+    }
+
+    const titleEl = $("#gallery-lightbox-title");
+    const dimsEl = $("#gallery-lightbox-dims");
+    const imgEl = $("#gallery-lightbox-image");
+    const tabLinkEl = $("#btn-open-image-tab");
+
+    if (titleEl) titleEl.textContent = titleText;
+    if (dimsEl) dimsEl.textContent = dimsText;
+    if (imgEl) {
+      imgEl.src = targetSrc;
+      imgEl.alt = titleText;
+    }
+    if (tabLinkEl) {
+      tabLinkEl.href = targetSrc;
+    }
+
+    if (this.galleryLightboxModal) {
+      this.galleryLightboxModal.removeAttribute("hidden");
+      this.galleryLightboxModal.setAttribute("aria-hidden", "false");
+      this.galleryLightboxModal.classList.add("is-open");
+    }
+  }
+
+  renderExchange(state = this.getStoreSnapshot()) {
+    const coins = Number(state?.coins || 0);
+    const coinsStr = coins.toLocaleString("zh-TW");
+    const elCoins = $("#exchange-coins");
+    if (elCoins) elCoins.textContent = coinsStr;
+    const elPlayerCoins = $("#exchange-player-coins");
+    if (elPlayerCoins) elPlayerCoins.textContent = coinsStr;
+  }
+
+  initOrResumePillowViewer() {
+    if (!this.pillowViewer) {
+      const canvas = $("#exchange-canvas");
+      if (!canvas) return;
+
+      this.pillowViewer = new Pillow3DViewer({
+        canvas,
+        stateEl: $("#exchange-3d-state"),
+        loadingEl: $("#exchange-loading"),
+        frontBtn: $("#btn-pillow-front"),
+        backBtn: $("#btn-pillow-back"),
+        resetBtn: $("#btn-exchange-reset"),
+        textureUrl: "./koraku/pillow-texture.webp",
+        getStateText: (type) => {
+          const map = {
+            loading: I18n.t("ui.pillowLoading") || "正在準備小樂…",
+            free: I18n.t("ui.pillowStateFree") || "自由探索",
+            dragging: I18n.t("ui.pillowStateDragging") || "抓取中",
+            inertia: I18n.t("ui.pillowStateInertia") || "慣性旋轉",
+            resetting: I18n.t("ui.pillowStateResetting") || "正在復位",
+            unsupported: "無法啟用 3D"
+          };
+          return map[type] || type;
+        }
+      });
+      this.pillowViewer.init();
+      this.bindExchangeEvents();
+    } else {
+      this.pillowViewer.resume();
+      setTimeout(() => this.pillowViewer?.resize(), 50);
+    }
+  }
+
+  bindExchangeEvents() {
+    const btnDesign = $("#btn-pillow-design");
+    const btnProduct = $("#btn-pillow-product");
+    const btnClose = $("#btn-exchange-dialog-close");
+    const btnZoom = $("#btn-exchange-zoom");
+    const dialog = $("#exchange-preview-dialog");
+
+    if (btnDesign) {
+      btnDesign.onclick = () => this.openExchangePreviewDialog("design");
+    }
+    if (btnProduct) {
+      btnProduct.onclick = () => this.openExchangePreviewDialog("product");
+    }
+    if (btnClose && dialog) {
+      btnClose.onclick = () => dialog.close();
+    }
+    if (dialog) {
+      dialog.addEventListener("click", (e) => {
+        if (e.target === dialog) dialog.close();
+      });
+    }
+    if (btnZoom) {
+      btnZoom.onclick = () => {
+        const vp = $("#exchange-preview-viewport");
+        if (!vp) return;
+        const zoomed = vp.classList.toggle("zoomed");
+        btnZoom.setAttribute("aria-pressed", String(zoomed));
+        btnZoom.textContent = zoomed
+          ? (I18n.t("ui.pillowZoomOut") || "− 完整顯示")
+          : (I18n.t("ui.pillowZoomIn") || "＋ 放大鑑賞");
+      };
+    }
+  }
+
+  openExchangePreviewDialog(type) {
+    const isDesign = type === "design";
+    const dialog = $("#exchange-preview-dialog");
+    const img = $("#exchange-product-img");
+    const title = $("#exchange-preview-title");
+    const eyebrow = $("#exchange-preview-eyebrow");
+    const caption = $("#exchange-preview-caption");
+    const viewport = $("#exchange-preview-viewport");
+    const zoomBtn = $("#btn-exchange-zoom");
+
+    const source = $("#exchange-product-source");
+
+    if (source) {
+      source.srcset = isDesign ? "./koraku/pillow-texture.webp" : "./koraku/小樂抱枕產品圖.webp";
+      source.type = "image/webp";
+    }
+    if (img) {
+      img.src = isDesign ? "./koraku/pillow-texture.webp" : "./koraku/小樂抱枕產品圖.webp";
+      img.alt = isDesign
+        ? (I18n.t("ui.pillowDesignAlt") || "小樂抱枕 2D 原始設計圖：左側為戰鬥正面，右側為泳裝背面")
+        : (I18n.t("ui.pillowProductAlt") || "小樂抱枕正反面產品示意圖，尺寸 160 × 50 公分");
+    }
+    if (title) {
+      title.textContent = isDesign
+        ? (I18n.t("ui.pillowDesignGallery") || "2D 設計圖")
+        : (I18n.t("ui.pillowProductPreview") || "產品示意圖");
+    }
+    if (eyebrow) {
+      eyebrow.textContent = isDesign ? "ILLUSTRATION GALLERY" : "PRODUCT PREVIEW";
+    }
+    if (caption) {
+      caption.textContent = isDesign
+        ? (I18n.t("ui.pillowCaptionDesign") || "左：正面・戰鬥日常　／　右：背面・夏日片刻")
+        : (I18n.t("ui.pillowCaptionProduct") || "產品外觀示意・實際效果依成品為準");
+    }
+    if (viewport) {
+      viewport.classList.remove("zoomed");
+      viewport.scrollTo(0, 0);
+    }
+    if (zoomBtn) {
+      zoomBtn.setAttribute("aria-pressed", "false");
+      zoomBtn.textContent = I18n.t("ui.pillowZoomIn") || "＋ 放大鑑賞";
+    }
+    if (dialog && typeof dialog.showModal === "function") {
+      dialog.showModal();
     }
   }
 

@@ -44,12 +44,12 @@
         }
       })();
     </script>
-    <link rel="stylesheet" href="./src/styles/tokens.css?v=202609050335">
-    <link rel="stylesheet" href="./src/styles/base.css?v=202609050335">
-    <link rel="stylesheet" href="./src/styles/components.css?v=202609050335">
-    <link rel="stylesheet" href="./src/styles/screens.css?v=202609050335">
-    <link rel="stylesheet" href="./src/styles/animations.css?v=202609050335">
-    <link rel="stylesheet" href="./src/styles/responsive.css?v=202609050335">
+    <link rel="stylesheet" href="./src/styles/tokens.css?v=202609050835">
+    <link rel="stylesheet" href="./src/styles/base.css?v=202609050835">
+    <link rel="stylesheet" href="./src/styles/components.css?v=202609050835">
+    <link rel="stylesheet" href="./src/styles/screens.css?v=202609050835">
+    <link rel="stylesheet" href="./src/styles/animations.css?v=202609050835">
+    <link rel="stylesheet" href="./src/styles/responsive.css?v=202609050835">
   </head>
   <body>
     <div id="app" class="app-shell" data-screen="home">
@@ -171,6 +171,11 @@
                 <span><b data-i18n="ui.menuDojo">修練道場</b><small data-i18n="ui.menuDojoSub">QTE & SANDBOX</small></span>
                 <i>›</i>
               </button>
+              <button class="menu-command menu-command-special" type="button" data-nav="exchange" id="btn-menu-exchange">
+                <span class="command-index">09</span>
+                <span><b data-i18n="ui.menuExchange">特典商店</b><small data-i18n="ui.menuExchangeSub">SPECIAL SHOP</small></span>
+                <i>›</i>
+              </button>
             </nav>
 
             <div class="home-record" aria-label="戰績" data-i18n-attr="aria-label:ui.battleRecords">
@@ -192,7 +197,7 @@
               </button>
               <footer class="home-footer" aria-label="頁腳資訊" data-i18n-attr="aria-label:ui.footerInfo">
                 <button type="button" class="footer-version-btn" id="footer-app-version-btn" title="查看更新日誌 (Changelog)" aria-label="查看更新日誌" data-i18n-attr="aria-label:ui.changelog,title:ui.changelog">
-                  <span class="footer-version" id="footer-app-version">0.0.35</span>
+                  <span class="footer-version" id="footer-app-version">0.0.36</span>
                 </button>
                 <span class="footer-plain-sep">/</span>
                 <a href="https://store.steampowered.com/app/1425000" target="_blank" rel="noopener noreferrer" class="footer-plain-link">Endless Alice</a>
@@ -734,6 +739,156 @@
               </div>
             </div>
           </div>
+        </section>
+
+        <section id="screen-exchange" class="screen page-screen" aria-labelledby="exchange-title" hidden>
+          <div class="page-backdrop page-backdrop-exchange" aria-hidden="true"></div>
+          <header class="page-heading">
+            <button class="back-button" type="button" data-nav="home"><span>‹</span> <b data-i18n="ui.back">返回</b></button>
+            <div>
+              <p class="eyebrow" data-i18n="ui.pillowEyebrow">KORAKU COLLECTION</p>
+              <h2 id="exchange-title" data-i18n="ui.exchangeTitle">特典商店</h2>
+              <p data-i18n="ui.exchangeSubtitle">累積冒險所得的星砂，換取小樂專屬限定實體週邊！</p>
+            </div>
+            <div class="large-wallet"><small data-i18n="ui.coins">星砂</small><b id="exchange-coins">0</b></div>
+          </header>
+
+          <div class="exchange-layout">
+            <!-- Left Column: Story, Commands, Specs, Exchange -->
+            <section class="exchange-left-panel">
+              <div class="exchange-intro">
+                <div class="exchange-badge-row">
+                  <span class="badge-gold exchange-badge" data-i18n="ui.exchangePrizeBadge">✦ 限定實體特典</span>
+                  <span class="badge-crimson exchange-sub-badge">特賞</span>
+                </div>
+                <h3 class="exchange-hero-title">
+                  <span id="exchange-prize-title" data-i18n="ui.exchangePrizeTitle">小樂等身抱枕（雙面）</span>
+                  <em data-i18n="ui.pillowSubheading">ふたつの表情</em>
+                </h3>
+                <p class="exchange-poem" data-i18n="ui.pillowPoem">
+                  指尖輕轉，遇見小樂的另一面。<br>從戰鬥日常，到夏日片刻。
+                </p>
+              </div>
+
+              <!-- Interactive Controls (01 Front, 02 Back, 03 2D Design, 04 Product Preview) -->
+              <nav class="exchange-cmd-nav" aria-label="抱枕鑑賞選單">
+                <button type="button" id="btn-pillow-front" class="exchange-cmd-btn active" aria-pressed="true">
+                  <span class="exchange-cmd-idx">01</span>
+                  <span class="exchange-cmd-text">
+                    <b data-i18n="ui.pillowFrontSide">正面・戰鬥日常</b>
+                    <small>FRONT SIDE</small>
+                  </span>
+                  <i class="exchange-cmd-arrow" aria-hidden="true">›</i>
+                </button>
+                <button type="button" id="btn-pillow-back" class="exchange-cmd-btn" aria-pressed="false">
+                  <span class="exchange-cmd-idx">02</span>
+                  <span class="exchange-cmd-text">
+                    <b data-i18n="ui.pillowBackSide">背面・夏日片刻</b>
+                    <small>BACK SIDE</small>
+                  </span>
+                  <i class="exchange-cmd-arrow" aria-hidden="true">›</i>
+                </button>
+                <button type="button" id="btn-pillow-design" class="exchange-cmd-btn">
+                  <span class="exchange-cmd-idx">03</span>
+                  <span class="exchange-cmd-text">
+                    <b data-i18n="ui.pillowDesignGallery">2D 設計圖</b>
+                    <small>ILLUSTRATION GALLERY</small>
+                  </span>
+                  <i class="exchange-cmd-arrow" aria-hidden="true">›</i>
+                </button>
+                <button type="button" id="btn-pillow-product" class="exchange-cmd-btn">
+                  <span class="exchange-cmd-idx">04</span>
+                  <span class="exchange-cmd-text">
+                    <b data-i18n="ui.pillowProductPreview">產品示意圖</b>
+                    <small>PRODUCT PREVIEW</small>
+                  </span>
+                  <i class="exchange-cmd-arrow" aria-hidden="true">›</i>
+                </button>
+              </nav>
+
+              <!-- Specifications & Dimensions -->
+              <div class="exchange-spec-summary">
+                <div class="spec-cell">
+                  <small data-i18n="ui.pillowSpecDimTitle">尺寸</small>
+                  <strong>160 × 50 <em>cm</em></strong>
+                </div>
+                <div class="spec-divider"></div>
+                <div class="spec-cell">
+                  <small data-i18n="ui.pillowSpecPrintTitle">圖案</small>
+                  <strong data-i18n="ui.pillowSpecPrint">雙面印製</strong>
+                </div>
+              </div>
+
+              <!-- Star Sand Exchange Area -->
+              <div class="exchange-pricing-box">
+                <div class="exchange-price-row">
+                  <span class="exchange-price-label" data-i18n="ui.exchangeCost">所需星砂</span>
+                  <div class="exchange-price-value">
+                    <span class="exchange-star-icon">✦</span>
+                    <b id="exchange-price-amount">1,000,000</b>
+                  </div>
+                </div>
+                <div class="exchange-balance-row">
+                  <span class="exchange-balance-label" data-i18n="ui.exchangePlayerBalance">當前持有</span>
+                  <span class="exchange-balance-value"><b id="exchange-player-coins">0</b> <small data-i18n="ui.coins">星砂</small></span>
+                </div>
+              </div>
+
+              <div class="exchange-action-area">
+                <button type="button" class="button-exchange disabled" id="btn-exchange-redeem" disabled aria-disabled="true">
+                  <span data-i18n="ui.exchangeBtn">兌換獎勵</span>
+                </button>
+                <div class="exchange-notice-pill" id="exchange-notice-pill">
+                  <svg class="notice-icon" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                  <span class="notice-text" data-i18n="ui.exchangeNotOpenNotice">尚未開放兌換，敬請期待！</span>
+                </div>
+              </div>
+            </section>
+
+            <!-- Right Column: 3D Pillow WebGL Stage -->
+            <section class="exchange-3d-stage" aria-label="互動 3D 抱枕">
+              <div class="stage-top">
+                <span><b data-i18n="ui.pillow3DView">抱枕鑑賞</b> <small data-i18n="ui.pillow3DSub">360° VIEW</small></span>
+                <span id="exchange-3d-state" class="stage-state-tag" aria-live="polite" data-i18n="ui.pillowStateFree">載入中</span>
+              </div>
+              <div class="stage-halo" aria-hidden="true"></div>
+              <div class="stage-floor" aria-hidden="true"></div>
+              <canvas id="exchange-canvas" tabindex="0" aria-label="按住抱枕拖曳，放手甩動。方向鍵旋轉，R 鍵恢復。"></canvas>
+              <div id="exchange-loading" class="stage-loading" data-i18n="ui.pillowLoading">正在準備小樂…</div>
+              <div class="stage-bottom">
+                <span class="stage-gesture" aria-hidden="true">✥</span>
+                <div class="stage-gesture-desc">
+                  <span data-i18n="ui.pillowGestureDrag">按住拖曳・放手甩動</span>
+                  <small class="stage-hint" data-i18n="ui.pillowGestureHint">拖得越快，轉得越快</small>
+                </div>
+                <button type="button" id="btn-exchange-reset" class="stage-reset-btn back-button" title="恢復原位 (R)">
+                  <span aria-hidden="true">↺</span> <b data-i18n="ui.pillowResetBtn">恢復原位</b>
+                </button>
+              </div>
+            </section>
+          </div>
+
+          <!-- Dialog for 2D Design & Product Preview -->
+          <dialog id="exchange-preview-dialog" class="exchange-preview-dialog" aria-labelledby="exchange-preview-title">
+            <div class="preview-dialog-header">
+              <div>
+                <p id="exchange-preview-eyebrow" class="eyebrow">PRODUCT PREVIEW</p>
+                <h3 id="exchange-preview-title" data-i18n="ui.pillowProductPreview">產品示意圖</h3>
+              </div>
+              <button type="button" id="btn-exchange-dialog-close" class="icon-button dialog-close-btn" aria-label="關閉預覽" data-i18n-attr="aria-label:ui.pillowClosePreview">✕</button>
+            </div>
+            <div class="preview-dialog-toolbar">
+              <span id="exchange-preview-label">正面・背面</span>
+              <button type="button" id="btn-exchange-zoom" class="back-button preview-zoom-btn" aria-pressed="false" data-i18n="ui.pillowZoomIn">＋ 放大鑑賞</button>
+            </div>
+            <div id="exchange-preview-viewport" class="preview-viewport">
+              <picture>
+                <source id="exchange-product-source" srcset="./koraku/小樂抱枕產品圖.webp" type="image/webp">
+                <img id="exchange-product-img" src="./koraku/小樂抱枕產品圖.png" alt="小樂抱枕產品圖" class="exchange-product-image">
+              </picture>
+            </div>
+            <p id="exchange-preview-caption" class="preview-caption" data-i18n="ui.pillowCaptionProduct">產品外觀示意・實際效果依成品為準</p>
+          </dialog>
         </section>
 
         <section id="screen-battle" class="screen battle-screen" aria-label="猜拳戰鬥" data-i18n-attr="aria-label:ui.rpsBattle">
@@ -1673,6 +1828,6 @@
       <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
     </div>
-    <script src="./src/js/bundle.js?v=202609050335"></script>
+    <script src="./src/js/bundle.js?v=202609050835"></script>
   </body>
 </html>

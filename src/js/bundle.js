@@ -4,7 +4,7 @@
   "use strict";
 
 // --- src/js/config/gameConfig.js ---
-const APP_VERSION = "0.0.35";
+const APP_VERSION = "0.0.36";
 
 const DOJO_CONFIG = Object.freeze({
   defaultHp: 10000,
@@ -517,6 +517,33 @@ const DEFAULT_LOCALE = "en";
 const LOCALE_STORAGE_KEY = "koraku-rps-locale";
 
 const CHANGELOG_DATA = [
+  {
+    version: "0.0.36",
+    date: "2026-09-05",
+    tag: "Physical Dakimakura 3D Viewer, Special Shop, Preview Fit Fix & WebP Migration",
+    changes: {
+      "zh-Hant": [
+        "【實體特典：小樂抱枕 3D 鑑賞與特典商店】主選單新增「09 特典商店」專屬按鈕，完整復刻純 WebGL 3D 抱枕物理引擎（360° 拖曳甩動、正反面翻轉、重心復位），標註 1,000,000 星砂兌換介面與尚未開放註釋。",
+        "【預覽圖裁切修復與高畫質鑑賞】修復 2D 設計圖與產品示意圖彈窗預設放大導致頭耳與腳部裁切問題，初始視野調整為完整包含 (contain)，並支援「＋ 放大鑑賞」展開至 1248px 高清捲動細節。",
+        "【素材全面切換 WebP】抱枕 2D 與 3D 貼圖素材全面切換為 WebP 高畫質壓縮格式，檔案體積降低約 40%，大幅提升載入效率。"
+      ],
+      "zh-Hans": [
+        "【实体特典：小乐抱枕 3D 鉴赏与特典商店】主菜单新增「09 特典商店」专属按钮，完整复刻纯 WebGL 3D 抱枕物理引擎（360° 拖曳甩动、正反面翻转、重心复位），标注 1,000,000 星砂兑换界面与尚未开放注释。",
+        "【预览图裁切修复与高画质鉴赏】修复 2D 设计图与产品示意图弹窗默认放大导致头耳与脚部裁切问题，初始视野调整为完整包含 (contain)，并支持「＋ 放大鉴赏」展开至 1248px 高清滚动细节。",
+        "【素材全面切换 WebP】抱枕 2D 与 3D 贴图素材全面切换为 WebP 高画质压缩格式，档案体积降低约 40%，大幅提升载入效率。"
+      ],
+      "en": [
+        "【Physical Reward: 3D Pillow Viewer & Special Shop】Added '09 Special Shop' to main menu with pure WebGL 3D pillow physics engine (360° inertia drag, front/back flip, reset), 1,000,000 star sand exchange interface and coming-soon notice.",
+        "【Preview Dialog Contain Fit & Zoom】Fixed default image cropping in 2D illustration and product preview modals to full contain view, with '+ Zoom' toggle expanding to 1248px scrollable HD view.",
+        "【WebP Asset Migration】Converted pillow 2D and 3D textures to WebP format, reducing asset size by ~40% and accelerating load times."
+      ],
+      "ja": [
+        "【実体特典：小楽抱き枕 3D 鑑賞＆特典商店】メインメニューに「09 特典商店」を追加。純 WebGL による 3D 物理シミュレーション（360° 慣性スイング、表裏反転、復位）と 1,000,000 星砂の交換ページを実装。",
+        "【プレビュー画像の切り抜き修正＆拡大鑑賞】2D 設計図および製品プレビューダイアログの初期表示切り抜き問題を解消し、全体表示（contain）と「＋ 拡大鑑賞」による 1248px 高精細スクロール閲覧に対応。",
+        "【WebP 素材最適化】抱き枕の 2D/3D テクスチャを高品質 WebP 形式に移行し、ファイル容量を約 40% 削減して読み込み速度を向上。"
+      ]
+    }
+  },
   {
     version: "0.0.35",
     date: "2026-09-05",
@@ -1703,6 +1730,49 @@ const DICTIONARY = {
       navDojo: "修練場",
       menuDojo: "修練道場",
       menuDojoSub: "QTE & SANDBOX",
+      menuExchange: "特典商店",
+      menuExchangeSub: "SPECIAL SHOP",
+      navExchange: "特典",
+      exchangeTitle: "特典商店",
+      exchangeSubtitle: "累積冒險所得的星砂，換取小樂專屬限定實體週邊！",
+      exchangePrizeTitle: "小樂等身抱枕（雙面）",
+      exchangePrizeBadge: "✦ 限定實體特典",
+      exchangePrizeDesc: "高品質雙面親膚抱枕，印有小樂溫柔陪伴的精緻立繪。無論是修行疲累或是寒夜入眠，都有小樂溫暖守護在身邊。",
+      exchangePrizeSpecs: "規格：等身雙面 (160×50cm)・2WAY 升級親膚彈性面料・高清雙面印花",
+      exchangePrizeDelivery: "配送說明：全球航空保密包裹寄送，開放兌換時提供填寫收件資訊",
+      exchangeCost: "所需星砂",
+      exchangePlayerBalance: "當前持有",
+      exchangeBtn: "兌換獎勵",
+      exchangeNotOpenNotice: "尚未開放兌換，敬請期待！",
+      shopToExchangeLink: "實體特典：小樂抱枕兌換 ›",
+      pillowEyebrow: "KORAKU COLLECTION",
+      pillowSubheading: "ふたつの表情",
+      pillowPoem: "指尖輕轉，遇見小樂的另一面。<br>從戰鬥日常，到夏日片刻。",
+      pillow3DView: "抱枕鑑賞",
+      pillow3DSub: "360° VIEW",
+      pillowFrontSide: "正面・戰鬥日常",
+      pillowBackSide: "背面・夏日片刻",
+      pillowDesignGallery: "2D 設計圖",
+      pillowProductPreview: "產品示意圖",
+      pillowSpecDimTitle: "尺寸",
+      pillowSpecDim: "160 × 50 cm",
+      pillowSpecPrintTitle: "圖案",
+      pillowSpecPrint: "雙面印製",
+      pillowGestureDrag: "按住拖曳・放手甩動",
+      pillowGestureHint: "拖得越快，轉得越快",
+      pillowResetBtn: "恢復原位",
+      pillowZoomIn: "＋ 放大鑑賞",
+      pillowZoomOut: "− 完整顯示",
+      pillowStateFree: "自由探索",
+      pillowStateDragging: "抓取中",
+      pillowStateInertia: "慣性旋轉",
+      pillowStateResetting: "正在復位",
+      pillowLoading: "正在準備小樂…",
+      pillowClosePreview: "關閉預覽",
+      pillowDesignAlt: "小樂抱枕 2D 原始設計圖：左側為戰鬥正面，右側為泳裝背面",
+      pillowProductAlt: "小樂抱枕正反面產品示意圖，尺寸 160 × 50 公分",
+      pillowCaptionDesign: "左：正面・戰鬥日常　／　右：背面・夏日片刻",
+      pillowCaptionProduct: "產品外觀示意・實際效果依成品為準",
       recentDamageLog: "戰鬥紀錄",
       damageSourceRps: "猜拳獲勝",
       damageSourceMorph: "變拳克制",
@@ -2585,6 +2655,49 @@ const DICTIONARY = {
       navDojo: "修练场",
       menuDojo: "修练道场",
       menuDojoSub: "QTE & SANDBOX",
+      menuExchange: "特典商店",
+      menuExchangeSub: "SPECIAL SHOP",
+      navExchange: "特典",
+      exchangeTitle: "特典商店",
+      exchangeSubtitle: "积累冒险所得的星砂，换取小乐专属限定实体周边！",
+      exchangePrizeTitle: "小乐等身抱枕（双面）",
+      exchangePrizeBadge: "✦ 限定实体特典",
+      exchangePrizeDesc: "高质量双面亲肤抱枕，印有小乐温柔陪伴的精致立绘。无论是修行疲累或是寒夜入眠，都有小乐温暖守护在身边。",
+      exchangePrizeSpecs: "规格：等身双面 (160×50cm)・2WAY 升级亲肤弹性面料・高清双面印花",
+      exchangePrizeDelivery: "配送说明：全球航空保密包裹寄送，开放兑换时提供填写收件信息",
+      exchangeCost: "所需星砂",
+      exchangePlayerBalance: "当前持有",
+      exchangeBtn: "兑换奖励",
+      exchangeNotOpenNotice: "尚未开放兑换，敬请期待！",
+      shopToExchangeLink: "实体特典：小乐抱枕兑换 ›",
+      pillowEyebrow: "KORAKU COLLECTION",
+      pillowSubheading: "ふたつの表情",
+      pillowPoem: "指尖轻转，遇见小乐的另一面。<br>从战斗日常，到夏日片刻。",
+      pillow3DView: "抱枕鉴赏",
+      pillow3DSub: "360° VIEW",
+      pillowFrontSide: "正面・战斗日常",
+      pillowBackSide: "背面・夏日片刻",
+      pillowDesignGallery: "2D 设计图",
+      pillowProductPreview: "产品示意图",
+      pillowSpecDimTitle: "尺寸",
+      pillowSpecDim: "160 × 50 cm",
+      pillowSpecPrintTitle: "图案",
+      pillowSpecPrint: "双面印制",
+      pillowGestureDrag: "按住拖拽・放手甩动",
+      pillowGestureHint: "拖得越快，转得越快",
+      pillowResetBtn: "恢复原位",
+      pillowZoomIn: "＋ 放大鉴赏",
+      pillowZoomOut: "− 完整显示",
+      pillowStateFree: "自由探索",
+      pillowStateDragging: "抓取中",
+      pillowStateInertia: "惯性旋转",
+      pillowStateResetting: "正在复位",
+      pillowLoading: "正在准备小乐…",
+      pillowClosePreview: "关闭预览",
+      pillowDesignAlt: "小乐抱枕 2D 原始设计图：左侧为战斗正面，右侧为泳装背面",
+      pillowProductAlt: "小乐抱枕正反面产品示意图，尺寸 160 × 50 公分",
+      pillowCaptionDesign: "左：正面・战斗日常　／　右：背面・夏日片刻",
+      pillowCaptionProduct: "产品外观示意・实际效果依成品为准",
       recentDamageLog: "战斗记录",
       damageSourceRps: "猜拳获胜",
       damageSourceMorph: "变拳克制",
@@ -3405,6 +3518,49 @@ const DICTIONARY = {
       navDojo: "Training Dojo",
       menuDojo: "Training Dojo",
       menuDojoSub: "QTE & SANDBOX",
+      menuExchange: "Special Shop",
+      menuExchangeSub: "SPECIAL SHOP",
+      navExchange: "Special",
+      exchangeTitle: "Special Shop",
+      exchangeSubtitle: "Accumulate Star Sand from battles to redeem exclusive limited physical merch of Kohaku!",
+      exchangePrizeTitle: "Kohaku Body Pillow (Double-Sided)",
+      exchangePrizeBadge: "✦ Limited Physical Reward",
+      exchangePrizeDesc: "Premium double-sided skin-friendly dakimakura body pillow featuring exquisite illustrations of Kohaku. Gentle companionship for your rest after long training.",
+      exchangePrizeSpecs: "Specs: Life-sized 160×50cm · 2WAY Upgraded Tricot · Ultra-HD Double-Sided Print",
+      exchangePrizeDelivery: "Shipping: Discreet worldwide air parcel delivery. Address form available upon launch.",
+      exchangeCost: "Required Star Sand",
+      exchangePlayerBalance: "Current Balance",
+      exchangeBtn: "Redeem Reward",
+      exchangeNotOpenNotice: "Redemption not yet available, stay tuned!",
+      shopToExchangeLink: "Physical Reward: Kohaku Dakimakura ›",
+      pillowEyebrow: "KORAKU COLLECTION",
+      pillowSubheading: "Two Expressions",
+      pillowPoem: "A gentle turn unveils another side of Kohaku.<br>From battle readiness to peaceful summer breeze.",
+      pillow3DView: "Dakimakura Showcase",
+      pillow3DSub: "360° VIEW",
+      pillowFrontSide: "Front · Battle Attire",
+      pillowBackSide: "Back · Summer Breeze",
+      pillowDesignGallery: "2D Design Sheet",
+      pillowProductPreview: "Product Preview",
+      pillowSpecDimTitle: "Dimensions",
+      pillowSpecDim: "160 × 50 cm",
+      pillowSpecPrintTitle: "Print Style",
+      pillowSpecPrint: "Double-Sided Print",
+      pillowGestureDrag: "Drag to rotate · Release to spin",
+      pillowGestureHint: "Faster drag brings faster inertia",
+      pillowResetBtn: "Reset View",
+      pillowZoomIn: "＋ Zoom In",
+      pillowZoomOut: "− Fit View",
+      pillowStateFree: "Free Exploration",
+      pillowStateDragging: "Dragging",
+      pillowStateInertia: "Inertia Spinning",
+      pillowStateResetting: "Resetting",
+      pillowLoading: "Preparing Kohaku…",
+      pillowClosePreview: "Close Preview",
+      pillowDesignAlt: "Kohaku Dakimakura 2D Master Artwork: Left front battle attire, Right rear swimsuit",
+      pillowProductAlt: "Kohaku Body Pillow Preview, 160 × 50 cm",
+      pillowCaptionDesign: "Left: Front · Battle Attire / Right: Back · Summer Breeze",
+      pillowCaptionProduct: "Product appearance mockup. Final details subject to production.",
       recentDamageLog: "Battle Log",
       damageSourceRps: "RPS Win",
       damageSourceMorph: "Morph Counter",
@@ -4225,6 +4381,49 @@ const DICTIONARY = {
       navDojo: "修練場",
       menuDojo: "修練道場",
       menuDojoSub: "QTE & SANDBOX",
+      menuExchange: "特典商店",
+      menuExchangeSub: "SPECIAL SHOP",
+      navExchange: "特典",
+      exchangeTitle: "特典商店",
+      exchangeSubtitle: "冒險で集めた星砂を捧げ、小楽の限定リアル特典を手に入れよう！",
+      exchangePrizeTitle: "小楽抱き枕カバー（両面）",
+      exchangePrizeBadge: "✦ 限定リアル特典",
+      exchangePrizeDesc: "最高級の肌触りを誇る2WAYトリコット両面抱き枕カバー。過酷な修練の疲れを癒やし、夜の安らぎを守る小楽の添い寝仕様。",
+      exchangePrizeSpecs: "仕様：等身大 (160×50cm)・2WAYトリコット昇華転写・高精細両面印刷",
+      exchangePrizeDelivery: "発送について：完全密閉梱包・海外航空便対応（交換開放時に配送先入力フォームを提供）",
+      exchangeCost: "必要星砂",
+      exchangePlayerBalance: "所持星砂",
+      exchangeBtn: "特典を交換する",
+      exchangeNotOpenNotice: "尚未開放兌換，敬請期待！",
+      shopToExchangeLink: "限定リアル特典：小楽抱き枕交換 ›",
+      pillowEyebrow: "KORAKU COLLECTION",
+      pillowSubheading: "ふたつの表情",
+      pillowPoem: "指先で紡ぐ、小楽のもうひとつの姿。<br>戦いの日々から、夏のひとときへ。",
+      pillow3DView: "抱き枕鑑賞",
+      pillow3DSub: "360° VIEW",
+      pillowFrontSide: "表面・戦闘日常",
+      pillowBackSide: "裏面・夏の思い出",
+      pillowDesignGallery: "2Dデザイン原画",
+      pillowProductPreview: "製品イメージ",
+      pillowSpecDimTitle: "サイズ",
+      pillowSpecDim: "160 × 50 cm",
+      pillowSpecPrintTitle: "印刷仕様",
+      pillowSpecPrint: "両面高精細印刷",
+      pillowGestureDrag: "ドラッグで回転・放してスピン",
+      pillowGestureHint: "スワイプ速度でスピンが変化",
+      pillowResetBtn: "位置リセット",
+      pillowZoomIn: "＋ 拡大表示",
+      pillowZoomOut: "− 全体表示",
+      pillowStateFree: "自由探索",
+      pillowStateDragging: "操作中",
+      pillowStateInertia: "慣性回転",
+      pillowStateResetting: "リセット中",
+      pillowLoading: "小楽を準備中…",
+      pillowClosePreview: "プレビューを閉じる",
+      pillowDesignAlt: "小楽抱き枕 2Dマスターデザイン：左側 戦闘日常、右側 水着背面",
+      pillowProductAlt: "小楽両面抱き枕カバー製品イメージ、160 × 50 cm",
+      pillowCaptionDesign: "左：表面・戦闘日常 ／ 右：裏面・夏の思い出",
+      pillowCaptionProduct: "製品外観イメージ・実際の仕上がりは完成品に準じます",
       recentDamageLog: "戦闘ログ",
       damageSourceRps: "じゃんけん勝利",
       damageSourceMorph: "変拳カウンター",
@@ -13011,6 +13210,597 @@ class DialogueController {
   }
 }
 
+// --- src/js/ui/Pillow3DViewer.js ---
+// ============================================================================
+// Pillow3DViewer.js - Pure WebGL 3D Interactive Dakimakura Viewer
+// Replicating physics suspension, 360-degree inertia fling, and fabric shaders
+// Zero external dependencies. Designed for Koraku RPS Special Merch Store.
+// ============================================================================
+
+const add = (a, b) => a.map((v, i) => v + b[i]);
+const sub = (a, b) => a.map((v, i) => v - b[i]);
+const scale = (a, s) => a.map(v => v * s);
+const dot = (a, b) => a.reduce((s, v, i) => s + v * b[i], 0);
+const cross = (a, b) => [
+  a[1] * b[2] - a[2] * b[1],
+  a[2] * b[0] - a[0] * b[2],
+  a[0] * b[1] - a[1] * b[0]
+];
+const len = a => Math.hypot(...a);
+const norm = a => scale(a, 1 / (len(a) || 1));
+
+const qmul = (a, b) => [
+  a[3] * b[0] + a[0] * b[3] + a[1] * b[2] - a[2] * b[1],
+  a[3] * b[1] - a[0] * b[2] + a[1] * b[3] + a[2] * b[0],
+  a[3] * b[2] + a[0] * b[1] - a[1] * b[0] + a[2] * b[3],
+  a[3] * b[3] - dot(a.slice(0, 3), b.slice(0, 3))
+];
+
+const axisQ = (a, t) => [...scale(norm(a), Math.sin(t / 2)), Math.cos(t / 2)];
+
+const rotate = (v, q) => {
+  const t = scale(cross(q.slice(0, 3), v), 2);
+  return add(v, add(scale(t, q[3]), cross(q.slice(0, 3), t)));
+};
+
+function createShader(gl, type, source) {
+  const s = gl.createShader(type);
+  gl.shaderSource(s, source);
+  gl.compileShader(s);
+  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+    const info = gl.getShaderInfoLog(s);
+    gl.deleteShader(s);
+    throw new Error(`Shader compilation failed: ${info}`);
+  }
+  return s;
+}
+
+// Parametric stitched pillow surface
+function surface(u, v, side) {
+  const edgeX = Math.max(0, 1 - u * u);
+  const edgeY = Math.max(0, 1 - v * v);
+  const bulge = Math.pow(edgeX * edgeY, 0.57);
+  const x = 0.5 * u * (0.95 + 0.045 * Math.pow(Math.abs(v), 10) - 0.018 * Math.cos(v * 5));
+  const y = 1.6 * v * (1 - 0.014 * edgeX);
+  const fold = 0.007 * Math.sin(v * 47 + u * 13) * Math.pow(Math.abs(u), 8) * Math.pow(edgeY, 0.5) +
+               0.006 * Math.sin(u * 35) * Math.pow(Math.abs(v), 16) * edgeX;
+  return [x, y, side * 1.25 * (0.016 + 0.175 * bulge + fold)];
+}
+
+function buildPillowMesh() {
+  const vertices = [];
+  const triangles = [];
+
+  function vertex(u, v, s) {
+    const p = surface(u, v, s);
+    const e = 0.0001;
+    const du = sub(surface(Math.min(1, u + e), v, s), surface(Math.max(-1, u - e), v, s));
+    const dv = sub(surface(u, Math.min(1, v + e), s), surface(u, Math.max(-1, v - e), s));
+    let n = scale(norm(cross(du, dv)), s);
+    const uv = [s === 1 ? (u + 1) * 0.25 : 0.5 + (1 - u) * 0.25, (v + 1) * 0.5];
+    return [...p, ...n, ...uv];
+  }
+
+  function triangle(a, b, c) {
+    vertices.push(...a, ...b, ...c);
+    triangles.push([a.slice(0, 3), b.slice(0, 3), c.slice(0, 3)]);
+  }
+
+  const NX = 40, NY = 112;
+  for (const s of [1, -1]) {
+    for (let j = 0; j < NY; j++) {
+      for (let i = 0; i < NX; i++) {
+        const u = (i / NX) * 2 - 1;
+        const v = (j / NY) * 2 - 1;
+        const un = ((i + 1) / NX) * 2 - 1;
+        const vn = ((j + 1) / NY) * 2 - 1;
+        const a = vertex(u, v, s);
+        const b = vertex(un, v, s);
+        const c = vertex(un, vn, s);
+        const d = vertex(u, vn, s);
+        if (s === 1) {
+          triangle(a, b, c);
+          triangle(a, c, d);
+        } else {
+          triangle(a, c, b);
+          triangle(a, d, c);
+        }
+      }
+    }
+  }
+
+  // Narrow side gusset closing perimeter
+  const boundary = [];
+  for (let i = 0; i <= NX; i++) boundary.push([-1 + (2 * i) / NX, -1]);
+  for (let j = 1; j <= NY; j++) boundary.push([1, -1 + (2 * j) / NY]);
+  for (let i = NX - 1; i >= 0; i--) boundary.push([-1 + (2 * i) / NX, 1]);
+  for (let j = NY - 1; j >= 0; j--) boundary.push([-1, -1 + (2 * j) / NY]);
+
+  for (let i = 0; i < boundary.length - 1; i++) {
+    const [u, v] = boundary[i];
+    const [un, vn] = boundary[i + 1];
+    const a = vertex(u, v, 1);
+    const b = vertex(u, v, -1);
+    const c = vertex(un, vn, -1);
+    const d = vertex(un, vn, 1);
+    const n = norm(cross(sub(b.slice(0, 3), a.slice(0, 3)), sub(c.slice(0, 3), a.slice(0, 3))));
+    for (const p of [a, b, c, d]) {
+      p.splice(3, 3, ...n);
+      p[6] = Math.min(0.4998, Math.max(0.0002, (u + 1) * 0.25));
+    }
+    triangle(a, b, c);
+    triangle(a, c, d);
+  }
+
+  return {
+    vertices: new Float32Array(vertices),
+    triangles,
+    vertexCount: vertices.length / 8
+  };
+}
+
+class Pillow3DViewer {
+  constructor(options = {}) {
+    this.canvas = options.canvas;
+    this.stateEl = options.stateEl || null;
+    this.loadingEl = options.loadingEl || null;
+    this.frontBtn = options.frontBtn || null;
+    this.backBtn = options.backBtn || null;
+    this.resetBtn = options.resetBtn || null;
+    this.textureUrl = options.textureUrl || "./koraku/pillow-texture.webp";
+    this.getStateText = options.getStateText || null;
+
+    this.home = qmul(axisQ([0, 0, 1], -0.085), axisQ([0, 1, 0], -0.23));
+    this.q = [...this.home];
+    this.omega = [0, 0, 0];
+    this.pos = [0, 0, 0];
+    this.velocity = [0, 0, 0];
+    this.drag = null;
+    this.targetQ = null;
+    this.last = 0;
+    this.halfH = 2.18;
+    this.halfW = 2.0;
+    this.loaded = false;
+    this.isPaused = false;
+    this.animId = null;
+
+    this.gl = null;
+    this.program = null;
+    this.modelLoc = null;
+    this.projectionLoc = null;
+    this.mesh = null;
+    this.resizeObserver = null;
+
+    this.boundPointerDown = this.handlePointerDown.bind(this);
+    this.boundPointerMove = this.handlePointerMove.bind(this);
+    this.boundPointerUp = this.handleRelease.bind(this);
+    this.boundKeyDown = this.handleKeyDown.bind(this);
+    this.boundFrame = this.frame.bind(this);
+  }
+
+  init() {
+    if (!this.canvas) return false;
+
+    try {
+      this.gl = this.canvas.getContext("webgl", {
+        alpha: true,
+        antialias: true,
+        premultipliedAlpha: false
+      });
+      if (!this.gl) throw new Error("WebGL is not supported");
+
+      const gl = this.gl;
+      const vs = `
+        attribute vec3 aPosition;
+        attribute vec3 aNormal;
+        attribute vec2 aUV;
+        uniform mat4 uModel;
+        uniform mat4 uProjection;
+        varying vec3 vNormal;
+        varying vec2 vUV;
+        varying vec3 vPos;
+        void main(){
+          vec4 p = uModel * vec4(aPosition, 1.0);
+          gl_Position = uProjection * p;
+          vNormal = mat3(uModel) * aNormal;
+          vUV = aUV;
+          vPos = p.xyz;
+        }
+      `;
+
+      const fs = `
+        precision mediump float;
+        varying vec3 vNormal;
+        varying vec2 vUV;
+        varying vec3 vPos;
+        uniform sampler2D uTexture;
+        void main(){
+          vec3 n = normalize(vNormal);
+          vec3 c = texture2D(uTexture, vUV).rgb;
+          float key = max(dot(n, normalize(vec3(-0.6, 0.9, 1.5))), 0.0);
+          float fill = max(dot(n, normalize(vec3(0.9, 0.2, -0.7))), 0.0);
+          float rim = pow(1.0 - abs(n.z), 3.0);
+          float weave = sin(vUV.x * 3600.0) * sin(vUV.y * 5800.0) * 0.009;
+          vec3 color = c * (0.66 + 0.38 * key + 0.14 * fill + weave) + vec3(0.09, 0.11, 0.12) * rim;
+          gl_FragColor = vec4(color, 1.0);
+        }
+      `;
+
+      this.program = gl.createProgram();
+      gl.attachShader(this.program, createShader(gl, gl.VERTEX_SHADER, vs));
+      gl.attachShader(this.program, createShader(gl, gl.FRAGMENT_SHADER, fs));
+      gl.linkProgram(this.program);
+      if (!gl.getProgramParameter(this.program, gl.LINK_STATUS)) {
+        throw new Error("Shader program link failed: " + gl.getProgramInfoLog(this.program));
+      }
+      gl.useProgram(this.program);
+
+      this.mesh = buildPillowMesh();
+      const buffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+      gl.bufferData(gl.ARRAY_BUFFER, this.mesh.vertices, gl.STATIC_DRAW);
+
+      for (const [name, size, offset] of [
+        ["aPosition", 3, 0],
+        ["aNormal", 3, 12],
+        ["aUV", 2, 24]
+      ]) {
+        const at = gl.getAttribLocation(this.program, name);
+        gl.enableVertexAttribArray(at);
+        gl.vertexAttribPointer(at, size, gl.FLOAT, false, 32, offset);
+      }
+
+      this.modelLoc = gl.getUniformLocation(this.program, "uModel");
+      this.projectionLoc = gl.getUniformLocation(this.program, "uProjection");
+
+      gl.enable(gl.DEPTH_TEST);
+      gl.enable(gl.CULL_FACE);
+      gl.cullFace(gl.BACK);
+
+      // Texture
+      const texture = gl.createTexture();
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+
+      const img = new Image();
+      img.onload = () => {
+        if (!this.gl) return;
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, img);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+        this.loaded = true;
+        if (this.loadingEl) this.loadingEl.hidden = true;
+        this.updateStateText("free");
+        this.resize();
+        this.resume();
+      };
+      img.onerror = () => {
+        if (this.loadingEl) {
+          this.loadingEl.textContent = "3D 貼圖載入失敗，請檢查網路或圖檔路徑。";
+        }
+      };
+      img.src = this.textureUrl;
+
+      // Event listeners
+      this.canvas.addEventListener("pointerdown", this.boundPointerDown);
+      window.addEventListener("pointermove", this.boundPointerMove);
+      window.addEventListener("pointerup", this.boundPointerUp);
+      window.addEventListener("pointercancel", this.boundPointerUp);
+      this.canvas.addEventListener("keydown", this.boundKeyDown);
+
+      if (this.resetBtn) this.resetBtn.onclick = () => this.settle("front");
+      if (this.frontBtn) this.frontBtn.onclick = () => this.settle("front");
+      if (this.backBtn) this.backBtn.onclick = () => this.settle("back");
+
+      if (typeof ResizeObserver !== "undefined") {
+        this.resizeObserver = new ResizeObserver(() => this.resize());
+        this.resizeObserver.observe(this.canvas);
+      }
+
+      this.canvas.addEventListener("webglcontextlost", e => {
+        e.preventDefault();
+        if (this.loadingEl) {
+          this.loadingEl.hidden = false;
+          this.loadingEl.textContent = "3D 顯示已中斷，請重新進入頁面。";
+        }
+      });
+
+      return true;
+    } catch (err) {
+      console.warn("Pillow3DViewer initialization failed:", err);
+      if (this.loadingEl) {
+        this.loadingEl.textContent = "此裝置未能啟用 3D，請使用支援 WebGL 的瀏覽器。";
+      }
+      this.updateStateText("unsupported");
+      return false;
+    }
+  }
+
+  updateStateText(type) {
+    if (!this.stateEl) return;
+    if (this.getStateText) {
+      this.stateEl.textContent = this.getStateText(type);
+      return;
+    }
+    const map = {
+      loading: "載入中",
+      free: "自由探索",
+      dragging: "抓取中",
+      inertia: "慣性旋轉",
+      resetting: "正在復位",
+      unsupported: "無法啟用 3D"
+    };
+    this.stateEl.textContent = map[type] || type;
+  }
+
+  matrix() {
+    const x = rotate([1, 0, 0], this.q);
+    const y = rotate([0, 1, 0], this.q);
+    const z = rotate([0, 0, 1], this.q);
+    return new Float32Array([...x, 0, ...y, 0, ...z, 0, ...this.pos, 1]);
+  }
+
+  resize() {
+    if (!this.canvas || !this.gl) return;
+    const r = this.canvas.getBoundingClientRect();
+    if (!r.width || !r.height) return;
+    const d = Math.min(window.devicePixelRatio || 1, 2);
+    this.canvas.width = Math.round(r.width * d);
+    this.canvas.height = Math.round(r.height * d);
+    this.halfW = this.halfH * (r.width / r.height);
+  }
+
+  pick(x, y) {
+    if (!this.mesh) return null;
+    const inverse = [-this.q[0], -this.q[1], -this.q[2], this.q[3]];
+    const o = rotate(sub([x, y, 6], this.pos), inverse);
+    const d = rotate([0, 0, -1], inverse);
+    let nearest = Infinity;
+    let hit = null;
+
+    for (const [a, b, c] of this.mesh.triangles) {
+      const e1 = sub(b, a);
+      const e2 = sub(c, a);
+      const h = cross(d, e2);
+      const det = dot(e1, h);
+      if (Math.abs(det) < 1e-8) continue;
+      const f = 1 / det;
+      const s = sub(o, a);
+      const u = f * dot(s, h);
+      if (u < 0 || u > 1) continue;
+      const t = cross(s, e1);
+      const v = f * dot(d, t);
+      if (v < 0 || u + v > 1) continue;
+      const distance = f * dot(e2, t);
+      if (distance > 0 && distance < nearest) {
+        nearest = distance;
+        hit = add(o, scale(d, distance));
+      }
+    }
+    return hit;
+  }
+
+  pointer(e) {
+    const r = this.canvas.getBoundingClientRect();
+    return [
+      ((e.clientX - r.left) / r.width) * 2 * this.halfW - this.halfW,
+      this.halfH - ((e.clientY - r.top) / r.height) * 2 * this.halfH
+    ];
+  }
+
+  settle(face) {
+    this.drag = null;
+    this.canvas.classList.remove("grabbing");
+    this.omega = [0, 0, 0];
+    this.targetQ = face === "back" ? qmul(this.home, axisQ([0, 1, 0], Math.PI)) : [...this.home];
+    this.updateStateText("resetting");
+  }
+
+  updateButtons() {
+    const back = rotate([0, 0, 1], this.q)[2] < 0;
+    if (this.frontBtn) {
+      this.frontBtn.classList.toggle("active", !back);
+      this.frontBtn.setAttribute("aria-pressed", String(!back));
+    }
+    if (this.backBtn) {
+      this.backBtn.classList.toggle("active", back);
+      this.backBtn.setAttribute("aria-pressed", String(back));
+    }
+  }
+
+  handlePointerDown(e) {
+    if (!this.loaded || e.button !== 0) return;
+    const p = this.pointer(e);
+    const hit = this.pick(...p);
+    if (!hit) return;
+    e.preventDefault();
+    this.canvas.focus({ preventScroll: true });
+    this.targetQ = null;
+    this.drag = {
+      id: e.pointerId,
+      p,
+      last: p,
+      time: performance.now(),
+      hit
+    };
+    this.canvas.classList.add("grabbing");
+    this.updateStateText("dragging");
+  }
+
+  handlePointerMove(e) {
+    if (!this.drag || this.drag.id !== e.pointerId) return;
+    const p = this.pointer(e);
+    const now = performance.now();
+    const dt = Math.max(0.008, (now - this.drag.time) / 1000);
+    const delta = sub(p, this.drag.last);
+    const speed = scale(delta, 1 / dt);
+    const arm = rotate(this.drag.hit, this.q);
+    const desired = [
+      -speed[1] * 1.3,
+      speed[0] * 2.8,
+      (arm[0] * speed[1] - arm[1] * speed[0]) * 0.9
+    ];
+    this.omega = add(scale(this.omega, 0.46), scale(desired, 0.54));
+    const magnitude = len(this.omega);
+    if (magnitude > 24) this.omega = scale(this.omega, 24 / magnitude);
+    this.drag.p = p;
+    this.drag.last = p;
+    this.drag.time = now;
+  }
+
+  handleRelease(e) {
+    if (!this.drag || (e && this.drag.id !== e.pointerId)) return;
+    const age = (performance.now() - this.drag.time) / 1000;
+    this.omega = scale(this.omega, Math.exp(-age * 9));
+    this.drag = null;
+    this.canvas.classList.remove("grabbing");
+    this.updateStateText("inertia");
+  }
+
+  handleKeyDown(e) {
+    if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) {
+      e.preventDefault();
+      this.targetQ = null;
+      this.omega = add(
+        this.omega,
+        e.key === "ArrowLeft"
+          ? [0, -2, 0]
+          : e.key === "ArrowRight"
+            ? [0, 2, 0]
+            : e.key === "ArrowUp"
+              ? [-2, 0, 0]
+              : [2, 0, 0]
+      );
+    }
+    if (e.key && e.key.toLowerCase() === "r") {
+      this.settle("front");
+    }
+  }
+
+  frame(time) {
+    if (this.isPaused) return;
+
+    const dt = Math.min((time - this.last) / 1000 || 0.016, 0.033);
+    this.last = time;
+
+    if (this.targetQ) {
+      let t = this.targetQ;
+      if (dot(this.q, t) < 0) t = scale(t, -1);
+      this.q = norm(add(scale(this.q, Math.exp(-dt * 8)), scale(t, 1 - Math.exp(-dt * 8))));
+      if (len(sub(this.q, t)) < 0.0004 && len(this.pos) < 0.002 && len(this.velocity) < 0.01) {
+        this.q = [...t];
+        this.targetQ = null;
+      }
+    } else {
+      if (this.drag && time - this.drag.time > 65) {
+        this.omega = scale(this.omega, Math.exp(-dt * 8));
+      }
+      const w = len(this.omega);
+      if (w > 0.0001) {
+        this.q = norm(qmul(axisQ(this.omega, w * dt), this.q));
+      }
+      if (!this.drag) {
+        this.omega = scale(this.omega, Math.exp(-dt * (0.82 + 0.045 * w)));
+        if (len(this.omega) < 0.007) this.omega = [0, 0, 0];
+      }
+    }
+
+    // Mass-and-spring suspension
+    let goal = [0, 0, 0];
+    if (this.drag) {
+      const arm = rotate(this.drag.hit, this.q);
+      goal = [
+        Math.max(-this.halfW * 0.65, Math.min(this.halfW * 0.65, this.drag.p[0] - arm[0])),
+        Math.max(-0.5, Math.min(0.5, this.drag.p[1] - arm[1] - 0.07)),
+        0
+      ];
+    }
+    const stiffness = this.drag ? 42 : this.targetQ ? 50 : 13;
+    const damping = this.drag ? 9 : this.targetQ ? 12 : 5.3;
+    this.velocity = add(
+      this.velocity,
+      scale(sub(scale(sub(goal, this.pos), stiffness), scale(this.velocity, damping)), dt)
+    );
+    this.pos = add(this.pos, scale(this.velocity, dt));
+
+    if (!this.drag && !this.targetQ && len(this.omega) === 0 && len(this.pos) < 0.0005 && len(this.velocity) < 0.002) {
+      this.pos = [0, 0, 0];
+      this.velocity = [0, 0, 0];
+    }
+
+    if (this.canvas.width > 0 && this.canvas.height > 0) {
+      const aspect = this.canvas.width / this.canvas.height;
+      const ax = rotate([0.52, 0, 0], this.q);
+      const ay = rotate([0, 1.61, 0], this.q);
+      const az = rotate([0, 0, 0.25], this.q);
+      const ex = Math.abs(ax[0]) + Math.abs(ay[0]) + Math.abs(az[0]);
+      const ey = Math.abs(ax[1]) + Math.abs(ay[1]) + Math.abs(az[1]);
+      const framing = Math.max(2.18, (ex + Math.abs(this.pos[0]) + 0.18) / aspect, ey + Math.abs(this.pos[1]) + 0.43);
+      this.halfH += (framing - this.halfH) * (1 - Math.exp(-dt * 12));
+      this.halfW = this.halfH * aspect;
+
+      const gl = this.gl;
+      gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+      gl.clearColor(0, 0, 0, 0);
+      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+      gl.uniformMatrix4fv(this.modelLoc, false, this.matrix());
+      gl.uniformMatrix4fv(
+        this.projectionLoc,
+        false,
+        new Float32Array([1 / this.halfW, 0, 0, 0, 0, 1 / this.halfH, 0, 0, 0, 0, -0.1, 0, 0, 0, 0, 1])
+      );
+      gl.drawArrays(gl.TRIANGLES, 0, this.mesh.vertexCount);
+    }
+
+    this.updateButtons();
+    if (!this.drag && !this.targetQ) {
+      this.updateStateText(len(this.omega) > 0.05 ? "inertia" : "free");
+    }
+
+    this.animId = requestAnimationFrame(this.boundFrame);
+  }
+
+  resume() {
+    if (!this.loaded || !this.isPaused) {
+      if (this.loaded && !this.animId) {
+        this.last = performance.now();
+        this.animId = requestAnimationFrame(this.boundFrame);
+      }
+      return;
+    }
+    this.isPaused = false;
+    this.last = performance.now();
+    this.animId = requestAnimationFrame(this.boundFrame);
+  }
+
+  pause() {
+    this.isPaused = true;
+    if (this.animId) {
+      cancelAnimationFrame(this.animId);
+      this.animId = null;
+    }
+  }
+
+  destroy() {
+    this.pause();
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+      this.resizeObserver = null;
+    }
+    if (this.canvas) {
+      this.canvas.removeEventListener("pointerdown", this.boundPointerDown);
+      this.canvas.removeEventListener("keydown", this.boundKeyDown);
+    }
+    window.removeEventListener("pointermove", this.boundPointerMove);
+    window.removeEventListener("pointerup", this.boundPointerUp);
+    window.removeEventListener("pointercancel", this.boundPointerUp);
+  }
+}
+
 // --- src/js/ui/AppView.js ---
 const $ = (selector) => document.querySelector(selector);
 const clampPercent = (value, max) => Math.max(0, Math.min(100, max ? (value / max) * 100 : 0));
@@ -13036,6 +13826,7 @@ class AppView {
     this.postState = null;
     this.qteState = null;
     this.recentDamageLog = [];
+    this.pillowViewer = null;
     this.dojoQteActive = false;
     this.dojoQteStyle = "single";
     this.dojoCombo = 0;
@@ -14653,6 +15444,11 @@ class AppView {
       return;
     }
 
+    if (event.target.closest("#exchange-art-frame") || event.target.closest("#exchange-product-img")) {
+      this.openExchangeLightbox();
+      return;
+    }
+
     if (event.target.closest("#open-save-record-modal")) {
       this.openSaveRecordModal();
       return;
@@ -15070,6 +15866,10 @@ class AppView {
       }
     }
 
+    if (this.currentScreen === "exchange" && screenName !== "exchange") {
+      this.pillowViewer?.pause?.();
+    }
+
     const next = $("#screen-" + screenName);
     if (!next) return;
     document.querySelectorAll(".screen").forEach((screen) => {
@@ -15085,6 +15885,9 @@ class AppView {
       this.renderGallery(this.getStoreSnapshot());
     } else if (screenName === "records") {
       this.renderHomeRecords(this.getStoreSnapshot());
+    } else if (screenName === "exchange") {
+      this.renderExchange(this.getStoreSnapshot());
+      this.initOrResumePillowViewer();
     }
   }
 
@@ -15214,6 +16017,10 @@ class AppView {
     if (!state?.profile) return;
     $("#header-level").textContent = String(state.profile.level || 1).padStart(2, "0");
     $("#header-coins").textContent = (state.coins || 0).toLocaleString("zh-TW");
+    const exCoins = $("#exchange-coins");
+    if (exCoins) exCoins.textContent = (state.coins || 0).toLocaleString("zh-TW");
+    const exPlayerCoins = $("#exchange-player-coins");
+    if (exPlayerCoins) exPlayerCoins.textContent = (state.coins || 0).toLocaleString("zh-TW");
     $("#header-xp").textContent = (state.profile.xp || 0) + " / " + (state.xpToNext || 0);
     $("#header-xp-fill").style.width = clampPercent(state.profile.xp || 0, state.xpToNext || 1) + "%";
     if (state.records) {
@@ -16040,6 +16847,163 @@ class AppView {
       this.galleryLightboxModal.classList.remove("is-open");
       this.galleryLightboxModal.setAttribute("aria-hidden", "true");
       this.galleryLightboxModal.setAttribute("hidden", "");
+    }
+  }
+
+  openExchangeLightbox() {
+    const targetSrc = "./koraku/小樂抱枕產品圖.png";
+    const titleText = I18n.t("ui.exchangePrizeTitle") || "小樂等身抱枕（雙面）";
+    const dimsText = "1122 × 1402 px (HD)";
+
+    const isMobile = window.innerWidth <= 780 || ("ontouchstart" in window) || (navigator.maxTouchPoints > 0);
+    if (isMobile) {
+      window.open(targetSrc, "_blank");
+      return;
+    }
+
+    const titleEl = $("#gallery-lightbox-title");
+    const dimsEl = $("#gallery-lightbox-dims");
+    const imgEl = $("#gallery-lightbox-image");
+    const tabLinkEl = $("#btn-open-image-tab");
+
+    if (titleEl) titleEl.textContent = titleText;
+    if (dimsEl) dimsEl.textContent = dimsText;
+    if (imgEl) {
+      imgEl.src = targetSrc;
+      imgEl.alt = titleText;
+    }
+    if (tabLinkEl) {
+      tabLinkEl.href = targetSrc;
+    }
+
+    if (this.galleryLightboxModal) {
+      this.galleryLightboxModal.removeAttribute("hidden");
+      this.galleryLightboxModal.setAttribute("aria-hidden", "false");
+      this.galleryLightboxModal.classList.add("is-open");
+    }
+  }
+
+  renderExchange(state = this.getStoreSnapshot()) {
+    const coins = Number(state?.coins || 0);
+    const coinsStr = coins.toLocaleString("zh-TW");
+    const elCoins = $("#exchange-coins");
+    if (elCoins) elCoins.textContent = coinsStr;
+    const elPlayerCoins = $("#exchange-player-coins");
+    if (elPlayerCoins) elPlayerCoins.textContent = coinsStr;
+  }
+
+  initOrResumePillowViewer() {
+    if (!this.pillowViewer) {
+      const canvas = $("#exchange-canvas");
+      if (!canvas) return;
+
+      this.pillowViewer = new Pillow3DViewer({
+        canvas,
+        stateEl: $("#exchange-3d-state"),
+        loadingEl: $("#exchange-loading"),
+        frontBtn: $("#btn-pillow-front"),
+        backBtn: $("#btn-pillow-back"),
+        resetBtn: $("#btn-exchange-reset"),
+        textureUrl: "./koraku/pillow-texture.webp",
+        getStateText: (type) => {
+          const map = {
+            loading: I18n.t("ui.pillowLoading") || "正在準備小樂…",
+            free: I18n.t("ui.pillowStateFree") || "自由探索",
+            dragging: I18n.t("ui.pillowStateDragging") || "抓取中",
+            inertia: I18n.t("ui.pillowStateInertia") || "慣性旋轉",
+            resetting: I18n.t("ui.pillowStateResetting") || "正在復位",
+            unsupported: "無法啟用 3D"
+          };
+          return map[type] || type;
+        }
+      });
+      this.pillowViewer.init();
+      this.bindExchangeEvents();
+    } else {
+      this.pillowViewer.resume();
+      setTimeout(() => this.pillowViewer?.resize(), 50);
+    }
+  }
+
+  bindExchangeEvents() {
+    const btnDesign = $("#btn-pillow-design");
+    const btnProduct = $("#btn-pillow-product");
+    const btnClose = $("#btn-exchange-dialog-close");
+    const btnZoom = $("#btn-exchange-zoom");
+    const dialog = $("#exchange-preview-dialog");
+
+    if (btnDesign) {
+      btnDesign.onclick = () => this.openExchangePreviewDialog("design");
+    }
+    if (btnProduct) {
+      btnProduct.onclick = () => this.openExchangePreviewDialog("product");
+    }
+    if (btnClose && dialog) {
+      btnClose.onclick = () => dialog.close();
+    }
+    if (dialog) {
+      dialog.addEventListener("click", (e) => {
+        if (e.target === dialog) dialog.close();
+      });
+    }
+    if (btnZoom) {
+      btnZoom.onclick = () => {
+        const vp = $("#exchange-preview-viewport");
+        if (!vp) return;
+        const zoomed = vp.classList.toggle("zoomed");
+        btnZoom.setAttribute("aria-pressed", String(zoomed));
+        btnZoom.textContent = zoomed
+          ? (I18n.t("ui.pillowZoomOut") || "− 完整顯示")
+          : (I18n.t("ui.pillowZoomIn") || "＋ 放大鑑賞");
+      };
+    }
+  }
+
+  openExchangePreviewDialog(type) {
+    const isDesign = type === "design";
+    const dialog = $("#exchange-preview-dialog");
+    const img = $("#exchange-product-img");
+    const title = $("#exchange-preview-title");
+    const eyebrow = $("#exchange-preview-eyebrow");
+    const caption = $("#exchange-preview-caption");
+    const viewport = $("#exchange-preview-viewport");
+    const zoomBtn = $("#btn-exchange-zoom");
+
+    const source = $("#exchange-product-source");
+
+    if (source) {
+      source.srcset = isDesign ? "./koraku/pillow-texture.webp" : "./koraku/小樂抱枕產品圖.webp";
+      source.type = "image/webp";
+    }
+    if (img) {
+      img.src = isDesign ? "./koraku/pillow-texture.webp" : "./koraku/小樂抱枕產品圖.webp";
+      img.alt = isDesign
+        ? (I18n.t("ui.pillowDesignAlt") || "小樂抱枕 2D 原始設計圖：左側為戰鬥正面，右側為泳裝背面")
+        : (I18n.t("ui.pillowProductAlt") || "小樂抱枕正反面產品示意圖，尺寸 160 × 50 公分");
+    }
+    if (title) {
+      title.textContent = isDesign
+        ? (I18n.t("ui.pillowDesignGallery") || "2D 設計圖")
+        : (I18n.t("ui.pillowProductPreview") || "產品示意圖");
+    }
+    if (eyebrow) {
+      eyebrow.textContent = isDesign ? "ILLUSTRATION GALLERY" : "PRODUCT PREVIEW";
+    }
+    if (caption) {
+      caption.textContent = isDesign
+        ? (I18n.t("ui.pillowCaptionDesign") || "左：正面・戰鬥日常　／　右：背面・夏日片刻")
+        : (I18n.t("ui.pillowCaptionProduct") || "產品外觀示意・實際效果依成品為準");
+    }
+    if (viewport) {
+      viewport.classList.remove("zoomed");
+      viewport.scrollTo(0, 0);
+    }
+    if (zoomBtn) {
+      zoomBtn.setAttribute("aria-pressed", "false");
+      zoomBtn.textContent = I18n.t("ui.pillowZoomIn") || "＋ 放大鑑賞";
+    }
+    if (dialog && typeof dialog.showModal === "function") {
+      dialog.showModal();
     }
   }
 

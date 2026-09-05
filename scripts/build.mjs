@@ -25,6 +25,7 @@ const modulesInOrder = [
   "src/js/net/RemoteGameClient.js",
   "src/js/ui/HUDDragController.js",
   "src/js/ui/DialogueController.js",
+  "src/js/ui/Pillow3DViewer.js",
   "src/js/ui/AppView.js",
   "src/js/main.js"
 ];

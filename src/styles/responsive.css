@@ -846,6 +846,61 @@
     grid-template-columns: 1fr;
   }
 
+  .exchange-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .exchange-left-panel {
+    display: contents;
+  }
+
+  .exchange-intro {
+    order: 1;
+  }
+
+  .exchange-3d-stage {
+    order: 2;
+    width: 100%;
+    min-height: 480px;
+    height: 58svh;
+  }
+
+  .exchange-cmd-nav {
+    order: 3;
+    max-width: 100%;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .exchange-spec-summary {
+    order: 4;
+    max-width: 100%;
+  }
+
+  .exchange-pricing-box {
+    order: 5;
+    max-width: 100%;
+  }
+
+  .exchange-action-area {
+    order: 6;
+    max-width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .button-exchange {
+    width: 100%;
+  }
+
+  .exchange-notice-pill {
+    justify-content: center;
+    width: 100%;
+    text-align: center;
+  }
+
   .stage-card {
     min-height: 240px;
     padding: 16px;
@@ -2189,6 +2244,41 @@
     right: 6px;
     width: min(285px, calc(100% - 12px));
     top: 50px;
+  }
+
+  .exchange-cmd-nav {
+    grid-template-columns: 1fr;
+  }
+
+  .exchange-3d-stage {
+    min-height: 480px;
+    height: 58svh;
+  }
+
+  .exchange-3d-stage .stage-bottom {
+    left: 14px;
+    right: 14px;
+    bottom: 14px;
+  }
+
+  .stage-gesture {
+    display: none;
+  }
+
+  .exchange-3d-stage .stage-top {
+    left: 14px;
+    right: 14px;
+    top: 14px;
+  }
+
+  .exchange-pricing-box {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .exchange-balance-row {
+    align-items: flex-start;
   }
 }
 
