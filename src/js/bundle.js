@@ -4,7 +4,7 @@
   "use strict";
 
 // --- src/js/config/gameConfig.js ---
-const APP_VERSION = "0.0.38";
+const APP_VERSION = "0.0.39";
 
 const DOJO_CONFIG = Object.freeze({
   defaultHp: 10000,
@@ -517,6 +517,33 @@ const DEFAULT_LOCALE = "en";
 const LOCALE_STORAGE_KEY = "koraku-rps-locale";
 
 const CHANGELOG_DATA = [
+  {
+    version: "0.0.39",
+    date: "2026-09-05 10:10 (GMT+8)",
+    tag: "Audio Lifecycle Background Pause & Headless Browser Orphan Guard",
+    changes: {
+      "zh-Hant": [
+        "【分頁背景音訊自動暫停】`SoundSystem.js` 整合 Page Visibility API，切換分頁或最小化時自動暫停音樂排程與 AudioContext，切回前景時自動恢復，杜絕背景音樂洩漏。",
+        "【頁面卸載即時釋放】監聽 `pagehide` 與 `beforeunload` 事件，在頁面關閉、導航離開或進入 bfcache 時立即停止音樂並釋放音訊節點。",
+        "【背景孤兒行程根除與防護】全面清理背景殘留之無視窗 Headless Edge 孤兒行程樹與常駐音訊服務；自動化探測工具新增 `--mute-audio` 啟動參數與 Windows 行程樹銷毀保護。"
+      ],
+      "zh-Hans": [
+        "【标签页背景音频自动暂停】`SoundSystem.js` 整合 Page Visibility API，切换标签页或最小化时自动暂停音乐排程与 AudioContext，切回前景时自动恢复，杜绝背景音乐泄漏。",
+        "【页面卸载即时释放】监听 `pagehide` 与 `beforeunload` 事件，在页面关闭、导航离开或进入 bfcache 时立即停止音乐并释放音频节点。",
+        "【背景孤儿进程根除与防护】全面清理背景残留之无窗口 Headless Edge 孤儿进程树与常驻音频服务；自动化探测工具新增 `--mute-audio` 启动参数与 Windows 进程树销毁保护。"
+      ],
+      "en": [
+        "【Audio Background Auto-Pause】Integrated Page Visibility API in `SoundSystem.js` to automatically pause music scheduling and AudioContext when hidden, and resume when visible.",
+        "【Page Unload Cleanup】Added `pagehide` and `beforeunload` event listeners to immediately stop audio and release nodes when closing tabs, navigating away, or caching.",
+        "【Headless Orphan Process Guard】Terminated background headless browser orphan process trees; added `--mute-audio` flag and Windows process tree termination in probe tools."
+      ],
+      "ja": [
+        "【タブ非表示時の音声自動一時停止】`SoundSystem.js` に Page Visibility API を統合し、タブ切り替えや最小化時にBGMとAudioContextを自動停止、前景復帰時に再開。",
+        "【ページ離脱時の即時クリーンアップ】`pagehide` および `beforeunload` イベントを監視し、タブを閉じた際やbfcache遷移時に音楽を直ちに停止してリソースを解放。",
+        "【ヘッドレス孤児プロセスの根絶と保護】バックグラウンドに残存していたヘッドレスEdge孤児プロセスと音声サービスを完全終了。プローブツールに `--mute-audio` とWindowsプロセスツリー強制終了を追加。"
+      ]
+    }
+  },
   {
     version: "0.0.38",
     date: "2026-09-05 09:30 (GMT+8)",
@@ -9725,6 +9752,8 @@ class SoundSystem {
     this.droneOsc1 = null;
     this.droneOsc2 = null;
     this.droneGain = null;
+    this.isPausedByVisibility = false;
+    this.isUnlocked = false;
 
     this.bindUnlockGesture();
   }
@@ -9739,6 +9768,7 @@ class SoundSystem {
     }
 
     const unlock = () => {
+      this.isUnlocked = true;
       this.ensureContext();
       if (this.context) {
         if (this.context.state === "suspended" || this.context.state === "interrupted") {
@@ -9762,12 +9792,20 @@ class SoundSystem {
 
     if (typeof document !== "undefined") {
       document.addEventListener("visibilitychange", () => {
-        if (document.visibilityState === "visible") {
+        if (document.visibilityState === "hidden") {
+          this.isPausedByVisibility = true;
+          this.stopMusicScheduler();
+          if (this.context && this.context.state === "running") {
+            this.context.suspend().catch(() => {});
+          }
+        } else if (document.visibilityState === "visible") {
+          const wasPaused = this.isPausedByVisibility;
+          this.isPausedByVisibility = false;
           this.ensureContext();
           if (this.context) {
             if (this.context.state === "suspended" || this.context.state === "interrupted") {
               this.context.resume().then(() => this.updateAudioState()).catch(() => {});
-            } else {
+            } else if (wasPaused) {
               this.updateAudioState();
             }
           }
@@ -9776,6 +9814,7 @@ class SoundSystem {
     }
 
     window.addEventListener("pageshow", () => {
+      this.isPausedByVisibility = false;
       this.ensureContext();
       if (this.context) {
         this.context.resume().then(() => this.updateAudioState()).catch(() => {});
@@ -9783,13 +9822,29 @@ class SoundSystem {
     });
 
     window.addEventListener("focus", () => {
+      if (typeof document !== "undefined" && document.visibilityState === "hidden") return;
+      this.isPausedByVisibility = false;
       this.ensureContext();
       if (this.context) {
         if (this.context.state === "suspended" || this.context.state === "interrupted") {
           this.context.resume().then(() => this.updateAudioState()).catch(() => {});
+        } else {
+          this.updateAudioState();
         }
       }
     });
+
+    const handleUnload = () => {
+      this.isPausedByVisibility = true;
+      this.stopMusicScheduler();
+      if (this.context && this.context.state !== "closed") {
+        try {
+          this.context.suspend().catch(() => {});
+        } catch (_) {}
+      }
+    };
+    window.addEventListener("pagehide", handleUnload);
+    window.addEventListener("beforeunload", handleUnload);
   }
 
   ensureContext() {
@@ -9806,8 +9861,16 @@ class SoundSystem {
       this.context = new AudioCtx();
 
       this.context.onstatechange = () => {
+        if (typeof document !== "undefined" && document.visibilityState === "hidden") {
+          return;
+        }
+        if (this.isPausedByVisibility) return;
+
         if (this.context?.state === "interrupted" || this.context?.state === "suspended") {
-          this.context.resume().catch(() => {});
+          const { isMusicMuted } = this.getEffectiveMuteState();
+          if (!isMusicMuted && this.isUnlocked) {
+            this.context.resume().catch(() => {});
+          }
         }
         this.updateAudioState();
       };
@@ -9857,6 +9920,10 @@ class SoundSystem {
   }
 
   updateMusicState() {
+    if (typeof document !== "undefined" && document.visibilityState === "hidden") {
+      this.stopMusicScheduler();
+      return;
+    }
     this.ensureContext();
     if (!this.context) return;
 
@@ -9904,6 +9971,7 @@ class SoundSystem {
   }
 
   startMusicScheduler() {
+    if (typeof document !== "undefined" && document.visibilityState === "hidden") return;
     if (this.isMusicRunning) return;
     this.isMusicRunning = true;
     if (this.context) {
@@ -10342,6 +10410,7 @@ class SoundSystem {
 
   // --- SOUND EFFECTS (SFX) ---
   play(name) {
+    if (typeof document !== "undefined" && document.visibilityState === "hidden") return;
     const { isSfxMuted } = this.getEffectiveMuteState();
     if (isSfxMuted) return;
     this.ensureContext();
@@ -10576,6 +10645,16 @@ class SoundSystem {
     tone.connect(toneGain).connect(sfxDest);
     tone.start(now);
     tone.stop(now + duration + 0.02);
+  }
+
+  dispose() {
+    this.stopMusicScheduler();
+    if (this.context && this.context.state !== "closed") {
+      try {
+        this.context.close().catch(() => {});
+      } catch (_) {}
+    }
+    this.context = null;
   }
 }
 

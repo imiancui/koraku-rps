@@ -264,6 +264,10 @@ New-game-project-4/
   - **端點動態注入校正**：`index.html` 本地環境預設自動注入 `ws://127.0.0.1:8080`，正式環境注入 `wss://ws.koraku.app`。
   - **連線標籤互動重連**：頂部 `#connection-status-badge` 支援點擊與鍵盤互動，離線一鍵恢復線上，斷線即時重試，線上顯示延遲與在線人數。
   - **全量測試與資源快取更新**：單元測試 269 項與伺服器測試 21 項全數通過，更新 `bundle.js` 與靜態資源快取戳記 `?v=202609050930`。
+- **Phase 4.21：v0.0.39 升版與發布（已 100% 達成）**：
+  - **網頁背景音訊生命週期管理**：`SoundSystem.js` 補齊 `visibilitychange`（`hidden` 自動停止排程並暫停 AudioContext、`visible` 自動恢復）與 `pagehide` / `beforeunload` 安全釋放，徹底移除在隱藏狀態下無條件強行 resume 的缺陷。
+  - **背景孤兒行程根除與防護**：全面清除背景殘留之 Headless 孤兒程序與常駐音訊服務；測試探測工具加入 `--mute-audio` 與 Windows 行程樹銷毀。
+  - **全量測試與資源快取更新**：單元測試 270 項全數通過（新增生命週期測試），更新 `bundle.js` 與靜態資源快取戳記 `?v=202609051010`。
 - **Phase 5（後續演進待辦）**：
   - 第三方帳號登入整合（Discord / Google OAuth2 與匿名裝置 Token 綁定遷移）。
   - 全球伺服器多節點部署與 Redis 分散式 Session 支援。

@@ -26,6 +26,8 @@ export class SoundSystem {
     this.droneOsc1 = null;
     this.droneOsc2 = null;
     this.droneGain = null;
+    this.isPausedByVisibility = false;
+    this.isUnlocked = false;
 
     this.bindUnlockGesture();
   }
@@ -40,6 +42,7 @@ export class SoundSystem {
     }
 
     const unlock = () => {
+      this.isUnlocked = true;
       this.ensureContext();
       if (this.context) {
         if (this.context.state === "suspended" || this.context.state === "interrupted") {
@@ -63,12 +66,20 @@ export class SoundSystem {
 
     if (typeof document !== "undefined") {
       document.addEventListener("visibilitychange", () => {
-        if (document.visibilityState === "visible") {
+        if (document.visibilityState === "hidden") {
+          this.isPausedByVisibility = true;
+          this.stopMusicScheduler();
+          if (this.context && this.context.state === "running") {
+            this.context.suspend().catch(() => {});
+          }
+        } else if (document.visibilityState === "visible") {
+          const wasPaused = this.isPausedByVisibility;
+          this.isPausedByVisibility = false;
           this.ensureContext();
           if (this.context) {
             if (this.context.state === "suspended" || this.context.state === "interrupted") {
               this.context.resume().then(() => this.updateAudioState()).catch(() => {});
-            } else {
+            } else if (wasPaused) {
               this.updateAudioState();
             }
           }
@@ -77,6 +88,7 @@ export class SoundSystem {
     }
 
     window.addEventListener("pageshow", () => {
+      this.isPausedByVisibility = false;
       this.ensureContext();
       if (this.context) {
         this.context.resume().then(() => this.updateAudioState()).catch(() => {});
@@ -84,13 +96,29 @@ export class SoundSystem {
     });
 
     window.addEventListener("focus", () => {
+      if (typeof document !== "undefined" && document.visibilityState === "hidden") return;
+      this.isPausedByVisibility = false;
       this.ensureContext();
       if (this.context) {
         if (this.context.state === "suspended" || this.context.state === "interrupted") {
           this.context.resume().then(() => this.updateAudioState()).catch(() => {});
+        } else {
+          this.updateAudioState();
         }
       }
     });
+
+    const handleUnload = () => {
+      this.isPausedByVisibility = true;
+      this.stopMusicScheduler();
+      if (this.context && this.context.state !== "closed") {
+        try {
+          this.context.suspend().catch(() => {});
+        } catch (_) {}
+      }
+    };
+    window.addEventListener("pagehide", handleUnload);
+    window.addEventListener("beforeunload", handleUnload);
   }
 
   ensureContext() {
@@ -107,8 +135,16 @@ export class SoundSystem {
       this.context = new AudioCtx();
 
       this.context.onstatechange = () => {
+        if (typeof document !== "undefined" && document.visibilityState === "hidden") {
+          return;
+        }
+        if (this.isPausedByVisibility) return;
+
         if (this.context?.state === "interrupted" || this.context?.state === "suspended") {
-          this.context.resume().catch(() => {});
+          const { isMusicMuted } = this.getEffectiveMuteState();
+          if (!isMusicMuted && this.isUnlocked) {
+            this.context.resume().catch(() => {});
+          }
         }
         this.updateAudioState();
       };
@@ -158,6 +194,10 @@ export class SoundSystem {
   }
 
   updateMusicState() {
+    if (typeof document !== "undefined" && document.visibilityState === "hidden") {
+      this.stopMusicScheduler();
+      return;
+    }
     this.ensureContext();
     if (!this.context) return;
 
@@ -205,6 +245,7 @@ export class SoundSystem {
   }
 
   startMusicScheduler() {
+    if (typeof document !== "undefined" && document.visibilityState === "hidden") return;
     if (this.isMusicRunning) return;
     this.isMusicRunning = true;
     if (this.context) {
@@ -643,6 +684,7 @@ export class SoundSystem {
 
   // --- SOUND EFFECTS (SFX) ---
   play(name) {
+    if (typeof document !== "undefined" && document.visibilityState === "hidden") return;
     const { isSfxMuted } = this.getEffectiveMuteState();
     if (isSfxMuted) return;
     this.ensureContext();
@@ -877,5 +919,15 @@ export class SoundSystem {
     tone.connect(toneGain).connect(sfxDest);
     tone.start(now);
     tone.stop(now + duration + 0.02);
+  }
+
+  dispose() {
+    this.stopMusicScheduler();
+    if (this.context && this.context.state !== "closed") {
+      try {
+        this.context.close().catch(() => {});
+      } catch (_) {}
+    }
+    this.context = null;
   }
 }

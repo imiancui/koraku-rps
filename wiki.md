@@ -741,4 +741,20 @@ $$\text{Theoretical DPS} = \frac{(\text{Base DMG} \times \text{Greatsword Mult} 
 - **線上狀態檢視**：處於線上狀態時，點擊顯示即時連線人數與 RTT 延遲提示 Toast。
 - **四語系提示詞條**：四國語言（繁中、簡中、英文、日文）完整同步補齊 `clickToReconnect`、`reconnectingToast` 與 `reconnectedSuccess` 提示。
 
+---
+
+## 38. v0.0.39 版本更新：網頁生命週期背景音訊自動暫停與 Headless 孤兒程序根治 (v0.0.39)
+
+### 38.1 網頁背景音訊生命週期管理 (Audio Lifecycle Management)
+- **分頁隱藏自動暫停**：`SoundSystem.js` 全面串接 Page Visibility API，當 `document.visibilityState === "hidden"`（如使用者切換分頁、縮小瀏覽器視窗）時，自動調用 `stopMusicScheduler()` 停止排程計時器、暫停 `AudioContext`，並阻斷 SFX 發聲。
+- **切回前景無縫恢復**：當 `document.visibilityState === "visible"` 且未被靜音時，自動恢復 `AudioContext` 並重啟背景音樂循環。
+- **防禦背景強制喚醒**：修正 `AudioContext.onstatechange` 監聽器，嚴格禁止在頁面處於 `hidden` 或未點擊解鎖時強行 `resume()` 對抗瀏覽器系統休眠。
+- **頁面卸載即時釋放**：掛載 `pagehide` 與 `beforeunload` 事件，在頁面關閉、導航離開或進入 bfcache 時立即停止音樂並釋放音訊節點。
+- **元件銷毀 API**：新增 `dispose()` 方法，安全關閉 `AudioContext` 並釋放全部相關資源。
+
+### 38.2 測試與探測腳本行程防護 (Headless Process Guard)
+- **探測靜音旗標**：啟動無頭瀏覽器（`--headless=new`）之開發探測腳本一律追加 `--mute-audio`，防止向系統請求音訊裝置。
+- **行程樹徹底銷毀**：在腳本退出清理區塊中引入 Windows 平台之 `taskkill /F /T /PID` 遞迴終止機制，杜絕子行程未隨主行程關閉而殘留之後台孤兒問題。
+
+
 
