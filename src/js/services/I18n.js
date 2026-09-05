@@ -22,8 +22,31 @@ export const LOCALE_STORAGE_KEY = "koraku-rps-locale";
 
 export const CHANGELOG_DATA = [
   {
+    version: "0.0.37",
+    date: "2026-09-05 08:50 (GMT+8)",
+    tag: "Header Logo BETA Badge & Changelog 24-Hour GMT+8 Timestamps Standard",
+    changes: {
+      "zh-Hant": [
+        "【左上角 LOGO BETA 標籤】於首頁全域標頭主標題「狐樂・絆之勝負」旁新增「BETA」微型和風標籤（緋紅漸層底、細緻金邊與米白字），具備完整 RWD 彈性排版與防溢出保護。",
+        "【更新日誌 24 小時時間戳】更新日誌時間全面升級為標準 24 小時制「YYYY-MM-DD HH:mm (GMT+8)」，依據 Git 提交歷史紀錄回溯補齊 v0.0.1～v0.0.36 所有版本發布時間。"
+      ],
+      "zh-Hans": [
+        "【左上角 LOGO BETA 标签】于首页全局标头主标题「狐乐・绊之胜负」旁新增「BETA」微型和风标签（绯红渐变底、细致金边与米白字），具备完整 RWD 弹性排版与防溢出保护。",
+        "【更新日志 24 小时时间戳】更新日志时间全面升级为标准 24 小时制「YYYY-MM-DD HH:mm (GMT+8)」，依据 Git 提交历史记录回溯补齐 v0.0.1～v0.0.36 所有版本发布时间。"
+      ],
+      "en": [
+        "【Header Logo BETA Badge】Added a refined Japanese shrine-themed 'BETA' mini badge (crimson gradient, gold border, paper-white text) next to the title in the global header with full responsive overflow resilience.",
+        "【Changelog 24-Hour GMT+8 Timestamps】Standardized changelog timestamps to 24-hour format 'YYYY-MM-DD HH:mm (GMT+8)', retroactively backfilling accurate Git release timestamps across all versions (v0.0.1 - v0.0.36)."
+      ],
+      "ja": [
+        "【左上ロゴ BETA バッジ追加】グローバルヘッダーのメインタイトル横に、神社和風デザインの「BETA」マイクロバッジ（真紅グラデーション、金縁、白字）を追加し、完全なRWD折り返し保護を実装。",
+        "【更新履歴 24時間制 GMT+8 時刻標準化】更新履歴の表記を24時間制「YYYY-MM-DD HH:mm (GMT+8)」に標準化し、Git コミット履歴に基づき v0.0.1～v0.0.36 の全バージョンのリリース時刻を遡及補完。"
+      ]
+    }
+  },
+  {
     version: "0.0.36",
-    date: "2026-09-05",
+    date: "2026-09-05 08:35 (GMT+8)",
     tag: "Physical Dakimakura 3D Viewer, Special Shop, Preview Fit Fix & WebP Migration",
     changes: {
       "zh-Hant": [
@@ -50,7 +73,7 @@ export const CHANGELOG_DATA = [
   },
   {
     version: "0.0.35",
-    date: "2026-09-05",
+    date: "2026-09-05 03:35 (GMT+8)",
     tag: "Security Hardening: Mask Cheat Passcode In Placeholder & Authoritative Online Elevation Sync",
     changes: {
       "zh-Hant": [
@@ -77,7 +100,7 @@ export const CHANGELOG_DATA = [
   },
   {
     version: "0.0.34",
-    date: "2026-09-05",
+    date: "2026-09-05 03:16 (GMT+8)",
     tag: "Cheat Passcode 8989 Interface Unlock & Authentication Fallback Fix",
     changes: {
       "zh-Hant": [
@@ -104,7 +127,7 @@ export const CHANGELOG_DATA = [
   },
   {
     version: "0.0.33",
-    date: "2026-09-05",
+    date: "2026-09-05 02:12 (GMT+8)",
     tag: "Audio Toggles Decoupling, F5 Mute Persistence & Real-time Online Player Counter Fix",
     changes: {
       "zh-Hant": [
@@ -131,7 +154,7 @@ export const CHANGELOG_DATA = [
   },
   {
     version: "0.0.32",
-    date: "2026-09-04",
+    date: "2026-09-04 23:35 (GMT+8)",
     tag: "Real-time Online Players Counter, Gold Mute Slash & F5 Mute State Persistence Fix",
     changes: {
       "zh-Hant": [
@@ -158,7 +181,7 @@ export const CHANGELOG_DATA = [
   },
   {
     version: "0.0.31",
-    date: "2026-09-04",
+    date: "2026-09-04 22:57 (GMT+8)",
     tag: "Gallery Swimsuit Diff Toggle, Records XP Math Fix & Dojo History Navigation Polish",
     changes: {
       "zh-Hant": [
@@ -189,7 +212,7 @@ export const CHANGELOG_DATA = [
   },
   {
     version: "0.0.30",
-    date: "2026-09-04",
+    date: "2026-09-04 21:09 (GMT+8)",
     tag: "Audio Mute Toggle Event Synchronization, Cross-Mode Persistence & Crimson Slash Visual Fix",
     changes: {
       "zh-Hant": [
@@ -216,7 +239,7 @@ export const CHANGELOG_DATA = [
   },
   {
     version: "0.0.29",
-    date: "2026-09-04",
+    date: "2026-09-04 20:24 (GMT+8)",
     tag: "Audio Mute Vector Strikethrough, Logo Click Stabilization & Transparent WebP Payload Optimization",
     changes: {
       "zh-Hant": [
@@ -243,7 +266,7 @@ export const CHANGELOG_DATA = [
   },
   {
     version: "0.0.28",
-    date: "2026-09-04",
+    date: "2026-09-04 20:18 (GMT+8)",
     tag: "Authoritative Cheat Module Overhaul, WebP Asset Migration & Instant View Re-rendering",
     changes: {
       "zh-Hant": [
@@ -266,7 +289,7 @@ export const CHANGELOG_DATA = [
   },
   {
     version: "0.0.27",
-    date: "2026-09-04",
+    date: "2026-09-04 03:35 (GMT+8)",
     tag: "Online Battle Countdown Client Ticker & Save Modal Mode Switching Normalization",
     changes: {
       "zh-Hant": [
@@ -289,7 +312,7 @@ export const CHANGELOG_DATA = [
   },
   {
     version: "0.0.26",
-    date: "2026-09-04",
+    date: "2026-09-04 02:35 (GMT+8)",
     tag: "Countdown, Watermelon Marker, Skill Points & Battle Rules Full Repair",
     changes: {
       "zh-Hant": [
@@ -320,7 +343,7 @@ export const CHANGELOG_DATA = [
   },
   {
     version: "0.0.25",
-    date: "2026-09-04",
+    date: "2026-09-04 00:16 (GMT+8)",
     tag: "Production VPS Server Online Launch & Cloudflare Dynamic WSS Auto-Injection",
     changes: {
       "zh-Hant": [
@@ -339,7 +362,7 @@ export const CHANGELOG_DATA = [
   },
   {
     version: "0.0.24",
-    date: "2026-09-03",
+    date: "2026-09-03 15:48 (GMT+8)",
     tag: "Offline Fallback Single-Prompt Guard, RWD Monotonic Log Indexing & Ops Evidence Archival",
     changes: {
       "zh-Hant": [
@@ -366,7 +389,7 @@ export const CHANGELOG_DATA = [
   },
   {
     version: "0.0.23",
-    date: "2026-09-03",
+    date: "2026-09-03 09:24 (GMT+8)",
     tag: "Offline Default & Fallback Protection, Disjoint Storage, Server Hardening & Tailscale Staging",
     changes: {
       "zh-Hant": [
@@ -397,7 +420,7 @@ export const CHANGELOG_DATA = [
   },
   {
     version: "0.0.22",
-    date: "2026-09-03",
+    date: "2026-09-03 08:36 (GMT+8)",
     tag: "i18n Residue Cleanup Round 1 & 2 (Keys, Battle HUD, Damage Log, Consumables)",
     changes: {
       "zh-Hant": [
@@ -424,7 +447,7 @@ export const CHANGELOG_DATA = [
   },
   {
     version: "0.0.21",
-    date: "2026-09-03",
+    date: "2026-09-03 05:51 (GMT+8)",
     tag: "Battle Mutation Lock UI, Multi-Viewport RWD Verification & Go-Live Runbook",
     changes: {
       "zh-Hant": [
@@ -455,7 +478,7 @@ export const CHANGELOG_DATA = [
   },
   {
     version: "0.0.20",
-    date: "2026-09-03",
+    date: "2026-09-03 03:00 (GMT+8)",
     tag: "Online Authority Formalization, Real WebSocket E2E & Docker Staging Environment",
     changes: {
       "zh-Hant": [
@@ -490,7 +513,7 @@ export const CHANGELOG_DATA = [
   },
   {
     version: "0.0.19",
-    date: "2026-09-02",
+    date: "2026-09-02 23:30 (GMT+8)",
     tag: "PRNG Chi-Square Verification, Burst Rate Limiting & Anti-Cheat Audit",
     changes: {
       "zh-Hant": [
@@ -525,7 +548,7 @@ export const CHANGELOG_DATA = [
   },
   {
     version: "0.0.18",
-    date: "2026-09-02",
+    date: "2026-09-02 22:15 (GMT+8)",
     tag: "Online-Ready Architecture, Zero-DOM Kernel Decoupling & Single Writer Guarantee",
     changes: {
       "zh-Hant": [
@@ -560,7 +583,7 @@ export const CHANGELOG_DATA = [
   },
   {
     version: "0.0.17",
-    date: "2026-09-02",
+    date: "2026-09-02 21:00 (GMT+8)",
     tag: "Battle HUD Drag-and-Drop & Non-Overlapping Spawn Layout",
     changes: {
       "zh-Hant": [
@@ -591,7 +614,7 @@ export const CHANGELOG_DATA = [
   },
   {
     version: "0.0.16",
-    date: "2026-09-02",
+    date: "2026-09-02 20:30 (GMT+8)",
     tag: "QTE Input Precision, Standee Appreciation Mode & Battle Navigation Guards",
     changes: {
       "zh-Hant": [
@@ -626,7 +649,7 @@ export const CHANGELOG_DATA = [
   },
   {
     version: "0.0.15",
-    date: "2026-09-02",
+    date: "2026-09-02 19:25 (GMT+8)",
     tag: "4K & Ultra-Wide RWD Calibration: Home Dialogue Proximity Anchoring & Theater Settlement Stage",
     changes: {
       "zh-Hant": [
@@ -653,7 +676,7 @@ export const CHANGELOG_DATA = [
   },
   {
     version: "0.0.14",
-    date: "2026-09-02",
+    date: "2026-09-02 18:11 (GMT+8)",
     tag: "RWD Regression Gate, Tablet Battle Positioning & Expanded Wide Dojo Workspace",
     changes: {
       "zh-Hant": [
@@ -680,7 +703,7 @@ export const CHANGELOG_DATA = [
   },
   {
     version: "0.0.13",
-    date: "2026-08-31",
+    date: "2026-08-31 22:47 (GMT+8)",
     tag: "Battle RWD Calibration: Portrait Standee Elevation & Landscape Dialogue Centering",
     changes: {
       "zh-Hant": [
@@ -707,7 +730,7 @@ export const CHANGELOG_DATA = [
   },
   {
     version: "0.0.12",
-    date: "2026-08-31",
+    date: "2026-08-31 22:31 (GMT+8)",
     tag: "Full State Persistence Across Page Refresh & Auto-Battle Continuity",
     changes: {
       "zh-Hant": [
@@ -734,7 +757,7 @@ export const CHANGELOG_DATA = [
   },
   {
     version: "0.0.11",
-    date: "2026-08-31",
+    date: "2026-08-31 21:54 (GMT+8)",
     tag: "Tablet Landscape Desktop-Like Spacious Layout & Overlap Fix",
     changes: {
       "zh-Hant": [
@@ -761,7 +784,7 @@ export const CHANGELOG_DATA = [
   },
   {
     version: "0.0.10",
-    date: "2026-08-31",
+    date: "2026-08-31 21:31 (GMT+8)",
     tag: "iPad Touch D-Pad Fix, Swipe QTE & Physical Keyboard Support",
     changes: {
       "zh-Hant": [
@@ -788,7 +811,7 @@ export const CHANGELOG_DATA = [
   },
   {
     version: "0.0.9",
-    date: "2026-08-31",
+    date: "2026-08-31 19:32 (GMT+8)",
     tag: "Dual QTE Desktop Layout & Input Failure Fix",
     changes: {
       "zh-Hant": [
@@ -811,7 +834,7 @@ export const CHANGELOG_DATA = [
   },
   {
     version: "0.0.8",
-    date: "2026-08-31",
+    date: "2026-08-31 17:27 (GMT+8)",
     tag: "Tablet Touch D-Pad & Player HUD Fix",
     changes: {
       "zh-Hant": [
@@ -842,7 +865,7 @@ export const CHANGELOG_DATA = [
   },
   {
     version: "0.0.7",
-    date: "2026-08-31",
+    date: "2026-08-31 09:46 (GMT+8)",
     tag: "Mobile Visual & RWD Precision Overhaul",
     changes: {
       "zh-Hant": [
@@ -873,7 +896,7 @@ export const CHANGELOG_DATA = [
   },
   {
     version: "0.0.6",
-    date: "2026-08-31",
+    date: "2026-08-31 09:39 (GMT+8)",
     tag: "UI & Audio Refactor",
     changes: {
       "zh-Hant": [
@@ -908,7 +931,7 @@ export const CHANGELOG_DATA = [
   },
   {
     version: "0.0.5",
-    date: "2026-08-31",
+    date: "2026-08-31 09:27 (GMT+8)",
     tag: "iOS Safari Audio Fix",
     changes: {
       "zh-Hant": [
@@ -935,7 +958,7 @@ export const CHANGELOG_DATA = [
   },
   {
     version: "0.0.4",
-    date: "2026-08-31",
+    date: "2026-08-31 09:23 (GMT+8)",
     tag: "Damage Log & Dual QTE",
     changes: {
       "zh-Hant": [
@@ -966,7 +989,7 @@ export const CHANGELOG_DATA = [
   },
   {
     version: "0.0.3",
-    date: "2026-08-30",
+    date: "2026-08-31 09:17 (GMT+8)",
     tag: "Dojo & Silhouette Sandbox",
     changes: {
       "zh-Hant": [
@@ -993,7 +1016,7 @@ export const CHANGELOG_DATA = [
   },
   {
     version: "0.0.2",
-    date: "2026-08-30",
+    date: "2026-08-31 09:11 (GMT+8)",
     tag: "QTE & Watermelon Slicing",
     changes: {
       "zh-Hant": [
@@ -1016,7 +1039,7 @@ export const CHANGELOG_DATA = [
   },
   {
     version: "0.0.1",
-    date: "2026-08-29",
+    date: "2026-08-31 09:06 (GMT+8)",
     tag: "Localization & 12-Slot Gear",
     changes: {
       "zh-Hant": [
@@ -1043,7 +1066,7 @@ export const CHANGELOG_DATA = [
   },
   {
     version: "0.0.0",
-    date: "2026-08-28",
+    date: "2026-08-31 09:01 (GMT+8)",
     tag: "Initial Release",
     changes: {
       "zh-Hant": [

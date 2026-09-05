@@ -1,4 +1,4 @@
-﻿import test from "node:test";
+import test from "node:test";
 import assert from "node:assert/strict";
 
 const container = { innerHTML: "" };
@@ -51,4 +51,16 @@ test("AppView.renderChangelog: 若資料源遺漏當前版本，自動在前頭�
   } finally {
     I18n.getChangelog = origGet;
   }
+});
+
+test("AppView.renderChangelog: 渲染的更新日誌條目包含標準 24 小時制 (GMT+8) 時間格式", () => {
+  container.innerHTML = "";
+  const view = Object.create(AppView.prototype);
+
+  view.renderChangelog();
+
+  assert.ok(container.innerHTML.includes("(GMT+8)"), "更新日誌必須包含 (GMT+8) 時區標籤");
+  const dateMatch = container.innerHTML.match(/<span class="changelog-date">(.*?)<\/span>/);
+  assert.ok(dateMatch, "必須包含 changelog-date 元素");
+  assert.match(dateMatch[1], /^\d{4}-\d{2}-\d{2} \d{2}:\d{2} \(GMT\+8\)$/, "日期格式必須為 YYYY-MM-DD HH:mm (GMT+8)");
 });

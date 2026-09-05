@@ -707,3 +707,19 @@ $$\text{Theoretical DPS} = \frac{(\text{Base DMG} \times \text{Greatsword Mult} 
 ### 35.3 素材全面升級 WebP
 - 抱枕 2D 設計圖與 3D 貼圖全面轉換為高畫質 WebP 格式（`koraku/pillow-texture.webp`、`koraku/小樂抱枕產品圖.webp`），縮減約 40% 檔案體積，大幅降低頻寬消耗。
 - 支援所有現代瀏覽器原生 WebP 解碼，並保留 JPG/PNG 回退。
+
+---
+
+## 36. v0.0.37 版本更新：左上角 Logo BETA 和風標籤與更新日誌 24 小時 GMT+8 時間戳記標準化 (v0.0.37)
+
+### 36.1 左上角 Logo「BETA」微型標籤
+- **標題右側和風徽章**：於全域標頭 `.brand-button` 的主標題「狐樂・絆之勝負」右側引入 `<span class="brand-badge-beta">BETA</span>` 膠囊標籤。
+- **神道緋紅金箔視覺**：背景採用日式神社緋紅漸層（`var(--crimson)` 至 `var(--crimson-dark)`），搭配神宮金箔細框（`rgba(216, 182, 106, 0.65)`）與米白字體（`var(--paper)`），展現雅緻的和風御守質感。
+- **全語系固定大寫**：四語系（繁中、簡中、英文、日文）統一以大寫「BETA」呈現，維持乾淨俐落的業界規格。
+- **完整 RWD 排版防溢出保護**：`.brand-title-wrap` 具備彈性收合（Flex layout），`.brand-badge-beta` 設置 `flex-shrink: 0`，在 320px/360px 等極小寬度螢幕下標題文字自動縮排截斷（ellipsis），BETA 標籤始終完整保留不破版。
+
+### 36.2 更新日誌 24 小時制 GMT+8 時間戳記標準化
+- **時間格式升級**：更新日誌（Changelog Modal）時間顯示由單純日期升級為標準 24 小時制 `YYYY-MM-DD HH:mm (GMT+8)`。
+- **歷史版本全量回溯補齊**：依據 Git 提交紀錄（Commit Timestamps），回溯補齊自 `v0.0.0`、`v0.0.1` 起至 `v0.0.36` 所有歷史版本的精準發布時間戳記。
+- **動態保底時間戳支援**：`AppView.renderChangelog()` 動態版本合成邏輯改為以本地 GMT+8 時區計算並格式化為標準字串，告別 UTC 簡易裁切字串。
+

@@ -178,9 +178,35 @@ p {
   gap: 2px;
 }
 
+.brand-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
 .brand-copy strong {
   font: 600 18px/1.2 var(--serif);
   letter-spacing: 0.16em;
+}
+
+.brand-badge-beta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 6px;
+  font: 700 9px/1.2 var(--sans);
+  letter-spacing: 0.1em;
+  color: var(--paper);
+  background: linear-gradient(135deg, var(--crimson), var(--crimson-dark));
+  border: 1px solid rgba(216, 182, 106, 0.65);
+  border-radius: 3px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45), inset 0 0 4px rgba(255, 226, 160, 0.2);
+  flex-shrink: 0;
+  vertical-align: middle;
+  text-transform: uppercase;
+  user-select: none;
+  pointer-events: none;
 }
 
 .brand-copy small,

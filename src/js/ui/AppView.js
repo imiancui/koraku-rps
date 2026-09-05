@@ -3595,10 +3595,19 @@ export class AppView {
 
     // Guard: Guarantee the running APP_VERSION is present and at the top
     if (!changelogs.some((e) => e.version === APP_VERSION)) {
+      const now = new Date();
+      const gmt8 = new Date(now.getTime() + (8 * 60 + now.getTimezoneOffset()) * 60000);
+      const yyyy = gmt8.getFullYear();
+      const mm = String(gmt8.getMonth() + 1).padStart(2, "0");
+      const dd = String(gmt8.getDate()).padStart(2, "0");
+      const hh = String(gmt8.getHours()).padStart(2, "0");
+      const min = String(gmt8.getMinutes()).padStart(2, "0");
+      const gmt8DateStr = `${yyyy}-${mm}-${dd} ${hh}:${min} (GMT+8)`;
+
       changelogs = [
         {
           version: APP_VERSION,
-          date: new Date().toISOString().slice(0, 10),
+          date: gmt8DateStr,
           tag: "Latest Version",
           changes: [
             I18n.t("ui.currentVersionStatus")
