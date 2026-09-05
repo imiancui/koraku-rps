@@ -122,6 +122,23 @@ test("模式解析策略：預設 offline，刪除 hostname 判斷，無配置�
     resolveClientMode({ protocol: "file:", serverUrl: "wss://staging.koraku.ts.net:8443/ws" }),
     "offline"
   );
+
+  // 10. 本地注入預設 ws://127.0.0.1:8080 時走 online，但若顯式指定 offline 則維持 offline
+  assert.equal(
+    resolveClientMode({ search: "", storageValue: null, serverUrl: "ws://127.0.0.1:8080" }),
+    "online",
+    "本地開發環境預設注入 8080 端點應走 online"
+  );
+  assert.equal(
+    resolveClientMode({ search: "?mode=offline", storageValue: null, serverUrl: "ws://127.0.0.1:8080" }),
+    "offline",
+    "本地環境顯式 ?mode=offline 應具有最高優先級退回 offline"
+  );
+  assert.equal(
+    resolveClientMode({ search: "", storageValue: "offline", serverUrl: "ws://127.0.0.1:8080" }),
+    "offline",
+    "本地環境儲存有 koraku_mode=offline 應維持 offline"
+  );
 });
 
 test("客戶端工廠路由：依據解析模式建立正確之 GameClient 實例", async () => {

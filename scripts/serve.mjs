@@ -1,4 +1,5 @@
 import http from "node:http";
+import net from "node:net";
 import { spawn } from "node:child_process";
 import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
@@ -118,9 +119,59 @@ async function allowTailscaleFirewall() {
   await runCommand("powershell", ["-NoProfile", "-NonInteractive", "-Command", script]);
 }
 
+const serverPort = 8080;
+let serverProc = null;
+
+function isPortInUse(targetPort, targetHost = "127.0.0.1") {
+  return new Promise((resolve) => {
+    const tester = net.createServer()
+      .once("error", (err) => {
+        resolve(err.code === "EADDRINUSE");
+      })
+      .once("listening", () => {
+        tester.close(() => resolve(false));
+      })
+      .listen(targetPort, targetHost);
+  });
+}
+
+async function startServerProcess() {
+  const inUse = await isPortInUse(serverPort, "127.0.0.1");
+  if (inUse) {
+    console.log(`[Server] 本地權威伺服器已在連接埠 ${serverPort} 運行中，沿用現有執行個體。`);
+    return;
+  }
+
+  serverProc = spawn("node", ["server/index.js"], {
+    cwd: root,
+    stdio: "inherit",
+    windowsHide: true,
+    env: {
+      ...process.env,
+      HOST: "127.0.0.1",
+      PORT: String(serverPort)
+    }
+  });
+
+  serverProc.on("error", (err) => {
+    console.warn("[Server Process Warning]: 無法啟動本地權威伺服器：", err.message);
+  });
+
+  serverProc.on("exit", (code, signal) => {
+    if (code !== null && code !== 0 && signal !== "SIGTERM" && signal !== "SIGINT") {
+      console.warn(`[Server Process Exited]: code=${code}, signal=${signal}`);
+    }
+  });
+
+  console.log(`[Server] 本地權威伺服器已啟動於 ws://127.0.0.1:${serverPort}`);
+}
+
 async function start() {
   await buildBundle().catch((err) => {
     console.warn("自動打包警告（若使用模組化開發可忽略）：", err.message);
+  });
+  await startServerProcess().catch((err) => {
+    console.warn("本地權威伺服器啟動警告：", err.message);
   });
   await listenOn(host);
   console.log("狐樂・絆之勝負：http://" + host + ":" + port);
@@ -157,6 +208,12 @@ async function start() {
 }
 
 function shutdown() {
+  if (serverProc) {
+    try {
+      serverProc.kill("SIGTERM");
+    } catch (_) {}
+    serverProc = null;
+  }
   Promise.all(servers.map((server) => new Promise((resolve) => server.close(resolve))))
     .finally(() => process.exit(0));
   setTimeout(() => process.exit(0), 1500).unref();

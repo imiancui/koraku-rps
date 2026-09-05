@@ -215,6 +215,7 @@ export class AppView {
 
   renderConnectionState(state, meta = {}) {
     if (!state) return;
+    const prevState = this.connectionState;
     this.connectionState = state;
     const badge = this.connectionStatusBadge || $("#connection-status-badge");
     const textEl = this.connectionStatusText || $("#connection-status-text");
@@ -228,12 +229,19 @@ export class AppView {
         badge.classList.remove("is-high-ping");
         const existingPing = badge.querySelector(".connection-ping-badge");
         if (existingPing) existingPing.remove();
+        badge.title = I18n.t("connection.clickToReconnect");
+      } else {
+        badge.title = I18n.t("connection.online");
       }
     }
 
     const label = this.getConnectionLabel(state, meta);
     if (textEl) {
       textEl.textContent = label;
+    }
+
+    if (state === ConnectionStates.ONLINE && (prevState === ConnectionStates.RECONNECTING || prevState === ConnectionStates.DISCONNECTED)) {
+      this.showToast(I18n.t("connection.reconnectedSuccess"), "success");
     }
 
     if (meta?.reason === "KICKED_BY_NEW_CONNECTION" || meta?.reason === "NEW_CONNECTION_ESTABLISHED") {
@@ -434,6 +442,56 @@ export class AppView {
     return (translated && translated !== key) ? translated : state;
   }
 
+  handleConnectionBadgeAction() {
+    if (this.connectionState === ConnectionStates.ONLINE) {
+      const ping = this.client?.getPing ? this.client.getPing() : null;
+      const count = typeof this.client?.getOnlineCount === "function" ? this.client.getOnlineCount() : 1;
+      const safeCount = (typeof count === "number" && count > 0) ? count : 1;
+      const rtt = (ping?.rtt && ping.rtt > 0) ? `${Math.round(ping.rtt)}ms` : null;
+      const countText = I18n.t("connection.onlineWithCount", { count: safeCount });
+      const text = rtt ? `${countText} (${rtt})` : countText;
+      this.showToast(text, "info");
+      return;
+    }
+
+    if (this.connectionState === ConnectionStates.OFFLINE) {
+      if (typeof window !== "undefined") {
+        try {
+          window.localStorage?.removeItem("koraku_mode");
+        } catch (_) {}
+        this.showToast(I18n.t("connection.reconnectingToast"), "info");
+        try {
+          const url = new URL(window.location.href);
+          const hadMode = url.searchParams.has("mode");
+          url.searchParams.delete("mode");
+          setTimeout(() => {
+            if (hadMode && url.toString() !== window.location.href) {
+              window.location.href = url.toString();
+            } else {
+              window.location.reload();
+            }
+          }, 300);
+        } catch (_) {
+          setTimeout(() => {
+            window.location.reload();
+          }, 300);
+        }
+      }
+      return;
+    }
+
+    // DISCONNECTED, RECONNECTING, CONNECTING
+    if (typeof this.client?.reconnect === "function") {
+      this.showToast(I18n.t("connection.reconnectingToast"), "info");
+      this.client.reconnect();
+    } else if (typeof window !== "undefined") {
+      this.showToast(I18n.t("connection.reconnectingToast"), "info");
+      setTimeout(() => {
+        window.location.reload();
+      }, 300);
+    }
+  }
+
   cacheElements() {
     this.app = $("#app");
     this.screenStack = $(".screen-stack");
@@ -496,6 +554,18 @@ export class AppView {
     this.connectionBannerText = $("#connection-banner-text");
     this.connectionBannerClose = $("#connection-banner-close");
     this.connectionBannerSwitchOffline = $("#connection-banner-switch-offline");
+
+    if (this.connectionStatusBadge) {
+      this.connectionStatusBadge.addEventListener("click", () => {
+        this.handleConnectionBadgeAction();
+      });
+      this.connectionStatusBadge.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
+          e.preventDefault();
+          this.handleConnectionBadgeAction();
+        }
+      });
+    }
 
     if (this.connectionBannerSwitchOffline) {
       this.connectionBannerSwitchOffline.addEventListener("click", () => {

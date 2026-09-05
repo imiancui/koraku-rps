@@ -22,6 +22,33 @@ export const LOCALE_STORAGE_KEY = "koraku-rps-locale";
 
 export const CHANGELOG_DATA = [
   {
+    version: "0.0.38",
+    date: "2026-09-05 09:30 (GMT+8)",
+    tag: "Local Authoritative Server Guard, Dynamic Endpoint Auto-Injection & Connection Badge Interactive Reconnect",
+    changes: {
+      "zh-Hant": [
+        "【本地伺服器守護整合】`scripts/serve.mjs` 整合本地權威遊戲伺服器（Port 8080）守護程序，開發環境啟動時同步啟動 WebSocket 伺服器，解決本機測試自動降級離線之問題。",
+        "【端點動態注入校正】`index.html` 本地環境（localhost / 127.0.0.1）預設自動注入 `ws://127.0.0.1:8080`，正式環境注入 `wss://ws.koraku.app`，修正跨來源安全性限制。",
+        "【連線狀態標籤一鍵重連】頂部連線狀態標籤升級為互動式元件，離線時點擊即可一鍵清除離線鎖定並自動重新連線；斷線時點擊觸發立即重試；線上時點擊查看延遲與在線人數。"
+      ],
+      "zh-Hans": [
+        "【本地服务器守护整合】`scripts/serve.mjs` 整合本地权威游戏服务器（Port 8080）守护程序，开发环境启动时同步启动 WebSocket 服务器，解决本机测试自动降级离线之问题。",
+        "【端点动态注入校正】`index.html` 本地环境（localhost / 127.0.0.1）默认自动注入 `ws://127.0.0.1:8080`，正式环境注入 `wss://ws.koraku.app`，修正跨来源安全性限制。",
+        "【连接状态标签一键重连】顶部连接状态标签升级为交互式组件，离线时点击即可一键清除离线锁定并自动重新连接；断线时点击触发立即重试；在线时点击查看延迟与在线人数。"
+      ],
+      "en": [
+        "【Local Server Guard Integration】Integrated local authoritative game server (port 8080) daemon into `scripts/serve.mjs`, ensuring HTTP and WebSocket servers launch together to prevent unexpected offline fallback.",
+        "【Dynamic Endpoint Auto-Injection】Auto-injected `ws://127.0.0.1:8080` on local environments (localhost / 127.0.0.1) and `wss://ws.koraku.app` in production, aligning with cross-origin safety policies.",
+        "【Interactive Connection Badge Reconnect】Enhanced header connection badge with click interactions: one-click unlock from offline mode to reconnect, instant reconnect retry when disconnected, and latency/status inspection when online."
+      ],
+      "ja": [
+        "【ローカル権威サーバー守護統合】`scripts/serve.mjs` にゲームサーバー（Port 8080）の自動起動プロセスを統合し、開発環境でHTTPとWebSocketを同期起動して意図せぬオフライン降格を解消。",
+        "【エンドポイント動的注入の適正化】`index.html` にてローカル環境（localhost / 127.0.0.1）で `ws://127.0.0.1:8080`、本番環境で `wss://ws.koraku.app` を自動注入し、オリジン制約をクリア。",
+        "【接続ステータスバッジの対話的再接続】ヘッダーの接続バッジをクリック可能にし、オフライン時のワンクリック再接続、切断時の即時再試行、オンライン時のPing・人数確認に対応。"
+      ]
+    }
+  },
+  {
     version: "0.0.37",
     date: "2026-09-05 08:50 (GMT+8)",
     tag: "Header Logo BETA Badge & Changelog 24-Hour GMT+8 Timestamps Standard",
@@ -1919,7 +1946,10 @@ const DICTIONARY = {
       noServerConfigured: "未偵測到伺服器設定，已切換為離線模式",
       switchToOffline: "改用離線模式",
       switchToOnline: "切換回線上模式",
-      commandFailedOffline: "尚未連線至伺服器，指令已逾時取消"
+      commandFailedOffline: "尚未連線至伺服器，指令已逾時取消",
+      clickToReconnect: "點擊嘗試重新連線",
+      reconnectingToast: "正在嘗試重新連線至伺服器...",
+      reconnectedSuccess: "已成功重新連線至伺服器！"
     },
     battle: {
       lockedDuringBattle: "戰鬥進行中已鎖定換裝與配點。"
@@ -2782,7 +2812,10 @@ const DICTIONARY = {
       noServerConfigured: "未检测到服务器配置，已切换为离线模式",
       switchToOffline: "改用离线模式",
       switchToOnline: "切换回在线模式",
-      commandFailedOffline: "尚未连接到服务器，指令已超时取消"
+      commandFailedOffline: "尚未连接到服务器，指令已超时取消",
+      clickToReconnect: "点击尝试重新连接",
+      reconnectingToast: "正在尝试重新连接至服务器...",
+      reconnectedSuccess: "已成功重新连接至服务器！"
     },
     battle: {
       lockedDuringBattle: "战斗进行中已锁定换装与配点。"
@@ -3645,7 +3678,10 @@ const DICTIONARY = {
       noServerConfigured: "No server configuration detected. Switched to offline mode.",
       switchToOffline: "Play offline",
       switchToOnline: "Switch to online mode",
-      commandFailedOffline: "Not connected to server; command timed out."
+      commandFailedOffline: "Not connected to server; command timed out.",
+      clickToReconnect: "Click to reconnect",
+      reconnectingToast: "Attempting to reconnect to server...",
+      reconnectedSuccess: "Successfully reconnected to server!"
     },
     battle: {
       lockedDuringBattle: "Equipment and stat allocation are locked during active battle."
@@ -4508,7 +4544,10 @@ const DICTIONARY = {
       noServerConfigured: "サーバー設定が見つからないため、オフラインモードに切り替えました",
       switchToOffline: "オフラインで遊ぶ",
       switchToOnline: "オンラインモードに切り替え",
-      commandFailedOffline: "サーバーに未接続のため、コマンドがタイムアウトしました"
+      commandFailedOffline: "サーバーに未接続のため、コマンドがタイムアウトしました",
+      clickToReconnect: "クリックして再接続",
+      reconnectingToast: "サーバーへの再接続を試みています...",
+      reconnectedSuccess: "サーバーへの再接続に成功しました！"
     },
     battle: {
       lockedDuringBattle: "戦闘中は装備の変更および能力値の配分が固定されています。"

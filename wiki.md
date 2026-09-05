@@ -723,3 +723,22 @@ $$\text{Theoretical DPS} = \frac{(\text{Base DMG} \times \text{Greatsword Mult} 
 - **歷史版本全量回溯補齊**：依據 Git 提交紀錄（Commit Timestamps），回溯補齊自 `v0.0.0`、`v0.0.1` 起至 `v0.0.36` 所有歷史版本的精準發布時間戳記。
 - **動態保底時間戳支援**：`AppView.renderChangelog()` 動態版本合成邏輯改為以本地 GMT+8 時區計算並格式化為標準字串，告別 UTC 簡易裁切字串。
 
+---
+
+## 37. v0.0.38 版本更新：本地權威伺服器守護、端點動態注入與連線狀態標籤一鍵重連 (v0.0.38)
+
+### 37.1 本地伺服器自動守護程序 (Server Process Guard)
+- **雙埠同步啟動**：於 `scripts/serve.mjs` 加入 8080 埠探測與伺服器守護程序，啟動靜態伺服器（Port 4173）時自動啟動後端權威遊戲伺服器（Port 8080，`server/index.js`），根除本地開發自動降級離線之問題。
+- **生命週期自動釋放**：掛載 SIGINT / SIGTERM 訊號處理器，終止開發伺服器時同步安全釋放後端子行程。
+
+### 37.2 端點動態注入校正 (Dynamic Endpoint Injection)
+- **本地端點自動注入**：在 `index.html` 全域配置注入中，當處於 `localhost` 或 `127.0.0.1` 且非顯式離線時，預設自動注入本地伺服器端點 `ws://127.0.0.1:8080`；正式環境維持 `wss://ws.koraku.app`。
+- **跨來源安全性對齊**：徹底解決正式 VPS `ALLOWED_ORIGINS` 僅允許 `https://koraku.app` 導致本機連線 403 被拒降級之現象。
+
+### 37.3 連線狀態標籤互動重連 (Interactive Connection Badge)
+- **離線一鍵恢復**：頂部 `#connection-status-badge` 升級為互動按鈕（含 `role="button"`、`tabindex="0"` 與 `>= 40px` 觸控尺寸）。處於離線狀態時點擊或按 Enter/Space 鍵，立即清除 `localStorage.koraku_mode` 與 URL 離線參數，自動重新載入無縫恢復線上模式。
+- **斷線快速重試**：處於中斷或重連中狀態時，點擊直接觸發 `client.reconnect()` 立即嘗試復連。
+- **線上狀態檢視**：處於線上狀態時，點擊顯示即時連線人數與 RTT 延遲提示 Toast。
+- **四語系提示詞條**：四國語言（繁中、簡中、英文、日文）完整同步補齊 `clickToReconnect`、`reconnectingToast` 與 `reconnectedSuccess` 提示。
+
+

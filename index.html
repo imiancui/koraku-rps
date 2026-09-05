@@ -30,26 +30,26 @@
           }
         } catch (_) {}
         if (typeof window !== 'undefined' && location.protocol !== 'file:') {
-          if (location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
-            window.__KORAKU_CONFIG__ = window.__KORAKU_CONFIG__ || { serverUrl: "wss://ws.koraku.app" };
-          } else {
-            var isOnlineRequested = false;
-            try {
-              isOnlineRequested = (location.search && /[?&]mode=online\b/i.test(location.search)) || (localStorage && localStorage.getItem('koraku_mode') === 'online');
-            } catch (_) {}
-            if (isOnlineRequested) {
+          var isExplicitOffline = false;
+          try {
+            isExplicitOffline = (location.search && /[?&]mode=offline\b/i.test(location.search)) || (localStorage && localStorage.getItem('koraku_mode') === 'offline');
+          } catch (_) {}
+          if (!isExplicitOffline) {
+            if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
               window.__KORAKU_CONFIG__ = window.__KORAKU_CONFIG__ || { serverUrl: "ws://127.0.0.1:8080" };
+            } else {
+              window.__KORAKU_CONFIG__ = window.__KORAKU_CONFIG__ || { serverUrl: "wss://ws.koraku.app" };
             }
           }
         }
       })();
     </script>
-    <link rel="stylesheet" href="./src/styles/tokens.css?v=202609050850">
-    <link rel="stylesheet" href="./src/styles/base.css?v=202609050850">
-    <link rel="stylesheet" href="./src/styles/components.css?v=202609050850">
-    <link rel="stylesheet" href="./src/styles/screens.css?v=202609050850">
-    <link rel="stylesheet" href="./src/styles/animations.css?v=202609050850">
-    <link rel="stylesheet" href="./src/styles/responsive.css?v=202609050850">
+    <link rel="stylesheet" href="./src/styles/tokens.css?v=202609050930">
+    <link rel="stylesheet" href="./src/styles/base.css?v=202609050930">
+    <link rel="stylesheet" href="./src/styles/components.css?v=202609050930">
+    <link rel="stylesheet" href="./src/styles/screens.css?v=202609050930">
+    <link rel="stylesheet" href="./src/styles/animations.css?v=202609050930">
+    <link rel="stylesheet" href="./src/styles/responsive.css?v=202609050930">
   </head>
   <body>
     <div id="app" class="app-shell" data-screen="home">
@@ -78,7 +78,7 @@
               <option value="ja">日本語</option>
             </select>
           </div>
-          <div id="connection-status-badge" class="profile-chip connection-badge is-offline" aria-live="polite" title="連線狀態" data-i18n-attr="title:connection.connectionStatus">
+          <div id="connection-status-badge" class="profile-chip connection-badge is-offline" role="button" tabindex="0" aria-live="polite" title="連線狀態" data-i18n-attr="title:connection.connectionStatus" aria-label="連線狀態">
             <span class="connection-status-dot" aria-hidden="true"></span>
             <span id="connection-status-text" class="connection-status-text" data-i18n="connection.offline">離線</span>
           </div>
@@ -200,7 +200,7 @@
               </button>
               <footer class="home-footer" aria-label="頁腳資訊" data-i18n-attr="aria-label:ui.footerInfo">
                 <button type="button" class="footer-version-btn" id="footer-app-version-btn" title="查看更新日誌 (Changelog)" aria-label="查看更新日誌" data-i18n-attr="aria-label:ui.changelog,title:ui.changelog">
-                  <span class="footer-version" id="footer-app-version">0.0.37</span>
+                  <span class="footer-version" id="footer-app-version">0.0.38</span>
                 </button>
                 <span class="footer-plain-sep">/</span>
                 <a href="https://store.steampowered.com/app/1425000" target="_blank" rel="noopener noreferrer" class="footer-plain-link">Endless Alice</a>
@@ -1831,6 +1831,6 @@
       <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
     </div>
-    <script src="./src/js/bundle.js?v=202609050850"></script>
+    <script src="./src/js/bundle.js?v=202609050930"></script>
   </body>
 </html>

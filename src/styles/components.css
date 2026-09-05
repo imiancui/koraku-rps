@@ -742,6 +742,21 @@ img.is-silhouette {
   color: var(--paper-soft);
   transition: all 180ms ease;
   user-select: none;
+  cursor: pointer;
+}
+
+.connection-badge:hover {
+  background: rgba(27, 22, 36, 0.9);
+  border-left-color: var(--gold);
+}
+
+.connection-badge:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.connection-badge:active {
+  transform: translateY(1px);
 }
 
 .connection-status-dot {
@@ -760,6 +775,9 @@ img.is-silhouette {
   color: var(--paper);
   background: rgba(14, 27, 20, 0.75);
 }
+.connection-badge.is-online:hover {
+  background: rgba(18, 36, 26, 0.9);
+}
 .connection-badge.is-online .connection-status-dot {
   background: var(--green);
   color: var(--green);
@@ -771,6 +789,10 @@ img.is-silhouette {
   border-left-color: var(--gold);
   color: var(--gold-bright);
   background: rgba(27, 22, 14, 0.75);
+}
+.connection-badge.is-connecting:hover,
+.connection-badge.is-reconnecting:hover {
+  background: rgba(36, 29, 18, 0.9);
 }
 .connection-badge.is-connecting .connection-status-dot,
 .connection-badge.is-reconnecting .connection-status-dot {
@@ -784,6 +806,11 @@ img.is-silhouette {
   border-left-color: var(--line);
   color: var(--paper-dim);
 }
+.connection-badge.is-offline:hover {
+  background: rgba(26, 22, 32, 0.9);
+  border-left-color: var(--gold);
+  color: var(--paper-soft);
+}
 .connection-badge.is-offline .connection-status-dot {
   background: var(--paper-dim);
   color: var(--paper-dim);
@@ -794,6 +821,10 @@ img.is-silhouette {
   border-left-color: var(--crimson);
   color: var(--crimson-bright);
   background: rgba(36, 14, 18, 0.75);
+}
+.connection-badge.is-disconnected:hover {
+  background: rgba(46, 18, 22, 0.9);
+  border-left-color: var(--crimson-bright);
 }
 .connection-badge.is-disconnected .connection-status-dot {
   background: var(--crimson-bright);
